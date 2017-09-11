@@ -1,0 +1,163 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>com.treefinance.saas</groupId>
+		<artifactId>grap-server</artifactId>
+		<version>1.0.0-SNAPSHOT</version>
+		<relativePath>../pom.xml</relativePath>
+	</parent>
+
+	<artifactId>grap-server-biz</artifactId>
+
+	<dependencies>
+		<dependency>
+			<groupId>com.treefinance.saas.gateway</groupId>
+			<artifactId>gateway-facade</artifactId>
+			<version>1.0.0-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>com.treefinance.saas</groupId>
+			<artifactId>grap-server-facade</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.treefinance.saas</groupId>
+			<artifactId>grap-server-dao</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.treefinance.saas</groupId>
+			<artifactId>grap-server-common</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>com.google.guava</groupId>
+			<artifactId>guava</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>com.treefinance.saas.gateway</groupId>
+			<artifactId>gateway-facade</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>com.datatrees.common</groupId>
+			<artifactId>common-util</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-web</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-aop</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-data-redis</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-jdbc</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-aspects</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.aspectj</groupId>
+			<artifactId>aspectjrt</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.aspectj</groupId>
+			<artifactId>aspectjtools</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>mysql</groupId>
+			<artifactId>mysql-connector-java</artifactId>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.mybatis</groupId>
+			<artifactId>mybatis</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.mybatis</groupId>
+			<artifactId>mybatis-spring</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>com.alibaba</groupId>
+			<artifactId>dubbo</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.101tec</groupId>
+			<artifactId>zkclient</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>com.github.diamond</groupId>
+			<artifactId>super-diamond-client</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>com.alibaba.rocketmq</groupId>
+			<artifactId>rocketmq-client</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>com.alibaba</groupId>
+			<artifactId>fastjson</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>com.datatrees.rawdatacentral</groupId>
+			<artifactId>rawdatacentral-api</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.datatrees.basisdata</groupId>
+			<artifactId>basisdata-operator-common-facade</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.treefinance.commonservice</groupId>
+			<artifactId>common-service-facade</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.treefinance.commonservice</groupId>
+			<artifactId>uid-worker</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>com.datatrees.toolkits</groupId>
+			<artifactId>toolkits</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>com.treefinance.basicservice.security</groupId>
+			<artifactId>security-crypto-facade</artifactId>
+			<version>1.0.0</version>
+		</dependency>
+
+		<dependency>
+			<groupId>com.treefinance.saas</groupId>
+			<artifactId>assistant-monitor</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.treefinance.saas</groupId>
+			<artifactId>assistant-config</artifactId>
+		</dependency>
+
+	</dependencies>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>aspectj-maven-plugin</artifactId>
+			</plugin>
+		</plugins>
+	</build>
+</project>

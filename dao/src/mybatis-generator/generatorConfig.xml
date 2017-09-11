@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE generatorConfiguration
+  PUBLIC "-//mybatis.org//DTD MyBatis Generator Configuration 1.0//EN"
+  "http://mybatis.org/dtd/mybatis-generator-config_1_0.dtd">
+<generatorConfiguration>
+  <context id="common-dao" targetRuntime="MyBatis3">
+
+    <plugin type="org.mybatis.generator.plugins.RenameExampleClassPlugin">
+      <property name="searchString" value="Example$"/>
+      <property name="replaceString" value="Criteria"/>
+    </plugin>
+
+    <plugin type="org.mybatis.generator.plugins.RowBoundsPlugin"/>
+    <plugin type="org.mybatis.generator.plugins.ToStringPlugin"/>
+    <plugin type="org.mybatis.generator.plugins.SerializablePlugin"/>
+    <!--<plugin type="org.mybatis.generator.plugins.CachePlugin"> -->
+    <!--<property name="enableSubPackages" value="true"/> -->
+    <!--</plugin> -->
+
+    <commentGenerator>
+      <!-- 去除自动生成的注释 -->
+      <property name="suppressAllComments" value="false"/>
+      <property name="suppressDate" value="false"/>
+    </commentGenerator>
+
+    <jdbcConnection driverClass="com.mysql.jdbc.Driver"
+      connectionURL="jdbc:mysql://192.168.5.24:3306/saas_main"
+      userId="root"
+      password="Tianxing@0701">
+    </jdbcConnection>
+
+    <!-- NOTE: When targetProject is set to "MAVEN", the default output is type/generated-sources/mybatis-generator -->
+
+    <javaModelGenerator targetPackage="com.treefinance.saas.grapserver.dao.entity"
+      targetProject="src/main/java"><!-- src/generated/java -->
+      <property name="enableSubPackages" value="true"/>
+      <property name="trimStrings" value="true"/>
+    </javaModelGenerator>
+
+    <sqlMapGenerator targetPackage="sqlmap"
+      targetProject="src/main/resources"> <!-- src/generated/resources -->
+      <property name="enableSubPackages" value="true"/>
+    </sqlMapGenerator>
+
+    <javaClientGenerator type="XMLMAPPER"
+      targetPackage="com.treefinance.saas.grapserver.dao.mapper"
+      targetProject="src/main/java"> <!-- src/generated/java -->
+      <property name="enableSubPackages" value="true"/>
+    </javaClientGenerator>
+
+    <!--<table tableName="app_license" domainObjectName="AppLicense">-->
+      <!--<property name="useActualColumnNames" value="true"/>-->
+      <!--<generatedKey column="Id" sqlStatement="MySql" identity="true"/>-->
+    <!--</table>-->
+<!--
+
+    <table tableName="app_biz_license" domainObjectName="AppBizLicense"
+           enableSelectPaginationByExample="true"
+           enableInsertOrUpdateBySelective="true"
+           enableBatchInsert="true"
+           enableBatchUpdateByPrimaryKey="true"
+           enableBatchUpdateByPrimaryKeySelective="true">
+      <property name="useActualColumnNames" value="true"/>
+      <generatedKey column="Id" sqlStatement="MySql" identity="true"/>
+    </table>
+-->
+
+    <table tableName="task_callback_log" domainObjectName="TaskCallbackLog">
+      <property name="useActualColumnNames" value="true"/>
+    </table>
+
+    <!--<table tableName="app_callback_config" domainObjectName="AppCallbackConfig">-->
+      <!--<property name="useActualColumnNames" value="true"/>-->
+      <!--<generatedKey column="Id" sqlStatement="MySql" identity="true"/>-->
+    <!--</table>-->
+
+    <!--<table tableName="task" domainObjectName="Task">-->
+      <!--<property name="useActualColumnNames" value="true"/>-->
+    <!--</table>-->
+
+    <!--<table tableName="task_log" domainObjectName="TaskLog">-->
+      <!--<property name="useActualColumnNames" value="true"/>-->
+    <!--</table>-->
+
+    <!--<table tableName="task_sub_log" domainObjectName="TaskSubLog">-->
+      <!--<property name="useActualColumnNames" value="true"/>-->
+    <!--</table>-->
+
+    <!--<table tableName="task_next_directive" domainObjectName="TaskNextDirective">-->
+      <!--<property name="useActualColumnNames" value="true"/>-->
+    <!--</table>-->
+
+    <!--<table tableName="task_support" domainObjectName="TaskSupport">-->
+      <!--<property name="useActualColumnNames" value="true"/>-->
+      <!--<generatedKey column="Id" sqlStatement="MySql" identity="true"/>-->
+    <!--</table>-->
+
+    <!--<table tableName="app_color_config" domainObjectName="AppColorConfig">-->
+      <!--<property name="useActualColumnNames" value="true"/>-->
+    <!--</table>-->
+
+    <!--<table tableName="task_device" domainObjectName="TaskDevice">-->
+      <!--<property name="useActualColumnNames" value="true"/>-->
+    <!--</table>-->
+<!--
+    <table tableName="merchant_base" domainObjectName="MerchantBaseInfo">
+      <property name="useActualColumnNames" value="true"/>
+    </table>-->
+<!--
+    <table tableName="task_attribute" domainObjectName="TaskAttribute">
+      <property name="useActualColumnNames" value="true"/>
+    </table>-->
+
+  </context>
+
+</generatorConfiguration>

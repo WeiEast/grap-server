@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:dubbo="http://code.alibabatech.com/schema/dubbo"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd http://code.alibabatech.com/schema/dubbo http://code.alibabatech.com/schema/dubbo/dubbo.xsd">
+
+	<dubbo:application name="grap-server" />
+
+	<dubbo:monitor protocol="registry" />
+
+	<!-- 使用multicast广播注册中心暴露发现服务地址 -->
+	<dubbo:registry protocol="zookeeper" address="${dubbo.zookeeper.address}" />
+	<dubbo:protocol name="dubbo" port="20196" />
+
+	<dubbo:consumer check="false"/>
+
+	<!--消费者 -->
+	<dubbo:reference id="crawlerService" interface="com.datatrees.rawdatacentral.api.CrawlerService" />
+	<dubbo:reference id="iMobileAttributionService" interface="com.treefinance.commonservice.facade.mobileattribution.IMobileAttributionService" />
+
+	<dubbo:reference id="geocodeService" interface="com.treefinance.commonservice.facade.location.GeocodeService" />
+	<dubbo:reference id="ipLocationService" interface="com.treefinance.commonservice.facade.location.IpLocationService" />
+
+	<dubbo:reference interface="com.treefinance.basicservice.security.crypto.facade.ISecurityCryptoService" id="securityCryptoService" check="false"/>
+
+	<!--生产者-->
+	<dubbo:service interface="com.treefinance.saas.grapserver.biz.service.TaskService" ref="taskService"  />
+
+	<bean id="appLicenseService" class="com.treefinance.saas.grapserver.biz.service.AppLicenseServiceImpl"/>
+	<dubbo:service interface="com.treefinance.saas.grapserver.biz.service.AppLicenseService" ref="appLicenseService"  />
+</beans>
+
+
