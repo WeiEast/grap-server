@@ -47,15 +47,15 @@ public class FilterRegistry {
         return bean;
     }
 
-    @Bean
-    public FilterRegistrationBean webContextFilter() {
-        FilterRegistrationBean registration = new FilterRegistrationBean();
-        registration.setFilter(new WebContextFilter());
-        registration.setName("webContextFilter");
-        registration.addUrlPatterns("/*");
-        registration.setOrder(1);
-        return registration;
-    }
+//    @Bean
+//    public FilterRegistrationBean webContextFilter() {
+//        FilterRegistrationBean registration = new FilterRegistrationBean();
+//        registration.setFilter(new WebContextFilter());
+//        registration.setName("webContextFilter");
+//        registration.addUrlPatterns("/*");
+//        registration.setOrder(1);
+//        return registration;
+//    }
 
     @Bean
     public FilterRegistrationBean requestDecryptFilter() {
@@ -69,15 +69,15 @@ public class FilterRegistry {
         return registration;
     }
 
-    @Bean
-    public FilterRegistrationBean OperatorH5DecryptFilter() {
-        FilterRegistrationBean registration = new FilterRegistrationBean();
-        registration.setFilter(new OperatorH5RequestFilter());
-        registration.setName("operatorH5RequestFilter");
-        registration.addUrlPatterns("/h5/*");
-        registration.addInitParameter("decrypt.target", "params");
-        registration.setOrder(2);
-        return registration;
-    }
+//    @Bean
+//    public FilterRegistrationBean OperatorH5DecryptFilter() {
+//        FilterRegistrationBean registration = new FilterRegistrationBean();
+//        registration.setFilter(new OperatorH5RequestFilter());
+//        registration.setName("operatorH5RequestFilter");
+//        registration.addUrlPatterns("/h5/*");
+//        registration.addInitParameter("decrypt.target", "params");
+//        registration.setOrder(2);
+//        return registration;
+//    }
 
 }

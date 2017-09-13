@@ -149,6 +149,10 @@
 			<groupId>com.treefinance.saas</groupId>
 			<artifactId>assistant-config</artifactId>
 		</dependency>
+		<dependency>
+			<groupId>com.treefinance.saas</groupId>
+			<artifactId>assistant-httpinvoker</artifactId>
+		</dependency>
 
 	</dependencies>
 

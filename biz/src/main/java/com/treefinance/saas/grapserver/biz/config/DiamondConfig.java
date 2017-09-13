@@ -37,6 +37,8 @@ public class DiamondConfig {
     @DAttribute(key = "check.uniqueId.count.max")
     private Integer maxCount;
 
+    @DAttribute(key = "moxie.url.fund.get.city-list")
+    private String moxieUrlFundGetCityList;
 
     @BeforeUpdate
     public void before(String key, Object newValue) {
@@ -96,5 +98,13 @@ public class DiamondConfig {
 
     public void setMaxCount(Integer maxCount) {
         this.maxCount = maxCount;
+    }
+
+    public String getMoxieUrlFundGetCityList() {
+        return moxieUrlFundGetCityList;
+    }
+
+    public void setMoxieUrlFundGetCityList(String moxieUrlFundGetCityList) {
+        this.moxieUrlFundGetCityList = moxieUrlFundGetCityList;
     }
 }
