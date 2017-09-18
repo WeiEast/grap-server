@@ -55,6 +55,16 @@ public class JsonUtils {
         return list;
     }
 
+    public static <T> T toJavaBean(String jsonString, Class<T> cls) {
+        T t = null;
+        try {
+            t = JSON.parseObject(jsonString, cls);
+        } catch (Exception e) {
+            logger.error("handle json string error:", e);
+        }
+        return t;
+    }
+
 
     public static Object toJsonObject(String jsonStr) {
         JSONObject jsonObject = JSONObject.parseObject(jsonStr);
