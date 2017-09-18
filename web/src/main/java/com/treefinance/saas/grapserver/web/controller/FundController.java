@@ -1,12 +1,10 @@
 package com.treefinance.saas.grapserver.web.controller;
 
-import com.datatrees.rawdatacentral.api.CrawlerService;
-import com.datatrees.rawdatacentral.domain.result.HttpResult;
 import com.google.common.collect.Maps;
-import com.treefinance.commonservice.facade.mobileattribution.IMobileAttributionService;
-import com.treefinance.commonservice.facade.mobileattribution.MobileAttributionDTO;
 import com.treefinance.saas.grapserver.biz.config.DiamondConfig;
 import com.treefinance.saas.grapserver.biz.service.*;
+import com.treefinance.saas.grapserver.biz.service.moxie.FundMoxieService;
+import com.treefinance.saas.grapserver.biz.service.moxie.MoxieBusinessService;
 import com.treefinance.saas.grapserver.common.enums.EBizType;
 import com.treefinance.saas.grapserver.common.exception.ForbiddenException;
 import com.treefinance.saas.grapserver.common.model.Result;
@@ -16,7 +14,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -33,10 +30,6 @@ public class FundController {
     private static final Logger logger = LoggerFactory.getLogger(FundController.class);
 
     @Autowired
-    private IMobileAttributionService mobileAttributionService;
-    @Autowired
-    private OperatorLoginSimulationService operatorLoginSimulationService;
-    @Autowired
     private TaskService taskService;
     @Autowired
     private MerchantConfigService merchantConfigService;
@@ -44,16 +37,14 @@ public class FundController {
     private TaskLicenseService taskLicenseService;
     @Autowired
     private DiamondConfig diamondConfig;
-
-    @Autowired
-    private CrawlerService crawlerService;
-
     @Autowired
     private AppBizLicenseService appBizLicenseService;
     @Autowired
     private TaskAttributeService taskAttributeService;
     @Autowired
     private FundMoxieService fundMoxieService;
+    @Autowired
+    private MoxieBusinessService moxieBusinessService;
 
     /**
      * 创建任务
@@ -98,14 +89,10 @@ public class FundController {
         if (StringUtils.isBlank(appid) || taskId == null) {
             throw new IllegalArgumentException("Parameter 'appid' or 'taskid' is incorrect.");
         }
-        Object result = fundMoxieService.queryAllFundConfig(request, response);
-        TaskAttribute taskAttribute = taskAttributeService.findByName(taskId, "mobile", true);
+        Object result = moxieBusinessService.queryCityList();
         Map<String, Object> map = Maps.newHashMap();
         map.put("config", result);
         map.put("license", appBizLicenseService.isShowLicense(appid, EBizType.OPERATOR.getText()));
-        if (taskAttribute != null) {
-            map.put(taskAttribute.getName(), taskAttribute.getValue());
-        }
         return Result.successResult(map);
     }
 
@@ -119,20 +106,33 @@ public class FundController {
      * @return
      */
     @RequestMapping(value = "/login/config", method = {RequestMethod.POST})
-    public Object getLoginConfig(@RequestParam String appid, @RequestParam("taskid") Long taskId, HttpServletRequest request, HttpServletResponse response) {
-        if (StringUtils.isBlank(appid) || taskId == null) {
-            throw new IllegalArgumentException("Parameter 'appid' or 'taskid' is incorrect.");
+    public Object getLoginConfig(@RequestParam String appid,
+                                 @RequestParam("taskid") Long taskId,
+                                 @RequestParam("area_code") String areaCode,
+                                 HttpServletRequest request, HttpServletResponse response) {
+        if (StringUtils.isBlank(appid) || taskId == null || StringUtils.isBlank(areaCode)) {
+            throw new IllegalArgumentException("Parameter is incorrect.");
         }
-        Object information = fundMoxieService.queryAllFundConfig(request, response);
-        Object loginElements = fundMoxieService.queryAllFundConfig(request, response);
+        Object loginElements = fundMoxieService.queryLoginElementsEx(areaCode);
+        Object information = fundMoxieService.queryInformation(areaCode);
         Map<String, Object> map = Maps.newHashMap();
         map.put("information", information);
         map.put("loginElements", loginElements);
         return Result.successResult(map);
     }
 
-    @RequestMapping(value = "/login/submit ", method = {RequestMethod.POST})
-    public Object getLoginSubmit(@RequestParam String appid,
+    /**
+     * 登录接口
+     *
+     * @param appId
+     * @param taskId
+     * @param uniqueId
+     * @param request
+     * @param response
+     * @return
+     */
+    @RequestMapping(value = "/login/submit", method = {RequestMethod.POST})
+    public Object getLoginSubmit(@RequestParam("appid") String appId,
                                  @RequestParam("taskid") Long taskId,
                                  @RequestParam("uniqueId") String uniqueId,
                                  @RequestParam("area_code") String areaCode,
@@ -150,115 +150,66 @@ public class FundController {
                                  @RequestParam("origin") String origin,
                                  @RequestParam(value = "ip", required = false) String ip,
                                  HttpServletRequest request, HttpServletResponse response) {
-        if (StringUtils.isBlank(appid) || taskId == null || StringUtils.isBlank(uniqueId) || StringUtils.isBlank(areaCode)
+        if (StringUtils.isBlank(appId) || taskId == null || StringUtils.isBlank(uniqueId) || StringUtils.isBlank(areaCode)
                 || StringUtils.isBlank(account) || StringUtils.isBlank(loginType) || StringUtils.isBlank(origin)) {
             throw new IllegalArgumentException("Parameter is incorrect.");
         }
-        Object information = fundMoxieService.queryAllFundConfig(request, response);
-        Object loginElements = fundMoxieService.queryAllFundConfig(request, response);
-        Map<String, Object> map = Maps.newHashMap();
-        map.put("information", information);
-        map.put("loginElements", loginElements);
-        return Result.successResult(map);
-    }
-
-
-    //---------------------------------->>>>>
-
-
-    /**
-     * 根据输入号码查找该号码的归属地
-     *
-     * @param mobile
-     * @return
-     */
-    @RequestMapping(value = "/mobile/attribution", method = {RequestMethod.POST})
-    public Object mobileAttribution(@RequestParam("mobile") String mobile) {
-        MobileAttributionDTO mobileAttributionDTO = mobileAttributionService.lookupMobileAttribution(mobile);
-        Map<String, Object> map = Maps.newHashMap();
-        if (mobileAttributionDTO != null) {
-            String operator = operatorLoginSimulationService
-                    .getOperator(mobileAttributionDTO.getTelOperator().getName(), mobileAttributionDTO.getProvince());
-            map.put("attribution", operator);
-            map.put("virtual", mobileAttributionDTO.getVNO());
-        } else {
-            logger.debug("mobile={},号码的归属地解析失败");
-            map.put("attribution", "");
-            map.put("virtual", "");
+        //TODO task表中的accountNo和website需要记录吗?
+        String moxieId = fundMoxieService.createTasks(uniqueId, areaCode, account, password, loginType, idCard, mobile,
+                realName, subArea, loanAccount, loanPassword, corpAccount, corpName, origin, ip);
+        if (StringUtils.isBlank(moxieId)) {
+            logger.info("魔蝎创建公积金采集任务失败");
+            return Result.failResult("魔蝎创建公积金采集任务失败");
         }
-        return Result.successResult(map);
-    }
-
-    /**
-     * 进入模拟登录页的时候通知服务端准备登录
-     *
-     * @param taskid      任务ID
-     * @param websiteName 爬虫提供
-     * @return
-     */
-    @RequestMapping(value = "/loginpage/prepare", method = {RequestMethod.POST})
-    public Object prepare(@RequestParam("taskid") Long taskid, @RequestParam("websiteName") String websiteName) {
-        logger.info("模拟登录: 用户打开登陆页,taskid={},websiteName={}", taskid, websiteName);
-        operatorLoginSimulationService.prepare(taskid, websiteName);
+        taskAttributeService.insertOrUpdateSelective(taskId, "moxie-taskId", moxieId);
         return Result.successResult(null);
     }
 
     /**
-     * 模拟登录页请求验证码
+     * 任务状态,获取验证码(需要前端轮询)
      *
-     * @param taskid   任务id
-     * @param type     验证码类型: SMS:发送短信验证码到手机 IMG:刷新图片验证码 QR:刷新二维码 (目前只有短信验证码和图片验证码)
-     * @param username 用户名,例如:手机号
-     * @param password 密码,例如:服务密码
+     * @param appId
+     * @param taskId
      * @return
      */
-    @RequestMapping(value = "/loginpage/captcha", method = {RequestMethod.POST})
-    public Object captcha(@RequestParam("taskid") Long taskid, @RequestParam("type") String type,
-                          @RequestParam(value = "username", required = false) String username,
-                          @RequestParam(value = "password", required = false) String password) {
-        logger.info("模拟登录: 请求验证码,taskid={},type={},mobile={},password={}", taskid, type, username, password);
-        Object obj = operatorLoginSimulationService.refreshCode(taskid, type, username, password);
-        return Result.successResult(obj);
+    //// TODO: 2017/9/15  可以删除
+    @RequestMapping(value = "/status", method = {RequestMethod.POST})
+    public Object getTaskStatus(@RequestParam("appid") String appId,
+                                @RequestParam("taskid") Long taskId) {
+        if (StringUtils.isBlank(appId) || taskId == null) {
+            throw new IllegalArgumentException("Parameter is incorrect.");
+        }
+        TaskAttribute attribute = taskAttributeService.findByName(taskId, "moxie-taskId", false);
+        if (attribute == null) {
+            logger.info("taskId={}在任务属性表中未找到对应的魔蝎任务id", taskId);
+            return Result.failResult("任务查询失败");
+        }
+        String moxieTaskId = attribute.getValue();
+        Object result = fundMoxieService.queryTaskStatus(moxieTaskId);
+        return Result.successResult(result);
     }
 
     /**
-     * 登录
+     * 输入图片验证码/短信
      *
-     * @param taskid         任务id
-     * @param username       用户名,例如:手机号
-     * @param password       密码,例如:服务密码
-     * @param code           图片验证码
-     * @param randomPassword 短信验证码
+     * @param taskId
      * @return
      */
-    @RequestMapping(value = "/loginpage/submit", method = {RequestMethod.POST})
-    public Object login(@RequestParam("taskid") Long taskid, @RequestParam("username") String username,
-                        @RequestParam("accountNo") String accountNo,
-                        @RequestParam("website") String website,
-                        @RequestParam("password") String password,
-                        @RequestParam(value = "code", required = false) String code,
-                        @RequestParam(value = "randomPassword", required = false) String randomPassword,
-                        @RequestParam(value = "realName", required = false) String realName,
-                        @RequestParam(value = "idCard", required = false) String idCard,
-                        HttpServletResponse response) {
-        logger.info("模拟登录: 请求验证码,taskid={},username={},code={},randomPassword={}", taskid, username, code,
-                randomPassword);
-        HttpResult<String> httpResult;
-        try {
-            Map<String, String> extra = Maps.newHashMap();
-            extra.put("realName", realName);
-            extra.put("idCard", idCard);
-            httpResult = operatorLoginSimulationService.login(taskid, username, password, accountNo, website, code, randomPassword, extra);
-            if (httpResult != null && httpResult.getStatus()) {
-                return Result.successResult(httpResult.getData());
-            } else {
-                response.setStatus(HttpStatus.FORBIDDEN.value());
-                return Result.failResult(httpResult.getData(), httpResult.getMessage());
-            }
-        } catch (Exception e) {
-            logger.error("登陆失败，taskId=" + taskid, e);
-            response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
-            return Result.failResult("登陆失败，taskId=" + taskid);
+    @RequestMapping(value = "/input", method = {RequestMethod.POST})
+    public Object submitTaskInput(@RequestParam("taskid") Long taskId,
+                                  @RequestParam("input") String input) {
+        if (taskId == null || StringUtils.isBlank(input)) {
+            throw new IllegalArgumentException("Parameter is incorrect.");
         }
+        TaskAttribute attribute = taskAttributeService.findByName(taskId, "moxie-taskId", false);
+        if (attribute == null) {
+            logger.info("taskId={}在任务属性表中未找到对应的魔蝎任务id", taskId);
+            return Result.failResult("任务查询失败");
+        }
+        String moxieTaskId = attribute.getValue();
+        fundMoxieService.submitTaskInput(moxieTaskId, input);
+        return Result.successResult(null);
     }
+
+
 }

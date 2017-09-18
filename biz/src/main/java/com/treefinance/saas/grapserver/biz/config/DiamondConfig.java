@@ -37,8 +37,32 @@ public class DiamondConfig {
     @DAttribute(key = "check.uniqueId.count.max")
     private Integer maxCount;
 
+    @DAttribute(key = "moxie.fund.apiKey")
+    private String moxieFundApiKey;
+
+    @DAttribute(key = "moxie.fund.token")
+    private String moxieFundToken;
+
     @DAttribute(key = "moxie.url.fund.get.city-list")
     private String moxieUrlFundGetCityList;
+
+    @DAttribute(key = "moxie.url.fund.get.city-list-ex")
+    private String moxieUrlFundGetCityListEx;
+
+    @DAttribute(key = "moxie.url.fund.get.login-elements-ex")
+    private String moxieUrlFundGetLoginElementsEx;
+
+    @DAttribute(key = "moxie.url.fund.get.information")
+    private String moxieUrlFundGetInformation;
+
+    @DAttribute(key = "moxie.url.fund.post.tasks")
+    private String moxieUrlFundPostTasks;
+
+    @DAttribute(key = "moxie.url.fund.get.tasks.status")
+    private String moxieUrlFundGetTasksStatus;
+
+    @DAttribute(key = "moxie.url.fund.post.tasks.input")
+    private String moxieUrlFundPostTasksInput;
 
     @BeforeUpdate
     public void before(String key, Object newValue) {
@@ -104,7 +128,71 @@ public class DiamondConfig {
         return moxieUrlFundGetCityList;
     }
 
+    public String getMoxieFundApiKey() {
+        return moxieFundApiKey;
+    }
+
+    public void setMoxieFundApiKey(String moxieFundApiKey) {
+        this.moxieFundApiKey = moxieFundApiKey;
+    }
+
+    public String getMoxieFundToken() {
+        return moxieFundToken;
+    }
+
+    public void setMoxieFundToken(String moxieFundToken) {
+        this.moxieFundToken = moxieFundToken;
+    }
+
     public void setMoxieUrlFundGetCityList(String moxieUrlFundGetCityList) {
         this.moxieUrlFundGetCityList = moxieUrlFundGetCityList;
+    }
+
+    public String getMoxieUrlFundGetLoginElementsEx() {
+        return moxieUrlFundGetLoginElementsEx;
+    }
+
+    public void setMoxieUrlFundGetLoginElementsEx(String moxieUrlFundGetLoginElementsEx) {
+        this.moxieUrlFundGetLoginElementsEx = moxieUrlFundGetLoginElementsEx;
+    }
+
+    public String getMoxieUrlFundGetInformation() {
+        return moxieUrlFundGetInformation;
+    }
+
+    public void setMoxieUrlFundGetInformation(String moxieUrlFundGetInformation) {
+        this.moxieUrlFundGetInformation = moxieUrlFundGetInformation;
+    }
+
+    public String getMoxieUrlFundPostTasks() {
+        return moxieUrlFundPostTasks;
+    }
+
+    public void setMoxieUrlFundPostTasks(String moxieUrlFundPostTasks) {
+        this.moxieUrlFundPostTasks = moxieUrlFundPostTasks;
+    }
+
+    public String getMoxieUrlFundGetTasksStatus() {
+        return moxieUrlFundGetTasksStatus;
+    }
+
+    public void setMoxieUrlFundGetTasksStatus(String moxieUrlFundGetTasksStatus) {
+        this.moxieUrlFundGetTasksStatus = moxieUrlFundGetTasksStatus;
+    }
+
+    public String getMoxieUrlFundPostTasksInput() {
+        return moxieUrlFundPostTasksInput;
+    }
+
+    public void setMoxieUrlFundPostTasksInput(String moxieUrlFundPostTasksInput) {
+        this.moxieUrlFundPostTasksInput = moxieUrlFundPostTasksInput;
+    }
+
+    public String getMoxieUrlFundGetCityListEx() {
+        return moxieUrlFundGetCityListEx;
+    }
+
+    public void setMoxieUrlFundGetCityListEx(String moxieUrlFundGetCityListEx) {
+        this.moxieUrlFundGetCityListEx = moxieUrlFundGetCityListEx;
     }
 }

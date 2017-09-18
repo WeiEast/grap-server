@@ -9,6 +9,7 @@ import com.treefinance.commonservice.uid.UidGenerator;
 import com.treefinance.saas.grapserver.dao.entity.TaskAttribute;
 import com.treefinance.saas.grapserver.dao.entity.TaskAttributeCriteria;
 import com.treefinance.saas.grapserver.dao.mapper.TaskAttributeMapper;
+import com.treefinance.saas.grapserver.dao.mapper.TaskAttributeUpdateMapper;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -26,6 +27,8 @@ import java.util.List;
 public class TaskAttributeService {
     @Resource
     private TaskAttributeMapper taskAttributeMapper;
+    @Autowired
+    private TaskAttributeUpdateMapper taskAttributeUpdateMapper;
     @Autowired
     private ISecurityCryptoService securityCryptoService;
 
@@ -49,6 +52,23 @@ public class TaskAttributeService {
     }
 
     /**
+     * 保存或更新属性
+     *
+     * @param taskId
+     * @param name
+     * @param value
+     */
+    public void insertOrUpdateSelective(Long taskId, String name, String value) {
+        long id = UidGenerator.getId();
+        TaskAttribute target = new TaskAttribute();
+        target.setId(id);
+        target.setTaskId(taskId);
+        target.setName(name);
+        target.setValue(value);
+        taskAttributeUpdateMapper.insertOrUpdateSelective(target);
+    }
+
+    /**
      * 通过属性名查询属性值
      *
      * @param taskId
@@ -66,6 +86,28 @@ public class TaskAttributeService {
         }
         if (decrypt && StringUtils.isNotEmpty(taskAttribute.getValue())) {
             taskAttribute.setValue(securityCryptoService.decrypt(taskAttribute.getValue(), EncryptionIntensityEnum.NORMAL));
+        }
+        return taskAttribute;
+    }
+
+    /**
+     * 通过属性名和属性值查询taskId
+     *
+     * @param name
+     * @param value
+     * @param encrypt
+     * @return
+     */
+    public TaskAttribute findByNameAndValue(String name, String value, boolean encrypt) {
+        if (encrypt) {
+            value = securityCryptoService.encrypt(value, EncryptionIntensityEnum.NORMAL);
+        }
+        TaskAttributeCriteria criteria = new TaskAttributeCriteria();
+        criteria.createCriteria().andNameEqualTo(name).andValueEqualTo(value);
+        List<TaskAttribute> attributeList = taskAttributeMapper.selectByExample(criteria);
+        TaskAttribute taskAttribute = CollectionUtils.isEmpty(attributeList) ? null : attributeList.get(0);
+        if (taskAttribute == null) {
+            return null;
         }
         return taskAttribute;
     }

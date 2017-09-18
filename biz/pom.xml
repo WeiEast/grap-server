@@ -21,6 +21,10 @@
 			<artifactId>grap-server-facade</artifactId>
 		</dependency>
 		<dependency>
+			<groupId>com.github.stuxuhai</groupId>
+			<artifactId>jpinyin</artifactId>
+		</dependency>
+		<dependency>
 			<groupId>com.treefinance.saas</groupId>
 			<artifactId>grap-server-dao</artifactId>
 		</dependency>
@@ -152,6 +156,11 @@
 		<dependency>
 			<groupId>com.treefinance.saas</groupId>
 			<artifactId>assistant-httpinvoker</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>com.treefinance.saas.processor.thirdparty</groupId>
+			<artifactId>processor-thirdparty-facade</artifactId>
 		</dependency>
 
 	</dependencies>

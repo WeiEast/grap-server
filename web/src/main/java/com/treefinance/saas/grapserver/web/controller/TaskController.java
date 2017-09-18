@@ -3,15 +3,20 @@ package com.treefinance.saas.grapserver.web.controller;
 import com.alibaba.fastjson.JSON;
 import com.datatrees.rawdatacentral.api.CrawlerService;
 import com.google.common.collect.Maps;
-import com.treefinance.saas.grapserver.common.model.Result;
-import com.treefinance.saas.grapserver.dao.entity.MerchantBaseInfo;
-import com.treefinance.saas.grapserver.common.enums.EDirective;
-import com.treefinance.saas.grapserver.common.enums.EOperatorCodeType;
 import com.treefinance.saas.grapserver.biz.mq.model.DirectiveMessage;
 import com.treefinance.saas.grapserver.biz.service.*;
 import com.treefinance.saas.grapserver.biz.service.directive.DirectiveService;
+import com.treefinance.saas.grapserver.biz.service.moxie.MoxieBusinessService;
+import com.treefinance.saas.grapserver.biz.service.moxie.directive.MoxieDirectiveService;
+import com.treefinance.saas.grapserver.common.enums.EDirective;
+import com.treefinance.saas.grapserver.common.enums.EOperatorCodeType;
+import com.treefinance.saas.grapserver.common.enums.moxie.EMoxieDirective;
+import com.treefinance.saas.grapserver.common.model.Result;
 import com.treefinance.saas.grapserver.common.model.dto.DirectiveDTO;
 import com.treefinance.saas.grapserver.common.model.dto.TaskDTO;
+import com.treefinance.saas.grapserver.common.model.dto.moxie.MoxieDirectiveDTO;
+import com.treefinance.saas.grapserver.dao.entity.MerchantBaseInfo;
+import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,6 +53,10 @@ public class TaskController {
     private MerchantBaseInfoService merchantBaseInfoService;
     @Autowired
     private DirectiveService directiveService;
+    @Autowired
+    private MoxieDirectiveService moxieDirectiveService;
+    @Autowired
+    private MoxieBusinessService moxieBusinessService;
     @Autowired
     private AppBizLicenseService appBizLicenseService;
 
@@ -99,6 +108,51 @@ public class TaskController {
      * @return
      * @throws Exception
      */
+    @RequestMapping(value = "/moxie/next_directive", method = {RequestMethod.POST})
+    public Object nextMoxieDirective(@RequestParam("taskid") Long taskid) throws Exception {
+
+        //判断是否需要验证码
+        Map<String, Object> result = moxieBusinessService.requireCaptcha(taskid);
+        if (!MapUtils.isEmpty(result)) {
+            return result;
+        }
+        String content = taskNextDirectiveService.getNextDirective(taskid);
+        Map<String, Object> map = Maps.newHashMap();
+        if (StringUtils.isEmpty(content)) {
+            // 轮询过程中，判断任务是否超时
+//            if (taskServiceImpl.isTaskTimeout(taskid)) {
+//                // 异步处理任务超时
+//                taskTimeService.handleTaskTimeout(taskid);
+//            }
+            map.put("directive", "waiting");
+            map.put("information", "请等待");
+        } else {
+            MoxieDirectiveDTO directiveMessage = JSON.parseObject(content, MoxieDirectiveDTO.class);
+            map.put("directive", directiveMessage.getDirective());
+//            map.put("directiveId", directiveMessage.getDirectiveId());
+
+            // 仅任务成功或回调失败时，转JSON处理
+            if (EDirective.TASK_SUCCESS.getText().equals(directiveMessage.getDirective()) ||
+                    EDirective.TASK_FAIL.getText().equals(directiveMessage.getDirective()) ||
+                    EDirective.CALLBACK_FAIL.getText().equals(directiveMessage.getDirective())) {
+                map.put("information", JSON.parse(directiveMessage.getRemark()));
+            } else {
+                map.put("information", directiveMessage.getRemark());
+            }
+            //taskNextDirectiveService.deleteNextDirective(taskid);
+        }
+        logger.info("taskId={}下一指令信息={}", taskid, map);
+        return new Result<>(map);
+    }
+
+
+    /**
+     * 轮询任务执行指令(魔蝎公积金)
+     *
+     * @param taskid
+     * @return
+     * @throws Exception
+     */
     @RequestMapping(value = "/next_directive", method = {RequestMethod.POST})
     public Object nextDirective(@RequestParam("taskid") Long taskid) throws Exception {
         String content = taskNextDirectiveService.getNextDirective(taskid);
@@ -129,6 +183,7 @@ public class TaskController {
         logger.info("taskId={}下一指令信息={}", taskid, map);
         return new Result<>(map);
     }
+
 
     /**
      * 发送验证码
@@ -166,6 +221,26 @@ public class TaskController {
             cancelDirective.setDirective(EDirective.TASK_CANCEL.getText());
             directiveService.process(cancelDirective);
 //            crawlerService.cancel(taskid, null);
+        }
+        return new Result<>();
+    }
+
+    /**
+     * 取消任务(魔蝎公积金)
+     *
+     * @param taskid
+     * @return
+     * @throws Exception
+     */
+    @RequestMapping(value = "/moxie/cancel", method = {RequestMethod.POST})
+    public Object cancelMoxieTask(@RequestParam Long taskid) throws Exception {
+        logger.info("取消魔蝎任务 : taskId={} ", taskid);
+        if (taskServiceImpl.isDoingTask(taskid)) {
+            logger.info("取消魔蝎正在执行任务 : taskId={} ", taskid);
+            MoxieDirectiveDTO cancelDirective = new MoxieDirectiveDTO();
+            cancelDirective.setTaskId(taskid);
+            cancelDirective.setDirective(EMoxieDirective.TASK_CANCEL.getText());
+            moxieDirectiveService.process(cancelDirective);
         }
         return new Result<>();
     }

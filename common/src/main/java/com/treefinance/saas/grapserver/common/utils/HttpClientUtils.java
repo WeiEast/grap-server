@@ -5,6 +5,7 @@ import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
 import com.treefinance.saas.grapserver.common.exception.RequestFailedException;
 import org.apache.commons.io.IOUtils;
+import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpStatus;
 import org.apache.http.NameValuePair;
@@ -19,6 +20,7 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
+import org.apache.http.message.BasicHeader;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
@@ -134,6 +136,57 @@ public class HttpClientUtils {
      */
     public static String doGet(String url) {
         return doGet(url, new HashMap<String, Object>());
+    }
+
+    public static String doGetWithHeaders(String url, Map<String, String> headers) {
+        return doGetWithHeaders(url, new HashMap<>(), headers);
+    }
+
+    public static String doGetWithHeaders(String url, HashMap<String, Object> params, Map<String, String> headers) {
+        long start = System.currentTimeMillis();
+
+        List<String> paramList = Lists.newArrayList();
+        for (String key : params.keySet()) {
+            paramList.add(key + "=" + params.get(key));
+        }
+        String apiUrl = url + (url.contains("?") ? "&" : "?") + Joiner.on("&").join(paramList);
+        String result = null;
+        CloseableHttpClient httpclient = getClient();
+        CloseableHttpResponse response = null;
+        int statusCode = 0;
+        try {
+            HttpGet httpGet = new HttpGet(apiUrl);
+            httpGet.setConfig(getBaseConfig());
+
+            List<Header> headerList = Lists.newArrayList();
+            for (Map.Entry<String, String> entry : headers.entrySet()) {
+                Header header = new BasicHeader(entry.getKey(), entry.getValue());
+                headerList.add(header);
+            }
+            Header[] headerArray = new Header[headerList.size()];
+            headerArray = headerList.toArray(headerArray);
+            httpGet.setHeaders(headerArray);
+
+            response = httpclient.execute(httpGet);
+            statusCode = response.getStatusLine().getStatusCode();
+            HttpEntity entity = response.getEntity();
+            if (entity != null) {
+                InputStream instream = entity.getContent();
+                result = IOUtils.toString(instream, "UTF-8");
+            }
+            if (statusCode != HttpStatus.SC_OK) {
+                throw new RequestFailedException(apiUrl, statusCode, result);
+            }
+        } catch (IOException e) {
+            throw new RequestFailedException(apiUrl, statusCode, result, e);
+        } finally {
+            if (logger.isInfoEnabled()) {
+                logger.info(" doGet completed: url={}, params={}, statusCode={} , result={} , cost {} ms ",
+                        url, JSON.toJSONString(params), statusCode, result, (System.currentTimeMillis() - start));
+            }
+            closeResponse(response);
+        }
+        return result;
     }
 
     /**
@@ -322,6 +375,66 @@ public class HttpClientUtils {
                 pairList.add(pair);
             }
             httpPost.setEntity(new UrlEncodedFormEntity(pairList, Charset.forName("UTF-8")));
+            response = httpClient.execute(httpPost);
+
+            statusCode = response.getStatusLine().getStatusCode();
+            HttpEntity entity = response.getEntity();
+            if (entity != null) {
+                result = EntityUtils.toString(entity, "UTF-8");
+            }
+            if (statusCode != HttpStatus.SC_OK) {
+                throw new RequestFailedException(url, statusCode, result);
+            }
+        } catch (IOException e) {
+            throw new RequestFailedException(url, statusCode, result, e);
+        } finally {
+            if (logger.isInfoEnabled()) {
+                logger.info(" doPost completed: url={}, params={}, statusCode={} ,result={}, cost {} ms ",
+                        url, JSON.toJSONString(params), statusCode, result, (System.currentTimeMillis() - start));
+            }
+            closeResponse(response);
+        }
+        return result;
+    }
+
+    /**
+     * 发送 POST 请求（HTTP），K-V形式
+     *
+     * @param url
+     * @param params 参数map
+     * @return
+     */
+    public static String doPostWithHeaders(String url, Map<String, Object> params, Map<String, String> headers) {
+        long start = System.currentTimeMillis();
+        CloseableHttpClient httpClient = getClient();
+        String result = null;
+        HttpPost httpPost = new HttpPost(url);
+        CloseableHttpResponse response = null;
+
+        int statusCode = 0;
+        try {
+            httpPost.setConfig(getBaseConfig());
+            String json = JsonUtils.toJsonString(params);
+            StringEntity s = new StringEntity(json);
+            s.setContentEncoding("UTF-8");
+            s.setContentType("application/json");
+//            post.setEntity(s);
+//            List<NameValuePair> pairList = new ArrayList<>(params.size());
+//            for (Map.Entry<String, Object> entry : params.entrySet()) {
+//                NameValuePair pair = new BasicNameValuePair(entry.getKey(), entry
+//                        .getValue().toString());
+//                pairList.add(pair);
+//            }
+            List<Header> headerList = Lists.newArrayList();
+            for (Map.Entry<String, String> entry : headers.entrySet()) {
+                Header header = new BasicHeader(entry.getKey(), entry.getValue());
+                headerList.add(header);
+            }
+//            httpPost.setEntity(new UrlEncodedFormEntity(pairList, Charset.forName("UTF-8")));
+            httpPost.setEntity(s);
+            Header[] headerArray = new Header[headerList.size()];
+            headerArray = headerList.toArray(headerArray);
+            httpPost.setHeaders(headerArray);
             response = httpClient.execute(httpPost);
 
             statusCode = response.getStatusLine().getStatusCode();

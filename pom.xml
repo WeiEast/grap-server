@@ -83,6 +83,12 @@
             </dependency>
 
             <dependency>
+                <groupId>com.github.stuxuhai</groupId>
+                <artifactId>jpinyin</artifactId>
+                <version>1.1.8</version>
+            </dependency>
+
+            <dependency>
                 <groupId>com.datatrees.toolkits</groupId>
                 <artifactId>toolkits</artifactId>
                 <version>2.3.2-SNAPSHOT</version>
@@ -197,6 +203,12 @@
                 <groupId>com.treefinance.saas</groupId>
                 <artifactId>assistant-httpinvoker</artifactId>
                 <version>1.0.3-SNAPSHOT</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.treefinance.saas.processor.thirdparty</groupId>
+                <artifactId>processor-thirdparty-facade</artifactId>
+                <version>1.1.0</version>
             </dependency>
 
         </dependencies>
