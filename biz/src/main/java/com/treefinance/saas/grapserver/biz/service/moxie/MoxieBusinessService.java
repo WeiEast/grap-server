@@ -1,5 +1,6 @@
 package com.treefinance.saas.grapserver.biz.service.moxie;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.github.stuxuhai.jpinyin.PinyinException;
 import com.github.stuxuhai.jpinyin.PinyinFormat;
@@ -8,6 +9,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.treefinance.saas.grapserver.biz.service.TaskAttributeService;
 import com.treefinance.saas.grapserver.biz.service.TaskLogService;
+import com.treefinance.saas.grapserver.biz.service.TaskNextDirectiveService;
 import com.treefinance.saas.grapserver.biz.service.moxie.directive.MoxieDirectiveService;
 import com.treefinance.saas.grapserver.common.enums.TaskStepEnum;
 import com.treefinance.saas.grapserver.common.enums.moxie.EMoxieDirective;
@@ -16,11 +18,13 @@ import com.treefinance.saas.grapserver.common.model.dto.moxie.MoxieCityInfoDTO;
 import com.treefinance.saas.grapserver.common.model.dto.moxie.MoxieDirectiveDTO;
 import com.treefinance.saas.grapserver.common.model.vo.moxie.MoxieCityInfoVO;
 import com.treefinance.saas.grapserver.dao.entity.TaskAttribute;
+import com.treefinance.saas.processor.thirdparty.facade.fund.FundService;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
 import java.util.List;
@@ -42,6 +46,10 @@ public class MoxieBusinessService {
     private TaskAttributeService taskAttributeService;
     @Autowired
     private FundMoxieService fundMoxieService;
+    @Autowired
+    private TaskNextDirectiveService taskNextDirectiveService;
+    @Autowired
+    private FundService fundService;
 
     /**
      * 魔蝎任务采集失败业务处理
@@ -51,12 +59,12 @@ public class MoxieBusinessService {
      */
     public void grabFail(String moxieTaskId, String message) {
         if (StringUtils.isBlank(moxieTaskId)) {
-            logger.error("handle moxie grab business error: moxieTaskId={} is null", moxieTaskId);
+            logger.error("handle moxie business error: moxieTaskId={} is null", moxieTaskId);
             return;
         }
         TaskAttribute taskAttribute = taskAttributeService.findByNameAndValue("moxie-taskId", moxieTaskId, false);
         if (taskAttribute == null) {
-            logger.error("handle moxie grab business error: moxieTaskId={} doesn't have taskId matched in task_attribute", moxieTaskId);
+            logger.error("handle moxie business error: moxieTaskId={} doesn't have taskId matched in task_attribute", moxieTaskId);
             return;
         }
         long taskId = taskAttribute.getTaskId();
@@ -77,25 +85,33 @@ public class MoxieBusinessService {
      *
      * @param moxieTaskId
      */
+    @Transactional(rollbackFor = Exception.class)
     public void bill(String moxieTaskId) {
+        moxieTaskId = "cab9e8d0-9c69-11e7-a2e1-00163e13cbf1";
         if (StringUtils.isBlank(moxieTaskId)) {
-            logger.error("handle moxie grab business error: moxieTaskId={} is null", moxieTaskId);
+            logger.error("handle moxie business error: moxieTaskId={} is null", moxieTaskId);
             return;
         }
-        TaskAttribute taskAttribute = taskAttributeService.findByNameAndValue("moxie-taskId", moxieTaskId, false);
-        if (taskAttribute == null) {
-            logger.error("handle moxie grab business error: moxieTaskId={} doesn't have taskId matched in task_attribute", moxieTaskId);
-            return;
-        }
-        long taskId = taskAttribute.getTaskId();
+//        TaskAttribute taskAttribute = taskAttributeService.findByNameAndValue("moxie-taskId", moxieTaskId, false);
+//        if (taskAttribute == null) {
+//            logger.error("handle moxie business error: moxieTaskId={} doesn't have taskId matched in task_attribute", moxieTaskId);
+//            return;
+//        }
+//        long taskId = taskAttribute.getTaskId();
+        long taskId = 94528182987812864L;
         //1.记录采集成功日志
         taskLogService.insert(taskId, TaskStepEnum.CRAWL_SUCCESS.getText(), new Date(), null);
         taskLogService.insert(taskId, TaskStepEnum.CRAWL_COMPLETE.getText(), new Date(), null);
-        //2.调用洗数,传递账单数据
-        // TODO: 2017/9/15  需要调用洗数的相关接口
-        logger.info("调用洗数处理...");
-        boolean result = false;
+        //2.获取魔蝎数据,调用洗数,传递账单数据
+        Boolean result = true;
         String message = null;
+        try {
+            this.billAndProcess(taskId, moxieTaskId);
+        } catch (Exception e) {
+            logger.error("handle moxie business error:bill and process fail", e);
+            result = false;
+            message = e.getMessage();
+        }
         //3.根据洗数返回结果,发送任务成功或失败指令
         if (result) {
             MoxieDirectiveDTO directiveDTO = new MoxieDirectiveDTO();
@@ -110,6 +126,23 @@ public class MoxieBusinessService {
             directiveDTO.setDirective(EMoxieDirective.TASK_FAIL.getText());
             directiveDTO.setRemark(message);
             moxieDirectiveService.process(directiveDTO);
+        }
+    }
+
+    private void billAndProcess(Long taskId, String moxieTaskId) throws Exception {
+        String moxieResult = null;
+        try {
+            moxieResult = fundMoxieService.queryFunds(moxieTaskId);
+        } catch (Exception e) {
+            logger.error("handle moxie business error:bill fail", e);
+            throw new Exception("获取公积金信息失败");
+        }
+        try {
+            String processResult = fundService.fund(taskId, moxieResult);
+            logger.info("获取数据路径,result={}", processResult);
+        } catch (Exception e) {
+            logger.error("handle moxie business error:process fail", e);
+            throw new Exception("洗数失败");
         }
     }
 
@@ -199,5 +232,31 @@ public class MoxieBusinessService {
             logger.error("convert to pinyinString is error name={}", name, e);
         }
         return result;
+    }
+
+    /**
+     * 查询指令,获取公积金账户登录状态
+     *
+     * @param taskId
+     * @return
+     */
+    public Map<String, Object> queryLoginStatusFromDirective(Long taskId) {
+        Map<String, Object> map = Maps.newHashMap();
+        String content = taskNextDirectiveService.getNextDirective(taskId);
+        if (StringUtils.isEmpty(content)) {
+            // 轮询过程中，判断任务是否超时
+//            if (taskServiceImpl.isTaskTimeout(taskid)) {
+//                // 异步处理任务超时
+//                taskTimeService.handleTaskTimeout(taskid);
+//            }
+            map.put("directive", "waiting");
+            map.put("information", "请等待");
+        } else {
+            MoxieDirectiveDTO directiveMessage = JSON.parseObject(content, MoxieDirectiveDTO.class);
+            map.put("directive", directiveMessage.getDirective());
+            map.put("information", directiveMessage.getRemark());
+        }
+
+        return map;
     }
 }

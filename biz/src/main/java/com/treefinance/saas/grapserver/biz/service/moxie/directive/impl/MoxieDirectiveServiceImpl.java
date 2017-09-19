@@ -50,6 +50,7 @@ public class MoxieDirectiveServiceImpl implements MoxieDirectiveService {
                 break;
             case LOGIN_FAIL:
                 moxieLoginFailDirectiveProcessor.process(directiveDTO);
+                break;
             case TASK_SUCCESS:
                 moxieSuccessDirectiveProcessor.process(directiveDTO);
                 break;

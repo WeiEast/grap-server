@@ -1,4 +1,4 @@
-package com.treefinance.saas.grapserver.web.controller;
+package com.treefinance.saas.grapserver.web.controller.notify;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Strings;
@@ -24,10 +24,10 @@ import java.util.Map;
  * Created by haojiahong on 2017/9/14.
  */
 @RestController
-@RequestMapping(value = "/api/v1")
-public class WebHookController {
+@RequestMapping(value = "/moxie/webhook")
+public class MoxieWebHookController {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(WebHookController.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(MoxieWebHookController.class);
 
     private static final String HEADER_MOXIE_EVENT = "X-Moxie-Event";
 

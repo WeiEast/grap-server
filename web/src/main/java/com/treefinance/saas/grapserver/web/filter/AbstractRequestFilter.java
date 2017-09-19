@@ -16,13 +16,18 @@
 
 package com.treefinance.saas.grapserver.web.filter;
 
+import com.google.common.collect.Lists;
+import org.springframework.util.AntPathMatcher;
+import org.springframework.util.CollectionUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import javax.servlet.FilterConfig;
 import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import java.util.List;
 
 /**
- * <p/>
+ * <p>
  *
  * @author Jerry
  * @version 1.0.3
@@ -30,15 +35,39 @@ import javax.servlet.ServletException;
  */
 public abstract class AbstractRequestFilter extends OncePerRequestFilter {
 
-  @Override
-  protected void initFilterBean() throws ServletException {
-    FilterConfig filterConfig = super.getFilterConfig();
+    private AntPathMatcher pathMatcher = new AntPathMatcher();
+    private List<String> excludeUrlPatterns = Lists.newArrayList("/moxie/webhook/**");
 
-    if (filterConfig != null) {
-      initFilterBean(filterConfig);
+    @Override
+    protected void initFilterBean() throws ServletException {
+        FilterConfig filterConfig = super.getFilterConfig();
+
+        if (filterConfig != null) {
+            initFilterBean(filterConfig);
+        }
     }
-  }
 
-  protected abstract void initFilterBean(FilterConfig filterConfig) throws ServletException;
+    @Override
+    protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
+        for (String excludeUrl : excludeUrlPatterns) {
+            boolean result = pathMatcher.match(excludeUrl, request.getServletPath());
+            if (result) {
+                return true;
+            }
+        }
+        return false;
+    }
 
+    protected abstract void initFilterBean(FilterConfig filterConfig) throws ServletException;
+
+    public List<String> getExcludeUrlPatterns() {
+        return excludeUrlPatterns;
+    }
+
+    public void addExcludeUrlPatterns(List<String> excludeUrlPatterns) {
+        if (CollectionUtils.isEmpty(excludeUrlPatterns)) {
+            excludeUrlPatterns = Lists.newArrayList();
+        }
+        excludeUrlPatterns.addAll(excludeUrlPatterns);
+    }
 }

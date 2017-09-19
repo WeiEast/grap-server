@@ -64,6 +64,9 @@ public class DiamondConfig {
     @DAttribute(key = "moxie.url.fund.post.tasks.input")
     private String moxieUrlFundPostTasksInput;
 
+    @DAttribute(key = "moxie.url.fund.get.funds")
+    private String moxieUrlFundGetFunds;
+
     @BeforeUpdate
     public void before(String key, Object newValue) {
         logger.info(key + " update to " + newValue + " start...");
@@ -194,5 +197,13 @@ public class DiamondConfig {
 
     public void setMoxieUrlFundGetCityListEx(String moxieUrlFundGetCityListEx) {
         this.moxieUrlFundGetCityListEx = moxieUrlFundGetCityListEx;
+    }
+
+    public String getMoxieUrlFundGetFunds() {
+        return moxieUrlFundGetFunds;
+    }
+
+    public void setMoxieUrlFundGetFunds(String moxieUrlFundGetFunds) {
+        this.moxieUrlFundGetFunds = moxieUrlFundGetFunds;
     }
 }

@@ -17,12 +17,12 @@ package com.treefinance.saas.grapserver.web.advice;
 
 import com.alibaba.fastjson.JSON;
 import com.google.common.collect.Maps;
-import com.treefinance.saas.grapserver.common.model.Result;
 import com.treefinance.saas.grapserver.common.exception.AppIdUncheckException;
 import com.treefinance.saas.grapserver.common.exception.ForbiddenException;
 import com.treefinance.saas.grapserver.common.exception.TaskTimeOutException;
 import com.treefinance.saas.grapserver.common.exception.UnknownException;
 import com.treefinance.saas.grapserver.common.exception.base.MarkBaseException;
+import com.treefinance.saas.grapserver.common.model.Result;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -122,6 +122,7 @@ public class GlobalExceptionAdvice extends ResponseEntityExceptionHandler {
     }
 
     private Result buildBody(Exception ex) {
+        logger.error("系统异常", ex);
         Result result = new Result();
         if (ex instanceof ForbiddenException) {
             Map map = Maps.newHashMap();

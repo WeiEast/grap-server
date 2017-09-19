@@ -9,7 +9,6 @@ public enum EMoxieDirective {
 
     LOGIN_SUCCESS("login_success"),
     LOGIN_FAIL("login_fail"),
-    GRAB_FAIL("grab_fail"),
     TASK_SUCCESS("task_success"),
     TASK_FAIL("task_fail"),
     TASK_CANCEL("task_cancel");

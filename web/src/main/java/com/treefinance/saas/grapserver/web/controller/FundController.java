@@ -60,7 +60,8 @@ public class FundController {
      * @throws IOException
      */
     @RequestMapping(value = "/start", method = {RequestMethod.POST})
-    public Object createTask(@RequestParam("appid") String appid, @RequestParam("uniqueId") String uniqueId,
+    public Object createTask(@RequestParam("appid") String appid,
+                             @RequestParam("uniqueId") String uniqueId,
                              @RequestParam(name = "coorType", required = false) String coorType,
                              @RequestParam("deviceInfo") String deviceInfo,
                              @RequestParam(name = "extra", required = false) String extra,
@@ -134,7 +135,7 @@ public class FundController {
     @RequestMapping(value = "/login/submit", method = {RequestMethod.POST})
     public Object getLoginSubmit(@RequestParam("appid") String appId,
                                  @RequestParam("taskid") Long taskId,
-                                 @RequestParam("uniqueId") String uniqueId,
+                                 @RequestParam("uniqueid") String uniqueId,
                                  @RequestParam("area_code") String areaCode,
                                  @RequestParam("account") String account,
                                  @RequestParam(value = "password", required = false) String password,
@@ -154,6 +155,15 @@ public class FundController {
                 || StringUtils.isBlank(account) || StringUtils.isBlank(loginType) || StringUtils.isBlank(origin)) {
             throw new IllegalArgumentException("Parameter is incorrect.");
         }
+
+        Map<String, Object> map = Maps.newHashMap();
+        TaskAttribute attribute = taskAttributeService.findByName(taskId, "moxie-taskId", false);
+        if (attribute != null && StringUtils.isNotBlank(attribute.getValue())) {
+            logger.info("taskId={}已生成魔蝎任务id,执行查询指令", taskId);
+            map = moxieBusinessService.queryLoginStatusFromDirective(taskId);
+            return Result.successResult(map);
+        }
+
         //TODO task表中的accountNo和website需要记录吗?
         String moxieId = fundMoxieService.createTasks(uniqueId, areaCode, account, password, loginType, idCard, mobile,
                 realName, subArea, loanAccount, loanPassword, corpAccount, corpName, origin, ip);
@@ -162,31 +172,9 @@ public class FundController {
             return Result.failResult("魔蝎创建公积金采集任务失败");
         }
         taskAttributeService.insertOrUpdateSelective(taskId, "moxie-taskId", moxieId);
-        return Result.successResult(null);
-    }
-
-    /**
-     * 任务状态,获取验证码(需要前端轮询)
-     *
-     * @param appId
-     * @param taskId
-     * @return
-     */
-    //// TODO: 2017/9/15  可以删除
-    @RequestMapping(value = "/status", method = {RequestMethod.POST})
-    public Object getTaskStatus(@RequestParam("appid") String appId,
-                                @RequestParam("taskid") Long taskId) {
-        if (StringUtils.isBlank(appId) || taskId == null) {
-            throw new IllegalArgumentException("Parameter is incorrect.");
-        }
-        TaskAttribute attribute = taskAttributeService.findByName(taskId, "moxie-taskId", false);
-        if (attribute == null) {
-            logger.info("taskId={}在任务属性表中未找到对应的魔蝎任务id", taskId);
-            return Result.failResult("任务查询失败");
-        }
-        String moxieTaskId = attribute.getValue();
-        Object result = fundMoxieService.queryTaskStatus(moxieTaskId);
-        return Result.successResult(result);
+        map.put("directive", "waiting");
+        map.put("information", "请等待");
+        return Result.successResult(map);
     }
 
     /**
@@ -195,9 +183,9 @@ public class FundController {
      * @param taskId
      * @return
      */
-    @RequestMapping(value = "/input", method = {RequestMethod.POST})
+    @RequestMapping(value = "/verifycode", method = {RequestMethod.POST})
     public Object submitTaskInput(@RequestParam("taskid") Long taskId,
-                                  @RequestParam("input") String input) {
+                                  @RequestParam("verifycode") String input) {
         if (taskId == null || StringUtils.isBlank(input)) {
             throw new IllegalArgumentException("Parameter is incorrect.");
         }
