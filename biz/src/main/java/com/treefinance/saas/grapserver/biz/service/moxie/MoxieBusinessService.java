@@ -17,6 +17,7 @@ import com.treefinance.saas.grapserver.common.model.dto.moxie.MoxieCaptchaDTO;
 import com.treefinance.saas.grapserver.common.model.dto.moxie.MoxieCityInfoDTO;
 import com.treefinance.saas.grapserver.common.model.dto.moxie.MoxieDirectiveDTO;
 import com.treefinance.saas.grapserver.common.model.vo.moxie.MoxieCityInfoVO;
+import com.treefinance.saas.grapserver.common.utils.JsonUtils;
 import com.treefinance.saas.grapserver.dao.entity.TaskAttribute;
 import com.treefinance.saas.processor.thirdparty.facade.fund.FundService;
 import org.apache.commons.lang3.StringUtils;
@@ -73,7 +74,9 @@ public class MoxieBusinessService {
         //2.发送任务失败指令
         MoxieDirectiveDTO directiveDTO = new MoxieDirectiveDTO();
         directiveDTO.setDirective(EMoxieDirective.TASK_FAIL.getText());
-        directiveDTO.setRemark(message);
+        Map<String, Object> map = Maps.newHashMap();
+        map.put("taskErrorMsg", "爬数失败");
+        directiveDTO.setRemark(JsonUtils.toJsonString(map));
         directiveDTO.setTaskId(taskId);
         directiveDTO.setMoxieTaskId(moxieTaskId);
         moxieDirectiveService.process(directiveDTO);
@@ -87,26 +90,27 @@ public class MoxieBusinessService {
      */
     @Transactional(rollbackFor = Exception.class)
     public void bill(String moxieTaskId) {
-        moxieTaskId = "cab9e8d0-9c69-11e7-a2e1-00163e13cbf1";
+//        moxieTaskId = "cab9e8d0-9c69-11e7-a2e1-00163e13cbf1";
         if (StringUtils.isBlank(moxieTaskId)) {
             logger.error("handle moxie business error: moxieTaskId={} is null", moxieTaskId);
             return;
         }
-//        TaskAttribute taskAttribute = taskAttributeService.findByNameAndValue("moxie-taskId", moxieTaskId, false);
-//        if (taskAttribute == null) {
-//            logger.error("handle moxie business error: moxieTaskId={} doesn't have taskId matched in task_attribute", moxieTaskId);
-//            return;
-//        }
-//        long taskId = taskAttribute.getTaskId();
-        long taskId = 94528182987812864L;
+        TaskAttribute taskAttribute = taskAttributeService.findByNameAndValue("moxie-taskId", moxieTaskId, false);
+        if (taskAttribute == null) {
+            logger.error("handle moxie business error: moxieTaskId={} doesn't have taskId matched in task_attribute", moxieTaskId);
+            return;
+        }
+        long taskId = taskAttribute.getTaskId();
         //1.记录采集成功日志
         taskLogService.insert(taskId, TaskStepEnum.CRAWL_SUCCESS.getText(), new Date(), null);
         taskLogService.insert(taskId, TaskStepEnum.CRAWL_COMPLETE.getText(), new Date(), null);
         //2.获取魔蝎数据,调用洗数,传递账单数据
         Boolean result = true;
         String message = null;
+        String processResult = null;
         try {
-            this.billAndProcess(taskId, moxieTaskId);
+            Thread.sleep(20000);//todo 需要删除
+            processResult = this.billAndProcess(taskId, moxieTaskId);
         } catch (Exception e) {
             logger.error("handle moxie business error:bill and process fail", e);
             result = false;
@@ -118,6 +122,7 @@ public class MoxieBusinessService {
             directiveDTO.setMoxieTaskId(moxieTaskId);
             directiveDTO.setTaskId(taskId);
             directiveDTO.setDirective(EMoxieDirective.TASK_SUCCESS.getText());
+            directiveDTO.setRemark(processResult);
             moxieDirectiveService.process(directiveDTO);
         } else {
             MoxieDirectiveDTO directiveDTO = new MoxieDirectiveDTO();
@@ -129,17 +134,19 @@ public class MoxieBusinessService {
         }
     }
 
-    private void billAndProcess(Long taskId, String moxieTaskId) throws Exception {
+    private String billAndProcess(Long taskId, String moxieTaskId) throws Exception {
         String moxieResult = null;
         try {
             moxieResult = fundMoxieService.queryFunds(moxieTaskId);
+            logger.info("handle moxie business moxieResult,result={}:", moxieResult);
         } catch (Exception e) {
             logger.error("handle moxie business error:bill fail", e);
             throw new Exception("获取公积金信息失败");
         }
         try {
             String processResult = fundService.fund(taskId, moxieResult);
-            logger.info("获取数据路径,result={}", processResult);
+            logger.info("handle moxie business processResult,result={}", processResult);
+            return processResult;
         } catch (Exception e) {
             logger.error("handle moxie business error:process fail", e);
             throw new Exception("洗数失败");
@@ -177,10 +184,13 @@ public class MoxieBusinessService {
                 if (StringUtils.equalsIgnoreCase(type, "sms")) {//需要短信验证码
                     map.put("directive", "require_sms");
                     map.put("information", moxieCaptchaDTO);
+                    taskLogService.insert(taskId, TaskStepEnum.WAITING_USER_INPUT_IMAGE_CODE.getText(), new Date(), null);
                 }
                 if (StringUtils.equalsIgnoreCase(type, "img")) {//需要图片验证码
                     map.put("directive", "require_picture");
                     map.put("information", moxieCaptchaDTO);
+                    taskLogService.insert(taskId, TaskStepEnum.WAITING_USER_INPUT_MESSAGE_CODE.getText(), new Date(), null);
+
                 }
 
             }
@@ -253,10 +263,41 @@ public class MoxieBusinessService {
             map.put("information", "请等待");
         } else {
             MoxieDirectiveDTO directiveMessage = JSON.parseObject(content, MoxieDirectiveDTO.class);
-            map.put("directive", directiveMessage.getDirective());
-            map.put("information", directiveMessage.getRemark());
+            EMoxieDirective directive = EMoxieDirective.directiveOf(directiveMessage.getDirective());
+            if (directive == null) {
+                map.put("directive", "waiting");
+                map.put("information", "请等待");
+            }
+            if (directive.getStepCode() == 1) {
+                map.put("directive", directiveMessage.getDirective());
+                map.put("information", directiveMessage.getRemark());
+                //如果是登录成功或失败,删掉指令,下一个页面轮询的时候转为waiting
+                taskNextDirectiveService.deleteNextDirective(taskId, directiveMessage.getDirective());
+                if (StringUtils.equals(directiveMessage.getDirective(), EMoxieDirective.LOGIN_FAIL.getText())) {
+                    // 登录失败(如用户名密码错误),需删除task_attribute中此taskId对应的moxieTaskId,重新登录时,可正常轮询/login/submit接口
+                    taskAttributeService.insertOrUpdateSelective(taskId, "moxie-taskId", "");
+                }
+            }
+            if (directive.getStepCode() > 1) {
+                map.put("directive", EMoxieDirective.LOGIN_SUCCESS.getText());
+                map.put("information", "");
+            }
         }
-
         return map;
+    }
+
+    public void loginSuccess(String moxieTaskId) {
+        MoxieDirectiveDTO directiveDTO = new MoxieDirectiveDTO();
+        directiveDTO.setMoxieTaskId(moxieTaskId);
+        directiveDTO.setDirective(EMoxieDirective.LOGIN_SUCCESS.getText());
+        moxieDirectiveService.process(directiveDTO);
+    }
+
+    public void loginFail(String moxieTaskId, String message) {
+        MoxieDirectiveDTO directiveDTO = new MoxieDirectiveDTO();
+        directiveDTO.setMoxieTaskId(moxieTaskId);
+        directiveDTO.setDirective(EMoxieDirective.LOGIN_FAIL.getText());
+        directiveDTO.setRemark(message);//登录错误信息
+        moxieDirectiveService.process(directiveDTO);
     }
 }

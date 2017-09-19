@@ -1,21 +1,30 @@
 package com.treefinance.saas.grapserver.biz.service.moxie.directive.process;
 
 import com.alibaba.fastjson.JSON;
-import com.treefinance.saas.grapserver.biz.service.TaskAttributeService;
-import com.treefinance.saas.grapserver.biz.service.TaskLogService;
-import com.treefinance.saas.grapserver.biz.service.TaskNextDirectiveService;
-import com.treefinance.saas.grapserver.biz.service.TaskService;
+import com.datatrees.toolkits.util.crypto.RSA;
+import com.datatrees.toolkits.util.crypto.core.Decryptor;
+import com.datatrees.toolkits.util.crypto.core.Encryptor;
+import com.datatrees.toolkits.util.json.Jackson;
+import com.google.common.collect.Maps;
+import com.treefinance.saas.grapserver.biz.service.*;
 import com.treefinance.saas.grapserver.common.enums.TaskStatusEnum;
 import com.treefinance.saas.grapserver.common.enums.moxie.EMoxieDirective;
+import com.treefinance.saas.grapserver.common.exception.CallbackEncryptException;
+import com.treefinance.saas.grapserver.common.exception.CryptorException;
 import com.treefinance.saas.grapserver.common.model.dto.TaskDTO;
 import com.treefinance.saas.grapserver.common.model.dto.moxie.MoxieDirectiveDTO;
 import com.treefinance.saas.grapserver.common.utils.JsonUtils;
+import com.treefinance.saas.grapserver.dao.entity.AppLicense;
 import com.treefinance.saas.grapserver.dao.entity.TaskAttribute;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.util.Map;
 
 public abstract class MoxieAbstractDirectiveProcessor implements MoxieDirectiveProcessor {
 
@@ -29,6 +38,8 @@ public abstract class MoxieAbstractDirectiveProcessor implements MoxieDirectiveP
     protected TaskNextDirectiveService taskNextDirectiveService;
     @Autowired
     protected TaskAttributeService taskAttributeService;
+    @Autowired
+    protected AppLicenseServiceImpl appLicenseService;
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -83,7 +94,114 @@ public abstract class MoxieAbstractDirectiveProcessor implements MoxieDirectiveP
         } finally {
             taskNextDirectiveService.insert(taskId, directiveDTO.getDirective());
             taskNextDirectiveService.putNextDirectiveToRedis(taskId, JsonUtils.toJsonString(directiveDTO, "task"));
-            logger.info("process moxie directive completed  cost {} ms : directive={}", System.currentTimeMillis() - start, JSON.toJSONString(directiveDTO));
+            logger.info("handle moxie directive completed  cost {} ms : directive={}", System.currentTimeMillis() - start, JSON.toJSONString(directiveDTO));
+        }
+    }
+
+    protected void generateData(MoxieDirectiveDTO directiveDTO, AppLicense appLicense) {
+        TaskDTO task = directiveDTO.getTask();
+        Map<String, Object> dataMap = ifNull(JSON.parseObject(directiveDTO.getRemark()), Maps.newHashMap());
+        dataMap.put("uniqueId", ifNull(dataMap.get("uniqueId"), directiveDTO.getTask().getUniqueId()));
+        dataMap.put("taskId", ifNull(dataMap.get("taskId"), directiveDTO.getTask().getId()));
+        dataMap.put("taskErrorMsg", ifNull(dataMap.get("taskErrorMsg"), ""));
+
+        dataMap.put("taskStatus", "001");
+        // 此次任务状态：001-抓取成功，002-抓取失败，003-抓取结果为空,004-任务取消
+        if (TaskStatusEnum.SUCCESS.getStatus().equals(task.getStatus())) {
+            dataMap.put("taskStatus", "001");
+        } else if (TaskStatusEnum.FAIL.getStatus().equals(task.getStatus())) {
+            dataMap.put("taskStatus", "002");
+
+//            dataMap.put("taskErrorMsg", "洗数失败");
+            // 任务失败消息
+//            TaskLog log = taskLogService.queryLastestErrorLog(task.getId());
+//            if (log != null) {
+//                dataMap.put("taskErrorMsg", log.getMsg());
+//            } else {
+//                dataMap.put("taskErrorMsg", "爬数失败");
+//            }
+        } else if (TaskStatusEnum.CANCLE.getStatus().equals(task.getStatus())) {
+            dataMap.put("taskStatus", "004");
+
+        }
+        logger.info("handle moxie directive generateData :data={}", JSON.toJSONString(dataMap));
+        try {
+            String params = encryptByRSA(dataMap, appLicense);
+            Map<String, Object> paramMap = Maps.newHashMap();
+            paramMap.put("params", params);
+            directiveDTO.setRemark(JSON.toJSONString(paramMap));
+        } catch (Exception e) {
+            logger.error("handle moxie directive error :encryptByRSA error dataMap={},key={}", dataMap, appLicense.getServerPublicKey(), e);
+            directiveDTO.setRemark("指令信息处理失败");
+        }
+    }
+
+    protected <T> T ifNull(T value, T defaultValue) {
+        return value == null ? defaultValue : value;
+    }
+
+    /**
+     * RSA 加密
+     *
+     * @param dataMap
+     * @param appLicense
+     * @return
+     * @throws CallbackEncryptException
+     * @throws UnsupportedEncodingException
+     */
+    private String encryptByRSA(Map<String, Object> dataMap, AppLicense appLicense) throws CallbackEncryptException, UnsupportedEncodingException {
+        String rsaPublicKey = appLicense.getServerPublicKey();
+        String encryptedData = Helper.encryptResult(dataMap, rsaPublicKey);
+        String params = URLEncoder.encode(encryptedData, "utf-8");
+        return params;
+    }
+
+    static class Helper {
+
+
+        public static Encryptor getEncryptor(String publicKey) {
+            try {
+                if (StringUtils.isEmpty(publicKey)) {
+                    throw new IllegalArgumentException("Can not find commercial tenant's public key.");
+                }
+
+                return RSA.createEncryptor(publicKey);
+            } catch (Exception e) {
+                throw new CryptorException(
+                        "Error creating Encryptor with publicKey '" + publicKey + " to encrypt callback.", e);
+            }
+        }
+
+        public static String encryptResult(Object data, String publicKey) throws CallbackEncryptException {
+            Encryptor encryptor = getEncryptor(publicKey);
+            try {
+                byte[] json = Jackson.toJSONByteArray(data);
+                return encryptor.encryptAsBase64String(json);
+            } catch (Exception e) {
+                throw new CallbackEncryptException("Error encrypting callback data", e);
+            }
+        }
+
+        public static Decryptor getDecryptor(String privateKey) {
+            try {
+                if (StringUtils.isEmpty(privateKey)) {
+                    throw new IllegalArgumentException("Can not find commercial tenant's private key.");
+                }
+                return RSA.createDecryptor(privateKey);
+            } catch (Exception e) {
+                throw new CryptorException(
+                        "Error creating Decryptor with privateKey '" + privateKey + " to encrypt callback.", e);
+            }
+        }
+
+        public static String decryptResult(Object data, String privateKey) throws CallbackEncryptException {
+            Decryptor decryptor = getDecryptor(privateKey);
+            try {
+                byte[] json = Jackson.toJSONByteArray(data);
+                return decryptor.decryptWithBase64AsString(json);
+            } catch (Exception e) {
+                throw new CallbackEncryptException("Error decrypting callback data", e);
+            }
         }
     }
 
@@ -94,4 +212,6 @@ public abstract class MoxieAbstractDirectiveProcessor implements MoxieDirectiveP
      * @param directiveDTO
      */
     protected abstract void doProcess(EMoxieDirective directive, MoxieDirectiveDTO directiveDTO);
+
+
 }

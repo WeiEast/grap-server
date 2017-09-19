@@ -90,8 +90,7 @@ public class MoxieWebHookController {
 //            return;
 //        }
 
-        LOGGER.info("receive moxie event name:" + eventName.toLowerCase());
-        LOGGER.info("request body:" + body);
+        LOGGER.info("receive moxie eventName={},body={}", eventName.toLowerCase(), body);
         //任务创建通知
         if (StringUtils.equals(eventName.toLowerCase(), "task.submit")) {
             //通知状态变更为 '认证中'

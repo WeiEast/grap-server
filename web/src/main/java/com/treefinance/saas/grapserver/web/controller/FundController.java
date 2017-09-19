@@ -1,15 +1,23 @@
 package com.treefinance.saas.grapserver.web.controller;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Maps;
 import com.treefinance.saas.grapserver.biz.config.DiamondConfig;
 import com.treefinance.saas.grapserver.biz.service.*;
 import com.treefinance.saas.grapserver.biz.service.moxie.FundMoxieService;
 import com.treefinance.saas.grapserver.biz.service.moxie.MoxieBusinessService;
 import com.treefinance.saas.grapserver.common.enums.EBizType;
+import com.treefinance.saas.grapserver.common.enums.moxie.EMoxieDirective;
 import com.treefinance.saas.grapserver.common.exception.ForbiddenException;
+import com.treefinance.saas.grapserver.common.exception.RequestFailedException;
+import com.treefinance.saas.grapserver.common.model.Result;
+import com.treefinance.saas.grapserver.common.model.dto.moxie.MoxieDirectiveDTO;
 import com.treefinance.saas.knife.result.SimpleResult;
 import com.treefinance.saas.grapserver.common.utils.IpUtils;
+import com.treefinance.saas.grapserver.common.utils.JsonUtils;
 import com.treefinance.saas.grapserver.dao.entity.TaskAttribute;
+import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,6 +53,8 @@ public class FundController {
     private FundMoxieService fundMoxieService;
     @Autowired
     private MoxieBusinessService moxieBusinessService;
+    @Autowired
+    private TaskNextDirectiveService taskNextDirectiveService;
 
     /**
      * 创建任务
@@ -156,6 +166,7 @@ public class FundController {
             throw new IllegalArgumentException("Parameter is incorrect.");
         }
 
+        //1.轮询指令,已经提交过登录,获取魔蝎异步回调登录状态
         Map<String, Object> map = Maps.newHashMap();
         TaskAttribute attribute = taskAttributeService.findByName(taskId, "moxie-taskId", false);
         if (attribute != null && StringUtils.isNotBlank(attribute.getValue())) {
@@ -164,13 +175,25 @@ public class FundController {
             return SimpleResult.successResult(map);
         }
 
+        //2.提交登录,调用魔蝎接口创建魔蝎任务,如果任务创建失败,返回登录失败及异常信息
         //TODO task表中的accountNo和website需要记录吗?
-        String moxieId = fundMoxieService.createTasks(uniqueId, areaCode, account, password, loginType, idCard, mobile,
-                realName, subArea, loanAccount, loanPassword, corpAccount, corpName, origin, ip);
-        if (StringUtils.isBlank(moxieId)) {
-            logger.info("魔蝎创建公积金采集任务失败");
-            return SimpleResult.failResult("魔蝎创建公积金采集任务失败");
+        String moxieId = null;
+        try {
+            moxieId = fundMoxieService.createTasks(uniqueId, areaCode, account, password, loginType, idCard, mobile,
+                    realName, subArea, loanAccount, loanPassword, corpAccount, corpName, origin, ip);
+        } catch (RequestFailedException e) {
+            map.put("directive", EMoxieDirective.LOGIN_FAIL.getText());
+            String result = e.getResult();
+            JSONObject object = (JSONObject) JsonUtils.toJsonObject(result);
+            if (object.containsKey("detail")) {
+                map.put("information", object.getString("detail"));
+            } else {
+                map.put("information", "登录失败,请重试");
+            }
+            return map;
+
         }
+        //3.任务创建成功,写入task_attribute,开始轮询此接口,等待魔蝎回调登录状态信息
         taskAttributeService.insertOrUpdateSelective(taskId, "moxie-taskId", moxieId);
         map.put("directive", "waiting");
         map.put("information", "请等待");
@@ -197,6 +220,48 @@ public class FundController {
         String moxieTaskId = attribute.getValue();
         fundMoxieService.submitTaskInput(moxieTaskId, input);
         return SimpleResult.successResult(null);
+    }
+
+    /**
+     * 轮询任务执行指令(魔蝎公积金)
+     *
+     * @param taskid
+     * @return
+     * @throws Exception
+     */
+    @RequestMapping(value = "/next_directive", method = {RequestMethod.POST})
+    public Object nextMoxieDirective(@RequestParam("taskid") Long taskid) throws Exception {
+
+        //判断是否需要验证码
+        Map<String, Object> result = moxieBusinessService.requireCaptcha(taskid);
+        if (!MapUtils.isEmpty(result)) {
+            return result;
+        }
+        String content = taskNextDirectiveService.getNextDirective(taskid);
+        Map<String, Object> map = Maps.newHashMap();
+        if (StringUtils.isEmpty(content)) {
+            // 轮询过程中，判断任务是否超时
+//            if (taskServiceImpl.isTaskTimeout(taskid)) {
+//                // 异步处理任务超时
+//                taskTimeService.handleTaskTimeout(taskid);
+//            }
+            map.put("directive", "waiting");
+            map.put("information", "请等待");
+        } else {
+            MoxieDirectiveDTO directiveMessage = JSON.parseObject(content, MoxieDirectiveDTO.class);
+            map.put("directive", directiveMessage.getDirective());
+//            map.put("directiveId", directiveMessage.getDirectiveId());
+
+            // 仅任务成功或回调失败时，转JSON处理
+            if (EMoxieDirective.TASK_SUCCESS.getText().equals(directiveMessage.getDirective())) {
+                map.put("information", JSON.parse(directiveMessage.getRemark()));
+            } else {
+                map.put("information", directiveMessage.getRemark());
+            }
+            //taskNextDirectiveService.deleteNextDirective(taskid);
+        }
+        logger.info("taskId={}下一指令信息={}", taskid, map);
+        return new Result<>(map);
     }
 
 

@@ -7,16 +7,19 @@ import org.apache.commons.lang3.StringUtils;
  */
 public enum EMoxieDirective {
 
-    LOGIN_SUCCESS("login_success"),
-    LOGIN_FAIL("login_fail"),
-    TASK_SUCCESS("task_success"),
-    TASK_FAIL("task_fail"),
-    TASK_CANCEL("task_cancel");
+    LOGIN_SUCCESS("login_success", (byte) 1),
+    LOGIN_FAIL("login_fail", (byte) 1),
+    TASK_SUCCESS("task_success", (byte) 2),
+    TASK_FAIL("task_fail", (byte) 2),
+    TASK_CANCEL("task_cancel", (byte) 2);
+
 
     private String text;
+    private Byte stepCode;
 
-    EMoxieDirective(String text) {
+    EMoxieDirective(String text, Byte stepCode) {
         this.text = text;
+        this.stepCode = stepCode;
     }
 
     public String getText() {
@@ -25,6 +28,14 @@ public enum EMoxieDirective {
 
     public void setText(String text) {
         this.text = text;
+    }
+
+    public Byte getStepCode() {
+        return stepCode;
+    }
+
+    public void setStepCode(Byte stepCode) {
+        this.stepCode = stepCode;
     }
 
     public static EMoxieDirective directiveOf(String text) {

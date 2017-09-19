@@ -1,8 +1,5 @@
 package com.treefinance.saas.grapserver.biz.service.moxie;
 
-import com.treefinance.saas.grapserver.biz.service.moxie.directive.MoxieDirectiveService;
-import com.treefinance.saas.grapserver.common.enums.moxie.EMoxieDirective;
-import com.treefinance.saas.grapserver.common.model.dto.moxie.MoxieDirectiveDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -14,8 +11,6 @@ import org.springframework.stereotype.Service;
 public class MoxieTaskEventNoticeService {
 
     @Autowired
-    private MoxieDirectiveService moxieDirectiveService;
-    @Autowired
     private MoxieBusinessService moxieBusinessService;
 
     /**
@@ -24,10 +19,7 @@ public class MoxieTaskEventNoticeService {
      * @param moxieTaskId
      */
     public void loginSuccess(String moxieTaskId) {
-        MoxieDirectiveDTO directiveDTO = new MoxieDirectiveDTO();
-        directiveDTO.setMoxieTaskId(moxieTaskId);
-        directiveDTO.setDirective(EMoxieDirective.LOGIN_SUCCESS.getText());
-        moxieDirectiveService.process(directiveDTO);
+        moxieBusinessService.loginSuccess(moxieTaskId);
     }
 
     /**
@@ -37,11 +29,7 @@ public class MoxieTaskEventNoticeService {
      * @param message
      */
     public void loginFail(String moxieTaskId, String message) {
-        MoxieDirectiveDTO directiveDTO = new MoxieDirectiveDTO();
-        directiveDTO.setMoxieTaskId(moxieTaskId);
-        directiveDTO.setDirective(EMoxieDirective.LOGIN_FAIL.getText());
-        directiveDTO.setRemark(message);//登录错误信息
-        moxieDirectiveService.process(directiveDTO);
+        moxieBusinessService.loginFail(moxieTaskId, message);
     }
 
     /**

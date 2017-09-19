@@ -108,51 +108,6 @@ public class TaskController {
      * @return
      * @throws Exception
      */
-    @RequestMapping(value = "/moxie/next_directive", method = {RequestMethod.POST})
-    public Object nextMoxieDirective(@RequestParam("taskid") Long taskid) throws Exception {
-
-        //判断是否需要验证码
-        Map<String, Object> result = moxieBusinessService.requireCaptcha(taskid);
-        if (!MapUtils.isEmpty(result)) {
-            return result;
-        }
-        String content = taskNextDirectiveService.getNextDirective(taskid);
-        Map<String, Object> map = Maps.newHashMap();
-        if (StringUtils.isEmpty(content)) {
-            // 轮询过程中，判断任务是否超时
-//            if (taskServiceImpl.isTaskTimeout(taskid)) {
-//                // 异步处理任务超时
-//                taskTimeService.handleTaskTimeout(taskid);
-//            }
-            map.put("directive", "waiting");
-            map.put("information", "请等待");
-        } else {
-            MoxieDirectiveDTO directiveMessage = JSON.parseObject(content, MoxieDirectiveDTO.class);
-            map.put("directive", directiveMessage.getDirective());
-//            map.put("directiveId", directiveMessage.getDirectiveId());
-
-            // 仅任务成功或回调失败时，转JSON处理
-            if (EDirective.TASK_SUCCESS.getText().equals(directiveMessage.getDirective()) ||
-                    EDirective.TASK_FAIL.getText().equals(directiveMessage.getDirective()) ||
-                    EDirective.CALLBACK_FAIL.getText().equals(directiveMessage.getDirective())) {
-                map.put("information", JSON.parse(directiveMessage.getRemark()));
-            } else {
-                map.put("information", directiveMessage.getRemark());
-            }
-            //taskNextDirectiveService.deleteNextDirective(taskid);
-        }
-        logger.info("taskId={}下一指令信息={}", taskid, map);
-        return new SimpleResult<>(map);
-    }
-
-
-    /**
-     * 轮询任务执行指令(魔蝎公积金)
-     *
-     * @param taskid
-     * @return
-     * @throws Exception
-     */
     @RequestMapping(value = "/next_directive", method = {RequestMethod.POST})
     public Object nextDirective(@RequestParam("taskid") Long taskid) throws Exception {
         String content = taskNextDirectiveService.getNextDirective(taskid);

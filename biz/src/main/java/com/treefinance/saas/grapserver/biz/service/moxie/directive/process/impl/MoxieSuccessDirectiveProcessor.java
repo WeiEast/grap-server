@@ -5,6 +5,9 @@ import com.treefinance.saas.grapserver.common.enums.TaskStatusEnum;
 import com.treefinance.saas.grapserver.common.enums.moxie.EMoxieDirective;
 import com.treefinance.saas.grapserver.common.model.dto.TaskDTO;
 import com.treefinance.saas.grapserver.common.model.dto.moxie.MoxieDirectiveDTO;
+import com.treefinance.saas.grapserver.dao.entity.AppLicense;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 /**
@@ -14,12 +17,24 @@ import org.springframework.stereotype.Component;
 @Component
 public class MoxieSuccessDirectiveProcessor extends MoxieAbstractDirectiveProcessor {
 
+    protected static final Logger logger = LoggerFactory.getLogger(MoxieSuccessDirectiveProcessor.class);
+
     @Override
     protected void doProcess(EMoxieDirective directive, MoxieDirectiveDTO directiveDTO) {
         TaskDTO taskDTO = directiveDTO.getTask();
         Long taskId = taskDTO.getId();
-        // 1.更新任务状态,记录任务成功日志
+        String appId = taskDTO.getAppId();
+
+        //任务置为成功
+        taskDTO.setStatus(TaskStatusEnum.SUCCESS.getStatus());
+
+        // 获取商户密钥,包装数据:洗数成功后返回的dataUrl加密后通过指令传递给前端
+        AppLicense appLicense = appLicenseService.getAppLicense(appId);
+        this.generateData(directiveDTO, appLicense);
+
+        // 更新任务状态,记录任务成功日志
         taskService.updateTaskStatusWithStep(taskId, TaskStatusEnum.SUCCESS.getStatus());
     }
+
 
 }
