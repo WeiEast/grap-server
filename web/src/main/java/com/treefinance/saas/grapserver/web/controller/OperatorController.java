@@ -6,7 +6,7 @@ import com.datatrees.rawdatacentral.domain.result.HttpResult;
 import com.google.common.collect.Maps;
 import com.treefinance.commonservice.facade.mobileattribution.IMobileAttributionService;
 import com.treefinance.commonservice.facade.mobileattribution.MobileAttributionDTO;
-import com.treefinance.saas.grapserver.common.model.Result;
+import com.treefinance.saas.knife.result.SimpleResult;
 import com.treefinance.saas.grapserver.biz.config.DiamondConfig;
 import com.treefinance.saas.grapserver.dao.entity.TaskAttribute;
 import com.treefinance.saas.grapserver.common.exception.CrawlerBizException;
@@ -84,7 +84,7 @@ public class OperatorController {
         map.put("taskid", String.valueOf(taskId));
         map.put("color", merchantConfigService.getColorConfig(appid));
         map.put("title", diamondConfig.getSdkTitle(EBizType.OPERATOR));
-        return Result.successResult(map);
+        return SimpleResult.successResult(map);
     }
 
     /**
@@ -111,7 +111,7 @@ public class OperatorController {
         if (taskAttribute != null) {
             map.put(taskAttribute.getName(), taskAttribute.getValue());
         }
-        Result resultData = Result.successResult(map);
+        SimpleResult resultData = SimpleResult.successResult(map);
 //        logger.info("/operator/config : {}", JSON.toJSONString(resultData));
 //        logger.info("/operator/config : {}", result.getData().stream().filter(operatorCatalogue -> !"联通".equals(operatorCatalogue.getCatalogue())).collect(Collectors.toList()).getClass());
         return resultData;
@@ -137,7 +137,7 @@ public class OperatorController {
             map.put("attribution", "");
             map.put("virtual", "");
         }
-        return Result.successResult(map);
+        return SimpleResult.successResult(map);
     }
 
     /**
@@ -151,7 +151,7 @@ public class OperatorController {
     public Object prepare(@RequestParam("taskid") Long taskid, @RequestParam("websiteName") String websiteName) {
         logger.info("模拟登录: 用户打开登陆页,taskid={},websiteName={}", taskid, websiteName);
         operatorLoginSimulationService.prepare(taskid, websiteName);
-        return Result.successResult(null);
+        return SimpleResult.successResult(null);
     }
 
     /**
@@ -169,7 +169,7 @@ public class OperatorController {
                           @RequestParam(value = "password", required = false) String password) {
         logger.info("模拟登录: 请求验证码,taskid={},type={},mobile={},password={}", taskid, type, username, password);
         Object obj = operatorLoginSimulationService.refreshCode(taskid, type, username, password);
-        return Result.successResult(obj);
+        return SimpleResult.successResult(obj);
     }
 
     /**
@@ -201,15 +201,15 @@ public class OperatorController {
             extra.put("idCard", idCard);
             httpResult = operatorLoginSimulationService.login(taskid, username, password, accountNo, website, code, randomPassword, extra);
             if (httpResult != null && httpResult.getStatus()) {
-                return Result.successResult(httpResult.getData());
+                return SimpleResult.successResult(httpResult.getData());
             } else {
                 response.setStatus(HttpStatus.FORBIDDEN.value());
-                return Result.failResult(httpResult.getData(), httpResult.getMessage());
+                return SimpleResult.failResult(httpResult.getData(), httpResult.getMessage());
             }
         } catch (Exception e) {
             logger.error("登陆失败，taskId=" + taskid, e);
             response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
-            return Result.failResult("登陆失败，taskId=" + taskid);
+            return SimpleResult.failResult("登陆失败，taskId=" + taskid);
         }
     }
 }

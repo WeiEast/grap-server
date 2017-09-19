@@ -16,8 +16,9 @@
 
 package com.treefinance.saas.grapserver.web;
 
-import com.treefinance.saas.grapserver.web.filter.OperatorH5RequestFilter;
-import com.treefinance.saas.grapserver.web.filter.RequestDecryptFilter;
+import com.treefinance.saas.grapserver.biz.config.DiamondConfig;
+import com.treefinance.saas.grapserver.biz.service.AppLicenseService;
+import com.treefinance.saas.grapserver.biz.service.MonitorService;
 import com.treefinance.saas.grapserver.web.filter.WebContextFilter;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
@@ -48,35 +49,17 @@ public class FilterRegistry {
     }
 
     @Bean
-    public FilterRegistrationBean webContextFilter() {
+    public FilterRegistrationBean webContextFilter(MonitorService monitorService,
+                                                   DiamondConfig diamondConfig,
+                                                   AppLicenseService appLicenseService) {
+        WebContextFilter contextFilter = new WebContextFilter(monitorService, diamondConfig, appLicenseService);
+        contextFilter.addExcludeUrlPatterns("/moxie/webhook/**");
+
         FilterRegistrationBean registration = new FilterRegistrationBean();
-        registration.setFilter(new WebContextFilter());
+        registration.setFilter(contextFilter);
         registration.setName("webContextFilter");
         registration.addUrlPatterns("/*");
         registration.setOrder(1);
-        return registration;
-    }
-
-    @Bean
-    public FilterRegistrationBean requestDecryptFilter() {
-        FilterRegistrationBean registration = new FilterRegistrationBean();
-        registration.setFilter(new RequestDecryptFilter());
-        registration.setName("requestDecryptFilter");
-//        registration.addUrlPatterns("/*");
-        registration.addUrlPatterns("/ecommerce/*", "/email/*", "/operator/*", "/qrscan/*", "/task/*", "/test/*");
-        registration.addInitParameter("decrypt.target", "params");
-        registration.setOrder(2);
-        return registration;
-    }
-
-    @Bean
-    public FilterRegistrationBean OperatorH5DecryptFilter() {
-        FilterRegistrationBean registration = new FilterRegistrationBean();
-        registration.setFilter(new OperatorH5RequestFilter());
-        registration.setName("operatorH5RequestFilter");
-        registration.addUrlPatterns("/h5/*");
-        registration.addInitParameter("decrypt.target", "params");
-        registration.setOrder(2);
         return registration;
     }
 

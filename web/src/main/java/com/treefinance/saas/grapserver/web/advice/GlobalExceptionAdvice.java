@@ -22,7 +22,7 @@ import com.treefinance.saas.grapserver.common.exception.ForbiddenException;
 import com.treefinance.saas.grapserver.common.exception.TaskTimeOutException;
 import com.treefinance.saas.grapserver.common.exception.UnknownException;
 import com.treefinance.saas.grapserver.common.exception.base.MarkBaseException;
-import com.treefinance.saas.grapserver.common.model.Result;
+import com.treefinance.saas.knife.result.SimpleResult;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -121,9 +121,9 @@ public class GlobalExceptionAdvice extends ResponseEntityExceptionHandler {
         logger.error(logBuffer.toString(), ex);
     }
 
-    private Result buildBody(Exception ex) {
+    private SimpleResult buildBody(Exception ex) {
         logger.error("系统异常", ex);
-        Result result = new Result();
+        SimpleResult result = new SimpleResult();
         if (ex instanceof ForbiddenException) {
             Map map = Maps.newHashMap();
             map.put("mark", 0);

@@ -1,6 +1,7 @@
 package com.treefinance.saas.grapserver.facade.service;
 
 import com.treefinance.saas.grapserver.facade.model.TaskRO;
+import com.treefinance.saas.knife.result.SaasResult;
 
 import java.util.List;
 
@@ -14,8 +15,7 @@ public interface TaskFacade {
      * @param taskId
      * @return
      */
-    List<Long> getUserTaskIdList(Long taskId);
-
+    SaasResult<List<Long>> getUserTaskIdList(Long taskId);
 
 
     /**
@@ -24,5 +24,5 @@ public interface TaskFacade {
      * @param taskId
      * @return
      */
-    TaskRO getById(Long taskId);
+    SaasResult<TaskRO> getById(Long taskId);
 }

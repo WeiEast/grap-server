@@ -7,7 +7,7 @@ import com.treefinance.saas.grapserver.biz.service.moxie.FundMoxieService;
 import com.treefinance.saas.grapserver.biz.service.moxie.MoxieBusinessService;
 import com.treefinance.saas.grapserver.common.enums.EBizType;
 import com.treefinance.saas.grapserver.common.exception.ForbiddenException;
-import com.treefinance.saas.grapserver.common.model.Result;
+import com.treefinance.saas.knife.result.SimpleResult;
 import com.treefinance.saas.grapserver.common.utils.IpUtils;
 import com.treefinance.saas.grapserver.dao.entity.TaskAttribute;
 import org.apache.commons.lang3.StringUtils;
@@ -75,7 +75,7 @@ public class FundController {
         map.put("taskid", String.valueOf(taskId));
         map.put("color", merchantConfigService.getColorConfig(appid));
         map.put("title", diamondConfig.getSdkTitle(EBizType.FUND));
-        return Result.successResult(map);
+        return SimpleResult.successResult(map);
     }
 
     /**
@@ -94,7 +94,7 @@ public class FundController {
         Map<String, Object> map = Maps.newHashMap();
         map.put("config", result);
         map.put("license", appBizLicenseService.isShowLicense(appid, EBizType.OPERATOR.getText()));
-        return Result.successResult(map);
+        return SimpleResult.successResult(map);
     }
 
     /**
@@ -119,7 +119,7 @@ public class FundController {
         Map<String, Object> map = Maps.newHashMap();
         map.put("information", information);
         map.put("loginElements", loginElements);
-        return Result.successResult(map);
+        return SimpleResult.successResult(map);
     }
 
     /**
@@ -161,7 +161,7 @@ public class FundController {
         if (attribute != null && StringUtils.isNotBlank(attribute.getValue())) {
             logger.info("taskId={}已生成魔蝎任务id,执行查询指令", taskId);
             map = moxieBusinessService.queryLoginStatusFromDirective(taskId);
-            return Result.successResult(map);
+            return SimpleResult.successResult(map);
         }
 
         //TODO task表中的accountNo和website需要记录吗?
@@ -169,12 +169,12 @@ public class FundController {
                 realName, subArea, loanAccount, loanPassword, corpAccount, corpName, origin, ip);
         if (StringUtils.isBlank(moxieId)) {
             logger.info("魔蝎创建公积金采集任务失败");
-            return Result.failResult("魔蝎创建公积金采集任务失败");
+            return SimpleResult.failResult("魔蝎创建公积金采集任务失败");
         }
         taskAttributeService.insertOrUpdateSelective(taskId, "moxie-taskId", moxieId);
         map.put("directive", "waiting");
         map.put("information", "请等待");
-        return Result.successResult(map);
+        return SimpleResult.successResult(map);
     }
 
     /**
@@ -192,11 +192,11 @@ public class FundController {
         TaskAttribute attribute = taskAttributeService.findByName(taskId, "moxie-taskId", false);
         if (attribute == null) {
             logger.info("taskId={}在任务属性表中未找到对应的魔蝎任务id", taskId);
-            return Result.failResult("任务查询失败");
+            return SimpleResult.failResult("任务查询失败");
         }
         String moxieTaskId = attribute.getValue();
         fundMoxieService.submitTaskInput(moxieTaskId, input);
-        return Result.successResult(null);
+        return SimpleResult.successResult(null);
     }
 
 

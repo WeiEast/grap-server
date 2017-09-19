@@ -16,7 +16,7 @@
 
 package com.treefinance.saas.grapserver.web.advice;
 
-import com.treefinance.saas.grapserver.common.model.Result;
+import com.treefinance.saas.knife.result.SimpleResult;
 import com.treefinance.saas.grapserver.common.exception.ResponseException;
 import com.treefinance.saas.grapserver.common.model.WebContext;
 import com.treefinance.saas.grapserver.common.utils.WebContextUtils;
@@ -37,7 +37,7 @@ import javax.servlet.http.HttpServletRequest;
  * @since 22:18 25/04/2017
  */
 @ControllerAdvice("com.treefinance.saas.grapserver")
-public class ResponseBodyEncryptAdvice implements ResponseBodyAdvice<Result> {
+public class ResponseBodyEncryptAdvice implements ResponseBodyAdvice<SimpleResult> {
 
   @Override
   public boolean supports(MethodParameter returnType,
@@ -46,16 +46,16 @@ public class ResponseBodyEncryptAdvice implements ResponseBodyAdvice<Result> {
         && returnType.getParameterIndex() < 0) {
       Class<?> parameterType = returnType.getParameterType();
 
-      return parameterType != null && Result.class.isAssignableFrom(parameterType);
+      return parameterType != null && SimpleResult.class.isAssignableFrom(parameterType);
     }
 
     return false;
   }
 
   @Override
-  public Result beforeBodyWrite(Result body, MethodParameter returnType,
-                                MediaType selectedContentType, Class<? extends HttpMessageConverter<?>> selectedConverterType,
-                                ServerHttpRequest request, ServerHttpResponse response) {
+  public SimpleResult beforeBodyWrite(SimpleResult body, MethodParameter returnType,
+                                      MediaType selectedContentType, Class<? extends HttpMessageConverter<?>> selectedConverterType,
+                                      ServerHttpRequest request, ServerHttpResponse response) {
     if (request instanceof ServletServerHttpRequest) {
       HttpServletRequest servletRequest = ((ServletServerHttpRequest) request).getServletRequest();
       WebContext context = WebContextUtils.getWebContext(servletRequest);

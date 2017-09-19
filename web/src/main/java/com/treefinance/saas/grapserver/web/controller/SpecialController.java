@@ -4,7 +4,7 @@ import com.alibaba.fastjson.JSON;
 import com.datatrees.rawdatacentral.api.CrawlerService;
 import com.datatrees.rawdatacentral.domain.result.HttpResult;
 import com.google.common.collect.Maps;
-import com.treefinance.saas.grapserver.common.model.Result;
+import com.treefinance.saas.knife.result.SimpleResult;
 import com.treefinance.saas.grapserver.common.enums.EQRResult;
 import com.treefinance.saas.grapserver.biz.service.TaskNextDirectiveService;
 import org.apache.commons.lang3.StringUtils;
@@ -47,6 +47,6 @@ public class SpecialController {
         }
         Map<String, Object> map = Maps.newHashMap();
         map.put("result", result.getData());
-        return new Result<>(map);
+        return new SimpleResult<>(map);
     }
 }

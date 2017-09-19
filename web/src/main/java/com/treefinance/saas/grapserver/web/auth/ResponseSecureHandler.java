@@ -19,7 +19,7 @@ package com.treefinance.saas.grapserver.web.auth;
 import com.datatrees.toolkits.util.crypto.AES;
 import com.datatrees.toolkits.util.crypto.core.Encryptor;
 import com.datatrees.toolkits.util.json.Jackson;
-import com.treefinance.saas.grapserver.common.model.Result;
+import com.treefinance.saas.knife.result.SimpleResult;
 import com.treefinance.saas.grapserver.common.exception.CryptorException;
 import com.treefinance.saas.grapserver.common.exception.ResponseEncryptException;
 import com.treefinance.saas.grapserver.common.model.AppLicenseKey;
@@ -55,7 +55,7 @@ public class ResponseSecureHandler extends SecureHandler {
     }
   }
 
-  public Result encrypt(Result result) throws ResponseEncryptException {
+  public SimpleResult encrypt(SimpleResult result) throws ResponseEncryptException {
     if (result != null) {
       Object data = result.getData();
       if (data == null) {
@@ -68,7 +68,7 @@ public class ResponseSecureHandler extends SecureHandler {
         logger.debug("Finish encrypting response for appLicenseKey '{}'.", appLicenseKey.getAppId());
       }
 
-      return new Result(result.getTimestamp(), result.getErrorMsg(), encryptedData);
+      return new SimpleResult(result.getTimestamp(), result.getErrorMsg(), encryptedData);
     }
 
     return null;

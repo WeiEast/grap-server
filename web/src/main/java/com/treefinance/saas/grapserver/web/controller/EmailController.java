@@ -6,7 +6,7 @@ import com.treefinance.saas.grapserver.common.enums.EBizType;
 import com.treefinance.saas.grapserver.common.exception.ForbiddenException;
 import com.treefinance.saas.grapserver.biz.service.*;
 import com.treefinance.saas.grapserver.common.utils.IpUtils;
-import com.treefinance.saas.grapserver.common.model.Result;
+import com.treefinance.saas.knife.result.SimpleResult;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -54,7 +54,7 @@ public class EmailController {
         map.put("title", diamondConfig.getSdkTitle(EBizType.EMAIL));
         String ipAddress = IpUtils.getIpAddress(request);
         taskDeviceService.create(deviceInfo, ipAddress, coorType, taskId);
-        return new Result<>(map);
+        return new SimpleResult<>(map);
     }
 
     @SuppressWarnings("rawtypes")
@@ -63,7 +63,7 @@ public class EmailController {
                            @RequestParam("cookie") String cookie, @RequestParam("url") String url,
                            @RequestParam("website") String website, @RequestParam(value = "accountNo", required = false) String accountNo) {
         acquisitionService.acquisition(taskid, header, cookie, url, website, accountNo);
-        return new Result<>();
+        return new SimpleResult<>();
     }
 
     @RequestMapping(value = "/acquisition/process", method = {RequestMethod.POST})
@@ -76,6 +76,6 @@ public class EmailController {
         }
         logger.info("邮箱-loginProcess: taskid={},directiveId={},html={},cookie={}",taskid, directiveId, cookie, html, cookie);
         acquisitionService.loginProcess(directiveId,taskid, html, cookie);
-        return new Result<>();
+        return new SimpleResult<>();
     }
 }

@@ -11,7 +11,7 @@ import com.treefinance.saas.grapserver.biz.service.moxie.directive.MoxieDirectiv
 import com.treefinance.saas.grapserver.common.enums.EDirective;
 import com.treefinance.saas.grapserver.common.enums.EOperatorCodeType;
 import com.treefinance.saas.grapserver.common.enums.moxie.EMoxieDirective;
-import com.treefinance.saas.grapserver.common.model.Result;
+import com.treefinance.saas.knife.result.SimpleResult;
 import com.treefinance.saas.grapserver.common.model.dto.DirectiveDTO;
 import com.treefinance.saas.grapserver.common.model.dto.TaskDTO;
 import com.treefinance.saas.grapserver.common.model.dto.moxie.MoxieDirectiveDTO;
@@ -78,7 +78,7 @@ public class TaskController {
         map.put("config", defaultConfig);
         map.put("color", colorMap);
         map.put("license", appBizLicenseService.isShowLicense(appid, type));
-        return new Result<>(map);
+        return new SimpleResult<>(map);
     }
 
     @RequestMapping(value = "/agreement", method = {RequestMethod.GET, RequestMethod.POST})
@@ -98,7 +98,7 @@ public class TaskController {
         } else {
             map.put("uniqueId", "");
         }
-        return new Result<>(map);
+        return new SimpleResult<>(map);
     }
 
     /**
@@ -142,7 +142,7 @@ public class TaskController {
             //taskNextDirectiveService.deleteNextDirective(taskid);
         }
         logger.info("taskId={}下一指令信息={}", taskid, map);
-        return new Result<>(map);
+        return new SimpleResult<>(map);
     }
 
 
@@ -181,7 +181,7 @@ public class TaskController {
             //taskNextDirectiveService.deleteNextDirective(taskid);
         }
         logger.info("taskId={}下一指令信息={}", taskid, map);
-        return new Result<>(map);
+        return new SimpleResult<>(map);
     }
 
 
@@ -201,7 +201,7 @@ public class TaskController {
                              @RequestParam() String code) throws Exception {
         taskNextDirectiveService.deleteNextDirective(taskid, null);
         crawlerService.importCrawlCode(directiveId, taskid, EOperatorCodeType.getCode(type), code, null);
-        return new Result<>();
+        return new SimpleResult<>();
     }
 
     /**
@@ -222,7 +222,7 @@ public class TaskController {
             directiveService.process(cancelDirective);
 //            crawlerService.cancel(taskid, null);
         }
-        return new Result<>();
+        return new SimpleResult<>();
     }
 
     /**
@@ -242,6 +242,6 @@ public class TaskController {
             cancelDirective.setDirective(EMoxieDirective.TASK_CANCEL.getText());
             moxieDirectiveService.process(cancelDirective);
         }
-        return new Result<>();
+        return new SimpleResult<>();
     }
 }

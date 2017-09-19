@@ -1,7 +1,7 @@
 package com.treefinance.saas.grapserver.web.controller;
 
 import com.google.common.collect.Maps;
-import com.treefinance.saas.grapserver.common.model.Result;
+import com.treefinance.saas.knife.result.SimpleResult;
 import com.treefinance.saas.grapserver.biz.config.DiamondConfig;
 import com.treefinance.saas.grapserver.common.exception.ForbiddenException;
 import com.treefinance.saas.grapserver.biz.service.*;
@@ -62,7 +62,7 @@ public class EcommerceController {
         map.put("title", diamondConfig.getSdkTitle(EBizType.ECOMMERCE));
         String ipAddress = IpUtils.getIpAddress(request);
         taskDeviceService.create(deviceInfo, ipAddress, coorType, taskId);
-        return new Result<>(map);
+        return new SimpleResult<>(map);
     }
 
     /**
@@ -83,7 +83,7 @@ public class EcommerceController {
                            @RequestParam(value = "accountNo", required = false) String accountNo) {
         logger.info("电商-发消息：acquisition，taskid={},header={},cookie={},url={},website={},accountNo={}",taskid, header, cookie, url, website, accountNo);
         acquisitionService.acquisition(taskid, header, cookie, url, website, accountNo);
-        return new Result<>();
+        return new SimpleResult<>();
     }
 
     @RequestMapping(value = "/acquisition/process", method = {RequestMethod.POST})
@@ -96,7 +96,7 @@ public class EcommerceController {
         }
         logger.info("电商-loginProcess: taskid={},directiveId={},html={},cookie={}",taskid, directiveId, cookie, html, cookie);
         acquisitionService.loginProcess(directiveId,taskid, html, cookie);
-        return new Result<>();
+        return new SimpleResult<>();
     }
 
 }

@@ -28,11 +28,9 @@
     <dubbo:reference id="fundService" interface="com.treefinance.saas.processor.thirdparty.facade.fund.FundService"
                      check="false"/>
 
-    <!--生产者-->
-    <dubbo:service interface="com.treefinance.saas.grapserver.biz.service.TaskService" ref="taskService"/>
-
-    <bean id="appLicenseService" class="com.treefinance.saas.grapserver.biz.service.AppLicenseServiceImpl"/>
-    <dubbo:service interface="com.treefinance.saas.grapserver.biz.service.AppLicenseService" ref="appLicenseService"/>
+    <!--兼容老的生产者-->
+    <dubbo:service interface="com.treefinance.saas.gateway.servicefacade.TaskService" ref="gatewayTaskServiceFacade"/>
+    <dubbo:service interface="com.treefinance.saas.gateway.servicefacade.AppLicenseService" ref="gatewayAppLicenseServiceFacade"/>
 </beans>
 
 

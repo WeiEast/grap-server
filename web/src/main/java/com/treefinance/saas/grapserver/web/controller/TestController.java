@@ -17,7 +17,7 @@
 package com.treefinance.saas.grapserver.web.controller;
 
 import com.google.common.collect.ImmutableMap;
-import com.treefinance.saas.grapserver.common.model.Result;
+import com.treefinance.saas.knife.result.SimpleResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -34,11 +34,11 @@ public class TestController {
   private static final Logger LOGGER = LoggerFactory.getLogger(TestController.class);
 
   @RequestMapping("/test")
-  public Result testCrypto(@RequestParam("appid") String appId, String info) {
+  public SimpleResult testCrypto(@RequestParam("appid") String appId, String info) {
     LOGGER.info("appId: {}", appId);
     LOGGER.info("information: {}", info);
     ImmutableMap<String, String> data = ImmutableMap
         .of("result", "I has received your information:" + info);
-    return new Result<>(data);
+    return new SimpleResult<>(data);
   }
 }

@@ -17,6 +17,7 @@
 package com.treefinance.saas.grapserver.biz.service;
 
 import com.alibaba.fastjson.JSON;
+import com.treefinance.saas.grapserver.common.exception.ForbiddenException;
 import com.treefinance.saas.grapserver.dao.entity.AppLicense;
 import com.treefinance.saas.grapserver.common.model.dto.CallBackLicenseDTO;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,23 +42,7 @@ public class AppLicenseServiceImpl implements AppLicenseService {
      */
     private final static String CALLBACK_SUFFIX = "saas_gateway_callback_license:";
 
-//    /**
-//     * 根据传入的appId查找对应的app许可
-//     *
-//     * @param appId 第三方的appId
-//     * @return {@link AppLicense}
-//     */
-//  @Cacheable(value = "DAY", key = "'saas_gateway_app_license:'+#appId")
-//  public AppLicense selectOneByAppId(String appId) {
-//    AppLicenseCriteria criteria = new AppLicenseCriteria();
-//    criteria.createCriteria().andAppIdEqualTo(appId);
-//    criteria.setOrderByClause("Id desc limit 1");
-//
-//    List<AppLicense> licenseList = appLicenseMapper.selectByExample(criteria);
-//
-//    return licenseList.isEmpty() ? null : licenseList.get(0);
-//  }
-
+    @Override
     public AppLicense getAppLicense(String appId) {
         String key = APPID_SUFFIX + appId;
         AppLicense result = null;
@@ -84,6 +69,7 @@ public class AppLicenseServiceImpl implements AppLicenseService {
 
     /**
      * 获取回调配置
+     *
      * @param callbackId
      * @return
      */

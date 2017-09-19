@@ -21,9 +21,9 @@ import org.springframework.util.AntPathMatcher;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 
-import javax.servlet.FilterConfig;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -36,16 +36,7 @@ import java.util.List;
 public abstract class AbstractRequestFilter extends OncePerRequestFilter {
 
     private AntPathMatcher pathMatcher = new AntPathMatcher();
-    private List<String> excludeUrlPatterns = Lists.newArrayList("/moxie/webhook/**");
-
-    @Override
-    protected void initFilterBean() throws ServletException {
-        FilterConfig filterConfig = super.getFilterConfig();
-
-        if (filterConfig != null) {
-            initFilterBean(filterConfig);
-        }
-    }
+    private List<String> excludeUrlPatterns = Lists.newArrayList();
 
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
@@ -58,16 +49,28 @@ public abstract class AbstractRequestFilter extends OncePerRequestFilter {
         return false;
     }
 
-    protected abstract void initFilterBean(FilterConfig filterConfig) throws ServletException;
-
     public List<String> getExcludeUrlPatterns() {
         return excludeUrlPatterns;
     }
 
+    /**
+     * @param excludeUrlPatterns
+     */
     public void addExcludeUrlPatterns(List<String> excludeUrlPatterns) {
         if (CollectionUtils.isEmpty(excludeUrlPatterns)) {
             excludeUrlPatterns = Lists.newArrayList();
         }
         excludeUrlPatterns.addAll(excludeUrlPatterns);
+    }
+
+    /**
+     * 增加排除的url
+     *
+     * @param excludeUrlPatterns
+     */
+    public void addExcludeUrlPatterns(String... excludeUrlPatterns) {
+        if (excludeUrlPatterns != null && excludeUrlPatterns.length != 0) {
+            this.excludeUrlPatterns.addAll(Arrays.asList(excludeUrlPatterns));
+        }
     }
 }
