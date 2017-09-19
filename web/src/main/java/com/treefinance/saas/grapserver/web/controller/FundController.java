@@ -189,7 +189,7 @@ public class FundController {
             } else {
                 map.put("information", "登录失败,请重试");
             }
-            return map;
+            return SimpleResult.successResult(map);
 
         }
         //3.任务创建成功,写入task_attribute,开始轮询此接口,等待魔蝎回调登录状态信息
