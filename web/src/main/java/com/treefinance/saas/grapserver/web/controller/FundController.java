@@ -11,12 +11,11 @@ import com.treefinance.saas.grapserver.common.enums.EBizType;
 import com.treefinance.saas.grapserver.common.enums.moxie.EMoxieDirective;
 import com.treefinance.saas.grapserver.common.exception.ForbiddenException;
 import com.treefinance.saas.grapserver.common.exception.RequestFailedException;
-import com.treefinance.saas.grapserver.common.model.Result;
 import com.treefinance.saas.grapserver.common.model.dto.moxie.MoxieDirectiveDTO;
-import com.treefinance.saas.knife.result.SimpleResult;
 import com.treefinance.saas.grapserver.common.utils.IpUtils;
 import com.treefinance.saas.grapserver.common.utils.JsonUtils;
 import com.treefinance.saas.grapserver.dao.entity.TaskAttribute;
+import com.treefinance.saas.knife.result.SimpleResult;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -261,7 +260,7 @@ public class FundController {
             //taskNextDirectiveService.deleteNextDirective(taskid);
         }
         logger.info("taskId={}下一指令信息={}", taskid, map);
-        return new Result<>(map);
+        return SimpleResult.successResult(map);
     }
 
 
