@@ -32,7 +32,7 @@ import java.io.IOException;
 import java.util.Map;
 
 @RestController
-@RequestMapping(value = {"/h5/fund"})
+@RequestMapping(value = {"/grap/h5/fund"})
 public class FundController {
     private static final Logger logger = LoggerFactory.getLogger(FundController.class);
 

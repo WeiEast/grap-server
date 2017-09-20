@@ -24,7 +24,7 @@ import java.util.Map;
  * Created by haojiahong on 2017/9/14.
  */
 @RestController
-@RequestMapping(value = "/moxie/webhook")
+@RequestMapping(value = "/grap/moxie/webhook")
 public class MoxieWebHookController {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MoxieWebHookController.class);
