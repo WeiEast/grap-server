@@ -28,6 +28,7 @@ import com.treefinance.saas.grapserver.common.exception.AppIdUncheckException;
 import com.treefinance.saas.grapserver.common.exception.ForbiddenException;
 import com.treefinance.saas.grapserver.common.model.AppLicenseKey;
 import com.treefinance.saas.grapserver.common.model.Constants;
+import com.treefinance.saas.grapserver.web.request.WrappedHttpServletRequest;
 import com.treefinance.saas.knife.result.SimpleResult;
 import com.treefinance.saas.grapserver.common.model.WebContext;
 import com.treefinance.saas.grapserver.common.utils.IpUtils;
@@ -68,7 +69,7 @@ public class WebContextFilter extends AbstractRequestFilter {
                                     FilterChain filterChain) throws ServletException, IOException {
         long start = System.currentTimeMillis();
         try {
-
+            request = WrappedHttpServletRequest.wrap(request, null);
             String appId = request.getParameter(Constants.APP_ID);
             if (appId == null) {
                 throw new ForbiddenException("Can not find parameter 'appid' in request.");
@@ -109,6 +110,7 @@ public class WebContextFilter extends AbstractRequestFilter {
 
     /**
      * appId uncheck
+     *
      * @param request
      * @param response
      * @param e
