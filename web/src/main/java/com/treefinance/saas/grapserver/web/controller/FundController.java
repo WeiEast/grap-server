@@ -234,7 +234,7 @@ public class FundController {
         //判断是否需要验证码
         Map<String, Object> result = moxieBusinessService.requireCaptcha(taskid);
         if (!MapUtils.isEmpty(result)) {
-            return result;
+            return SimpleResult.successResult(result);
         }
         String content = taskNextDirectiveService.getNextDirective(taskid);
         Map<String, Object> map = Maps.newHashMap();
@@ -252,7 +252,8 @@ public class FundController {
 //            map.put("directiveId", directiveMessage.getDirectiveId());
 
             // 仅任务成功或回调失败时，转JSON处理
-            if (EMoxieDirective.TASK_SUCCESS.getText().equals(directiveMessage.getDirective())) {
+            if (EMoxieDirective.TASK_SUCCESS.getText().equals(directiveMessage.getDirective()) ||
+                    EMoxieDirective.TASK_FAIL.getText().equals(directiveMessage.getDirective())) {
                 map.put("information", JSON.parse(directiveMessage.getRemark()));
             } else {
                 map.put("information", directiveMessage.getRemark());

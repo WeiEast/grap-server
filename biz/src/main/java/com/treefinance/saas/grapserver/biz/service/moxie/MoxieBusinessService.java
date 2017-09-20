@@ -90,7 +90,6 @@ public class MoxieBusinessService {
      */
     @Transactional(rollbackFor = Exception.class)
     public void bill(String moxieTaskId) {
-//        moxieTaskId = "cab9e8d0-9c69-11e7-a2e1-00163e13cbf1";
         if (StringUtils.isBlank(moxieTaskId)) {
             logger.error("handle moxie business error: moxieTaskId={} is null", moxieTaskId);
             return;
@@ -109,10 +108,9 @@ public class MoxieBusinessService {
         String message = null;
         String processResult = null;
         try {
-            Thread.sleep(20000);//todo 需要删除
             processResult = this.billAndProcess(taskId, moxieTaskId);
         } catch (Exception e) {
-            logger.error("handle moxie business error:bill and process fail", e);
+            logger.error("handle moxie business error:bill and process fail.taskId={},moxieTaskId={}", taskId, moxieTaskId, e);
             result = false;
             message = e.getMessage();
         }
@@ -129,7 +127,9 @@ public class MoxieBusinessService {
             directiveDTO.setMoxieTaskId(moxieTaskId);
             directiveDTO.setTaskId(taskId);
             directiveDTO.setDirective(EMoxieDirective.TASK_FAIL.getText());
-            directiveDTO.setRemark(message);
+            Map<String, Object> map = Maps.newHashMap();
+            map.put("taskErrorMsg", message);
+            directiveDTO.setRemark(JsonUtils.toJsonString(map));
             moxieDirectiveService.process(directiveDTO);
         }
     }
@@ -138,14 +138,14 @@ public class MoxieBusinessService {
         String moxieResult = null;
         try {
             moxieResult = fundMoxieService.queryFunds(moxieTaskId);
-            logger.info("handle moxie business moxieResult,result={}:", moxieResult);
+            logger.info("handle moxie business moxieResult,taskId={},moxieTaskId={},result={}", taskId, moxieTaskId, moxieResult);
         } catch (Exception e) {
             logger.error("handle moxie business error:bill fail", e);
             throw new Exception("获取公积金信息失败");
         }
         try {
             String processResult = fundService.fund(taskId, moxieResult);
-            logger.info("handle moxie business processResult,result={}", processResult);
+            logger.info("handle moxie business processResult,taskId={},moxieTaskId={},result={}", taskId, moxieTaskId, processResult);
             return processResult;
         } catch (Exception e) {
             logger.error("handle moxie business error:process fail", e);

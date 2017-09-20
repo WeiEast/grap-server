@@ -170,17 +170,6 @@ public class MoxieWebHookController {
             }
 
         }
-
-        if (StringUtils.equals(eventName.toLowerCase(), "report")) {
-            try {
-//                Object object = objectMapper.readValue(body, EventTypeUtil.getReportEventType(eventType.toLowerCase()));
-//                eventBus.post(object);
-            } catch (Exception e) {
-                LOGGER.error("body convert to object error", e);
-            }
-        }
-
-
         writeMessage(httpServletResponse, HttpServletResponse.SC_CREATED, "default eventtype");
     }
 
@@ -189,7 +178,8 @@ public class MoxieWebHookController {
         try {
             PrintWriter printWriter = response.getWriter();
             printWriter.write(content);
-        } catch (IOException ignored) {
+        } catch (IOException e) {
+            LOGGER.error("moxie webhook response error:", e);
         }
     }
 

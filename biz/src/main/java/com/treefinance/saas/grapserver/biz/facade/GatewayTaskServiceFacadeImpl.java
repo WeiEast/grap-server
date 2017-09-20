@@ -53,6 +53,6 @@ public class GatewayTaskServiceFacadeImpl implements TaskService {
                 result.setBizTypeEnum(type);
             }
         }
-        return null;
+        return result;
     }
 }
