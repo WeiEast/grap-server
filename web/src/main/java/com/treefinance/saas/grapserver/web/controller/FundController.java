@@ -258,7 +258,6 @@ public class FundController {
             } else {
                 map.put("information", directiveMessage.getRemark());
             }
-            //taskNextDirectiveService.deleteNextDirective(taskid);
         }
         logger.info("taskId={}下一指令信息={}", taskid, map);
         return SimpleResult.successResult(map);
