@@ -29,7 +29,7 @@ import java.util.Map;
  */
 
 @RestController
-@RequestMapping(value = {"/task", "/h5/task"})
+@RequestMapping(value = {"/task", "/h5/task","grap/h5/task"})
 public class TaskController {
     private static final Logger logger = LoggerFactory.getLogger(TaskController.class);
 
