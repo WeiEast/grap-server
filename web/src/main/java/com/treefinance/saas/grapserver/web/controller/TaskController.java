@@ -6,17 +6,12 @@ import com.google.common.collect.Maps;
 import com.treefinance.saas.grapserver.biz.mq.model.DirectiveMessage;
 import com.treefinance.saas.grapserver.biz.service.*;
 import com.treefinance.saas.grapserver.biz.service.directive.DirectiveService;
-import com.treefinance.saas.grapserver.biz.service.moxie.MoxieBusinessService;
-import com.treefinance.saas.grapserver.biz.service.moxie.directive.MoxieDirectiveService;
 import com.treefinance.saas.grapserver.common.enums.EDirective;
 import com.treefinance.saas.grapserver.common.enums.EOperatorCodeType;
-import com.treefinance.saas.grapserver.common.enums.moxie.EMoxieDirective;
-import com.treefinance.saas.knife.result.SimpleResult;
 import com.treefinance.saas.grapserver.common.model.dto.DirectiveDTO;
 import com.treefinance.saas.grapserver.common.model.dto.TaskDTO;
-import com.treefinance.saas.grapserver.common.model.dto.moxie.MoxieDirectiveDTO;
 import com.treefinance.saas.grapserver.dao.entity.MerchantBaseInfo;
-import org.apache.commons.collections.MapUtils;
+import com.treefinance.saas.knife.result.SimpleResult;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,6 +21,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.validation.ValidationException;
 import java.util.Map;
 
 /**
@@ -54,11 +50,9 @@ public class TaskController {
     @Autowired
     private DirectiveService directiveService;
     @Autowired
-    private MoxieDirectiveService moxieDirectiveService;
-    @Autowired
-    private MoxieBusinessService moxieBusinessService;
-    @Autowired
     private AppBizLicenseService appBizLicenseService;
+    @Autowired
+    private TaskBuryPointLogService taskBuryPointLogService;
 
     /**
      * 获取配置,电商在用
@@ -180,23 +174,21 @@ public class TaskController {
         return new SimpleResult<>();
     }
 
-    /**
-     * 取消任务(魔蝎公积金)
-     *
-     * @param taskid
-     * @return
-     * @throws Exception
-     */
-    @RequestMapping(value = "/moxie/cancel", method = {RequestMethod.POST})
-    public Object cancelMoxieTask(@RequestParam Long taskid) throws Exception {
-        logger.info("取消魔蝎任务 : taskId={} ", taskid);
-        if (taskServiceImpl.isDoingTask(taskid)) {
-            logger.info("取消魔蝎正在执行任务 : taskId={} ", taskid);
-            MoxieDirectiveDTO cancelDirective = new MoxieDirectiveDTO();
-            cancelDirective.setTaskId(taskid);
-            cancelDirective.setDirective(EMoxieDirective.TASK_CANCEL.getText());
-            moxieDirectiveService.process(cancelDirective);
+    @RequestMapping(value = "/bury/point/log", method = {RequestMethod.POST})
+    public Object buryPointLog(@RequestParam("taskid") Long taskId,
+                               @RequestParam("appid") String appId,
+                               @RequestParam("code") String code) throws Exception {
+        logger.info("记录埋点:taskid={},appid={},code={}", taskId, appId, code);
+        if (taskId == null) {
+            throw new ValidationException("参数taskid为空");
         }
-        return new SimpleResult<>();
+        if (StringUtils.isBlank(appId)) {
+            throw new ValidationException("参数appid为空");
+        }
+        if (StringUtils.isBlank(code)) {
+            throw new ValidationException("参数code为空");
+        }
+        taskBuryPointLogService.pushTaskBuryPointLog(taskId, appId, code);
+        return SimpleResult.successResult(null);
     }
 }
