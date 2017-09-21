@@ -20,21 +20,17 @@ import com.alibaba.fastjson.JSON;
 import com.datatrees.rawdatacentral.api.CrawlerService;
 import com.datatrees.rawdatacentral.domain.model.WebsiteConf;
 import com.datatrees.toolkits.util.json.Jackson;
-import com.treefinance.saas.grapserver.dao.entity.TaskSupport;
+import com.treefinance.saas.grapserver.common.enums.EBizType;
 import com.treefinance.saas.grapserver.common.enums.EOperatorType;
-import com.treefinance.saas.grapserver.common.enums.ETaskSupportType;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
+import com.treefinance.saas.grapserver.dao.entity.TaskSupport;
 import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * @author Jerry
@@ -42,114 +38,115 @@ import org.springframework.stereotype.Service;
  */
 @Service
 public class TaskConfigService {
-  private static final Logger logger = LoggerFactory.getLogger(TaskDeviceService.class);
+    private static final Logger logger = LoggerFactory.getLogger(TaskDeviceService.class);
 
-  @Autowired
-  private TaskSupportService taskSupportService;
-  @Autowired
-  private CrawlerService crawlerService;
+    @Autowired
+    private TaskSupportService taskSupportService;
+    @Autowired
+    private CrawlerService crawlerService;
 
-  /**
-   * 获取配置信息
-   *
-   * @param type 分类 {@link ETaskSupportType}
-   */
+    /**
+     * 获取配置信息
+     *
+     * @param type 分类
+     * @return
+     */
 //  @Cacheable(value = "DAY", key = "'saas_crawler_task_config:'+#type")
-  public Object getTaskConfig(String type) {
-    ETaskSupportType supportType = ETaskSupportType.from(type);
+    public Object getTaskConfig(String type) {
+        EBizType supportType = EBizType.from(type);
 
-    List<TaskSupport> supportedList = taskSupportService
-        .getSupportedList(supportType.name());
-    if (CollectionUtils.isEmpty(supportedList)) {
-      throw new IllegalArgumentException("Can not find any supported list.");
+        List<TaskSupport> supportedList = taskSupportService
+                .getSupportedList(supportType.name());
+        if (CollectionUtils.isEmpty(supportedList)) {
+            throw new IllegalArgumentException("Can not find any supported list.");
+        }
+
+        List<String> list = supportedList.stream().map(TaskSupport::getName)
+                .collect(Collectors.toList());
+
+        List<WebsiteConf> websiteConf = crawlerService.getWebsiteConf(list);
+
+        return merge(supportedList, websiteConf, supportType);
     }
 
-    List<String> list = supportedList.stream().map(TaskSupport::getName)
-        .collect(Collectors.toList());
 
-    List<WebsiteConf> websiteConf = crawlerService.getWebsiteConf(list);
+    private List<Map<String, Object>> merge(List<TaskSupport> supportedList,
+                                            List<WebsiteConf> configs, EBizType type) {
+        if (type == EBizType.OPERATOR) {
+            List<Map<String, Object>> configList = new ArrayList<>();
+            Map<String, List<TaskSupport>> collect = supportedList.stream()
+                    .collect(Collectors.groupingBy(TaskSupport::getType));
 
-    return merge(supportedList, websiteConf, supportType);
-  }
+            collect.forEach((key, value) -> {
+                EOperatorType operatorType = EOperatorType.from(key);
 
+                Map<String, Object> map = new HashMap<>();
+                map.put("name", operatorType.getName());
+                map.put("list", merge(value, configs));
+                configList.add(map);
+            });
 
-  private List<Map<String, Object>> merge(List<TaskSupport> supportedList,
-      List<WebsiteConf> configs, ETaskSupportType type) {
-    if (type == ETaskSupportType.OPERATOR) {
-      List<Map<String, Object>> configList = new ArrayList<>();
-      Map<String, List<TaskSupport>> collect = supportedList.stream()
-          .collect(Collectors.groupingBy(TaskSupport::getType));
+            return configList;
+        } else {
 
-      collect.forEach((key, value) -> {
-        EOperatorType operatorType = EOperatorType.from(key);
-
-        Map<String, Object> map = new HashMap<>();
-        map.put("name", operatorType.getName());
-        map.put("list", merge(value, configs));
-        configList.add(map);
-      });
-
-      return configList;
-    } else {
-
-      return merge(supportedList, configs);
-    }
-  }
-
-  private List<Map<String, Object>> merge(List<TaskSupport> supportedList,
-      List<WebsiteConf> configs) {
-    List<Map<String, Object>> list = new ArrayList<>();
-
-    for (TaskSupport taskSupport : supportedList) {
-      Map<String, Object> map = new HashMap<>();
-      map.put("id", taskSupport.getId());
-      map.put("name", taskSupport.getName());
-      map.put("image", taskSupport.getImage());
-      map.put("loginConfig", getLoginConfig(taskSupport.getName(), configs));
-
-      list.add(map);
+            return merge(supportedList, configs);
+        }
     }
 
-    return list;
-  }
+    private List<Map<String, Object>> merge(List<TaskSupport> supportedList,
+                                            List<WebsiteConf> configs) {
+        List<Map<String, Object>> list = new ArrayList<>();
 
-  private Object getLoginConfig(String name, List<WebsiteConf> configs) {
-    Map<String, Object> loginConfig = null;
-    Iterator<WebsiteConf> iterator = configs.iterator();
-    logger.info("configs name={},configs={}",name,JSON.toJSONString(configs));
-    while (iterator.hasNext()) {
-      WebsiteConf conf = iterator.next();
-      if(null == conf){
-        continue;
-      }
+        for (TaskSupport taskSupport : supportedList) {
+            Map<String, Object> map = new HashMap<>();
+            map.put("id", taskSupport.getId());
+            map.put("name", taskSupport.getName());
+            map.put("image", taskSupport.getImage());
+            map.put("loginConfig", getLoginConfig(taskSupport.getName(), configs));
 
-      if (conf.getName().equals(name)) {
-        loginConfig = getLoginConfig(conf);
+            list.add(map);
+        }
 
-        iterator.remove();
-      }
+        return list;
     }
 
-    return loginConfig == null ? Collections.emptyMap() : loginConfig;
-  }
+    private Object getLoginConfig(String name, List<WebsiteConf> configs) {
+        Map<String, Object> loginConfig = null;
+        Iterator<WebsiteConf> iterator = configs.iterator();
+        logger.info("configs name={},configs={}", name, JSON.toJSONString(configs));
+        while (iterator.hasNext()) {
+            WebsiteConf conf = iterator.next();
+            if (null == conf) {
+                continue;
+            }
 
-  private Map<String, Object> getLoginConfig(WebsiteConf conf) {
-    Map<String, Object> loginConfig = new HashMap<>();
-    loginConfig.put("website", conf.getWebsiteName());
-    loginConfig.put("isSimulate", conf.getSimulate());
-    loginConfig.putAll(Jackson.parseMap(conf.getInitSetting(), String.class, Object.class));
+            if (conf.getName().equals(name)) {
+                loginConfig = getLoginConfig(conf);
 
-    if (conf.getSimulate()) {
-      loginConfig.put("loginTip", conf.getLoginTip());
-      loginConfig.put("verifyTip", conf.getVerifyTip());
+                iterator.remove();
+            }
+        }
 
-      loginConfig.put("resetType", conf.getResetType());
-      loginConfig.put("smsTemplate", conf.getSmsTemplate());
-      loginConfig.put("smsReceiver", conf.getSmsReceiver());
-      loginConfig.put("resetURL", conf.getResetURL());
-      loginConfig.put("resetTip", conf.getResetTip());
+        return loginConfig == null ? Collections.emptyMap() : loginConfig;
     }
 
-    return loginConfig;
-  }
+    private Map<String, Object> getLoginConfig(WebsiteConf conf) {
+        Map<String, Object> loginConfig = new HashMap<>();
+        loginConfig.put("website", conf.getWebsiteName());
+        loginConfig.put("isSimulate", conf.getSimulate());
+        loginConfig.putAll(Jackson.parseMap(conf.getInitSetting(), String.class, Object.class));
+
+        if (conf.getSimulate()) {
+            loginConfig.put("loginTip", conf.getLoginTip());
+            loginConfig.put("verifyTip", conf.getVerifyTip());
+
+            loginConfig.put("resetType", conf.getResetType());
+            loginConfig.put("smsTemplate", conf.getSmsTemplate());
+            loginConfig.put("smsReceiver", conf.getSmsReceiver());
+            loginConfig.put("resetURL", conf.getResetURL());
+            loginConfig.put("resetTip", conf.getResetTip());
+        }
+
+        return loginConfig;
+    }
 }
