@@ -190,7 +190,7 @@ public class FundController {
         }
         String moxieTaskId = attribute.getValue();
         fundMoxieService.submitTaskInput(moxieTaskId, input);
-        return SimpleResult.successResult(null);
+        return SimpleResult.successResult(true);
     }
 
     /**

@@ -85,21 +85,7 @@ public class FundMoxieService {
     /**
      * 创建公积金采集任务
      *
-     * @param uniqueId
-     * @param areaCode
-     * @param account
-     * @param password
-     * @param loginType
-     * @param idCard
-     * @param mobile
-     * @param realName
-     * @param subArea
-     * @param loanAccount
-     * @param loanPassword
-     * @param corpAccount
-     * @param corpName
-     * @param origin
-     * @param ip
+     * @param moxieLoginParams
      * @return
      */
     public String createTasks(MoxieLoginParamsDTO moxieLoginParams) {

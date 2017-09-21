@@ -29,6 +29,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -60,6 +61,11 @@ public class MoxieBusinessService implements InitializingBean {
     private FundService fundService;
     @Autowired
     private TaskService taskService;
+    @Autowired
+    private RedisTemplate<String, String> redisTemplate;
+
+    private static final String BASE_64_IMG = "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";
+    private static String BASE_64_IMG_KEY_PREFIX = "test-base64-img-key:";
 
 
     /**
@@ -123,7 +129,7 @@ public class MoxieBusinessService implements InitializingBean {
     /**
      * 魔蝎账单通知业务处理
      *
-     * @param moxieTaskId
+     * @param eventNoticeDTO
      */
     @Transactional(rollbackFor = Exception.class)
     public void bill(MoxieTaskEventNoticeDTO eventNoticeDTO) {
@@ -209,15 +215,23 @@ public class MoxieBusinessService implements InitializingBean {
             return map;
         }
         String moxieTaskId = taskAttribute.getValue();
-        JSONObject object = (JSONObject) fundMoxieService.queryTaskStatus(moxieTaskId);
-        if (!object.containsKey("phase_status")) {
-            return map;
-        }
-        if (StringUtils.equalsIgnoreCase(object.getString("phase_status"), "WAIT_CODE")) {
-            if (object.containsKey("input")) {
-                String type = object.getJSONObject("input").getString("type");
-                String value = object.getJSONObject("input").getString("value");
-                Long waitSeconds = object.getJSONObject("input").getLong("wait_seconds");
+//        JSONObject object = (JSONObject) fundMoxieService.queryTaskStatus(moxieTaskId);
+//        if (!object.containsKey("phase_status")) {
+//            return map;
+//        }
+        redisTemplate.opsForValue().setIfAbsent(BASE_64_IMG_KEY_PREFIX + taskId, "1");
+//        if (StringUtils.equalsIgnoreCase(object.getString("phase_status"), "WAIT_CODE")) {
+        String value1 = redisTemplate.opsForValue().get(BASE_64_IMG_KEY_PREFIX + taskId);
+        if (Integer.valueOf(value1) <= 1) {
+            if (true){
+//            if (object.containsKey("input")) {
+//                String type = object.getJSONObject("input").getString("type");
+                String type = "img";
+//                String value = object.getJSONObject("input").getString("value");
+                String value = BASE_64_IMG;
+//                Long waitSeconds = object.getJSONObject("input").getLong("wait_seconds");
+                Long waitSeconds = 60L;
+
 
                 MoxieCaptchaDTO moxieCaptchaDTO = new MoxieCaptchaDTO();
                 moxieCaptchaDTO.setType(type);
@@ -238,6 +252,7 @@ public class MoxieBusinessService implements InitializingBean {
             }
 
         }
+        redisTemplate.opsForValue().setIfAbsent(BASE_64_IMG_KEY_PREFIX + taskId, "2");
         return map;
     }
 
