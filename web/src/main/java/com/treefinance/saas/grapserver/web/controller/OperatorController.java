@@ -6,14 +6,14 @@ import com.datatrees.rawdatacentral.domain.result.HttpResult;
 import com.google.common.collect.Maps;
 import com.treefinance.commonservice.facade.mobileattribution.IMobileAttributionService;
 import com.treefinance.commonservice.facade.mobileattribution.MobileAttributionDTO;
-import com.treefinance.saas.knife.result.SimpleResult;
 import com.treefinance.saas.grapserver.biz.config.DiamondConfig;
-import com.treefinance.saas.grapserver.dao.entity.TaskAttribute;
-import com.treefinance.saas.grapserver.common.exception.CrawlerBizException;
-import com.treefinance.saas.grapserver.common.exception.ForbiddenException;
 import com.treefinance.saas.grapserver.biz.service.*;
 import com.treefinance.saas.grapserver.common.enums.EBizType;
+import com.treefinance.saas.grapserver.common.exception.CrawlerBizException;
+import com.treefinance.saas.grapserver.common.exception.ForbiddenException;
 import com.treefinance.saas.grapserver.common.utils.IpUtils;
+import com.treefinance.saas.grapserver.dao.entity.TaskAttribute;
+import com.treefinance.saas.knife.result.SimpleResult;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,7 +31,7 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
-@RequestMapping(value = {"/operator", "/h5/operator"})
+@RequestMapping(value = {"/operator", "/h5/operator", "/grap/h5/operator"})
 public class OperatorController {
     private static final Logger logger = LoggerFactory.getLogger(OperatorController.class);
 

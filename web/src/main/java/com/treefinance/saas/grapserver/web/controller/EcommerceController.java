@@ -1,13 +1,12 @@
 package com.treefinance.saas.grapserver.web.controller;
 
 import com.google.common.collect.Maps;
-import com.treefinance.saas.knife.result.SimpleResult;
 import com.treefinance.saas.grapserver.biz.config.DiamondConfig;
-import com.treefinance.saas.grapserver.common.exception.ForbiddenException;
 import com.treefinance.saas.grapserver.biz.service.*;
-import com.treefinance.saas.grapserver.biz.service.TaskLicenseService;
 import com.treefinance.saas.grapserver.common.enums.EBizType;
+import com.treefinance.saas.grapserver.common.exception.ForbiddenException;
 import com.treefinance.saas.grapserver.common.utils.IpUtils;
+import com.treefinance.saas.knife.result.SimpleResult;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,7 +23,7 @@ import java.util.Map;
  * Created by luoyihua on 2017/4/27.
  */
 @RestController
-@RequestMapping("/ecommerce")
+@RequestMapping(value = {"/ecommerce", "/grap/ecommerce"})
 public class EcommerceController {
     private static final Logger logger = LoggerFactory.getLogger(EcommerceController.class);
 
@@ -53,7 +52,7 @@ public class EcommerceController {
                              @RequestParam(name = "coorType", required = false) String coorType, @RequestParam("deviceInfo") String deviceInfo,
                              @RequestParam(name = "extra", required = false) String extra,
                              HttpServletRequest request) throws ForbiddenException {
-        logger.info("createTask : appid={},uniqueId={},coorType={},deviceInfo={},extra={}",appid,uniqueId,coorType,deviceInfo,extra);
+        logger.info("createTask : appid={},uniqueId={},coorType={},deviceInfo={},extra={}", appid, uniqueId, coorType, deviceInfo, extra);
         taskLicenseService.verifyCreateTask(appid, EBizType.ECOMMERCE);
         Long taskId = taskServiceImpl.createTask(uniqueId, appid, EBizType.ECOMMERCE.getCode());
         Map<String, Object> map = Maps.newHashMap();
@@ -68,6 +67,7 @@ public class EcommerceController {
     /**
      * 发消息到mq
      * 登陆成功之后调用
+     *
      * @param taskid
      * @param header
      * @param cookie
@@ -81,7 +81,7 @@ public class EcommerceController {
                            @RequestParam("cookie") String cookie, @RequestParam("url") String url,
                            @RequestParam("website") String website,
                            @RequestParam(value = "accountNo", required = false) String accountNo) {
-        logger.info("电商-发消息：acquisition，taskid={},header={},cookie={},url={},website={},accountNo={}",taskid, header, cookie, url, website, accountNo);
+        logger.info("电商-发消息：acquisition，taskid={},header={},cookie={},url={},website={},accountNo={}", taskid, header, cookie, url, website, accountNo);
         acquisitionService.acquisition(taskid, header, cookie, url, website, accountNo);
         return new SimpleResult<>();
     }
@@ -94,8 +94,8 @@ public class EcommerceController {
         if (StringUtils.isEmpty(html) && StringUtils.isEmpty(cookie)) {
             throw new Exception("html和cookie不能同时为空");
         }
-        logger.info("电商-loginProcess: taskid={},directiveId={},html={},cookie={}",taskid, directiveId, cookie, html, cookie);
-        acquisitionService.loginProcess(directiveId,taskid, html, cookie);
+        logger.info("电商-loginProcess: taskid={},directiveId={},html={},cookie={}", taskid, directiveId, cookie, html, cookie);
+        acquisitionService.loginProcess(directiveId, taskid, html, cookie);
         return new SimpleResult<>();
     }
 
