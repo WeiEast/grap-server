@@ -11,6 +11,7 @@ import com.treefinance.saas.grapserver.common.enums.moxie.EMoxieDirective;
 import com.treefinance.saas.grapserver.common.exception.ForbiddenException;
 import com.treefinance.saas.grapserver.common.model.dto.moxie.MoxieDirectiveDTO;
 import com.treefinance.saas.grapserver.common.model.dto.moxie.MoxieLoginParamsDTO;
+import com.treefinance.saas.grapserver.common.model.vo.moxie.MoxieCityInfoVO;
 import com.treefinance.saas.grapserver.common.utils.IpUtils;
 import com.treefinance.saas.grapserver.dao.entity.TaskAttribute;
 import com.treefinance.saas.knife.result.SimpleResult;
@@ -27,6 +28,7 @@ import org.springframework.web.bind.annotation.RestController;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -97,7 +99,7 @@ public class FundController {
         if (StringUtils.isBlank(appid) || taskId == null) {
             throw new IllegalArgumentException("Parameter 'appid' or 'taskid' is incorrect.");
         }
-        Object result = moxieBusinessService.queryCityList();
+        List<MoxieCityInfoVO> result = moxieBusinessService.getCityList();
         Map<String, Object> map = Maps.newHashMap();
         map.put("config", result);
         map.put("license", appBizLicenseService.isShowLicense(appid, EBizType.OPERATOR.getText()));
@@ -219,8 +221,6 @@ public class FundController {
         } else {
             MoxieDirectiveDTO directiveMessage = JSON.parseObject(content, MoxieDirectiveDTO.class);
             map.put("directive", directiveMessage.getDirective());
-//            map.put("directiveId", directiveMessage.getDirectiveId());
-
             // 仅任务成功或回调失败时，转JSON处理
             if (EMoxieDirective.TASK_SUCCESS.getText().equals(directiveMessage.getDirective()) ||
                     EMoxieDirective.TASK_FAIL.getText().equals(directiveMessage.getDirective())) {

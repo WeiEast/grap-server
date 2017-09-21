@@ -111,15 +111,6 @@ public abstract class MoxieAbstractDirectiveProcessor implements MoxieDirectiveP
             dataMap.put("taskStatus", "001");
         } else if (ETaskStatus.FAIL.getStatus().equals(task.getStatus())) {
             dataMap.put("taskStatus", "002");
-
-//            dataMap.put("taskErrorMsg", "洗数失败");
-            // 任务失败消息
-//            TaskLog log = taskLogService.queryLastestErrorLog(task.getId());
-//            if (log != null) {
-//                dataMap.put("taskErrorMsg", log.getMsg());
-//            } else {
-//                dataMap.put("taskErrorMsg", "爬数失败");
-//            }
         } else if (ETaskStatus.CANCEL.getStatus().equals(task.getStatus())) {
             dataMap.put("taskStatus", "004");
 

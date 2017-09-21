@@ -5,6 +5,9 @@ import com.alibaba.fastjson.JSONObject;
 import com.github.stuxuhai.jpinyin.PinyinException;
 import com.github.stuxuhai.jpinyin.PinyinFormat;
 import com.github.stuxuhai.jpinyin.PinyinHelper;
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.treefinance.saas.grapserver.biz.service.TaskAttributeService;
@@ -23,9 +26,11 @@ import com.treefinance.saas.grapserver.common.model.vo.moxie.MoxieCityInfoVO;
 import com.treefinance.saas.grapserver.common.utils.JsonUtils;
 import com.treefinance.saas.grapserver.dao.entity.TaskAttribute;
 import com.treefinance.saas.processor.thirdparty.facade.fund.FundService;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -33,13 +38,15 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 /**
  * Created by haojiahong on 2017/9/15.
  */
 @Service
-public class MoxieBusinessService {
+public class MoxieBusinessService implements InitializingBean {
     protected final Logger logger = LoggerFactory.getLogger(getClass());
 
     @Autowired
@@ -56,6 +63,33 @@ public class MoxieBusinessService {
     private FundService fundService;
     @Autowired
     private TaskService taskService;
+
+
+    /**
+     * 本地缓存
+     */
+    private final LoadingCache<String, List<MoxieCityInfoVO>> cache = CacheBuilder.newBuilder()
+            .refreshAfterWrite(5, TimeUnit.MINUTES)
+            .expireAfterWrite(5, TimeUnit.MINUTES)
+            .build(CacheLoader.from(() -> {
+                List<MoxieCityInfoVO> list = this.queryCityList();
+                if (list == null) {
+                    list = Lists.newArrayList();
+                }
+                logger.info("load local cache of moxie city list : list={}", JSON.toJSONString(list));
+                return list;
+            }));
+
+
+    @Override
+    public void afterPropertiesSet() throws Exception {
+        List<MoxieCityInfoVO> cityList = this.queryCityList();
+        logger.info("获取魔蝎城市公积金列表: cityList={}", JSON.toJSONString(cityList));
+        if (CollectionUtils.isEmpty(cityList)) {
+            return;
+        }
+        this.cache.put("citys", cityList);
+    }
 
     /**
      * 魔蝎任务采集失败业务处理
@@ -209,90 +243,20 @@ public class MoxieBusinessService {
     }
 
     /**
-     * 拼装获取的城市列表信息为所需格式
+     * 获取魔蝎城市公积金列表
      *
      * @return
      */
-    public Object queryCityList() {
-        List<MoxieCityInfoVO> result = Lists.newArrayList();
-        List<MoxieCityInfoDTO> list = fundMoxieService.queryCityListEx();
-        //<province,list>
-        Map<String, List<MoxieCityInfoDTO>> map = list.stream().collect(Collectors.groupingBy(MoxieCityInfoDTO::getProvince));
-        for (Map.Entry<String, List<MoxieCityInfoDTO>> entry : map.entrySet()) {
-            MoxieCityInfoVO vo = new MoxieCityInfoVO();
-            vo.setLabel(entry.getKey());
-            vo.setSpell(convertToPinyinString(entry.getKey()));
-            List<MoxieCityInfoVO> sonList = Lists.newArrayList();
-            List<MoxieCityInfoDTO> dtoList = entry.getValue();
-            for (MoxieCityInfoDTO dto : dtoList) {
-                MoxieCityInfoVO sonVO = new MoxieCityInfoVO();
-                sonVO.setLabel(dto.getCity_name());
-                sonVO.setValue(dto.getArea_code());
-                sonVO.setSpell(convertToPinyinString(dto.getCity_name()));
-                sonVO.setStatus(dto.getStatus());
-                sonList.add(sonVO);
-            }
-            sonList = sonList.stream().sorted((o1, o2) -> o1.getSpell().compareTo(o2.getSpell())).collect(Collectors.toList());
-            vo.setList(sonList);
-            result.add(vo);
-        }
-        result = result.stream().sorted((o1, o2) -> o1.getSpell().compareTo(o2.getSpell())).collect(Collectors.toList());
-        return result;
-    }
+    public List<MoxieCityInfoVO> getCityList() {
 
-    private String convertToPinyinString(String name) {
-        if (StringUtils.isBlank(name)) {
-            return "";
-        }
-        String result = "";
+        List<MoxieCityInfoVO> list = Lists.newArrayList();
         try {
-            result = PinyinHelper.convertToPinyinString(name, "", PinyinFormat.WITHOUT_TONE);
-        } catch (PinyinException e) {
-            logger.error("convert to pinyinString is error name={}", name, e);
+            list = cache.get("citys");
+        } catch (ExecutionException e) {
+            logger.error("获取魔蝎城市公积金列表缓存信息失败", e);
         }
-        return result;
-    }
+        return list;
 
-    /**
-     * 查询指令,获取公积金账户登录状态
-     *
-     * @param taskId
-     * @return
-     */
-    public Map<String, Object> queryLoginStatusFromDirective(Long taskId) {
-        Map<String, Object> map = Maps.newHashMap();
-        String content = taskNextDirectiveService.getNextDirective(taskId);
-        if (StringUtils.isEmpty(content)) {
-            // 轮询过程中，判断任务是否超时
-//            if (taskServiceImpl.isTaskTimeout(taskid)) {
-//                // 异步处理任务超时
-//                taskTimeService.handleTaskTimeout(taskid);
-//            }
-            map.put("directive", "waiting");
-            map.put("information", "请等待");
-        } else {
-            MoxieDirectiveDTO directiveMessage = JSON.parseObject(content, MoxieDirectiveDTO.class);
-            EMoxieDirective directive = EMoxieDirective.directiveOf(directiveMessage.getDirective());
-            if (directive == null) {
-                map.put("directive", "waiting");
-                map.put("information", "请等待");
-            }
-            if (directive.getStepCode() == 1) {
-                map.put("directive", directiveMessage.getDirective());
-                map.put("information", directiveMessage.getRemark());
-                //如果是登录成功或失败,删掉指令,下一个页面轮询的时候转为waiting
-                taskNextDirectiveService.deleteNextDirective(taskId, directiveMessage.getDirective());
-                if (StringUtils.equals(directiveMessage.getDirective(), EMoxieDirective.LOGIN_FAIL.getText())) {
-                    // 登录失败(如用户名密码错误),需删除task_attribute中此taskId对应的moxieTaskId,重新登录时,可正常轮询/login/submit接口
-                    taskAttributeService.insertOrUpdateSelective(taskId, "moxie-taskId", "");
-                }
-            }
-            if (directive.getStepCode() > 1) {
-                map.put("directive", EMoxieDirective.LOGIN_SUCCESS.getText());
-                map.put("information", "");
-            }
-        }
-        return map;
     }
 
     public void loginSuccess(String moxieTaskId) {
@@ -306,10 +270,7 @@ public class MoxieBusinessService {
         MoxieDirectiveDTO directiveDTO = new MoxieDirectiveDTO();
         directiveDTO.setMoxieTaskId(moxieTaskId);
         directiveDTO.setDirective(EMoxieDirective.LOGIN_FAIL.getText());
-        Map<String, Object> map = Maps.newHashMap();
-        map.put("taskErrorMsg", message);
-        map.put("moxieTaskId", moxieTaskId);
-        directiveDTO.setRemark(JsonUtils.toJsonString(map));
+        directiveDTO.setRemark(message);
         moxieDirectiveService.process(directiveDTO);
     }
 
@@ -355,4 +316,94 @@ public class MoxieBusinessService {
         map.put("information", "请等待");
         return map;
     }
+
+
+    /**
+     * 查询指令,获取公积金账户登录状态
+     *
+     * @param taskId
+     * @return
+     */
+    private Map<String, Object> queryLoginStatusFromDirective(Long taskId) {
+        Map<String, Object> map = Maps.newHashMap();
+        String content = taskNextDirectiveService.getNextDirective(taskId);
+        if (StringUtils.isEmpty(content)) {
+            // 轮询过程中，判断任务是否超时
+//            if (taskServiceImpl.isTaskTimeout(taskid)) {
+//                // 异步处理任务超时
+//                taskTimeService.handleTaskTimeout(taskid);
+//            }
+            map.put("directive", "waiting");
+            map.put("information", "请等待");
+        } else {
+            MoxieDirectiveDTO directiveMessage = JSON.parseObject(content, MoxieDirectiveDTO.class);
+            EMoxieDirective directive = EMoxieDirective.directiveOf(directiveMessage.getDirective());
+            if (directive == null) {
+                map.put("directive", "waiting");
+                map.put("information", "请等待");
+            }
+            if (directive.getStepCode() == 1) {
+                map.put("directive", directiveMessage.getDirective());
+                map.put("information", directiveMessage.getRemark());
+                //如果是登录成功或失败,删掉指令,下一个页面轮询/next_derictive的时候转为waiting
+                taskNextDirectiveService.deleteNextDirective(taskId, directiveMessage.getDirective());
+                if (StringUtils.equals(directiveMessage.getDirective(), EMoxieDirective.LOGIN_FAIL.getText())) {
+                    // 登录失败(如用户名密码错误),需删除task_attribute中此taskId对应的moxieTaskId,重新登录时,可正常轮询/login/submit接口
+                    taskAttributeService.insertOrUpdateSelective(taskId, "moxie-taskId", "");
+                }
+            }
+            if (directive.getStepCode() > 1) {
+                map.put("directive", EMoxieDirective.LOGIN_SUCCESS.getText());
+                map.put("information", "");
+            }
+        }
+        return map;
+    }
+
+    /**
+     * 拼装获取的城市列表信息为所需格式
+     *
+     * @return
+     */
+    private List<MoxieCityInfoVO> queryCityList() {
+        List<MoxieCityInfoVO> result = Lists.newArrayList();
+        List<MoxieCityInfoDTO> list = fundMoxieService.queryCityListEx();
+        //<province,list>
+        Map<String, List<MoxieCityInfoDTO>> map = list.stream().collect(Collectors.groupingBy(MoxieCityInfoDTO::getProvince));
+        for (Map.Entry<String, List<MoxieCityInfoDTO>> entry : map.entrySet()) {
+            MoxieCityInfoVO vo = new MoxieCityInfoVO();
+            vo.setLabel(entry.getKey());
+            vo.setSpell(convertToPinyinString(entry.getKey()));
+            List<MoxieCityInfoVO> sonList = Lists.newArrayList();
+            List<MoxieCityInfoDTO> dtoList = entry.getValue();
+            for (MoxieCityInfoDTO dto : dtoList) {
+                MoxieCityInfoVO sonVO = new MoxieCityInfoVO();
+                sonVO.setLabel(dto.getCity_name());
+                sonVO.setValue(dto.getArea_code());
+                sonVO.setSpell(convertToPinyinString(dto.getCity_name()));
+                sonVO.setStatus(dto.getStatus());
+                sonList.add(sonVO);
+            }
+            sonList = sonList.stream().sorted((o1, o2) -> o1.getSpell().compareTo(o2.getSpell())).collect(Collectors.toList());
+            vo.setList(sonList);
+            result.add(vo);
+        }
+        result = result.stream().sorted((o1, o2) -> o1.getSpell().compareTo(o2.getSpell())).collect(Collectors.toList());
+        return result;
+    }
+
+    private String convertToPinyinString(String name) {
+        if (StringUtils.isBlank(name)) {
+            return "";
+        }
+        String result = "";
+        try {
+            result = PinyinHelper.convertToPinyinString(name, "", PinyinFormat.WITHOUT_TONE);
+        } catch (PinyinException e) {
+            logger.error("convert to pinyinString is error name={}", name, e);
+        }
+        return result;
+    }
+
+
 }
