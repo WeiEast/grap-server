@@ -40,7 +40,7 @@ public class MoxieTaskEventNoticeService {
     public void loginFail(String moxieTaskId, String message) {
         MoxieTaskEventNoticeDTO eventNoticeDTO = new MoxieTaskEventNoticeDTO();
         eventNoticeDTO.setMoxieTaskId(moxieTaskId);
-        eventNoticeDTO.setMoxieTaskId(message);
+        eventNoticeDTO.setMessage(message);
         asycExcutor.runAsyc(eventNoticeDTO, _eventNoticeDTO -> {
             moxieBusinessService.loginFail(_eventNoticeDTO);
         });
@@ -55,7 +55,7 @@ public class MoxieTaskEventNoticeService {
     public void taskFail(String moxieTaskId, String message) {
         MoxieTaskEventNoticeDTO eventNoticeDTO = new MoxieTaskEventNoticeDTO();
         eventNoticeDTO.setMoxieTaskId(moxieTaskId);
-        eventNoticeDTO.setMoxieTaskId(message);
+        eventNoticeDTO.setMessage(message);
 
         asycExcutor.runAsyc(eventNoticeDTO, eventNoticeDTO1 -> {
             moxieBusinessService.grabFail(eventNoticeDTO1);
