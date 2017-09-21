@@ -72,7 +72,7 @@
            enableBatchUpdateByPrimaryKey="true"
            enableBatchUpdateByPrimaryKeySelective="true">
       <property name="useActualColumnNames" value="true"/>
-      <generatedKey column="Id" sqlStatement="MySql" identity="true"/>
+      <!--<generatedKey column="Id" sqlStatement="MySql" identity="true"/>-->
 
     </table>
 
