@@ -18,10 +18,7 @@ import com.treefinance.saas.grapserver.biz.service.moxie.directive.MoxieDirectiv
 import com.treefinance.saas.grapserver.common.enums.ETaskStep;
 import com.treefinance.saas.grapserver.common.enums.moxie.EMoxieDirective;
 import com.treefinance.saas.grapserver.common.exception.RequestFailedException;
-import com.treefinance.saas.grapserver.common.model.dto.moxie.MoxieCaptchaDTO;
-import com.treefinance.saas.grapserver.common.model.dto.moxie.MoxieCityInfoDTO;
-import com.treefinance.saas.grapserver.common.model.dto.moxie.MoxieDirectiveDTO;
-import com.treefinance.saas.grapserver.common.model.dto.moxie.MoxieLoginParamsDTO;
+import com.treefinance.saas.grapserver.common.model.dto.moxie.*;
 import com.treefinance.saas.grapserver.common.model.vo.moxie.MoxieCityInfoVO;
 import com.treefinance.saas.grapserver.common.utils.JsonUtils;
 import com.treefinance.saas.grapserver.dao.entity.TaskAttribute;
@@ -94,10 +91,11 @@ public class MoxieBusinessService implements InitializingBean {
     /**
      * 魔蝎任务采集失败业务处理
      *
-     * @param moxieTaskId
-     * @param message
+     * @param eventNoticeDTO
      */
-    public void grabFail(String moxieTaskId, String message) {
+    public void grabFail(MoxieTaskEventNoticeDTO eventNoticeDTO) {
+        String moxieTaskId = eventNoticeDTO.getMoxieTaskId();
+        String message = eventNoticeDTO.getMessage();
         if (StringUtils.isBlank(moxieTaskId)) {
             logger.error("handle moxie business error: moxieTaskId={} is null", moxieTaskId);
             return;
@@ -128,7 +126,8 @@ public class MoxieBusinessService implements InitializingBean {
      * @param moxieTaskId
      */
     @Transactional(rollbackFor = Exception.class)
-    public void bill(String moxieTaskId) {
+    public void bill(MoxieTaskEventNoticeDTO eventNoticeDTO) {
+        String moxieTaskId = eventNoticeDTO.getMoxieTaskId();
         if (StringUtils.isBlank(moxieTaskId)) {
             logger.error("handle moxie business error: moxieTaskId={} is null", moxieTaskId);
             return;
@@ -259,18 +258,18 @@ public class MoxieBusinessService implements InitializingBean {
 
     }
 
-    public void loginSuccess(String moxieTaskId) {
+    public void loginSuccess(MoxieTaskEventNoticeDTO eventNoticeDTO) {
         MoxieDirectiveDTO directiveDTO = new MoxieDirectiveDTO();
-        directiveDTO.setMoxieTaskId(moxieTaskId);
+        directiveDTO.setMoxieTaskId(eventNoticeDTO.getMoxieTaskId());
         directiveDTO.setDirective(EMoxieDirective.LOGIN_SUCCESS.getText());
         moxieDirectiveService.process(directiveDTO);
     }
 
-    public void loginFail(String moxieTaskId, String message) {
+    public void loginFail(MoxieTaskEventNoticeDTO eventNoticeDTO) {
         MoxieDirectiveDTO directiveDTO = new MoxieDirectiveDTO();
-        directiveDTO.setMoxieTaskId(moxieTaskId);
+        directiveDTO.setMoxieTaskId(eventNoticeDTO.getMoxieTaskId());
         directiveDTO.setDirective(EMoxieDirective.LOGIN_FAIL.getText());
-        directiveDTO.setRemark(message);
+        directiveDTO.setRemark(eventNoticeDTO.getMessage());
         moxieDirectiveService.process(directiveDTO);
     }
 
