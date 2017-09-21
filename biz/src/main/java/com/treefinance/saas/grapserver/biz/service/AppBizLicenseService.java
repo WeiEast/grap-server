@@ -43,7 +43,7 @@ public class AppBizLicenseService implements InitializingBean, ConfigUpdateMessa
      */
     private final LoadingCache<String, List<AppBizLicense>> cache = CacheBuilder.newBuilder()
             .refreshAfterWrite(5, TimeUnit.MINUTES)
-            .expireAfterAccess(5, TimeUnit.MINUTES)
+            .expireAfterWrite(5, TimeUnit.MINUTES)
             .build(CacheLoader.from(appid -> {
                 AppBizLicenseCriteria appBizLicenseCriteria = new AppBizLicenseCriteria();
                 appBizLicenseCriteria.createCriteria().andAppIdEqualTo(appid);
