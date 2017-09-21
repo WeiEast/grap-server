@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Maps;
 import com.treefinance.saas.grapserver.biz.config.DiamondConfig;
 import com.treefinance.saas.grapserver.common.model.dto.moxie.MoxieCityInfoDTO;
+import com.treefinance.saas.grapserver.common.model.dto.moxie.MoxieLoginParamsDTO;
 import com.treefinance.saas.grapserver.common.utils.HttpClientUtils;
 import com.treefinance.saas.grapserver.common.utils.JsonUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -101,14 +102,11 @@ public class FundMoxieService {
      * @param ip
      * @return
      */
-    public String createTasks(String uniqueId, String areaCode, String account, String password, String loginType,
-                              String idCard, String mobile, String realName, String subArea, String loanAccount,
-                              String loanPassword, String corpAccount, String corpName, String origin, String ip) {
+    public String createTasks(MoxieLoginParamsDTO moxieLoginParams) {
         String url = diamondConfig.getMoxieUrlFundPostTasks();
         Map<String, Object> params = Maps.newHashMap();
         Map<String, String> headers = Maps.newHashMap();
-        wrapperParams(params, uniqueId, areaCode, account, password, loginType, idCard, mobile, realName, subArea,
-                loanAccount, loanPassword, corpAccount, corpName, origin, ip);
+        wrapperParams(params, moxieLoginParams);
         wrapperApiKeyHeaders(headers);
         String data = HttpClientUtils.doPostWithHeaders(url, params, headers);
         JSONObject result = (JSONObject) JsonUtils.toJsonObject(data);
@@ -172,45 +170,42 @@ public class FundMoxieService {
         headers.put("Authorization", sb.toString());
     }
 
-    private void wrapperParams(Map<String, Object> params, String uniqueId, String areaCode, String account,
-                               String password, String loginType, String idCard, String mobile, String realName,
-                               String subArea, String loanAccount, String loanPassword, String corpAccount,
-                               String corpName, String origin, String ip) {
+    private void wrapperParams(Map<String, Object> params, MoxieLoginParamsDTO moxieLoginParams) {
 
-        params.put("user_id", uniqueId);
-        params.put("area_code", areaCode);
-        params.put("account", account);
-        params.put("login_type", loginType);
-        params.put("origin", origin);
-        if (StringUtils.isNotBlank(password)) {
-            params.put("password", password);
+        params.put("user_id", moxieLoginParams.getUniqueId());
+        params.put("area_code", moxieLoginParams.getAreaCode());
+        params.put("account", moxieLoginParams.getAccount());
+        params.put("login_type", moxieLoginParams.getLoginType());
+        params.put("origin", moxieLoginParams.getOrigin());
+        if (StringUtils.isNotBlank(moxieLoginParams.getPassword())) {
+            params.put("password", moxieLoginParams.getPassword());
         }
-        if (StringUtils.isNotBlank(idCard)) {
-            params.put("id_card", idCard);
+        if (StringUtils.isNotBlank(moxieLoginParams.getIdCard())) {
+            params.put("id_card", moxieLoginParams.getIdCard());
         }
-        if (StringUtils.isNotBlank(mobile)) {
-            params.put("mobile", mobile);
+        if (StringUtils.isNotBlank(moxieLoginParams.getMobile())) {
+            params.put("mobile", moxieLoginParams.getMobile());
         }
-        if (StringUtils.isNotBlank(realName)) {
-            params.put("real_name", realName);
+        if (StringUtils.isNotBlank(moxieLoginParams.getRealName())) {
+            params.put("real_name", moxieLoginParams.getRealName());
         }
-        if (StringUtils.isNotBlank(subArea)) {
-            params.put("sub_area", subArea);
+        if (StringUtils.isNotBlank(moxieLoginParams.getSubArea())) {
+            params.put("sub_area", moxieLoginParams.getSubArea());
         }
-        if (StringUtils.isNotBlank(loanAccount)) {
-            params.put("loan_account", loanAccount);
+        if (StringUtils.isNotBlank(moxieLoginParams.getLoanAccount())) {
+            params.put("loan_account", moxieLoginParams.getLoanAccount());
         }
-        if (StringUtils.isNotBlank(loanPassword)) {
-            params.put("loan_password", loanPassword);
+        if (StringUtils.isNotBlank(moxieLoginParams.getLoanPassword())) {
+            params.put("loan_password", moxieLoginParams.getLoanPassword());
         }
-        if (StringUtils.isNotBlank(corpAccount)) {
-            params.put("corp_account", corpAccount);
+        if (StringUtils.isNotBlank(moxieLoginParams.getCorpAccount())) {
+            params.put("corp_account", moxieLoginParams.getCorpAccount());
         }
-        if (StringUtils.isNotBlank(corpName)) {
-            params.put("corp_name", corpName);
+        if (StringUtils.isNotBlank(moxieLoginParams.getCorpName())) {
+            params.put("corp_name", moxieLoginParams.getCorpName());
         }
-        if (StringUtils.isNotBlank(ip)) {
-            params.put("ip", ip);
+        if (StringUtils.isNotBlank(moxieLoginParams.getIp())) {
+            params.put("ip", moxieLoginParams.getIp());
         }
 
     }

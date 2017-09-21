@@ -10,12 +10,15 @@ import com.google.common.collect.Maps;
 import com.treefinance.saas.grapserver.biz.service.TaskAttributeService;
 import com.treefinance.saas.grapserver.biz.service.TaskLogService;
 import com.treefinance.saas.grapserver.biz.service.TaskNextDirectiveService;
+import com.treefinance.saas.grapserver.biz.service.TaskService;
 import com.treefinance.saas.grapserver.biz.service.moxie.directive.MoxieDirectiveService;
 import com.treefinance.saas.grapserver.common.enums.ETaskStep;
 import com.treefinance.saas.grapserver.common.enums.moxie.EMoxieDirective;
+import com.treefinance.saas.grapserver.common.exception.RequestFailedException;
 import com.treefinance.saas.grapserver.common.model.dto.moxie.MoxieCaptchaDTO;
 import com.treefinance.saas.grapserver.common.model.dto.moxie.MoxieCityInfoDTO;
 import com.treefinance.saas.grapserver.common.model.dto.moxie.MoxieDirectiveDTO;
+import com.treefinance.saas.grapserver.common.model.dto.moxie.MoxieLoginParamsDTO;
 import com.treefinance.saas.grapserver.common.model.vo.moxie.MoxieCityInfoVO;
 import com.treefinance.saas.grapserver.common.utils.JsonUtils;
 import com.treefinance.saas.grapserver.dao.entity.TaskAttribute;
@@ -51,6 +54,8 @@ public class MoxieBusinessService {
     private TaskNextDirectiveService taskNextDirectiveService;
     @Autowired
     private FundService fundService;
+    @Autowired
+    private TaskService taskService;
 
     /**
      * 魔蝎任务采集失败业务处理
@@ -100,10 +105,7 @@ public class MoxieBusinessService {
             return;
         }
         long taskId = taskAttribute.getTaskId();
-        //1.记录采集成功日志
-        taskLogService.insert(taskId, ETaskStep.CRAWL_SUCCESS.getText(), new Date(), null);
-        taskLogService.insert(taskId, ETaskStep.CRAWL_COMPLETE.getText(), new Date(), null);
-        //2.获取魔蝎数据,调用洗数,传递账单数据
+        //获取魔蝎数据,调用洗数,传递账单数据
         Boolean result = true;
         String message = null;
         String processResult = null;
@@ -138,17 +140,24 @@ public class MoxieBusinessService {
         String moxieResult = null;
         try {
             moxieResult = fundMoxieService.queryFunds(moxieTaskId);
+            //记录抓取日志
+            taskLogService.insert(taskId, ETaskStep.CRAWL_SUCCESS.getText(), new Date(), null);
+            taskLogService.insert(taskId, ETaskStep.CRAWL_COMPLETE.getText(), new Date(), null);
             logger.info("handle moxie business moxieResult,taskId={},moxieTaskId={},result={}", taskId, moxieTaskId, moxieResult);
         } catch (Exception e) {
             logger.error("handle moxie business error:bill fail", e);
+            taskLogService.insert(taskId, ETaskStep.CRAWL_FAIL.getText(), new Date(), e.getMessage());
             throw new Exception("获取公积金信息失败");
         }
         try {
             String processResult = fundService.fund(taskId, moxieResult);
+            //记录数据保存日志
+            taskLogService.insert(taskId, ETaskStep.DATA_SAVE_SUCCESS.getText(), new Date(), null);
             logger.info("handle moxie business processResult,taskId={},moxieTaskId={},result={}", taskId, moxieTaskId, processResult);
             return processResult;
         } catch (Exception e) {
             logger.error("handle moxie business error:process fail", e);
+            taskLogService.insert(taskId, ETaskStep.DATA_SAVE_FAIL.getText(), new Date(), e.getMessage());
             throw new Exception("洗数失败");
         }
     }
@@ -297,7 +306,53 @@ public class MoxieBusinessService {
         MoxieDirectiveDTO directiveDTO = new MoxieDirectiveDTO();
         directiveDTO.setMoxieTaskId(moxieTaskId);
         directiveDTO.setDirective(EMoxieDirective.LOGIN_FAIL.getText());
-        directiveDTO.setRemark(message);//登录错误信息
+        Map<String, Object> map = Maps.newHashMap();
+        map.put("taskErrorMsg", message);
+        map.put("moxieTaskId", moxieTaskId);
+        directiveDTO.setRemark(JsonUtils.toJsonString(map));
         moxieDirectiveService.process(directiveDTO);
+    }
+
+    /**
+     * 创建魔蝎任务,得到moxieTaskId
+     *
+     * @param taskId
+     * @param params
+     * @return
+     */
+    @Transactional
+    public Map<String, Object> createMoxieTask(Long taskId, MoxieLoginParamsDTO params) {
+        //1.轮询指令,已经提交过登录,获取魔蝎异步回调登录状态
+        Map<String, Object> map = Maps.newHashMap();
+        TaskAttribute attribute = taskAttributeService.findByName(taskId, "moxie-taskId", false);
+        if (attribute != null && StringUtils.isNotBlank(attribute.getValue())) {
+            logger.info("taskId={}已生成魔蝎任务id,执行查询指令", taskId);
+            map = this.queryLoginStatusFromDirective(taskId);
+            return map;
+        }
+
+        //2.提交登录,调用魔蝎接口创建魔蝎任务,如果任务创建失败,返回登录失败及异常信息
+        String moxieId = null;
+        try {
+            moxieId = fundMoxieService.createTasks(params);
+        } catch (RequestFailedException e) {
+            map.put("directive", EMoxieDirective.LOGIN_FAIL.getText());
+            String result = e.getResult();
+            JSONObject object = (JSONObject) JsonUtils.toJsonObject(result);
+            if (object.containsKey("detail")) {
+                map.put("information", object.getString("detail"));
+            } else {
+                map.put("information", "登录失败,请重试");
+            }
+            return map;
+
+        }
+        //3.任务创建成功,写入task_attribute,开始轮询此接口,等待魔蝎回调登录状态信息
+        taskAttributeService.insertOrUpdateSelective(taskId, "moxie-taskId", moxieId);
+        //任务创建成功,记录登录account,登录失败重试会更新accountNo
+        taskService.updateTask(taskId, params.getAccount(), null);
+        map.put("directive", "waiting");
+        map.put("information", "请等待");
+        return map;
     }
 }
