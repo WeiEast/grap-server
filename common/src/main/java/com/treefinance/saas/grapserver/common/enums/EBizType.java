@@ -45,4 +45,12 @@ public enum EBizType {
         }
         return -1;
     }
+
+    public static EBizType from(String name) {
+        try {
+            return EBizType.valueOf(name);
+        } catch (IllegalArgumentException e) {
+            throw new IllegalArgumentException("The task type '" + name + "' is unsupported.", e);
+        }
+    }
 }
