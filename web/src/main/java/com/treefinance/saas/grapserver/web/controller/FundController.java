@@ -1,7 +1,6 @@
 package com.treefinance.saas.grapserver.web.controller;
 
 import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Maps;
 import com.treefinance.saas.grapserver.biz.config.DiamondConfig;
 import com.treefinance.saas.grapserver.biz.service.*;
@@ -10,10 +9,10 @@ import com.treefinance.saas.grapserver.biz.service.moxie.MoxieBusinessService;
 import com.treefinance.saas.grapserver.common.enums.EBizType;
 import com.treefinance.saas.grapserver.common.enums.moxie.EMoxieDirective;
 import com.treefinance.saas.grapserver.common.exception.ForbiddenException;
-import com.treefinance.saas.grapserver.common.exception.RequestFailedException;
 import com.treefinance.saas.grapserver.common.model.dto.moxie.MoxieDirectiveDTO;
+import com.treefinance.saas.grapserver.common.model.dto.moxie.MoxieLoginParamsDTO;
+import com.treefinance.saas.grapserver.common.model.vo.moxie.MoxieCityInfoVO;
 import com.treefinance.saas.grapserver.common.utils.IpUtils;
-import com.treefinance.saas.grapserver.common.utils.JsonUtils;
 import com.treefinance.saas.grapserver.dao.entity.TaskAttribute;
 import com.treefinance.saas.knife.result.SimpleResult;
 import org.apache.commons.collections.MapUtils;
@@ -29,6 +28,7 @@ import org.springframework.web.bind.annotation.RestController;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -99,7 +99,7 @@ public class FundController {
         if (StringUtils.isBlank(appid) || taskId == null) {
             throw new IllegalArgumentException("Parameter 'appid' or 'taskid' is incorrect.");
         }
-        Object result = moxieBusinessService.queryCityList();
+        List<MoxieCityInfoVO> result = moxieBusinessService.getCityList();
         Map<String, Object> map = Maps.newHashMap();
         map.put("config", result);
         map.put("license", appBizLicenseService.isShowLicense(appid, EBizType.OPERATOR.getText()));
@@ -165,37 +165,9 @@ public class FundController {
             throw new IllegalArgumentException("Parameter is incorrect.");
         }
 
-        //1.轮询指令,已经提交过登录,获取魔蝎异步回调登录状态
-        Map<String, Object> map = Maps.newHashMap();
-        TaskAttribute attribute = taskAttributeService.findByName(taskId, "moxie-taskId", false);
-        if (attribute != null && StringUtils.isNotBlank(attribute.getValue())) {
-            logger.info("taskId={}已生成魔蝎任务id,执行查询指令", taskId);
-            map = moxieBusinessService.queryLoginStatusFromDirective(taskId);
-            return SimpleResult.successResult(map);
-        }
-
-        //2.提交登录,调用魔蝎接口创建魔蝎任务,如果任务创建失败,返回登录失败及异常信息
-        //TODO task表中的accountNo和website需要记录吗?
-        String moxieId = null;
-        try {
-            moxieId = fundMoxieService.createTasks(uniqueId, areaCode, account, password, loginType, idCard, mobile,
-                    realName, subArea, loanAccount, loanPassword, corpAccount, corpName, origin, ip);
-        } catch (RequestFailedException e) {
-            map.put("directive", EMoxieDirective.LOGIN_FAIL.getText());
-            String result = e.getResult();
-            JSONObject object = (JSONObject) JsonUtils.toJsonObject(result);
-            if (object.containsKey("detail")) {
-                map.put("information", object.getString("detail"));
-            } else {
-                map.put("information", "登录失败,请重试");
-            }
-            return SimpleResult.successResult(map);
-
-        }
-        //3.任务创建成功,写入task_attribute,开始轮询此接口,等待魔蝎回调登录状态信息
-        taskAttributeService.insertOrUpdateSelective(taskId, "moxie-taskId", moxieId);
-        map.put("directive", "waiting");
-        map.put("information", "请等待");
+        MoxieLoginParamsDTO moxieLoginParamsDTO = new MoxieLoginParamsDTO(uniqueId, areaCode, account, password, loginType, idCard, mobile,
+                realName, subArea, loanAccount, loanPassword, corpAccount, corpName, origin, ip);
+        Map<String, Object> map = moxieBusinessService.createMoxieTask(taskId, moxieLoginParamsDTO);
         return SimpleResult.successResult(map);
     }
 
@@ -249,8 +221,6 @@ public class FundController {
         } else {
             MoxieDirectiveDTO directiveMessage = JSON.parseObject(content, MoxieDirectiveDTO.class);
             map.put("directive", directiveMessage.getDirective());
-//            map.put("directiveId", directiveMessage.getDirectiveId());
-
             // 仅任务成功或回调失败时，转JSON处理
             if (EMoxieDirective.TASK_SUCCESS.getText().equals(directiveMessage.getDirective()) ||
                     EMoxieDirective.TASK_FAIL.getText().equals(directiveMessage.getDirective())) {

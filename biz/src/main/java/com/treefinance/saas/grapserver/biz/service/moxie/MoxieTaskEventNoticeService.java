@@ -1,5 +1,7 @@
 package com.treefinance.saas.grapserver.biz.service.moxie;
 
+import com.treefinance.saas.grapserver.biz.common.AsycExcutor;
+import com.treefinance.saas.grapserver.common.model.dto.moxie.MoxieTaskEventNoticeDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -12,6 +14,8 @@ public class MoxieTaskEventNoticeService {
 
     @Autowired
     private MoxieBusinessService moxieBusinessService;
+    @Autowired
+    private AsycExcutor asycExcutor;
 
     /**
      * 收到魔蝎回调:登录成功
@@ -19,7 +23,12 @@ public class MoxieTaskEventNoticeService {
      * @param moxieTaskId
      */
     public void loginSuccess(String moxieTaskId) {
-        moxieBusinessService.loginSuccess(moxieTaskId);
+        MoxieTaskEventNoticeDTO eventNoticeDTO = new MoxieTaskEventNoticeDTO();
+        eventNoticeDTO.setMoxieTaskId(moxieTaskId);
+        asycExcutor.runAsyc(eventNoticeDTO, _eventNoticeDTO -> {
+            moxieBusinessService.loginSuccess(_eventNoticeDTO);
+        });
+
     }
 
     /**
@@ -29,7 +38,12 @@ public class MoxieTaskEventNoticeService {
      * @param message
      */
     public void loginFail(String moxieTaskId, String message) {
-        moxieBusinessService.loginFail(moxieTaskId, message);
+        MoxieTaskEventNoticeDTO eventNoticeDTO = new MoxieTaskEventNoticeDTO();
+        eventNoticeDTO.setMoxieTaskId(moxieTaskId);
+        eventNoticeDTO.setMessage(message);
+        asycExcutor.runAsyc(eventNoticeDTO, _eventNoticeDTO -> {
+            moxieBusinessService.loginFail(_eventNoticeDTO);
+        });
     }
 
     /**
@@ -39,7 +53,13 @@ public class MoxieTaskEventNoticeService {
      * @param message
      */
     public void taskFail(String moxieTaskId, String message) {
-        moxieBusinessService.grabFail(moxieTaskId, message);
+        MoxieTaskEventNoticeDTO eventNoticeDTO = new MoxieTaskEventNoticeDTO();
+        eventNoticeDTO.setMoxieTaskId(moxieTaskId);
+        eventNoticeDTO.setMessage(message);
+
+        asycExcutor.runAsyc(eventNoticeDTO, eventNoticeDTO1 -> {
+            moxieBusinessService.grabFail(eventNoticeDTO1);
+        });
     }
 
 
@@ -49,6 +69,10 @@ public class MoxieTaskEventNoticeService {
      * @param moxieTaskId
      */
     public void bill(String moxieTaskId) {
-        moxieBusinessService.bill(moxieTaskId);
+        MoxieTaskEventNoticeDTO eventNoticeDTO = new MoxieTaskEventNoticeDTO();
+        eventNoticeDTO.setMoxieTaskId(moxieTaskId);
+        asycExcutor.runAsyc(eventNoticeDTO, eventNoticeDTO1 -> {
+            moxieBusinessService.bill(eventNoticeDTO1);
+        });
     }
 }

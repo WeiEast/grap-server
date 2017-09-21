@@ -2,9 +2,9 @@ package com.treefinance.saas.grapserver.web.controller;
 
 import com.google.common.collect.Maps;
 import com.treefinance.saas.grapserver.biz.config.DiamondConfig;
+import com.treefinance.saas.grapserver.biz.service.*;
 import com.treefinance.saas.grapserver.common.enums.EBizType;
 import com.treefinance.saas.grapserver.common.exception.ForbiddenException;
-import com.treefinance.saas.grapserver.biz.service.*;
 import com.treefinance.saas.grapserver.common.utils.IpUtils;
 import com.treefinance.saas.knife.result.SimpleResult;
 import org.apache.commons.lang3.StringUtils;
@@ -23,7 +23,7 @@ import java.util.Map;
  * Created by luoyihua on 2017/5/4.
  */
 @RestController
-@RequestMapping("/email")
+@RequestMapping(value = {"/email", "/grap/email"})
 public class EmailController {
     private static final Logger logger = LoggerFactory.getLogger(EmailController.class);
 
@@ -42,10 +42,10 @@ public class EmailController {
 
     @RequestMapping(value = "/start", method = {RequestMethod.POST})
     public Object createTask(@RequestParam("appid") String appid, @RequestParam("uniqueId") String uniqueId,
-                             @RequestParam(name="coorType",required=false) String coorType, @RequestParam("deviceInfo") String deviceInfo,
+                             @RequestParam(name = "coorType", required = false) String coorType, @RequestParam("deviceInfo") String deviceInfo,
                              @RequestParam(name = "extra", required = false) String extra,
                              HttpServletRequest request) throws ForbiddenException {
-        logger.info("createTask : appid={},uniqueId={},coorType={},deviceInfo={},extra={}",appid,uniqueId,coorType,deviceInfo,extra);
+        logger.info("createTask : appid={},uniqueId={},coorType={},deviceInfo={},extra={}", appid, uniqueId, coorType, deviceInfo, extra);
         taskLicenseService.verifyCreateTask(appid, EBizType.EMAIL);
         Long taskId = taskServiceImpl.createTask(uniqueId, appid, EBizType.EMAIL.getCode());
         Map<String, Object> map = Maps.newHashMap();
@@ -58,7 +58,7 @@ public class EmailController {
     }
 
     @SuppressWarnings("rawtypes")
-	@RequestMapping(value = "/acquisition", method = {RequestMethod.POST})
+    @RequestMapping(value = "/acquisition", method = {RequestMethod.POST})
     public Object sendToMq(@RequestParam("taskid") Long taskid, @RequestParam(value = "header", required = false) String header,
                            @RequestParam("cookie") String cookie, @RequestParam("url") String url,
                            @RequestParam("website") String website, @RequestParam(value = "accountNo", required = false) String accountNo) {
@@ -74,8 +74,8 @@ public class EmailController {
         if (StringUtils.isEmpty(html) && StringUtils.isEmpty(cookie)) {
             throw new Exception("html和cookie不能同时为空");
         }
-        logger.info("邮箱-loginProcess: taskid={},directiveId={},html={},cookie={}",taskid, directiveId, cookie, html, cookie);
-        acquisitionService.loginProcess(directiveId,taskid, html, cookie);
+        logger.info("邮箱-loginProcess: taskid={},directiveId={},html={},cookie={}", taskid, directiveId, cookie, html, cookie);
+        acquisitionService.loginProcess(directiveId, taskid, html, cookie);
         return new SimpleResult<>();
     }
 }
