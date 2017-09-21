@@ -5,7 +5,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.treefinance.saas.grapserver.biz.common.CallbackSecureHandler;
 import com.treefinance.saas.grapserver.biz.service.AppCallbackConfigService;
-import com.treefinance.saas.grapserver.biz.service.AppLicenseServiceImpl;
+import com.treefinance.saas.grapserver.biz.service.AppLicenseService;
 import com.treefinance.saas.grapserver.biz.service.TaskCallbackLogService;
 import com.treefinance.saas.grapserver.common.enums.EDirective;
 import com.treefinance.saas.grapserver.common.enums.ETaskStatus;
@@ -42,7 +42,7 @@ public abstract class CallbackableDirectiveProcessor extends AbstractDirectivePr
     @Autowired
     protected CallbackSecureHandler callbackSecureHandler;
     @Autowired
-    protected AppLicenseServiceImpl appLicenseService;
+    protected AppLicenseService appLicenseService;
     @Autowired
     protected TaskCallbackLogService taskCallbackLogService;
 

@@ -31,7 +31,7 @@ public class AcquisitionService {
     @Autowired
     private MqConfig mqConfig;
     @Autowired
-    private TaskServiceImpl taskServiceImpl;
+    private TaskService taskService;
     @Resource
     CrawlerService crawlerService;
     @Autowired
@@ -61,10 +61,10 @@ public class AcquisitionService {
             logger.error(e.getMessage(), e);
         }
         if (StringUtils.isNotEmpty(accountNo)) {
-            taskServiceImpl.setAccountNo(taskid, accountNo);
+            taskService.setAccountNo(taskid, accountNo);
         }
         if (StringUtils.isNotEmpty(website)) {
-            taskServiceImpl.updateWebSite(taskid, website);
+            taskService.updateWebSite(taskid, website);
         }
         taskTimeService.updateLoginTime(taskid, new Date());
     }

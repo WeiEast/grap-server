@@ -22,7 +22,7 @@ public class TaskLicenseService {
     private static final Logger logger = LoggerFactory.getLogger(TaskLicenseService.class);
 
     @Autowired
-    private AppLicenseServiceImpl appLicenseService;
+    private AppLicenseService appLicenseService;
     @Autowired
     private AppBizLicenseService appBizLicenseService;
     @Autowired

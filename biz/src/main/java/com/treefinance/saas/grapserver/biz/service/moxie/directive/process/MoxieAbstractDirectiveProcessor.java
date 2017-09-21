@@ -39,7 +39,7 @@ public abstract class MoxieAbstractDirectiveProcessor implements MoxieDirectiveP
     @Autowired
     protected TaskAttributeService taskAttributeService;
     @Autowired
-    protected AppLicenseServiceImpl appLicenseService;
+    protected AppLicenseService appLicenseService;
 
     @Override
     @Transactional(rollbackFor = Exception.class)

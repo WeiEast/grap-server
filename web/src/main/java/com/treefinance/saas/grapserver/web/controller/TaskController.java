@@ -36,7 +36,7 @@ public class TaskController {
     @Autowired
     private TaskConfigService taskConfigService;
     @Autowired
-    private TaskServiceImpl taskServiceImpl;
+    private TaskService taskServiceImpl;
     @Autowired
     private TaskTimeService taskTimeService;
     @Autowired

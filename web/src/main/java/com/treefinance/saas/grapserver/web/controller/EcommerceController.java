@@ -29,7 +29,7 @@ public class EcommerceController {
     private static final Logger logger = LoggerFactory.getLogger(EcommerceController.class);
 
     @Autowired
-    private TaskServiceImpl taskServiceImpl;
+    private TaskService taskServiceImpl;
     @Autowired
     private MerchantConfigService merchantConfigService;
     @Autowired

@@ -28,7 +28,7 @@ public class EmailController {
     private static final Logger logger = LoggerFactory.getLogger(EmailController.class);
 
     @Autowired
-    private TaskServiceImpl taskServiceImpl;
+    private TaskService taskServiceImpl;
     @Autowired
     private MerchantConfigService merchantConfigService;
     @Autowired
