@@ -22,7 +22,7 @@ package com.treefinance.saas.grapserver.common.enums;
  * @author Jerry
  * @since 11:41 02/05/2017
  */
-public enum OperatorType {
+public enum EOperatorType {
   /**
    * 中国移动
    */
@@ -38,7 +38,7 @@ public enum OperatorType {
 
   private String name;
 
-  OperatorType(String name) {
+  EOperatorType(String name) {
     this.name = name;
   }
 
@@ -46,9 +46,9 @@ public enum OperatorType {
     return name;
   }
 
-  public static OperatorType from(String name) {
+  public static EOperatorType from(String name) {
     try {
-      return OperatorType.valueOf(name);
+      return EOperatorType.valueOf(name);
     } catch (IllegalArgumentException e) {
       throw new IllegalArgumentException("The operator type '" + name + "' is unsupported.", e);
     }

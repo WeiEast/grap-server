@@ -7,7 +7,7 @@ import com.datatrees.toolkits.util.crypto.core.Encryptor;
 import com.datatrees.toolkits.util.json.Jackson;
 import com.google.common.collect.Maps;
 import com.treefinance.saas.grapserver.biz.service.*;
-import com.treefinance.saas.grapserver.common.enums.TaskStatusEnum;
+import com.treefinance.saas.grapserver.common.enums.ETaskStatus;
 import com.treefinance.saas.grapserver.common.enums.moxie.EMoxieDirective;
 import com.treefinance.saas.grapserver.common.exception.CallbackEncryptException;
 import com.treefinance.saas.grapserver.common.exception.CryptorException;
@@ -82,9 +82,9 @@ public abstract class MoxieAbstractDirectiveProcessor implements MoxieDirectiveP
         }
         // 3.任务是否是已经完成
         Byte taskStatus = taskDTO.getStatus();
-        if (TaskStatusEnum.CANCLE.getStatus().equals(taskStatus)
-                || TaskStatusEnum.SUCCESS.getStatus().equals(taskStatus)
-                || TaskStatusEnum.FAIL.getStatus().equals(taskStatus)) {
+        if (ETaskStatus.CANCEL.getStatus().equals(taskStatus)
+                || ETaskStatus.SUCCESS.getStatus().equals(taskStatus)
+                || ETaskStatus.FAIL.getStatus().equals(taskStatus)) {
             logger.info("handle moxie directive error : the task id={} is completed: directive={}", taskId, JsonUtils.toJsonString(directiveDTO));
             return;
         }
@@ -107,9 +107,9 @@ public abstract class MoxieAbstractDirectiveProcessor implements MoxieDirectiveP
 
         dataMap.put("taskStatus", "001");
         // 此次任务状态：001-抓取成功，002-抓取失败，003-抓取结果为空,004-任务取消
-        if (TaskStatusEnum.SUCCESS.getStatus().equals(task.getStatus())) {
+        if (ETaskStatus.SUCCESS.getStatus().equals(task.getStatus())) {
             dataMap.put("taskStatus", "001");
-        } else if (TaskStatusEnum.FAIL.getStatus().equals(task.getStatus())) {
+        } else if (ETaskStatus.FAIL.getStatus().equals(task.getStatus())) {
             dataMap.put("taskStatus", "002");
 
 //            dataMap.put("taskErrorMsg", "洗数失败");
@@ -120,7 +120,7 @@ public abstract class MoxieAbstractDirectiveProcessor implements MoxieDirectiveP
 //            } else {
 //                dataMap.put("taskErrorMsg", "爬数失败");
 //            }
-        } else if (TaskStatusEnum.CANCLE.getStatus().equals(task.getStatus())) {
+        } else if (ETaskStatus.CANCEL.getStatus().equals(task.getStatus())) {
             dataMap.put("taskStatus", "004");
 
         }

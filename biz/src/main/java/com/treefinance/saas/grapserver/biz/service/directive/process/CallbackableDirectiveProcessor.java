@@ -3,23 +3,22 @@ package com.treefinance.saas.grapserver.biz.service.directive.process;
 import com.alibaba.fastjson.JSON;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.treefinance.saas.grapserver.common.enums.EDirective;
-import com.treefinance.saas.grapserver.common.exception.CallbackEncryptException;
-import com.treefinance.saas.grapserver.common.exception.RequestFailedException;
+import com.treefinance.saas.grapserver.biz.common.CallbackSecureHandler;
 import com.treefinance.saas.grapserver.biz.service.AppCallbackConfigService;
 import com.treefinance.saas.grapserver.biz.service.AppLicenseServiceImpl;
 import com.treefinance.saas.grapserver.biz.service.TaskCallbackLogService;
-import com.treefinance.saas.grapserver.common.utils.HttpClientUtils;
-import com.treefinance.saas.grapserver.common.utils.RemoteDataDownloadUtils;
-import com.treefinance.saas.grapserver.biz.common.CallbackSecureHandler;
-import com.treefinance.saas.grapserver.dao.entity.AppLicense;
-import com.treefinance.saas.grapserver.dao.entity.TaskLog;
-import com.treefinance.saas.grapserver.common.enums.BizTypeEnum;
-import com.treefinance.saas.grapserver.common.enums.TaskStatusEnum;
+import com.treefinance.saas.grapserver.common.enums.EDirective;
+import com.treefinance.saas.grapserver.common.enums.ETaskStatus;
+import com.treefinance.saas.grapserver.common.exception.CallbackEncryptException;
+import com.treefinance.saas.grapserver.common.exception.RequestFailedException;
 import com.treefinance.saas.grapserver.common.model.dto.AppCallbackConfigDTO;
 import com.treefinance.saas.grapserver.common.model.dto.CallBackLicenseDTO;
 import com.treefinance.saas.grapserver.common.model.dto.DirectiveDTO;
 import com.treefinance.saas.grapserver.common.model.dto.TaskDTO;
+import com.treefinance.saas.grapserver.common.utils.HttpClientUtils;
+import com.treefinance.saas.grapserver.common.utils.RemoteDataDownloadUtils;
+import com.treefinance.saas.grapserver.dao.entity.AppLicense;
+import com.treefinance.saas.grapserver.dao.entity.TaskLog;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -161,8 +160,8 @@ public abstract class CallbackableDirectiveProcessor extends AbstractDirectivePr
      */
     protected List<AppCallbackConfigDTO> getCallbackConfigs(TaskDTO taskDTO) {
         String appId = taskDTO.getAppId();
-        BizTypeEnum bizTypeEnum = taskDTO.getBizTypeEnum();
-        List<AppCallbackConfigDTO> configList = appCallbackConfigService.getByAppIdAndBizType(appId, bizTypeEnum);
+        Byte bizType = taskDTO.getBizType();
+        List<AppCallbackConfigDTO> configList = appCallbackConfigService.getByAppIdAndBizType(appId, bizType);
         return configList;
     }
 
@@ -223,10 +222,10 @@ public abstract class CallbackableDirectiveProcessor extends AbstractDirectivePr
         dataMap.put("taskStatus", "001");
         dataMap.put("taskErrorMsg", "");
         // 此次任务状态：001-抓取成功，002-抓取失败，003-抓取结果为空,004-任务取消
-        if (TaskStatusEnum.SUCCESS.getStatus().equals(task.getStatus())) {
+        if (ETaskStatus.SUCCESS.getStatus().equals(task.getStatus())) {
             dataMap.put("taskStatus", "001");
             dataMap.put("taskErrorMsg", "");
-        } else if (TaskStatusEnum.FAIL.getStatus().equals(task.getStatus())) {
+        } else if (ETaskStatus.FAIL.getStatus().equals(task.getStatus())) {
             dataMap.put("taskStatus", "002");
             // 任务失败消息
             TaskLog log = taskLogService.queryLastestErrorLog(task.getId());
@@ -235,7 +234,7 @@ public abstract class CallbackableDirectiveProcessor extends AbstractDirectivePr
             } else {
                 dataMap.put("taskErrorMsg", "爬数失败");
             }
-        } else if (TaskStatusEnum.CANCLE.getStatus().equals(task.getStatus())) {
+        } else if (ETaskStatus.CANCEL.getStatus().equals(task.getStatus())) {
             dataMap.put("taskStatus", "004");
             dataMap.put("taskErrorMsg", "用户取消");
 

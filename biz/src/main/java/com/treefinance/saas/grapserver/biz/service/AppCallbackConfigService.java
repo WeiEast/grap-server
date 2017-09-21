@@ -8,12 +8,14 @@ import com.google.common.collect.Lists;
 import com.treefinance.saas.assistant.config.listener.handler.ConfigUpdateMessageHandler;
 import com.treefinance.saas.assistant.config.model.ConfigUpdateModel;
 import com.treefinance.saas.assistant.config.model.enums.ConfigType;
-import com.treefinance.saas.grapserver.dao.entity.*;
-import com.treefinance.saas.grapserver.dao.mapper.AppCallbackBizMapper;
-import com.treefinance.saas.grapserver.dao.mapper.AppCallbackConfigMapper;
-import com.treefinance.saas.grapserver.common.enums.BizTypeEnum;
 import com.treefinance.saas.grapserver.common.model.dto.AppCallbackConfigDTO;
 import com.treefinance.saas.grapserver.common.utils.DataConverterUtils;
+import com.treefinance.saas.grapserver.dao.entity.AppCallbackBiz;
+import com.treefinance.saas.grapserver.dao.entity.AppCallbackBizCriteria;
+import com.treefinance.saas.grapserver.dao.entity.AppCallbackConfig;
+import com.treefinance.saas.grapserver.dao.entity.AppCallbackConfigCriteria;
+import com.treefinance.saas.grapserver.dao.mapper.AppCallbackBizMapper;
+import com.treefinance.saas.grapserver.dao.mapper.AppCallbackConfigMapper;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -130,17 +132,16 @@ public class AppCallbackConfigService implements InitializingBean, ConfigUpdateM
      * 如果有配置该业务类型，则使用该业务类型；没有则使用全局配置
      *
      * @param appId
-     * @param bizTypeEnum
+     * @param bizType
      * @return
      */
-    public List<AppCallbackConfigDTO> getByAppIdAndBizType(String appId, BizTypeEnum bizTypeEnum) {
+    public List<AppCallbackConfigDTO> getByAppIdAndBizType(String appId, Byte bizType) {
         // 1.查询所有回调
         List<AppCallbackConfig> list = getByAppId(appId);
         if (CollectionUtils.isEmpty(list)) {
             return null;
         }
         Byte defaultType = Byte.valueOf("0");
-        Byte bizType = BizTypeEnum.valueOfType(bizTypeEnum);
         // 2.查询回调类型
         List<Integer> callbackIds = list.stream().map(AppCallbackConfig::getId).collect(Collectors.toList());
 

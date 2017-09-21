@@ -7,7 +7,7 @@ import java.util.Objects;
  * <p>
  * Created by haojiahong on 2017/8/21.
  */
-public enum TaskStepEnum {
+public enum ETaskStep {
 
     TASK_CREATE("任务创建", "CJ", "创建", "CJ01", "任务创建"),
     WAITING_USER_SCAN_QR_CODE("等待用户扫描二维码", "PS", "爬数", "PS01", "扫描二维码"),
@@ -52,7 +52,7 @@ public enum TaskStepEnum {
     private String stepText;//环节信息
 
 
-    TaskStepEnum(String text, String stageCode, String stageText, String stepCode, String stepText) {
+    ETaskStep(String text, String stageCode, String stageText, String stepCode, String stepText) {
         this.text = text;
         this.stageCode = stageCode;
         this.stageText = stageText;
@@ -78,7 +78,7 @@ public enum TaskStepEnum {
 
     public static String getStepCodeByText(String text) {
         if (Objects.nonNull(text)) {
-            for (TaskStepEnum item : TaskStepEnum.values()) {
+            for (ETaskStep item : ETaskStep.values()) {
                 if (text.equals(item.getText())) {
                     return item.getStepCode();
                 }
@@ -89,7 +89,7 @@ public enum TaskStepEnum {
 
     public static String getStageCodeByStepCode(String stepCode) {
         if (Objects.nonNull(stepCode)) {
-            for (TaskStepEnum item : TaskStepEnum.values()) {
+            for (ETaskStep item : ETaskStep.values()) {
                 if (stepCode.equals(item.getStepCode())) {
                     return item.getStageCode();
                 }
@@ -100,7 +100,7 @@ public enum TaskStepEnum {
 
     public static String getStageTextByStepCode(String stepCode) {
         if (Objects.nonNull(stepCode)) {
-            for (TaskStepEnum item : TaskStepEnum.values()) {
+            for (ETaskStep item : ETaskStep.values()) {
                 if (stepCode.equals(item.getStepCode())) {
                     return item.getStageText();
                 }

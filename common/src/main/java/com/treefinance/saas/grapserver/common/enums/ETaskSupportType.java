@@ -22,7 +22,7 @@ package com.treefinance.saas.grapserver.common.enums;
  * @author Jerry
  * @since 10:52 02/05/2017
  */
-public enum TaskSupportType {
+public enum ETaskSupportType {
   /**
    * 运营商
    */
@@ -36,9 +36,9 @@ public enum TaskSupportType {
    */
   EMAIL;
 
-  public static TaskSupportType from(String name) {
+  public static ETaskSupportType from(String name) {
     try {
-      return TaskSupportType.valueOf(name);
+      return ETaskSupportType.valueOf(name);
     } catch (IllegalArgumentException e) {
       throw new IllegalArgumentException("The task type '" + name + "' is unsupported.", e);
     }

@@ -1,7 +1,7 @@
 package com.treefinance.saas.grapserver.biz.service.moxie.directive.process.impl;
 
 import com.treefinance.saas.grapserver.biz.service.moxie.directive.process.MoxieAbstractDirectiveProcessor;
-import com.treefinance.saas.grapserver.common.enums.TaskStatusEnum;
+import com.treefinance.saas.grapserver.common.enums.ETaskStatus;
 import com.treefinance.saas.grapserver.common.enums.moxie.EMoxieDirective;
 import com.treefinance.saas.grapserver.common.model.dto.TaskDTO;
 import com.treefinance.saas.grapserver.common.model.dto.moxie.MoxieDirectiveDTO;
@@ -17,7 +17,7 @@ public class MoxieCancelDirectiveProcessor extends MoxieAbstractDirectiveProcess
     @Override
     protected void doProcess(EMoxieDirective directive, MoxieDirectiveDTO directiveDTO) {
         TaskDTO taskDTO = directiveDTO.getTask();
-        taskDTO.setStatus(TaskStatusEnum.CANCLE.getStatus());
+        taskDTO.setStatus(ETaskStatus.CANCEL.getStatus());
         // 取消任务
         taskService.cancelTaskWithStep(taskDTO.getId());
 

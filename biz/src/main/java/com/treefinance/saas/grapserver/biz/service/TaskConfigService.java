@@ -21,8 +21,8 @@ import com.datatrees.rawdatacentral.api.CrawlerService;
 import com.datatrees.rawdatacentral.domain.model.WebsiteConf;
 import com.datatrees.toolkits.util.json.Jackson;
 import com.treefinance.saas.grapserver.dao.entity.TaskSupport;
-import com.treefinance.saas.grapserver.common.enums.OperatorType;
-import com.treefinance.saas.grapserver.common.enums.TaskSupportType;
+import com.treefinance.saas.grapserver.common.enums.EOperatorType;
+import com.treefinance.saas.grapserver.common.enums.ETaskSupportType;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -52,11 +52,11 @@ public class TaskConfigService {
   /**
    * 获取配置信息
    *
-   * @param type 分类 {@link TaskSupportType}
+   * @param type 分类 {@link ETaskSupportType}
    */
 //  @Cacheable(value = "DAY", key = "'saas_crawler_task_config:'+#type")
   public Object getTaskConfig(String type) {
-    TaskSupportType supportType = TaskSupportType.from(type);
+    ETaskSupportType supportType = ETaskSupportType.from(type);
 
     List<TaskSupport> supportedList = taskSupportService
         .getSupportedList(supportType.name());
@@ -74,14 +74,14 @@ public class TaskConfigService {
 
 
   private List<Map<String, Object>> merge(List<TaskSupport> supportedList,
-      List<WebsiteConf> configs, TaskSupportType type) {
-    if (type == TaskSupportType.OPERATOR) {
+      List<WebsiteConf> configs, ETaskSupportType type) {
+    if (type == ETaskSupportType.OPERATOR) {
       List<Map<String, Object>> configList = new ArrayList<>();
       Map<String, List<TaskSupport>> collect = supportedList.stream()
           .collect(Collectors.groupingBy(TaskSupport::getType));
 
       collect.forEach((key, value) -> {
-        OperatorType operatorType = OperatorType.from(key);
+        EOperatorType operatorType = EOperatorType.from(key);
 
         Map<String, Object> map = new HashMap<>();
         map.put("name", operatorType.getName());

@@ -11,12 +11,12 @@ public enum EBizType {
     OPERATOR("OPERATOR", (byte) 3),
     FUND("FUND", (byte) 4);
 
-    private Byte code;
     private String text;
+    private Byte code;
 
-    private EBizType(String text, Byte code) {
-        this.code = code;
+    EBizType(String text, Byte code) {
         this.text = text;
+        this.code = code;
     }
 
     public Byte getCode() {

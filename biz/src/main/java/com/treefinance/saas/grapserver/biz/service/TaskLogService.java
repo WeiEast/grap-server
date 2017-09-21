@@ -6,7 +6,7 @@ import com.treefinance.saas.grapserver.dao.entity.TaskLog;
 import com.treefinance.saas.grapserver.dao.entity.TaskLogCriteria;
 import com.treefinance.saas.grapserver.dao.mapper.TaskLogMapper;
 import com.treefinance.saas.grapserver.dao.mapper.TaskMapper;
-import com.treefinance.saas.grapserver.common.enums.TaskStepEnum;
+import com.treefinance.saas.grapserver.common.enums.ETaskStep;
 import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -55,7 +55,7 @@ public class TaskLogService {
         taskLog.setId(id);
         taskLog.setTaskId(taskId);
         taskLog.setMsg(msg);
-        taskLog.setStepCode(TaskStepEnum.getStepCodeByText(msg));
+        taskLog.setStepCode(ETaskStep.getStepCodeByText(msg));
         taskLog.setOccurTime(processTime);
         taskLog.setErrorMsg(errorMsg != null && errorMsg.length() > 1000 ? errorMsg.substring(0, 1000) : errorMsg);
         taskLogMapper.insertSelective(taskLog);

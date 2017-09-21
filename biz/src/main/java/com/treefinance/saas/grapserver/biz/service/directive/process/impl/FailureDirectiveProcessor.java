@@ -5,7 +5,7 @@ import com.treefinance.saas.grapserver.dao.entity.AppLicense;
 import com.treefinance.saas.grapserver.common.enums.EDirective;
 import com.treefinance.saas.grapserver.biz.service.MonitorService;
 import com.treefinance.saas.grapserver.biz.service.directive.process.CallbackableDirectiveProcessor;
-import com.treefinance.saas.grapserver.common.enums.TaskStatusEnum;
+import com.treefinance.saas.grapserver.common.enums.ETaskStatus;
 import com.treefinance.saas.grapserver.common.model.dto.DirectiveDTO;
 import com.treefinance.saas.grapserver.common.model.dto.TaskDTO;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,7 +30,7 @@ public class FailureDirectiveProcessor extends CallbackableDirectiveProcessor {
         String appId = taskDTO.getAppId();
 
         // 1.任务置为失败
-        taskDTO.setStatus(TaskStatusEnum.FAIL.getStatus());
+        taskDTO.setStatus(ETaskStatus.FAIL.getStatus());
         // 2.更新任务状态
         String errorCode = taskService.failTaskWithStep(taskDTO.getId());
         taskDTO.setStepCode(errorCode);

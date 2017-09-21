@@ -2,16 +2,16 @@ package com.treefinance.saas.grapserver.biz.service;
 
 import com.datatrees.rawdatacentral.api.CrawlerService;
 import com.google.common.collect.Lists;
-import com.treefinance.saas.grapserver.common.enums.EDirective;
 import com.treefinance.saas.grapserver.biz.service.directive.DirectiveService;
+import com.treefinance.saas.grapserver.common.enums.EDirective;
+import com.treefinance.saas.grapserver.common.enums.ETaskStatus;
+import com.treefinance.saas.grapserver.common.model.dto.DirectiveDTO;
 import com.treefinance.saas.grapserver.common.utils.CommonUtils;
 import com.treefinance.saas.grapserver.common.utils.JsonUtils;
 import com.treefinance.saas.grapserver.dao.entity.AppBizType;
 import com.treefinance.saas.grapserver.dao.entity.Task;
 import com.treefinance.saas.grapserver.dao.entity.TaskCriteria;
 import com.treefinance.saas.grapserver.dao.mapper.TaskMapper;
-import com.treefinance.saas.grapserver.common.enums.TaskStatusEnum;
-import com.treefinance.saas.grapserver.common.model.dto.DirectiveDTO;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateFormatUtils;
@@ -127,7 +127,7 @@ public class TaskTimeService {
                         continue;
                     }
                     // 清除已经完成任务
-                    List<String> completedTaskIds = tasks.stream().filter(task -> !TaskStatusEnum.RUNNING.getStatus().equals(task.getStatus()))
+                    List<String> completedTaskIds = tasks.stream().filter(task -> !ETaskStatus.RUNNING.getStatus().equals(task.getStatus()))
                             .map(task -> task.getId().toString()).collect(Collectors.toList());
                     if (CollectionUtils.isNotEmpty(completedTaskIds)) {
                         redisTemplate.opsForSet().remove(taskSetKey, completedTaskIds.toArray(new String[]{}));
@@ -136,7 +136,7 @@ public class TaskTimeService {
 
                     List<String> timeoutTaskIds = Lists.newArrayList();
                     // 计算正在运行任务是否有超时
-                    tasks.stream().filter(task -> TaskStatusEnum.RUNNING.getStatus().equals(task.getStatus()))
+                    tasks.stream().filter(task -> ETaskStatus.RUNNING.getStatus().equals(task.getStatus()))
                             .forEach(task -> {
                                 Long taskId = task.getId();
                                 if (handleTaskTimeout(task)) {
@@ -193,9 +193,9 @@ public class TaskTimeService {
      */
     public boolean handleTaskTimeout(Task task) {
         Byte taskStatus = task.getStatus();
-        if (TaskStatusEnum.CANCLE.getStatus().equals(taskStatus)
-                || TaskStatusEnum.SUCCESS.getStatus().equals(taskStatus)
-                || TaskStatusEnum.FAIL.getStatus().equals(taskStatus)) {
+        if (ETaskStatus.CANCEL.getStatus().equals(taskStatus)
+                || ETaskStatus.SUCCESS.getStatus().equals(taskStatus)
+                || ETaskStatus.FAIL.getStatus().equals(taskStatus)) {
             logger.info("handleTaskTimeout error : the task is completed: {}", JsonUtils.toJsonString(task));
             return false;
         }

@@ -1,8 +1,6 @@
 package com.treefinance.saas.grapserver.common.model.dto;
 
 
-import com.treefinance.saas.grapserver.common.enums.BizTypeEnum;
-
 import java.io.Serializable;
 import java.util.Date;
 
@@ -15,7 +13,7 @@ public class TaskDTO implements Serializable {
     private String uniqueId;
     private String appId;
     private String accountNo;
-    private BizTypeEnum bizTypeEnum;
+    private Byte bizType;
     private Byte status;
     private String webSite;
     private String stepCode;
@@ -56,15 +54,6 @@ public class TaskDTO implements Serializable {
         this.accountNo = accountNo;
     }
 
-
-    public BizTypeEnum getBizTypeEnum() {
-        return bizTypeEnum;
-    }
-
-    public void setBizTypeEnum(BizTypeEnum bizTypeEnum) {
-        this.bizTypeEnum = bizTypeEnum;
-    }
-
     public Byte getStatus() {
         return status;
     }
@@ -103,5 +92,13 @@ public class TaskDTO implements Serializable {
 
     public void setStepCode(String stepCode) {
         this.stepCode = stepCode;
+    }
+
+    public Byte getBizType() {
+        return bizType;
+    }
+
+    public void setBizType(Byte bizType) {
+        this.bizType = bizType;
     }
 }

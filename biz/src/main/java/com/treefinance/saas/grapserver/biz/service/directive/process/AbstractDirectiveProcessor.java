@@ -1,14 +1,14 @@
 package com.treefinance.saas.grapserver.biz.service.directive.process;
 
 import com.alibaba.fastjson.JSON;
-import com.treefinance.saas.grapserver.common.enums.EDirective;
 import com.treefinance.saas.grapserver.biz.service.TaskLogService;
 import com.treefinance.saas.grapserver.biz.service.TaskNextDirectiveService;
-import com.treefinance.saas.grapserver.common.utils.JsonUtils;
 import com.treefinance.saas.grapserver.biz.service.TaskService;
-import com.treefinance.saas.grapserver.common.enums.TaskStatusEnum;
+import com.treefinance.saas.grapserver.common.enums.EDirective;
+import com.treefinance.saas.grapserver.common.enums.ETaskStatus;
 import com.treefinance.saas.grapserver.common.model.dto.DirectiveDTO;
 import com.treefinance.saas.grapserver.common.model.dto.TaskDTO;
+import com.treefinance.saas.grapserver.common.utils.JsonUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -58,9 +58,9 @@ public abstract class AbstractDirectiveProcessor implements DirectiveProcessor {
         }
         // 3.任务是否是已经完成
         Byte taskStatus = taskDTO.getStatus();
-        if (TaskStatusEnum.CANCLE.getStatus().equals(taskStatus)
-                || TaskStatusEnum.SUCCESS.getStatus().equals(taskStatus)
-                || TaskStatusEnum.FAIL.getStatus().equals(taskStatus)) {
+        if (ETaskStatus.CANCEL.getStatus().equals(taskStatus)
+                || ETaskStatus.SUCCESS.getStatus().equals(taskStatus)
+                || ETaskStatus.FAIL.getStatus().equals(taskStatus)) {
             logger.info("handle directive error : the task id={} is completed: directive={}", taskId, JsonUtils.toJsonString(directiveDTO));
             return;
         }

@@ -1,7 +1,7 @@
 package com.treefinance.saas.grapserver.biz.service.moxie.directive.process.impl;
 
 import com.treefinance.saas.grapserver.biz.service.moxie.directive.process.MoxieAbstractDirectiveProcessor;
-import com.treefinance.saas.grapserver.common.enums.TaskStepEnum;
+import com.treefinance.saas.grapserver.common.enums.ETaskStep;
 import com.treefinance.saas.grapserver.common.enums.moxie.EMoxieDirective;
 import com.treefinance.saas.grapserver.common.model.dto.TaskDTO;
 import com.treefinance.saas.grapserver.common.model.dto.moxie.MoxieDirectiveDTO;
@@ -19,7 +19,7 @@ public class MoxieLoginSuccessDirectiveProcessor extends MoxieAbstractDirectiveP
     protected void doProcess(EMoxieDirective directive, MoxieDirectiveDTO directiveDTO) {
         TaskDTO taskDTO = directiveDTO.getTask();
         // 1.记录登录日志
-        taskLogService.insert(taskDTO.getId(), TaskStepEnum.LOGIN_SUCCESS.getText(), new Date(), null);
+        taskLogService.insert(taskDTO.getId(), ETaskStep.LOGIN_SUCCESS.getText(), new Date(), null);
 
     }
 }

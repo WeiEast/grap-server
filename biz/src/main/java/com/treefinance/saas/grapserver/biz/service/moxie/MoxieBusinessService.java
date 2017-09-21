@@ -11,7 +11,7 @@ import com.treefinance.saas.grapserver.biz.service.TaskAttributeService;
 import com.treefinance.saas.grapserver.biz.service.TaskLogService;
 import com.treefinance.saas.grapserver.biz.service.TaskNextDirectiveService;
 import com.treefinance.saas.grapserver.biz.service.moxie.directive.MoxieDirectiveService;
-import com.treefinance.saas.grapserver.common.enums.TaskStepEnum;
+import com.treefinance.saas.grapserver.common.enums.ETaskStep;
 import com.treefinance.saas.grapserver.common.enums.moxie.EMoxieDirective;
 import com.treefinance.saas.grapserver.common.model.dto.moxie.MoxieCaptchaDTO;
 import com.treefinance.saas.grapserver.common.model.dto.moxie.MoxieCityInfoDTO;
@@ -70,7 +70,7 @@ public class MoxieBusinessService {
         }
         long taskId = taskAttribute.getTaskId();
         //1.记录采集失败日志
-        taskLogService.insert(taskId, TaskStepEnum.CRAWL_FAIL.getText(), new Date(), message);
+        taskLogService.insert(taskId, ETaskStep.CRAWL_FAIL.getText(), new Date(), message);
         //2.发送任务失败指令
         MoxieDirectiveDTO directiveDTO = new MoxieDirectiveDTO();
         directiveDTO.setDirective(EMoxieDirective.TASK_FAIL.getText());
@@ -101,8 +101,8 @@ public class MoxieBusinessService {
         }
         long taskId = taskAttribute.getTaskId();
         //1.记录采集成功日志
-        taskLogService.insert(taskId, TaskStepEnum.CRAWL_SUCCESS.getText(), new Date(), null);
-        taskLogService.insert(taskId, TaskStepEnum.CRAWL_COMPLETE.getText(), new Date(), null);
+        taskLogService.insert(taskId, ETaskStep.CRAWL_SUCCESS.getText(), new Date(), null);
+        taskLogService.insert(taskId, ETaskStep.CRAWL_COMPLETE.getText(), new Date(), null);
         //2.获取魔蝎数据,调用洗数,传递账单数据
         Boolean result = true;
         String message = null;
@@ -184,12 +184,12 @@ public class MoxieBusinessService {
                 if (StringUtils.equalsIgnoreCase(type, "sms")) {//需要短信验证码
                     map.put("directive", "require_sms");
                     map.put("information", moxieCaptchaDTO);
-                    taskLogService.insert(taskId, TaskStepEnum.WAITING_USER_INPUT_IMAGE_CODE.getText(), new Date(), null);
+                    taskLogService.insert(taskId, ETaskStep.WAITING_USER_INPUT_IMAGE_CODE.getText(), new Date(), null);
                 }
                 if (StringUtils.equalsIgnoreCase(type, "img")) {//需要图片验证码
                     map.put("directive", "require_picture");
                     map.put("information", moxieCaptchaDTO);
-                    taskLogService.insert(taskId, TaskStepEnum.WAITING_USER_INPUT_MESSAGE_CODE.getText(), new Date(), null);
+                    taskLogService.insert(taskId, ETaskStep.WAITING_USER_INPUT_MESSAGE_CODE.getText(), new Date(), null);
 
                 }
 

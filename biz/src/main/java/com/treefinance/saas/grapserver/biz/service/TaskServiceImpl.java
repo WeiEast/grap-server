@@ -9,19 +9,18 @@ import com.treefinance.basicservice.security.crypto.facade.EncryptionIntensityEn
 import com.treefinance.basicservice.security.crypto.facade.ISecurityCryptoService;
 import com.treefinance.commonservice.uid.UidGenerator;
 import com.treefinance.saas.grapserver.biz.config.DiamondConfig;
+import com.treefinance.saas.grapserver.common.enums.EBizType;
+import com.treefinance.saas.grapserver.common.enums.ETaskStep;
+import com.treefinance.saas.grapserver.common.enums.ETaskStatus;
+import com.treefinance.saas.grapserver.common.exception.base.MarkBaseException;
+import com.treefinance.saas.grapserver.common.model.dto.TaskDTO;
+import com.treefinance.saas.grapserver.common.utils.CommonUtils;
+import com.treefinance.saas.grapserver.common.utils.DataConverterUtils;
 import com.treefinance.saas.grapserver.dao.entity.AppBizType;
 import com.treefinance.saas.grapserver.dao.entity.Task;
 import com.treefinance.saas.grapserver.dao.entity.TaskCriteria;
 import com.treefinance.saas.grapserver.dao.entity.TaskLog;
 import com.treefinance.saas.grapserver.dao.mapper.TaskMapper;
-import com.treefinance.saas.grapserver.common.exception.base.MarkBaseException;
-import com.treefinance.saas.grapserver.common.enums.BizTypeEnum;
-import com.treefinance.saas.grapserver.common.enums.EBizType;
-import com.treefinance.saas.grapserver.common.enums.TaskStatusEnum;
-import com.treefinance.saas.grapserver.common.enums.TaskStepEnum;
-import com.treefinance.saas.grapserver.common.model.dto.TaskDTO;
-import com.treefinance.saas.grapserver.common.utils.CommonUtils;
-import com.treefinance.saas.grapserver.common.utils.DataConverterUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateUtils;
@@ -209,9 +208,9 @@ public class TaskServiceImpl implements TaskService {
             return false;
         }
         Byte status = existTask.getStatus();
-        if (TaskStatusEnum.CANCLE.getStatus().equals(status)
-                || TaskStatusEnum.FAIL.getStatus().equals(status)
-                || TaskStatusEnum.SUCCESS.getStatus().equals(status)) {
+        if (ETaskStatus.CANCEL.getStatus().equals(status)
+                || ETaskStatus.FAIL.getStatus().equals(status)
+                || ETaskStatus.SUCCESS.getStatus().equals(status)) {
             return true;
         }
         return false;
@@ -267,13 +266,6 @@ public class TaskServiceImpl implements TaskService {
             return null;
         }
         TaskDTO result = DataConverterUtils.convert(task, TaskDTO.class);
-        if (task.getBizType().equals(EBizType.ECOMMERCE.getCode())) {
-            result.setBizTypeEnum(BizTypeEnum.ECOMMERCE);
-        } else if (task.getBizType().equals(EBizType.EMAIL.getCode())) {
-            result.setBizTypeEnum(BizTypeEnum.EMAIL);
-        } else if (task.getBizType().equals(EBizType.OPERATOR.getCode())) {
-            result.setBizTypeEnum(BizTypeEnum.OPERATOR);
-        }
         return result;
     }
 
@@ -351,7 +343,7 @@ public class TaskServiceImpl implements TaskService {
 
         Task task = new Task();
         task.setId(taskId);
-        task.setStatus(TaskStatusEnum.CANCLE.getStatus());
+        task.setStatus(ETaskStatus.CANCEL.getStatus());
         TaskLog taskLog = taskLogService.queryLastestErrorLog(taskId);
         if (taskLog != null) {
             task.setStepCode(taskLog.getStepCode());
@@ -369,10 +361,10 @@ public class TaskServiceImpl implements TaskService {
     @Transactional
     public String failTaskWithStep(Long taskId) {
         TaskCriteria taskCriteria = new TaskCriteria();
-        taskCriteria.createCriteria().andIdEqualTo(taskId).andStatusNotEqualTo(TaskStatusEnum.FAIL.getStatus());
+        taskCriteria.createCriteria().andIdEqualTo(taskId).andStatusNotEqualTo(ETaskStatus.FAIL.getStatus());
         Task task = new Task();
         task.setId(taskId);
-        task.setStatus(TaskStatusEnum.FAIL.getStatus());
+        task.setStatus(ETaskStatus.FAIL.getStatus());
         TaskLog taskLog = taskLogService.queryLastestErrorLog(taskId);
         if (taskLog != null) {
             task.setStepCode(taskLog.getStepCode());
@@ -381,7 +373,7 @@ public class TaskServiceImpl implements TaskService {
         }
         taskMapper.updateByExampleSelective(task, taskCriteria);
         //如果任务是超时导致的失败,则不记录任务失败日志了
-        if (!TaskStepEnum.TASK_TIMEOUT.getStepCode().equals(task.getStepCode())) {
+        if (!ETaskStep.TASK_TIMEOUT.getStepCode().equals(task.getStepCode())) {
             taskLogService.logFailTask(taskId);
         }
         return task.getStepCode();
@@ -390,7 +382,7 @@ public class TaskServiceImpl implements TaskService {
     @Override
     @Transactional
     public String updateTaskStatusWithStep(Long taskId, Byte status) {
-        if (TaskStatusEnum.SUCCESS.getStatus().equals(status)) {
+        if (ETaskStatus.SUCCESS.getStatus().equals(status)) {
             Task task = new Task();
             task.setId(taskId);
             task.setStatus(status);
@@ -398,7 +390,7 @@ public class TaskServiceImpl implements TaskService {
             taskLogService.logSuccessTask(taskId);
             return null;
         }
-        if (TaskStatusEnum.FAIL.getStatus().equals(status)) {
+        if (ETaskStatus.FAIL.getStatus().equals(status)) {
             return this.failTaskWithStep(taskId);
         }
         return null;

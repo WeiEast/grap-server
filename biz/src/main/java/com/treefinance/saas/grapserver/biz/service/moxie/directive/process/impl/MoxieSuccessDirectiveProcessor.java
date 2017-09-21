@@ -1,7 +1,7 @@
 package com.treefinance.saas.grapserver.biz.service.moxie.directive.process.impl;
 
 import com.treefinance.saas.grapserver.biz.service.moxie.directive.process.MoxieAbstractDirectiveProcessor;
-import com.treefinance.saas.grapserver.common.enums.TaskStatusEnum;
+import com.treefinance.saas.grapserver.common.enums.ETaskStatus;
 import com.treefinance.saas.grapserver.common.enums.moxie.EMoxieDirective;
 import com.treefinance.saas.grapserver.common.model.dto.TaskDTO;
 import com.treefinance.saas.grapserver.common.model.dto.moxie.MoxieDirectiveDTO;
@@ -26,14 +26,14 @@ public class MoxieSuccessDirectiveProcessor extends MoxieAbstractDirectiveProces
         String appId = taskDTO.getAppId();
 
         //任务置为成功
-        taskDTO.setStatus(TaskStatusEnum.SUCCESS.getStatus());
+        taskDTO.setStatus(ETaskStatus.SUCCESS.getStatus());
 
         // 获取商户密钥,包装数据:洗数成功后返回的dataUrl加密后通过指令传递给前端
         AppLicense appLicense = appLicenseService.getAppLicense(appId);
         this.generateData(directiveDTO, appLicense);
 
         // 更新任务状态,记录任务成功日志
-        taskService.updateTaskStatusWithStep(taskId, TaskStatusEnum.SUCCESS.getStatus());
+        taskService.updateTaskStatusWithStep(taskId, ETaskStatus.SUCCESS.getStatus());
     }
 
 

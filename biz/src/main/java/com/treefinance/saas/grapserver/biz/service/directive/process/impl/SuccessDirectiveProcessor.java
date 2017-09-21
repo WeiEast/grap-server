@@ -4,7 +4,7 @@ import com.treefinance.saas.grapserver.common.enums.EDirective;
 import com.treefinance.saas.grapserver.biz.service.MonitorService;
 import com.treefinance.saas.grapserver.biz.service.directive.process.CallbackableDirectiveProcessor;
 import com.treefinance.saas.grapserver.dao.entity.AppLicense;
-import com.treefinance.saas.grapserver.common.enums.TaskStatusEnum;
+import com.treefinance.saas.grapserver.common.enums.ETaskStatus;
 import com.treefinance.saas.grapserver.common.model.dto.DirectiveDTO;
 import com.treefinance.saas.grapserver.common.model.dto.TaskDTO;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,14 +40,14 @@ public class SuccessDirectiveProcessor extends CallbackableDirectiveProcessor {
         // 5.触发回调: 0-无需回调，1-回调成功，-1-回调失败
         int result = callback(dataMap, appLicense, directiveDTO);
         if (result == 0) {
-            taskDTO.setStatus(TaskStatusEnum.SUCCESS.getStatus());
+            taskDTO.setStatus(ETaskStatus.SUCCESS.getStatus());
         } else if (result == 1) {
-            taskDTO.setStatus(TaskStatusEnum.SUCCESS.getStatus());
+            taskDTO.setStatus(ETaskStatus.SUCCESS.getStatus());
         } else {
             // 指令发生变更 ： task_success -> callback_fail
             taskNextDirectiveService.insert(taskId, directiveDTO.getDirective());
 
-            taskDTO.setStatus(TaskStatusEnum.FAIL.getStatus());
+            taskDTO.setStatus(ETaskStatus.FAIL.getStatus());
             directiveDTO.setDirective(EDirective.CALLBACK_FAIL.getText());
         }
         // 6.更新任务状态

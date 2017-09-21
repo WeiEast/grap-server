@@ -6,13 +6,11 @@ import com.treefinance.saas.assistant.model.HttpMonitorMessage;
 import com.treefinance.saas.assistant.model.TaskMonitorMessage;
 import com.treefinance.saas.assistant.plugin.HttpMonitorPlugin;
 import com.treefinance.saas.assistant.plugin.TaskMonitorPlugin;
-import com.treefinance.saas.grapserver.dao.entity.Task;
-import com.treefinance.saas.grapserver.dao.mapper.TaskMapper;
-import com.treefinance.saas.grapserver.common.enums.BizTypeEnum;
-import com.treefinance.saas.grapserver.common.enums.EBizType;
-import com.treefinance.saas.grapserver.common.enums.TaskStatusEnum;
+import com.treefinance.saas.grapserver.common.enums.ETaskStatus;
 import com.treefinance.saas.grapserver.common.model.dto.TaskDTO;
 import com.treefinance.saas.grapserver.common.utils.DataConverterUtils;
+import com.treefinance.saas.grapserver.dao.entity.Task;
+import com.treefinance.saas.grapserver.dao.mapper.TaskMapper;
 import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -52,16 +50,16 @@ public class MonitorService {
     public void sendMonitorMessage(TaskDTO taskDTO) {
         Byte status = taskDTO.getStatus();
         // 仅成功、失败、取消发送任务
-        if (!TaskStatusEnum.SUCCESS.getStatus().equals(status)
-                && !TaskStatusEnum.FAIL.getStatus().equals(status)
-                && !TaskStatusEnum.CANCLE.getStatus().equals(status)) {
+        if (!ETaskStatus.SUCCESS.getStatus().equals(status)
+                && !ETaskStatus.FAIL.getStatus().equals(status)
+                && !ETaskStatus.CANCEL.getStatus().equals(status)) {
             return;
         }
         TaskMonitorMessage message = new TaskMonitorMessage();
         try {
             message.setAccountNo(taskDTO.getAccountNo());
             message.setAppId(taskDTO.getAppId());
-            message.setBizType(BizTypeEnum.valueOfType(taskDTO.getBizTypeEnum()));
+            message.setBizType(taskDTO.getBizType());
             message.setCompleteTime(taskDTO.getCreateTime());
             message.setStatus(taskDTO.getStatus());
             message.setTaskId(taskDTO.getId());
@@ -86,13 +84,6 @@ public class MonitorService {
             return;
         }
         TaskDTO taskDTO = DataConverterUtils.convert(task, TaskDTO.class);
-        if (task.getBizType().equals(EBizType.ECOMMERCE.getCode())) {
-            taskDTO.setBizTypeEnum(BizTypeEnum.ECOMMERCE);
-        } else if (task.getBizType().equals(EBizType.EMAIL.getCode())) {
-            taskDTO.setBizTypeEnum(BizTypeEnum.EMAIL);
-        } else if (task.getBizType().equals(EBizType.OPERATOR.getCode())) {
-            taskDTO.setBizTypeEnum(BizTypeEnum.OPERATOR);
-        }
         if (taskDTO != null) {
             sendMonitorMessage(taskDTO);
         }
