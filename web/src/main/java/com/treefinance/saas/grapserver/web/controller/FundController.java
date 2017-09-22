@@ -189,6 +189,7 @@ public class FundController {
             return SimpleResult.failResult("任务查询失败");
         }
         String moxieTaskId = attribute.getValue();
+
         fundMoxieService.submitTaskInput(moxieTaskId, input);
         return SimpleResult.successResult(true);
     }
