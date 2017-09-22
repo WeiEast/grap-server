@@ -190,19 +190,19 @@
             <dependency>
                 <groupId>com.treefinance.saas</groupId>
                 <artifactId>assistant-monitor</artifactId>
-                <version>1.0.3</version>
+                <version>1.0.3-SNAPSHOT</version>
             </dependency>
 
             <dependency>
                 <groupId>com.treefinance.saas</groupId>
                 <artifactId>assistant-config</artifactId>
-                <version>1.0.3</version>
+                <version>1.0.3-SNAPSHOT</version>
             </dependency>
 
             <dependency>
                 <groupId>com.treefinance.saas</groupId>
                 <artifactId>assistant-httpinvoker</artifactId>
-                <version>1.0.3</version>
+                <version>1.0.3-SNAPSHOT</version>
             </dependency>
 
             <dependency>
