@@ -64,6 +64,8 @@ public class MoxieBusinessService implements InitializingBean {
     private TaskService taskService;
     @Autowired
     private DiamondConfig diamondConfig;
+    @Autowired
+    private MoxieTimeoutService moxieTimeoutService;
 
     /**
      * 本地缓存
@@ -311,10 +313,12 @@ public class MoxieBusinessService implements InitializingBean {
             return map;
 
         }
-        //3.任务创建成功,写入task_attribute,开始轮询此接口,等待魔蝎回调登录状态信息
+        //3.魔蝎任务创建成功,写入task_attribute,开始轮询此接口,等待魔蝎回调登录状态信息
         taskAttributeService.insertOrUpdateSelective(taskId, "moxie-taskId", moxieId);
-        //任务创建成功,记录登录account,登录失败重试会更新accountNo
+        //魔蝎任务创建成功,记录登录account,登录失败重试会更新accountNo
         taskService.updateTask(taskId, params.getAccount(), null);
+        //魔蝎任务创建成功,记录任务创建时间,查询登录状态时判断登录是否超时.
+        moxieTimeoutService.logLoginTime(taskId);
         map.put("directive", "waiting");
         map.put("information", "请等待");
         return map;
@@ -331,33 +335,35 @@ public class MoxieBusinessService implements InitializingBean {
         Map<String, Object> map = Maps.newHashMap();
         String content = taskNextDirectiveService.getNextDirective(taskId);
         if (StringUtils.isEmpty(content)) {
-            // 轮询过程中，判断任务是否超时
-//            if (taskServiceImpl.isTaskTimeout(taskid)) {
-//                // 异步处理任务超时
-//                taskTimeService.handleTaskTimeout(taskid);
-//            }
-            map.put("directive", "waiting");
-            map.put("information", "请等待");
+            // 轮询过程中，判断登录是否超时
+            if (moxieTimeoutService.isLoginTaskTimeout(taskId)) {
+                map.put("directive", EMoxieDirective.LOGIN_FAIL.getText());
+                map.put("information", "登录超时,请重试");
+            } else {
+                map.put("directive", "waiting");
+                map.put("information", "请等待");
+            }
         } else {
             MoxieDirectiveDTO directiveMessage = JSON.parseObject(content, MoxieDirectiveDTO.class);
             EMoxieDirective directive = EMoxieDirective.directiveOf(directiveMessage.getDirective());
             if (directive == null) {
                 map.put("directive", "waiting");
                 map.put("information", "请等待");
-            }
-            if (directive.getStepCode() == 1) {
-                map.put("directive", directiveMessage.getDirective());
-                map.put("information", directiveMessage.getRemark());
-                //如果是登录成功或失败,删掉指令,下一个页面轮询/next_derictive的时候转为waiting
-                taskNextDirectiveService.deleteNextDirective(taskId, directiveMessage.getDirective());
-                if (StringUtils.equals(directiveMessage.getDirective(), EMoxieDirective.LOGIN_FAIL.getText())) {
-                    // 登录失败(如用户名密码错误),需删除task_attribute中此taskId对应的moxieTaskId,重新登录时,可正常轮询/login/submit接口
-                    taskAttributeService.insertOrUpdateSelective(taskId, "moxie-taskId", "");
+            } else {
+                if (directive.getStepCode() == 1) {
+                    map.put("directive", directiveMessage.getDirective());
+                    map.put("information", directiveMessage.getRemark());
+                    //如果是登录成功或失败,删掉指令,下一个页面轮询/next_derictive的时候转为waiting
+                    taskNextDirectiveService.deleteNextDirective(taskId, directiveMessage.getDirective());
+                    if (StringUtils.equals(directiveMessage.getDirective(), EMoxieDirective.LOGIN_FAIL.getText())) {
+                        // 登录失败(如用户名密码错误),需删除task_attribute中此taskId对应的moxieTaskId,重新登录时,可正常轮询/login/submit接口
+                        taskAttributeService.insertOrUpdateSelective(taskId, "moxie-taskId", "");
+                    }
                 }
-            }
-            if (directive.getStepCode() > 1) {
-                map.put("directive", EMoxieDirective.LOGIN_SUCCESS.getText());
-                map.put("information", "");
+                if (directive.getStepCode() > 1) {
+                    map.put("directive", EMoxieDirective.LOGIN_SUCCESS.getText());
+                    map.put("information", "");
+                }
             }
         }
         logger.info("taskId={}下一指令信息={}", taskId, JSON.toJSONString(map));

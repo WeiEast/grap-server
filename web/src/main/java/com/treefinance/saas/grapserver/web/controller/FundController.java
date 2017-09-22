@@ -6,6 +6,7 @@ import com.treefinance.saas.grapserver.biz.config.DiamondConfig;
 import com.treefinance.saas.grapserver.biz.service.*;
 import com.treefinance.saas.grapserver.biz.service.moxie.FundMoxieService;
 import com.treefinance.saas.grapserver.biz.service.moxie.MoxieBusinessService;
+import com.treefinance.saas.grapserver.biz.service.moxie.MoxieTimeoutService;
 import com.treefinance.saas.grapserver.common.enums.EBizType;
 import com.treefinance.saas.grapserver.common.enums.moxie.EMoxieDirective;
 import com.treefinance.saas.grapserver.common.exception.ForbiddenException;
@@ -15,7 +16,6 @@ import com.treefinance.saas.grapserver.common.model.vo.moxie.MoxieCityInfoVO;
 import com.treefinance.saas.grapserver.common.utils.IpUtils;
 import com.treefinance.saas.grapserver.dao.entity.TaskAttribute;
 import com.treefinance.saas.knife.result.SimpleResult;
-import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -54,6 +54,9 @@ public class FundController {
     private MoxieBusinessService moxieBusinessService;
     @Autowired
     private TaskNextDirectiveService taskNextDirectiveService;
+    @Autowired
+    private MoxieTimeoutService moxieTimeoutService;
+
 
     /**
      * 创建任务
@@ -212,11 +215,11 @@ public class FundController {
         String content = taskNextDirectiveService.getNextDirective(taskid);
         Map<String, Object> map = Maps.newHashMap();
         if (StringUtils.isEmpty(content)) {
-            // 轮询过程中，判断任务是否超时
-//            if (taskServiceImpl.isTaskTimeout(taskid)) {
-//                // 异步处理任务超时
-//                taskTimeService.handleTaskTimeout(taskid);
-//            }
+//             轮询过程中，判断任务是否超时
+            if (moxieTimeoutService.isTaskTimeout(taskid)) {
+                // 异步处理任务超时
+                moxieTimeoutService.handleTaskTimeout(taskid);
+            }
             map.put("directive", "waiting");
             map.put("information", "请等待");
         } else {
