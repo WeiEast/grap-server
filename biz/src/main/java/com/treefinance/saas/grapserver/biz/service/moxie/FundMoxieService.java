@@ -134,8 +134,29 @@ public class FundMoxieService {
         HttpClientUtils.doPostWithHeaders(url, params, headers);
     }
 
+    /**
+     * 根据task_id获取公积金全部信息
+     *
+     * @param moxieTaskId
+     * @return
+     */
     public String queryFunds(String moxieTaskId) {
         String url = diamondConfig.getMoxieUrlFundGetFunds();
+        url = url.replaceAll("\\{task_id\\}", moxieTaskId);
+        Map<String, String> headers = Maps.newHashMap();
+        wrapperTokenHeaders(headers);
+        String data = HttpClientUtils.doGetWithHeaders(url, headers);
+        return data;
+    }
+
+    /**
+     * 根据task_id获取公积金全部信息(扩展接口，含area_code和city)
+     *
+     * @param moxieTaskId
+     * @return
+     */
+    public String queryFundsEx(String moxieTaskId) {
+        String url = diamondConfig.getMoxieUrlFundGetFundsEx();
         url = url.replaceAll("\\{task_id\\}", moxieTaskId);
         Map<String, String> headers = Maps.newHashMap();
         wrapperTokenHeaders(headers);

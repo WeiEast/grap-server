@@ -205,10 +205,10 @@ public class FundController {
     public Object nextMoxieDirective(@RequestParam("taskid") Long taskid) throws Exception {
 
         //判断是否需要验证码
-        Map<String, Object> result = moxieBusinessService.requireCaptcha(taskid);
-        if (!MapUtils.isEmpty(result)) {
-            return SimpleResult.successResult(result);
-        }
+//        Map<String, Object> result = moxieBusinessService.requireCaptcha(taskid);
+//        if (!MapUtils.isEmpty(result)) {
+//            return SimpleResult.successResult(result);
+//        }
         String content = taskNextDirectiveService.getNextDirective(taskid);
         Map<String, Object> map = Maps.newHashMap();
         if (StringUtils.isEmpty(content)) {

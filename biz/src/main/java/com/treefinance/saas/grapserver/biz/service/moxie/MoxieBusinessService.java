@@ -29,7 +29,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -61,8 +60,6 @@ public class MoxieBusinessService implements InitializingBean {
     private FundService fundService;
     @Autowired
     private TaskService taskService;
-    @Autowired
-    private RedisTemplate<String, String> redisTemplate;
 
     /**
      * 本地缓存
@@ -174,7 +171,7 @@ public class MoxieBusinessService implements InitializingBean {
     private String billAndProcess(Long taskId, String moxieTaskId) throws Exception {
         String moxieResult = null;
         try {
-            moxieResult = fundMoxieService.queryFunds(moxieTaskId);
+            moxieResult = fundMoxieService.queryFundsEx(moxieTaskId);
             //记录抓取日志
             taskLogService.insert(taskId, ETaskStep.CRAWL_SUCCESS.getText(), new Date(), null);
             taskLogService.insert(taskId, ETaskStep.CRAWL_COMPLETE.getText(), new Date(), null);
@@ -289,7 +286,7 @@ public class MoxieBusinessService implements InitializingBean {
         Map<String, Object> map = Maps.newHashMap();
         TaskAttribute attribute = taskAttributeService.findByName(taskId, "moxie-taskId", false);
         if (attribute != null && StringUtils.isNotBlank(attribute.getValue())) {
-            logger.info("taskId={}已生成魔蝎任务id,执行查询指令", taskId);
+            logger.info("taskId={}已生成魔蝎任务id,执行查询指令,等待魔蝎异步回调登录状态...", taskId);
             map = this.queryLoginStatusFromDirective(taskId);
             return map;
         }
@@ -359,6 +356,7 @@ public class MoxieBusinessService implements InitializingBean {
                 map.put("information", "");
             }
         }
+        logger.info("taskId={}下一指令信息={}", taskId, JSON.toJSONString(map));
         return map;
     }
 
