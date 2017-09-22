@@ -5,11 +5,13 @@ import com.alibaba.fastjson.JSONObject;
 import com.github.stuxuhai.jpinyin.PinyinException;
 import com.github.stuxuhai.jpinyin.PinyinFormat;
 import com.github.stuxuhai.jpinyin.PinyinHelper;
+import com.google.common.base.Splitter;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.treefinance.saas.grapserver.biz.config.DiamondConfig;
 import com.treefinance.saas.grapserver.biz.service.TaskAttributeService;
 import com.treefinance.saas.grapserver.biz.service.TaskLogService;
 import com.treefinance.saas.grapserver.biz.service.TaskNextDirectiveService;
@@ -60,6 +62,8 @@ public class MoxieBusinessService implements InitializingBean {
     private FundService fundService;
     @Autowired
     private TaskService taskService;
+    @Autowired
+    private DiamondConfig diamondConfig;
 
     /**
      * 本地缓存
@@ -368,6 +372,11 @@ public class MoxieBusinessService implements InitializingBean {
     private List<MoxieCityInfoVO> queryCityList() {
         List<MoxieCityInfoVO> result = Lists.newArrayList();
         List<MoxieCityInfoDTO> list = fundMoxieService.queryCityListEx();
+        String excludeCitys = diamondConfig.getMoxieFundExcludeCitys();
+        List<String> excludeCityList = Lists.newArrayList();
+        if (StringUtils.isNotBlank(excludeCitys)) {
+            excludeCityList = Splitter.on(",").splitToList(excludeCitys);
+        }
         //<province,list>
         Map<String, List<MoxieCityInfoDTO>> map = list.stream().collect(Collectors.groupingBy(MoxieCityInfoDTO::getProvince));
         for (Map.Entry<String, List<MoxieCityInfoDTO>> entry : map.entrySet()) {
@@ -382,6 +391,9 @@ public class MoxieBusinessService implements InitializingBean {
                 sonVO.setValue(dto.getArea_code());
                 sonVO.setSpell(convertToPinyinString(dto.getCity_name()));
                 sonVO.setStatus(dto.getStatus());
+                if (excludeCityList.contains(dto.getCity_name())) {
+                    sonVO.setStatus("1");//将配置中排除的城市status设置为1
+                }
                 sonList.add(sonVO);
             }
             sonList = sonList.stream().sorted((o1, o2) -> o1.getSpell().compareTo(o2.getSpell())).collect(Collectors.toList());

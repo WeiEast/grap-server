@@ -31,7 +31,7 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
-@RequestMapping(value = {"/operator", "/h5/operator", "/grap/h5/operator"})
+@RequestMapping(value = {"/operator", "/h5/operator", "/grap/h5/operator","/grap/operator"})
 public class OperatorController {
     private static final Logger logger = LoggerFactory.getLogger(OperatorController.class);
 

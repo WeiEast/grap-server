@@ -9,7 +9,7 @@
 
     <!-- 使用multicast广播注册中心暴露发现服务地址 -->
     <dubbo:registry protocol="zookeeper" address="${dubbo.zookeeper.address}"/>
-    <dubbo:protocol name="dubbo" port="296"/>
+    <dubbo:protocol name="dubbo" port="20296"/>
 
     <dubbo:consumer check="false"/>
 
