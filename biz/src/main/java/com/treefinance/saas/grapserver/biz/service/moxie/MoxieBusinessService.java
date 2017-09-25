@@ -339,6 +339,7 @@ public class MoxieBusinessService implements InitializingBean {
             if (moxieTimeoutService.isLoginTaskTimeout(taskId)) {
                 map.put("directive", EMoxieDirective.LOGIN_FAIL.getText());
                 map.put("information", "登录超时,请重试");
+                moxieTimeoutService.resetLoginTaskTimeOut(taskId);//返回前端登录超时后,重置记录登录时间.
             } else {
                 map.put("directive", "waiting");
                 map.put("information", "请等待");

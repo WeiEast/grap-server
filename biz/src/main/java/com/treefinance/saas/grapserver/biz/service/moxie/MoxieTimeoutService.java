@@ -97,6 +97,16 @@ public class MoxieTimeoutService {
         redisTemplate.opsForValue().set(key, GrapDateUtils.nowDateTimeStr(), 10, TimeUnit.MINUTES);
     }
 
+    /**
+     * 前端收到登录超时后,重置登录时间
+     *
+     * @param taskId
+     */
+    public void resetLoginTaskTimeOut(Long taskId) {
+        String key = LOGIN_TIME_PREFIX + taskId;
+        redisTemplate.opsForValue().set(key, GrapDateUtils.nowDateTimeStr(), 10, TimeUnit.MINUTES);
+    }
+
     public Date getLoginTime(Long taskId) {
         String key = LOGIN_TIME_PREFIX + taskId;
         String value = redisTemplate.opsForValue().get(key);
