@@ -31,7 +31,7 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
-@RequestMapping(value = {"/operator", "/h5/operator", "/grap/h5/operator","/grap/operator"})
+@RequestMapping(value = {"/operator", "/h5/operator", "/grap/h5/operator", "/grap/operator"})
 public class OperatorController {
     private static final Logger logger = LoggerFactory.getLogger(OperatorController.class);
 
@@ -147,9 +147,11 @@ public class OperatorController {
      * @return
      */
     @RequestMapping(value = "/loginpage/prepare", method = {RequestMethod.POST})
-    public Object prepare(@RequestParam("taskid") Long taskid, @RequestParam("websiteName") String websiteName) {
+    public Object prepare(@RequestParam("taskid") Long taskid,
+                          @RequestParam("websiteName") String websiteName,
+                          @RequestParam(name = "accountNo", required = false) String accountNo) {
         logger.info("模拟登录: 用户打开登陆页,taskid={},websiteName={}", taskid, websiteName);
-        operatorLoginSimulationService.prepare(taskid, websiteName);
+        operatorLoginSimulationService.prepare(taskid, websiteName, accountNo);
         return SimpleResult.successResult(null);
     }
 

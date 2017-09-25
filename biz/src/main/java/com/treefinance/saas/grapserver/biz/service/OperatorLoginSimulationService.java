@@ -49,10 +49,11 @@ public class OperatorLoginSimulationService {
         return province + operatorName;
     }
 
-    public void prepare(Long taskId, String websiteName) {
+    public void prepare(Long taskId, String websiteName, String accountNo) {
         LoginMessage loginMessage = new LoginMessage();
         loginMessage.setTaskId(taskId);
         loginMessage.setWebsiteName(websiteName);
+        loginMessage.setAccountNo(accountNo);
         try {
             messageProducer.send(GsonUtils.toJson(loginMessage), mqConfig.getProviderRawdataTopic(),
                     mqConfig.getProviderRawdataTag(), taskId.toString());

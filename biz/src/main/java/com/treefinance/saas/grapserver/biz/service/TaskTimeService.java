@@ -2,6 +2,7 @@ package com.treefinance.saas.grapserver.biz.service;
 
 import com.datatrees.rawdatacentral.api.CrawlerService;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.treefinance.saas.grapserver.biz.service.directive.DirectiveService;
 import com.treefinance.saas.grapserver.common.enums.EDirective;
 import com.treefinance.saas.grapserver.common.enums.ETaskStatus;
@@ -216,7 +217,9 @@ public class TaskTimeService {
 
             // 通知爬数取消任务
             try {
-                this.crawlerService.cancel(taskId, null);
+                Map<String, String> extMap = Maps.newHashMap();
+                extMap.put("reason", "timeout");
+                this.crawlerService.cancel(taskId, extMap);
             } catch (Exception e) {
                 logger.error("crawlerService.cancel(" + taskId + ") failed", e);
             }

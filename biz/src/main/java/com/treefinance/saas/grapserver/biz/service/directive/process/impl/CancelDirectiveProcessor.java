@@ -1,6 +1,7 @@
 package com.treefinance.saas.grapserver.biz.service.directive.process.impl;
 
 import com.datatrees.rawdatacentral.api.CrawlerService;
+import com.google.common.collect.Maps;
 import com.treefinance.saas.grapserver.biz.common.AsycExcutor;
 import com.treefinance.saas.grapserver.biz.service.MonitorService;
 import com.treefinance.saas.grapserver.biz.service.directive.process.CallbackableDirectiveProcessor;
@@ -10,6 +11,8 @@ import com.treefinance.saas.grapserver.common.model.dto.DirectiveDTO;
 import com.treefinance.saas.grapserver.common.model.dto.TaskDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import java.util.Map;
 
 /**
  * 取消任务执行
@@ -30,7 +33,9 @@ public class CancelDirectiveProcessor extends CallbackableDirectiveProcessor {
         taskDTO.setStatus(ETaskStatus.CANCEL.getStatus());
         // 取消任务
         taskService.cancelTaskWithStep(taskDTO.getId());
-        crawlerService.cancel(taskDTO.getId(), null);
+        Map<String, String> extMap = Maps.newHashMap();
+        extMap.put("reason", "user");
+        crawlerService.cancel(taskDTO.getId(), extMap);
 
         // 发送监控消息
         monitorService.sendMonitorMessage(taskDTO);
