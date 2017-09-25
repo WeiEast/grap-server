@@ -105,7 +105,7 @@ public class FundController {
         List<MoxieCityInfoVO> result = moxieBusinessService.getCityList();
         Map<String, Object> map = Maps.newHashMap();
         map.put("config", result);
-        map.put("license", appBizLicenseService.isShowLicense(appid, EBizType.OPERATOR.getText()));
+        map.put("license", appBizLicenseService.isShowLicense(appid, EBizType.FUND.getText()));
         return SimpleResult.successResult(map);
     }
 
