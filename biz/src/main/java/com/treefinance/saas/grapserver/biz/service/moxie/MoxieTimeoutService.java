@@ -5,6 +5,7 @@ import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.google.common.collect.Maps;
 import com.treefinance.saas.grapserver.biz.service.AppBizTypeService;
+import com.treefinance.saas.grapserver.biz.service.TaskAttributeService;
 import com.treefinance.saas.grapserver.biz.service.TaskLogService;
 import com.treefinance.saas.grapserver.biz.service.moxie.directive.MoxieDirectiveService;
 import com.treefinance.saas.grapserver.common.enums.ETaskStatus;
@@ -26,6 +27,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
 import java.util.Map;
@@ -54,6 +56,8 @@ public class MoxieTimeoutService {
     private TaskLogService taskLogService;
     @Autowired
     private MoxieDirectiveService moxieDirectiveService;
+    @Autowired
+    private TaskAttributeService taskAttributeService;
 
     /**
      * 本地任务缓存
@@ -193,9 +197,13 @@ public class MoxieTimeoutService {
         }
     }
 
+    @Transactional
     public void handleLoginTimeout(Long taskId, String moxieTaskId) {
         //重置登录时间
         this.resetLoginTaskTimeOut(taskId);
+
+        // 登录失败(如用户名密码错误),需删除task_attribute中此taskId对应的moxieTaskId,重新登录时,可正常轮询/login/submit接口
+        taskAttributeService.insertOrUpdateSelective(taskId, "moxie-taskId", "");
 
         //记录登录超时日志
         Map<String, Object> map = Maps.newHashMap();
