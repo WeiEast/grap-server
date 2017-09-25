@@ -292,8 +292,8 @@ public class MoxieBusinessService implements InitializingBean {
         Map<String, Object> map = Maps.newHashMap();
         TaskAttribute attribute = taskAttributeService.findByName(taskId, "moxie-taskId", false);
         if (attribute != null && StringUtils.isNotBlank(attribute.getValue())) {
-            logger.info("taskId={}已生成魔蝎任务id,执行查询指令,等待魔蝎异步回调登录状态...", taskId);
-            map = this.queryLoginStatusFromDirective(taskId);
+            logger.info("taskId={}已生成魔蝎任务moxieTaskId={},执行查询指令,等待魔蝎异步回调登录状态...", taskId, attribute.getValue());
+            map = this.queryLoginStatusFromDirective(taskId, attribute.getValue());
             return map;
         }
 
@@ -329,9 +329,10 @@ public class MoxieBusinessService implements InitializingBean {
      * 查询指令,获取公积金账户登录状态
      *
      * @param taskId
+     * @param moxieTaskId
      * @return
      */
-    private Map<String, Object> queryLoginStatusFromDirective(Long taskId) {
+    private Map<String, Object> queryLoginStatusFromDirective(Long taskId, String moxieTaskId) {
         Map<String, Object> map = Maps.newHashMap();
         String content = taskNextDirectiveService.getNextDirective(taskId);
         if (StringUtils.isEmpty(content)) {
@@ -339,7 +340,7 @@ public class MoxieBusinessService implements InitializingBean {
             if (moxieTimeoutService.isLoginTaskTimeout(taskId)) {
                 map.put("directive", EMoxieDirective.LOGIN_FAIL.getText());
                 map.put("information", "登录超时,请重试");
-                moxieTimeoutService.resetLoginTaskTimeOut(taskId);//返回前端登录超时后,重置记录登录时间.
+                moxieTimeoutService.handleLoginTimeout(taskId, moxieTaskId);
             } else {
                 map.put("directive", "waiting");
                 map.put("information", "请等待");

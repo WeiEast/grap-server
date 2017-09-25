@@ -8,6 +8,7 @@ import com.treefinance.saas.grapserver.biz.service.AppBizTypeService;
 import com.treefinance.saas.grapserver.biz.service.TaskLogService;
 import com.treefinance.saas.grapserver.biz.service.moxie.directive.MoxieDirectiveService;
 import com.treefinance.saas.grapserver.common.enums.ETaskStatus;
+import com.treefinance.saas.grapserver.common.enums.ETaskStep;
 import com.treefinance.saas.grapserver.common.enums.moxie.EMoxieDirective;
 import com.treefinance.saas.grapserver.common.model.dto.moxie.MoxieDirectiveDTO;
 import com.treefinance.saas.grapserver.common.utils.CommonUtils;
@@ -192,4 +193,15 @@ public class MoxieTimeoutService {
         }
     }
 
+    public void handleLoginTimeout(Long taskId, String moxieTaskId) {
+        //重置登录时间
+        this.resetLoginTaskTimeOut(taskId);
+
+        //记录登录超时日志
+        Map<String, Object> map = Maps.newHashMap();
+        map.put("error", "登录超时");
+        map.put("moxieTaskId", moxieTaskId);
+        taskLogService.insert(taskId, ETaskStep.LOGIN_FAIL.getText(), new Date(), JsonUtils.toJsonString(map));
+
+    }
 }
