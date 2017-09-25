@@ -1,7 +1,6 @@
 package com.treefinance.saas.grapserver.biz.service.directive.process;
 
 import com.alibaba.fastjson.JSON;
-import com.treefinance.saas.grapserver.biz.service.TaskLogService;
 import com.treefinance.saas.grapserver.biz.service.TaskNextDirectiveService;
 import com.treefinance.saas.grapserver.biz.service.TaskService;
 import com.treefinance.saas.grapserver.common.enums.EDirective;
@@ -17,7 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 /**
  * Created by yh-treefinance on 2017/7/5.
  */
-public abstract class AbstractDirectiveProcessor implements DirectiveProcessor {
+public abstract class AbstractDirectiveProcessor extends CallbackableDirectiveProcessor implements DirectiveProcessor {
     /**
      * logger
      */
@@ -25,8 +24,6 @@ public abstract class AbstractDirectiveProcessor implements DirectiveProcessor {
 
     @Autowired
     protected TaskService taskService;
-    @Autowired
-    protected TaskLogService taskLogService;
     @Autowired
     protected TaskNextDirectiveService taskNextDirectiveService;
 

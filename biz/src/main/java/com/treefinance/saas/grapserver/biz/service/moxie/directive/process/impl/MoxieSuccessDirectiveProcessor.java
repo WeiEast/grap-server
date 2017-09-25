@@ -10,6 +10,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import java.util.Map;
+
 /**
  * 成功指令处理
  * Created by yh-treefinance on 2017/7/6.
@@ -25,15 +27,28 @@ public class MoxieSuccessDirectiveProcessor extends MoxieAbstractDirectiveProces
         Long taskId = taskDTO.getId();
         String appId = taskDTO.getAppId();
 
-        //任务置为成功
-        taskDTO.setStatus(ETaskStatus.SUCCESS.getStatus());
-
-        // 获取商户密钥,包装数据:洗数成功后返回的dataUrl加密后通过指令传递给前端
+        // 获取商户密钥
         AppLicense appLicense = appLicenseService.getAppLicense(appId);
-        this.generateData(directiveDTO, appLicense);
+        //生成数据map
+        Map<String, Object> dataMap = generateDataMap(directiveDTO);
+        // 回调之前预处理
+        precallback(dataMap, appLicense, directiveDTO);
+        //触发回调: 0-无需回调，1-回调成功，-1-回调失败
+        int result = callback(dataMap, appLicense, directiveDTO);
 
-        // 更新任务状态,记录任务成功日志
-        taskService.updateTaskStatusWithStep(taskId, ETaskStatus.SUCCESS.getStatus());
+        if (result == 0) {
+            taskDTO.setStatus(ETaskStatus.SUCCESS.getStatus());
+        } else if (result == 1) {
+            taskDTO.setStatus(ETaskStatus.SUCCESS.getStatus());
+        } else {
+            // 指令发生变更 ： task_success -> callback_fail
+            taskNextDirectiveService.insert(taskId, directiveDTO.getDirective());
+
+            taskDTO.setStatus(ETaskStatus.FAIL.getStatus());
+            directiveDTO.setDirective(EMoxieDirective.CALLBACK_FAIL.getText());
+        }
+        //更新任务状态,记录任务成功日志
+        String stepCode = taskService.updateTaskStatusWithStep(taskId, taskDTO.getStatus());
     }
 
 

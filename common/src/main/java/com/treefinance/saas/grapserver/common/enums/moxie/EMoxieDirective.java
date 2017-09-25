@@ -11,7 +11,8 @@ public enum EMoxieDirective {
     LOGIN_FAIL("login_fail", (byte) 1),
     TASK_SUCCESS("task_success", (byte) 2),
     TASK_FAIL("task_fail", (byte) 2),
-    TASK_CANCEL("task_cancel", (byte) 2);
+    TASK_CANCEL("task_cancel", (byte) 2),
+    CALLBACK_FAIL("callback_fail", (byte) 2);
 
 
     private String text;

@@ -1,12 +1,12 @@
 package com.treefinance.saas.grapserver.biz.service.directive.process.impl;
 
-import com.treefinance.saas.grapserver.common.enums.EDirective;
 import com.treefinance.saas.grapserver.biz.service.MonitorService;
-import com.treefinance.saas.grapserver.biz.service.directive.process.CallbackableDirectiveProcessor;
-import com.treefinance.saas.grapserver.dao.entity.AppLicense;
+import com.treefinance.saas.grapserver.biz.service.directive.process.AbstractDirectiveProcessor;
+import com.treefinance.saas.grapserver.common.enums.EDirective;
 import com.treefinance.saas.grapserver.common.enums.ETaskStatus;
 import com.treefinance.saas.grapserver.common.model.dto.DirectiveDTO;
 import com.treefinance.saas.grapserver.common.model.dto.TaskDTO;
+import com.treefinance.saas.grapserver.dao.entity.AppLicense;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -18,7 +18,7 @@ import java.util.Map;
  * Created by yh-treefinance on 2017/7/6.
  */
 @Component
-public class SuccessDirectiveProcessor extends CallbackableDirectiveProcessor {
+public class SuccessDirectiveProcessor extends AbstractDirectiveProcessor {
     @Autowired
     protected MonitorService monitorService;
 

@@ -4,7 +4,7 @@ import com.datatrees.rawdatacentral.api.CrawlerService;
 import com.google.common.collect.Maps;
 import com.treefinance.saas.grapserver.biz.common.AsycExcutor;
 import com.treefinance.saas.grapserver.biz.service.MonitorService;
-import com.treefinance.saas.grapserver.biz.service.directive.process.CallbackableDirectiveProcessor;
+import com.treefinance.saas.grapserver.biz.service.directive.process.AbstractDirectiveProcessor;
 import com.treefinance.saas.grapserver.common.enums.EDirective;
 import com.treefinance.saas.grapserver.common.enums.ETaskStatus;
 import com.treefinance.saas.grapserver.common.model.dto.DirectiveDTO;
@@ -19,7 +19,7 @@ import java.util.Map;
  * Created by yh-treefinance on 2017/7/10.
  */
 @Component
-public class CancelDirectiveProcessor extends CallbackableDirectiveProcessor {
+public class CancelDirectiveProcessor extends AbstractDirectiveProcessor {
     @Autowired
     protected MonitorService monitorService;
     @Autowired

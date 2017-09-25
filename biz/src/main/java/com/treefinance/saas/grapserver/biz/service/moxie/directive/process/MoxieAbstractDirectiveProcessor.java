@@ -6,7 +6,11 @@ import com.datatrees.toolkits.util.crypto.core.Decryptor;
 import com.datatrees.toolkits.util.crypto.core.Encryptor;
 import com.datatrees.toolkits.util.json.Jackson;
 import com.google.common.collect.Maps;
-import com.treefinance.saas.grapserver.biz.service.*;
+import com.treefinance.saas.grapserver.biz.service.AppLicenseService;
+import com.treefinance.saas.grapserver.biz.service.TaskAttributeService;
+import com.treefinance.saas.grapserver.biz.service.TaskNextDirectiveService;
+import com.treefinance.saas.grapserver.biz.service.TaskService;
+import com.treefinance.saas.grapserver.biz.service.directive.process.CallbackableDirectiveProcessor;
 import com.treefinance.saas.grapserver.common.enums.ETaskStatus;
 import com.treefinance.saas.grapserver.common.enums.moxie.EMoxieDirective;
 import com.treefinance.saas.grapserver.common.exception.CallbackEncryptException;
@@ -26,14 +30,12 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.Map;
 
-public abstract class MoxieAbstractDirectiveProcessor implements MoxieDirectiveProcessor {
+public abstract class MoxieAbstractDirectiveProcessor extends CallbackableDirectiveProcessor implements MoxieDirectiveProcessor {
 
     protected final Logger logger = LoggerFactory.getLogger(getClass());
 
     @Autowired
     protected TaskService taskService;
-    @Autowired
-    protected TaskLogService taskLogService;
     @Autowired
     protected TaskNextDirectiveService taskNextDirectiveService;
     @Autowired

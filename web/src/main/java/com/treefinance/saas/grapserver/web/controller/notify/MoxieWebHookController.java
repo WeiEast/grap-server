@@ -90,6 +90,7 @@ public class MoxieWebHookController {
 //            return;
 //        }
 
+
         LOGGER.info("receive moxie eventName={},body={}", eventName.toLowerCase(), body);
         //任务创建通知
         if (StringUtils.equals(eventName.toLowerCase(), "task.submit")) {

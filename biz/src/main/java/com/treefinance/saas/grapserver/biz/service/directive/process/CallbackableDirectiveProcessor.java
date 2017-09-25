@@ -7,6 +7,7 @@ import com.treefinance.saas.grapserver.biz.common.CallbackSecureHandler;
 import com.treefinance.saas.grapserver.biz.service.AppCallbackConfigService;
 import com.treefinance.saas.grapserver.biz.service.AppLicenseService;
 import com.treefinance.saas.grapserver.biz.service.TaskCallbackLogService;
+import com.treefinance.saas.grapserver.biz.service.TaskLogService;
 import com.treefinance.saas.grapserver.common.enums.EDirective;
 import com.treefinance.saas.grapserver.common.enums.ETaskStatus;
 import com.treefinance.saas.grapserver.common.exception.CallbackEncryptException;
@@ -21,6 +22,8 @@ import com.treefinance.saas.grapserver.dao.entity.AppLicense;
 import com.treefinance.saas.grapserver.dao.entity.TaskLog;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.CollectionUtils;
 
@@ -36,7 +39,10 @@ import java.util.stream.Collectors;
  * 支持回调的指令处理
  * Created by yh-treefinance on 2017/7/11.
  */
-public abstract class CallbackableDirectiveProcessor extends AbstractDirectiveProcessor {
+public abstract class CallbackableDirectiveProcessor {
+
+    protected final Logger logger = LoggerFactory.getLogger(getClass());
+
     @Autowired
     protected AppCallbackConfigService appCallbackConfigService;
     @Autowired
@@ -45,6 +51,8 @@ public abstract class CallbackableDirectiveProcessor extends AbstractDirectivePr
     protected AppLicenseService appLicenseService;
     @Autowired
     protected TaskCallbackLogService taskCallbackLogService;
+    @Autowired
+    protected TaskLogService taskLogService;
 
     /**
      * 回调前处理
@@ -52,9 +60,6 @@ public abstract class CallbackableDirectiveProcessor extends AbstractDirectivePr
      * @param directiveDTO
      */
     protected boolean precallback(Map<String, Object> dataMap, AppLicense appLicense, DirectiveDTO directiveDTO) {
-        TaskDTO taskDTO = directiveDTO.getTask();
-        String appId = taskDTO.getAppId();
-
         // 使用商户密钥加密数据，返回给前端
         try {
             logger.info("回调数据生成： {}", JSON.toJSONString(dataMap));
@@ -64,7 +69,7 @@ public abstract class CallbackableDirectiveProcessor extends AbstractDirectivePr
             directiveDTO.setRemark(JSON.toJSONString(paramMap));
         } catch (Exception e) {
             logger.error("encryptByRSA error : " + dataMap + ",key=" + appLicense.getServerPublicKey(), e);
-            directiveDTO.setRemark("指令信息处理失败");
+            directiveDTO.setRemark(JSON.toJSONString("指令信息处理失败"));
             return false;
         }
         return true;

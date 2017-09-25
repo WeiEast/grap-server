@@ -17,9 +17,11 @@ import com.treefinance.saas.grapserver.biz.service.TaskLogService;
 import com.treefinance.saas.grapserver.biz.service.TaskNextDirectiveService;
 import com.treefinance.saas.grapserver.biz.service.TaskService;
 import com.treefinance.saas.grapserver.biz.service.moxie.directive.MoxieDirectiveService;
+import com.treefinance.saas.grapserver.common.enums.ETaskStatus;
 import com.treefinance.saas.grapserver.common.enums.ETaskStep;
 import com.treefinance.saas.grapserver.common.enums.moxie.EMoxieDirective;
 import com.treefinance.saas.grapserver.common.exception.RequestFailedException;
+import com.treefinance.saas.grapserver.common.model.dto.TaskDTO;
 import com.treefinance.saas.grapserver.common.model.dto.moxie.*;
 import com.treefinance.saas.grapserver.common.model.vo.moxie.MoxieCityInfoVO;
 import com.treefinance.saas.grapserver.common.utils.JsonUtils;
@@ -111,6 +113,11 @@ public class MoxieBusinessService implements InitializingBean {
             return;
         }
         long taskId = taskAttribute.getTaskId();
+        //任务已经完成,不再继续后续处理.(当任务超时时,会发生魔蝎回调接口重试)
+        boolean flag = isTaskDone(taskId);
+        if (flag) {
+            return;
+        }
         //1.记录采集失败日志
         taskLogService.insert(taskId, ETaskStep.CRAWL_FAIL.getText(), new Date(), message);
         //2.发送任务失败指令
@@ -123,6 +130,28 @@ public class MoxieBusinessService implements InitializingBean {
         directiveDTO.setMoxieTaskId(moxieTaskId);
         moxieDirectiveService.process(directiveDTO);
 
+    }
+
+    /**
+     * 任务是否已经结束(即:任务是否已经为成功,失败或取消)
+     *
+     * @param taskId
+     * @return
+     */
+    private boolean isTaskDone(long taskId) {
+        TaskDTO task = taskService.getById(taskId);
+        if (task == null) {
+            logger.error("taskId={}不存在", taskId);
+            return true;
+        }
+        Byte taskStatus = task.getStatus();
+        if (ETaskStatus.CANCEL.getStatus().equals(taskStatus)
+                || ETaskStatus.SUCCESS.getStatus().equals(taskStatus)
+                || ETaskStatus.FAIL.getStatus().equals(taskStatus)) {
+            logger.info("taskId={}任务已经结束,魔蝎后续重试回调不再处理", taskId);
+            return true;
+        }
+        return false;
     }
 
     /**
@@ -143,6 +172,13 @@ public class MoxieBusinessService implements InitializingBean {
             return;
         }
         long taskId = taskAttribute.getTaskId();
+
+        //任务已经完成,不再继续后续处理.(当任务超时时,会发生魔蝎回调接口重试)
+        boolean flag = isTaskDone(taskId);
+        if (flag) {
+            return;
+        }
+
         //获取魔蝎数据,调用洗数,传递账单数据
         Boolean result = true;
         String message = null;
