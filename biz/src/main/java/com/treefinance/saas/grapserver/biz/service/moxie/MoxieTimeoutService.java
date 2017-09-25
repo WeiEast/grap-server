@@ -3,6 +3,7 @@ package com.treefinance.saas.grapserver.biz.service.moxie;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
+import com.google.common.collect.Maps;
 import com.treefinance.saas.grapserver.biz.service.AppBizTypeService;
 import com.treefinance.saas.grapserver.biz.service.TaskLogService;
 import com.treefinance.saas.grapserver.biz.service.moxie.directive.MoxieDirectiveService;
@@ -26,6 +27,7 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
+import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
@@ -173,6 +175,9 @@ public class MoxieTimeoutService {
             MoxieDirectiveDTO directiveDTO = new MoxieDirectiveDTO();
             directiveDTO.setTaskId(task.getId());
             directiveDTO.setDirective(EMoxieDirective.TASK_FAIL.getText());
+            Map<String, Object> map = Maps.newHashMap();
+            map.put("taskErrorMsg", errorMessage);
+            directiveDTO.setRemark(JsonUtils.toJsonString(map));
             moxieDirectiveService.process(directiveDTO);
         }
     }
