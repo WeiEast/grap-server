@@ -1,14 +1,15 @@
 package com.treefinance.saas.grapserver.biz.service;
 
+import com.alibaba.fastjson.JSON;
 import com.datatrees.common.util.GsonUtils;
 import com.datatrees.rawdatacentral.api.CrawlerService;
 import com.datatrees.rawdatacentral.domain.result.HttpResult;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Maps;
-import com.treefinance.saas.grapserver.common.enums.EOperatorCodeType;
 import com.treefinance.saas.grapserver.biz.mq.MessageProducer;
 import com.treefinance.saas.grapserver.biz.mq.MqConfig;
 import com.treefinance.saas.grapserver.biz.mq.model.LoginMessage;
+import com.treefinance.saas.grapserver.common.enums.EOperatorCodeType;
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
@@ -67,7 +68,7 @@ public class OperatorLoginSimulationService {
         HttpResult<String> result = crawlerService.login(taskId, username, password, code, random, extra);
         taskService.updateTask(taskId, accountNo, website);
         taskTimeService.updateLoginTime(taskId, new Date());
-        logger.info("taskId={}, 登录结果={}", taskId, result);
+        logger.info("taskId={}, 登录结果={}", taskId, JSON.toJSONString(result));
         return result;
     }
 
