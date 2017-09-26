@@ -10,8 +10,8 @@ import com.treefinance.basicservice.security.crypto.facade.ISecurityCryptoServic
 import com.treefinance.commonservice.uid.UidGenerator;
 import com.treefinance.saas.grapserver.biz.config.DiamondConfig;
 import com.treefinance.saas.grapserver.common.enums.EBizType;
-import com.treefinance.saas.grapserver.common.enums.ETaskStep;
 import com.treefinance.saas.grapserver.common.enums.ETaskStatus;
+import com.treefinance.saas.grapserver.common.enums.ETaskStep;
 import com.treefinance.saas.grapserver.common.exception.base.MarkBaseException;
 import com.treefinance.saas.grapserver.common.model.dto.TaskDTO;
 import com.treefinance.saas.grapserver.common.utils.CommonUtils;
@@ -52,7 +52,7 @@ public class TaskService {
     /**
      * prefix
      */
-    private final String prefix = "saas_gateway_task_uniqueid:";
+    private final String prefix = "saas_gateway_task_account_uniqueid:";
     @Autowired
     private RedisTemplate<String, String> redisTemplate;
     @Autowired
@@ -356,7 +356,7 @@ public class TaskService {
 
     }
 
-    
+
     @Transactional
     public String failTaskWithStep(Long taskId) {
         TaskCriteria taskCriteria = new TaskCriteria();
@@ -378,7 +378,7 @@ public class TaskService {
         return task.getStepCode();
     }
 
-    
+
     @Transactional
     public String updateTaskStatusWithStep(Long taskId, Byte status) {
         if (ETaskStatus.SUCCESS.getStatus().equals(status)) {
