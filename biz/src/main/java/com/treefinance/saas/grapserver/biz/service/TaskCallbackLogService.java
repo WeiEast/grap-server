@@ -1,9 +1,10 @@
 package com.treefinance.saas.grapserver.biz.service;
 
 import com.treefinance.commonservice.uid.UidGenerator;
+import com.treefinance.saas.grapserver.common.model.dto.AppCallbackConfigDTO;
 import com.treefinance.saas.grapserver.dao.entity.TaskCallbackLog;
 import com.treefinance.saas.grapserver.dao.mapper.TaskCallbackLogMapper;
-import com.treefinance.saas.grapserver.common.model.dto.AppCallbackConfigDTO;
+import com.treefinance.saas.grapserver.dao.mapper.TaskCallbackLogUpdateMapper;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,6 +22,8 @@ public class TaskCallbackLogService {
     private static final Logger logger = LoggerFactory.getLogger(TaskLogService.class);
     @Autowired
     protected TaskCallbackLogMapper taskCallbackLogMapper;
+    @Autowired
+    private TaskCallbackLogUpdateMapper taskCallbackLogUpdateMapper;
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void insert(String callbackUrl, AppCallbackConfigDTO config, Long taskId, String params, String result, long consumeTime) {
@@ -40,6 +43,6 @@ public class TaskCallbackLogService {
             taskCallbackLog.setResponseData("");
         }
         taskCallbackLog.setConsumeTime((int) consumeTime);
-        taskCallbackLogMapper.insert(taskCallbackLog);
+        taskCallbackLogUpdateMapper.insertOrUpdateSelective(taskCallbackLog);
     }
 }
