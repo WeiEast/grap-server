@@ -28,6 +28,7 @@ import com.treefinance.saas.grapserver.common.utils.JsonUtils;
 import com.treefinance.saas.grapserver.dao.entity.TaskAttribute;
 import com.treefinance.saas.processor.thirdparty.facade.fund.FundService;
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -49,6 +50,7 @@ import java.util.stream.Collectors;
 @Service
 public class MoxieBusinessService implements InitializingBean {
     protected final Logger logger = LoggerFactory.getLogger(getClass());
+    private static String VERIFY_CODE_SMS_COUNT_PREFIX = "saas-grapserver-fund-sms-verify-code-count";
 
     @Autowired
     private TaskLogService taskLogService;
@@ -242,7 +244,7 @@ public class MoxieBusinessService implements InitializingBean {
      * @param taskId
      * @return
      */
-    public Map<String, Object> requireCaptcha(Long taskId) {
+    private Map<String, Object> requireCaptcha(Long taskId) {
         Map<String, Object> map = Maps.newHashMap();
         TaskAttribute taskAttribute = taskAttributeService.findByName(taskId, "moxie-taskId", false);
         if (taskAttribute == null) {
@@ -324,6 +326,7 @@ public class MoxieBusinessService implements InitializingBean {
      */
     @Transactional
     public Map<String, Object> createMoxieTask(Long taskId, MoxieLoginParamsDTO params) {
+
         //1.轮询指令,已经提交过登录,获取魔蝎异步回调登录状态
         Map<String, Object> map = Maps.newHashMap();
         TaskAttribute attribute = taskAttributeService.findByName(taskId, "moxie-taskId", false);
@@ -378,8 +381,14 @@ public class MoxieBusinessService implements InitializingBean {
                 map.put("information", "登录超时,请重试");
                 moxieTimeoutService.handleLoginTimeout(taskId, moxieTaskId);
             } else {
-                map.put("directive", "waiting");
-                map.put("information", "请等待");
+                //如果还未收到登录状态的指令,判断是否需要验证码
+                Map<String, Object> captchaMap = this.requireCaptcha(taskId);
+                if (!MapUtils.isEmpty(captchaMap)) {
+                    return captchaMap;
+                } else {
+                    map.put("directive", "waiting");
+                    map.put("information", "请等待");
+                }
             }
         } else {
             MoxieDirectiveDTO directiveMessage = JSON.parseObject(content, MoxieDirectiveDTO.class);
@@ -462,4 +471,10 @@ public class MoxieBusinessService implements InitializingBean {
     }
 
 
+    public void verifyCodeInput(String moxieTaskId, String input) {
+
+        fundMoxieService.submitTaskInput(moxieTaskId, input);
+
+
+    }
 }
