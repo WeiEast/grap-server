@@ -52,7 +52,7 @@ import java.util.stream.Collectors;
 @Service
 public class MoxieBusinessService implements InitializingBean {
     protected final Logger logger = LoggerFactory.getLogger(getClass());
-    private static String VERIFY_CODE_SMS_COUNT_PREFIX = "saas-grapserver-fund-sms-verify-code-count";
+    private static String VERIFY_CODE_SMS_COUNT_PREFIX = "saas-grap-fund-verify-code-count";
 
     @Autowired
     private TaskLogService taskLogService;
@@ -481,7 +481,7 @@ public class MoxieBusinessService implements InitializingBean {
     public void verifyCodeInput(Long taskId, String moxieTaskId, String input) {
         String key = Joiner.on(":").useForNull("null").join(VERIFY_CODE_SMS_COUNT_PREFIX, taskId);
         Long count = redisTemplate.opsForValue().increment(key, 1);
-        logger.info("taskId={}输入验证码次数+1,count={}", taskId, count);
+        logger.info("公积金taskId={}输入验证码次数+1,count={}", taskId, count);
         fundMoxieService.submitTaskInput(moxieTaskId, input);
 
 
