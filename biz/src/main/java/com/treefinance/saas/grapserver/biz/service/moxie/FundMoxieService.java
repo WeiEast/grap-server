@@ -179,7 +179,7 @@ public class FundMoxieService {
 
     private void wrapperParams(Map<String, Object> params, MoxieLoginParamsDTO moxieLoginParams) {
 
-        params.put("user_id", moxieLoginParams.getUniqueId());
+        params.put("user_id", moxieLoginParams.getTaskId());
         params.put("area_code", moxieLoginParams.getAreaCode());
         params.put("account", moxieLoginParams.getAccount());
         params.put("login_type", moxieLoginParams.getLoginType());

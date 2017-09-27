@@ -8,7 +8,7 @@ import java.io.Serializable;
 public class MoxieLoginParamsDTO implements Serializable {
     private static final long serialVersionUID = 2496811170928273528L;
 
-    private String uniqueId;
+    private String taskId;
     private String areaCode;
     private String account;
     private String password;
@@ -29,10 +29,10 @@ public class MoxieLoginParamsDTO implements Serializable {
 
     }
 
-    public MoxieLoginParamsDTO(String uniqueId, String areaCode, String account, String password, String loginType,
+    public MoxieLoginParamsDTO(String taskId, String areaCode, String account, String password, String loginType,
                                String idCard, String mobile, String realName, String subArea, String loanAccount,
                                String loanPassword, String corpAccount, String corpName, String origin, String ip) {
-        this.uniqueId = uniqueId;
+        this.taskId = taskId;
         this.areaCode = areaCode;
         this.account = account;
         this.password = password;
@@ -50,13 +50,12 @@ public class MoxieLoginParamsDTO implements Serializable {
 
     }
 
-
-    public String getUniqueId() {
-        return uniqueId;
+    public String getTaskId() {
+        return taskId;
     }
 
-    public void setUniqueId(String uniqueId) {
-        this.uniqueId = uniqueId;
+    public void setTaskId(String taskId) {
+        this.taskId = taskId;
     }
 
     public String getAreaCode() {

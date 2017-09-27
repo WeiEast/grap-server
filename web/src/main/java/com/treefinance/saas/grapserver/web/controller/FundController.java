@@ -168,7 +168,7 @@ public class FundController {
             throw new IllegalArgumentException("Parameter is incorrect.");
         }
 
-        MoxieLoginParamsDTO moxieLoginParamsDTO = new MoxieLoginParamsDTO(uniqueId, areaCode, account, password, loginType, idCard, mobile,
+        MoxieLoginParamsDTO moxieLoginParamsDTO = new MoxieLoginParamsDTO(String.valueOf(taskId), areaCode, account, password, loginType, idCard, mobile,
                 realName, subArea, loanAccount, loanPassword, corpAccount, corpName, origin, ip);
         Map<String, Object> map = moxieBusinessService.createMoxieTask(taskId, moxieLoginParamsDTO);
         return SimpleResult.successResult(map);
