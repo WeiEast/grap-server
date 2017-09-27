@@ -5,6 +5,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.github.stuxuhai.jpinyin.PinyinException;
 import com.github.stuxuhai.jpinyin.PinyinFormat;
 import com.github.stuxuhai.jpinyin.PinyinHelper;
+import com.google.common.base.Joiner;
 import com.google.common.base.Splitter;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
@@ -34,6 +35,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -70,6 +72,8 @@ public class MoxieBusinessService implements InitializingBean {
     private DiamondConfig diamondConfig;
     @Autowired
     private MoxieTimeoutService moxieTimeoutService;
+    @Autowired
+    private RedisTemplate<String, String> redisTemplate;
 
     /**
      * 本地缓存
@@ -268,6 +272,9 @@ public class MoxieBusinessService implements InitializingBean {
                 moxieCaptchaDTO.setValue(value);
                 moxieCaptchaDTO.setWaitSeconds(waitSeconds);
                 if (StringUtils.equalsIgnoreCase(type, "sms")) {//需要短信验证码
+                    //短信验证码需要自定义一个不同的value值,区分是两次不同的验证码请求,供前端轮询比较
+                    String key = Joiner.on(":").useForNull("null").join(VERIFY_CODE_SMS_COUNT_PREFIX, taskId);
+                    moxieCaptchaDTO.setValue(redisTemplate.opsForValue().get(key));
                     map.put("directive", "require_sms");
                     map.put("information", moxieCaptchaDTO);
                     taskLogService.insert(taskId, ETaskStep.WAITING_USER_INPUT_IMAGE_CODE.getText(), new Date(), null);
@@ -471,8 +478,10 @@ public class MoxieBusinessService implements InitializingBean {
     }
 
 
-    public void verifyCodeInput(String moxieTaskId, String input) {
-
+    public void verifyCodeInput(Long taskId, String moxieTaskId, String input) {
+        String key = Joiner.on(":").useForNull("null").join(VERIFY_CODE_SMS_COUNT_PREFIX, taskId);
+        Long count = redisTemplate.opsForValue().increment(key, 1);
+        logger.info("taskId={}输入验证码次数+1,count={}", taskId, count);
         fundMoxieService.submitTaskInput(moxieTaskId, input);
 
 
