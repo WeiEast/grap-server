@@ -12,6 +12,9 @@ import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.treefinance.commonservice.facade.location.GeoCoordSysType;
+import com.treefinance.commonservice.facade.location.GeoPosition;
+import com.treefinance.commonservice.facade.location.GeocodeService;
 import com.treefinance.saas.grapserver.biz.config.DiamondConfig;
 import com.treefinance.saas.grapserver.biz.service.TaskAttributeService;
 import com.treefinance.saas.grapserver.biz.service.TaskLogService;
@@ -74,6 +77,8 @@ public class MoxieBusinessService implements InitializingBean {
     private MoxieTimeoutService moxieTimeoutService;
     @Autowired
     private RedisTemplate<String, String> redisTemplate;
+    @Autowired
+    private GeocodeService geocodeService;
 
     /**
      * 本地缓存
@@ -485,5 +490,29 @@ public class MoxieBusinessService implements InitializingBean {
         fundMoxieService.submitTaskInput(moxieTaskId, input);
 
 
+    }
+
+    public Object getCurrentProvince(Double latitude, Double longitude) {
+        Map<String, Object> map = Maps.newHashMap();
+        GeoPosition result = null;
+        try {
+            result = geocodeService.findPosition(latitude, longitude, GeoCoordSysType.BD_09_LL);
+        } catch (Exception e) {
+            logger.error("公积金调用公共服务定位当前省份失败,latitude={},longitude={}", latitude, longitude, e);
+        }
+        if (result == null) {
+            return map;
+        }
+        String provinceName = result.getProvince();
+        List<MoxieCityInfoVO> list = this.getCityList();
+        List<MoxieCityInfoVO> currentList = list.stream()
+                .filter(moxieCityInfoVO -> provinceName.contains(moxieCityInfoVO.getLabel()))
+                .collect(Collectors.toList());
+        if (CollectionUtils.isEmpty(currentList)) {
+            return map;
+        }
+        map.put("province", currentList.get(0).getLabel());
+        map.put("list", currentList.get(0).getList());
+        return map;
     }
 }

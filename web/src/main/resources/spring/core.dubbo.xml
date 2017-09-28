@@ -28,9 +28,11 @@
     <dubbo:reference id="fundService" interface="com.treefinance.saas.processor.thirdparty.facade.fund.FundService"
                      check="false" timeout="60000" cluster="failfast"/>
 
+
     <!--兼容老的生产者-->
     <dubbo:service interface="com.treefinance.saas.gateway.servicefacade.TaskService" ref="gatewayTaskServiceFacade"/>
-    <dubbo:service interface="com.treefinance.saas.gateway.servicefacade.AppLicenseService" ref="gatewayAppLicenseServiceFacade"/>
+    <dubbo:service interface="com.treefinance.saas.gateway.servicefacade.AppLicenseService"
+                   ref="gatewayAppLicenseServiceFacade"/>
 </beans>
 
 
