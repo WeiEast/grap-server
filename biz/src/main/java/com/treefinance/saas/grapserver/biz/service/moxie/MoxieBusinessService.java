@@ -486,6 +486,7 @@ public class MoxieBusinessService implements InitializingBean {
     public void verifyCodeInput(Long taskId, String moxieTaskId, String input) {
         String key = Joiner.on(":").useForNull("null").join(VERIFY_CODE_SMS_COUNT_PREFIX, taskId);
         Long count = redisTemplate.opsForValue().increment(key, 1);
+        redisTemplate.opsForValue().getOperations().expire(key, 5, TimeUnit.MINUTES);
         logger.info("公积金taskId={}输入验证码次数+1,count={}", taskId, count);
         fundMoxieService.submitTaskInput(moxieTaskId, input);
 
