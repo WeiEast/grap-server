@@ -8,6 +8,7 @@ import com.treefinance.saas.grapserver.biz.service.AppCallbackConfigService;
 import com.treefinance.saas.grapserver.biz.service.AppLicenseService;
 import com.treefinance.saas.grapserver.biz.service.TaskCallbackLogService;
 import com.treefinance.saas.grapserver.biz.service.TaskLogService;
+import com.treefinance.saas.grapserver.common.enums.EDataType;
 import com.treefinance.saas.grapserver.common.enums.EDirective;
 import com.treefinance.saas.grapserver.common.enums.ETaskStatus;
 import com.treefinance.saas.grapserver.common.exception.CallbackEncryptException;
@@ -167,7 +168,13 @@ public abstract class CallbackableDirectiveProcessor {
         String appId = taskDTO.getAppId();
         Byte bizType = taskDTO.getBizType();
         List<AppCallbackConfigDTO> configList = appCallbackConfigService.getByAppIdAndBizType(appId, bizType);
-        return configList;
+        if (CollectionUtils.isEmpty(configList)) {
+            return Lists.newArrayList();
+        }
+        // 剔除非主流程数据
+        return configList.stream()
+                .filter(config -> config != null && !EDataType.MAIN_STREAM.getType().equals(config.getDataType()))
+                .collect(Collectors.toList());
     }
 
     /**

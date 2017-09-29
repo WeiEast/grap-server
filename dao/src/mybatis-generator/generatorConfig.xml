@@ -65,21 +65,26 @@
     </table>
 -->
 
-    <table tableName="task_bury_point_log" domainObjectName="TaskBuryPointLog"
+    <!--<table tableName="task_bury_point_log" domainObjectName="TaskBuryPointLog"-->
+           <!--enableSelectPaginationByExample="true"-->
+           <!--enableInsertOrUpdateBySelective="true"-->
+           <!--enableBatchInsert="true"-->
+           <!--enableBatchUpdateByPrimaryKey="true"-->
+           <!--enableBatchUpdateByPrimaryKeySelective="true">-->
+      <!--<property name="useActualColumnNames" value="true"/>-->
+      <!--&lt;!&ndash;<generatedKey column="Id" sqlStatement="MySql" identity="true"/>&ndash;&gt;-->
+
+    <!--</table>-->
+
+    <table tableName="app_callback_config" domainObjectName="AppCallbackConfig"
            enableSelectPaginationByExample="true"
            enableInsertOrUpdateBySelective="true"
            enableBatchInsert="true"
            enableBatchUpdateByPrimaryKey="true"
            enableBatchUpdateByPrimaryKeySelective="true">
       <property name="useActualColumnNames" value="true"/>
-      <!--<generatedKey column="Id" sqlStatement="MySql" identity="true"/>-->
-
+      <generatedKey column="Id" sqlStatement="MySql" identity="true"/>
     </table>
-
-    <!--<table tableName="app_callback_config" domainObjectName="AppCallbackConfig">-->
-      <!--<property name="useActualColumnNames" value="true"/>-->
-      <!--<generatedKey column="Id" sqlStatement="MySql" identity="true"/>-->
-    <!--</table>-->
 
     <!--<table tableName="task" domainObjectName="Task">-->
       <!--<property name="useActualColumnNames" value="true"/>-->

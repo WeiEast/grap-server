@@ -45,6 +45,8 @@ public class AppCallbackConfigDTO extends BaseDTO {
     /** */
     private Byte notifyModel;
 
+    private Byte dataType;
+
     public Integer getId() {
         return id;
     }
@@ -155,5 +157,13 @@ public class AppCallbackConfigDTO extends BaseDTO {
 
     public void setIsNewKey(Byte isNewKey) {
         this.isNewKey = isNewKey;
+    }
+
+    public Byte getDataType() {
+        return dataType;
+    }
+
+    public void setDataType(Byte dataType) {
+        this.dataType = dataType;
     }
 }
