@@ -1,6 +1,7 @@
 package com.treefinance.saas.grapserver.biz.service.moxie.directive.process.impl;
 
 import com.treefinance.saas.grapserver.biz.common.AsycExcutor;
+import com.treefinance.saas.grapserver.biz.service.MonitorService;
 import com.treefinance.saas.grapserver.biz.service.moxie.directive.process.MoxieAbstractDirectiveProcessor;
 import com.treefinance.saas.grapserver.common.enums.ETaskStatus;
 import com.treefinance.saas.grapserver.common.enums.moxie.EMoxieDirective;
@@ -19,6 +20,8 @@ import java.util.Map;
 public class MoxieFailureDirectiveProcessor extends MoxieAbstractDirectiveProcessor {
     @Autowired
     private AsycExcutor asycExcutor;
+    @Autowired
+    private MonitorService monitorService;
 
     @Override
     protected void doProcess(EMoxieDirective directive, MoxieDirectiveDTO directiveDTO) {
@@ -29,7 +32,11 @@ public class MoxieFailureDirectiveProcessor extends MoxieAbstractDirectiveProces
         taskDTO.setStatus(ETaskStatus.FAIL.getStatus());
 
         // 更新任务状态,记录失败任务日志
-        taskService.failTaskWithStep(taskDTO.getId());
+        String stepCode = taskService.failTaskWithStep(taskDTO.getId());
+        taskDTO.setStepCode(stepCode);
+
+        //发送监控消息
+        monitorService.sendMonitorMessage(taskDTO);
 
         //获取商户秘钥,包装数据:任务失败后返回失败信息加密后通过指令传递给前端
         AppLicense appLicense = appLicenseService.getAppLicense(appId);

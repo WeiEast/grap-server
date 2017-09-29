@@ -1,5 +1,6 @@
 package com.treefinance.saas.grapserver.biz.service.moxie.directive.process.impl;
 
+import com.treefinance.saas.grapserver.biz.service.MonitorService;
 import com.treefinance.saas.grapserver.biz.service.moxie.directive.process.MoxieAbstractDirectiveProcessor;
 import com.treefinance.saas.grapserver.common.enums.ETaskStatus;
 import com.treefinance.saas.grapserver.common.enums.moxie.EMoxieDirective;
@@ -8,6 +9,7 @@ import com.treefinance.saas.grapserver.common.model.dto.moxie.MoxieDirectiveDTO;
 import com.treefinance.saas.grapserver.dao.entity.AppLicense;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.Map;
@@ -20,6 +22,9 @@ import java.util.Map;
 public class MoxieSuccessDirectiveProcessor extends MoxieAbstractDirectiveProcessor {
 
     protected static final Logger logger = LoggerFactory.getLogger(MoxieSuccessDirectiveProcessor.class);
+
+    @Autowired
+    protected MonitorService monitorService;
 
     @Override
     protected void doProcess(EMoxieDirective directive, MoxieDirectiveDTO directiveDTO) {
@@ -49,6 +54,11 @@ public class MoxieSuccessDirectiveProcessor extends MoxieAbstractDirectiveProces
         }
         //更新任务状态,记录任务成功日志
         String stepCode = taskService.updateTaskStatusWithStep(taskId, taskDTO.getStatus());
+        taskDTO.setStepCode(stepCode);
+
+        //发送监控消息
+        monitorService.sendMonitorMessage(taskDTO);
+
     }
 
 
