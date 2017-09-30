@@ -165,7 +165,7 @@ public class DeliveryAddressService {
         }
         // 剔除非主流程数据
         return configList.stream()
-                .filter(config -> config != null && !EDataType.DELIVERY_ADDRESS.getType().equals(config.getDataType()))
+                .filter(config -> config != null && EDataType.DELIVERY_ADDRESS.getType().equals(config.getDataType()))
                 .collect(Collectors.toList());
     }
 }

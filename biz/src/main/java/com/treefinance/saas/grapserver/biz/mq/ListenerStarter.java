@@ -2,7 +2,9 @@ package com.treefinance.saas.grapserver.biz.mq;
 
 import com.alibaba.rocketmq.client.consumer.DefaultMQPushConsumer;
 import com.alibaba.rocketmq.client.exception.MQClientException;
+
 import static com.alibaba.rocketmq.common.protocol.heartbeat.MessageModel.CLUSTERING;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,15 +24,19 @@ public class ListenerStarter {
     private MqConfig mqConfig;
     private DefaultMQPushConsumer directiveConsumer;
     private DefaultMQPushConsumer taskLogConsumer;
+    private DefaultMQPushConsumer deliveryAddressConsumer;
     @Autowired
     private DirectiveMessageListener directiveMessageListener;
     @Autowired
     private TaskLogMessageListener taskLogMessageListener;
+    @Autowired
+    private DeliveryAddressMessageListener deliveryAddressMessageListener;
 
     @PostConstruct
     public void init() throws MQClientException {
         initDirectiveMessageMQ();
         initTaskLogMessageMQ();
+        initDeliveryAddressMessageMQ();
     }
 
     @PreDestroy
@@ -64,5 +70,21 @@ public class ListenerStarter {
         taskLogConsumer.start();
         logger.info("启动任务log数据的消费者.nameserver:{},topic:{},tag:{}", mqConfig.getNamesrvAddr(),
                 mqConfig.getConsumeTaskLogTopic(), mqConfig.getConsumeTaskLogTag());
+    }
+
+
+    private void initDeliveryAddressMessageMQ() throws MQClientException {
+        String group ="grap-data";
+        deliveryAddressConsumer = new DefaultMQPushConsumer(group);
+        deliveryAddressConsumer.setInstanceName(group);
+        deliveryAddressConsumer.setNamesrvAddr(mqConfig.getNamesrvAddr());
+        String topic = "ecommerce_trade_address";
+        String tag = "ecommerce";
+        deliveryAddressConsumer.subscribe(topic, tag);
+        deliveryAddressConsumer.setMessageModel(CLUSTERING);
+        deliveryAddressConsumer.registerMessageListener(deliveryAddressMessageListener);
+        deliveryAddressConsumer.start();
+        logger.info("启动收货地址数据的消费者.nameserver:{},topic:{},tag:{}",
+                mqConfig.getNamesrvAddr(), topic, tag);
     }
 }

@@ -173,7 +173,7 @@ public abstract class CallbackableDirectiveProcessor {
         }
         // 剔除非主流程数据
         return configList.stream()
-                .filter(config -> config != null && !EDataType.MAIN_STREAM.getType().equals(config.getDataType()))
+                .filter(config -> config != null && EDataType.MAIN_STREAM.getType().equals(config.getDataType()))
                 .collect(Collectors.toList());
     }
 
