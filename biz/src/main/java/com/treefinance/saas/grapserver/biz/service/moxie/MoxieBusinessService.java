@@ -5,12 +5,16 @@ import com.alibaba.fastjson.JSONObject;
 import com.github.stuxuhai.jpinyin.PinyinException;
 import com.github.stuxuhai.jpinyin.PinyinFormat;
 import com.github.stuxuhai.jpinyin.PinyinHelper;
+import com.google.common.base.Joiner;
 import com.google.common.base.Splitter;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.treefinance.commonservice.facade.location.GeoCoordSysType;
+import com.treefinance.commonservice.facade.location.GeoPosition;
+import com.treefinance.commonservice.facade.location.GeocodeService;
 import com.treefinance.saas.grapserver.biz.config.DiamondConfig;
 import com.treefinance.saas.grapserver.biz.service.TaskAttributeService;
 import com.treefinance.saas.grapserver.biz.service.TaskLogService;
@@ -28,11 +32,13 @@ import com.treefinance.saas.grapserver.common.utils.JsonUtils;
 import com.treefinance.saas.grapserver.dao.entity.TaskAttribute;
 import com.treefinance.saas.processor.thirdparty.facade.fund.FundService;
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -49,6 +55,7 @@ import java.util.stream.Collectors;
 @Service
 public class MoxieBusinessService implements InitializingBean {
     protected final Logger logger = LoggerFactory.getLogger(getClass());
+    private static String VERIFY_CODE_SMS_COUNT_PREFIX = "saas-grap-fund-verify-code-count";
 
     @Autowired
     private TaskLogService taskLogService;
@@ -68,6 +75,10 @@ public class MoxieBusinessService implements InitializingBean {
     private DiamondConfig diamondConfig;
     @Autowired
     private MoxieTimeoutService moxieTimeoutService;
+    @Autowired
+    private RedisTemplate<String, String> redisTemplate;
+    @Autowired
+    private GeocodeService geocodeService;
 
     /**
      * 本地缓存
@@ -242,7 +253,7 @@ public class MoxieBusinessService implements InitializingBean {
      * @param taskId
      * @return
      */
-    public Map<String, Object> requireCaptcha(Long taskId) {
+    private Map<String, Object> requireCaptcha(Long taskId) {
         Map<String, Object> map = Maps.newHashMap();
         TaskAttribute taskAttribute = taskAttributeService.findByName(taskId, "moxie-taskId", false);
         if (taskAttribute == null) {
@@ -266,6 +277,9 @@ public class MoxieBusinessService implements InitializingBean {
                 moxieCaptchaDTO.setValue(value);
                 moxieCaptchaDTO.setWaitSeconds(waitSeconds);
                 if (StringUtils.equalsIgnoreCase(type, "sms")) {//需要短信验证码
+                    //短信验证码需要自定义一个不同的value值,区分是两次不同的验证码请求,供前端轮询比较
+                    String key = Joiner.on(":").useForNull("null").join(VERIFY_CODE_SMS_COUNT_PREFIX, taskId);
+                    moxieCaptchaDTO.setValue(redisTemplate.opsForValue().get(key));
                     map.put("directive", "require_sms");
                     map.put("information", moxieCaptchaDTO);
                     taskLogService.insert(taskId, ETaskStep.WAITING_USER_INPUT_IMAGE_CODE.getText(), new Date(), null);
@@ -324,6 +338,7 @@ public class MoxieBusinessService implements InitializingBean {
      */
     @Transactional
     public Map<String, Object> createMoxieTask(Long taskId, MoxieLoginParamsDTO params) {
+
         //1.轮询指令,已经提交过登录,获取魔蝎异步回调登录状态
         Map<String, Object> map = Maps.newHashMap();
         TaskAttribute attribute = taskAttributeService.findByName(taskId, "moxie-taskId", false);
@@ -378,8 +393,14 @@ public class MoxieBusinessService implements InitializingBean {
                 map.put("information", "登录超时,请重试");
                 moxieTimeoutService.handleLoginTimeout(taskId, moxieTaskId);
             } else {
-                map.put("directive", "waiting");
-                map.put("information", "请等待");
+                //如果还未收到登录状态的指令,判断是否需要验证码
+                Map<String, Object> captchaMap = this.requireCaptcha(taskId);
+                if (!MapUtils.isEmpty(captchaMap)) {
+                    return captchaMap;
+                } else {
+                    map.put("directive", "waiting");
+                    map.put("information", "请等待");
+                }
             }
         } else {
             MoxieDirectiveDTO directiveMessage = JSON.parseObject(content, MoxieDirectiveDTO.class);
@@ -462,4 +483,37 @@ public class MoxieBusinessService implements InitializingBean {
     }
 
 
+    public void verifyCodeInput(Long taskId, String moxieTaskId, String input) {
+        String key = Joiner.on(":").useForNull("null").join(VERIFY_CODE_SMS_COUNT_PREFIX, taskId);
+        Long count = redisTemplate.opsForValue().increment(key, 1);
+        redisTemplate.opsForValue().getOperations().expire(key, 5, TimeUnit.MINUTES);
+        logger.info("公积金taskId={}输入验证码次数+1,count={}", taskId, count);
+        fundMoxieService.submitTaskInput(moxieTaskId, input);
+
+
+    }
+
+    public Object getCurrentProvince(Double latitude, Double longitude) {
+        Map<String, Object> map = Maps.newHashMap();
+        GeoPosition result = null;
+        try {
+            result = geocodeService.findPosition(latitude, longitude, GeoCoordSysType.BD_09_LL);
+        } catch (Exception e) {
+            logger.error("公积金调用公共服务定位当前省份失败,latitude={},longitude={}", latitude, longitude, e);
+        }
+        if (result == null) {
+            return map;
+        }
+        String provinceName = result.getProvince();
+        List<MoxieCityInfoVO> list = this.getCityList();
+        List<MoxieCityInfoVO> currentList = list.stream()
+                .filter(moxieCityInfoVO -> provinceName.contains(moxieCityInfoVO.getLabel()))
+                .collect(Collectors.toList());
+        if (CollectionUtils.isEmpty(currentList)) {
+            return map;
+        }
+        map.put("province", currentList.get(0).getLabel());
+        map.put("list", currentList.get(0).getList());
+        return map;
+    }
 }

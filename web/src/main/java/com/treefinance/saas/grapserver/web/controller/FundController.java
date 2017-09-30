@@ -106,8 +106,21 @@ public class FundController {
         Map<String, Object> map = Maps.newHashMap();
         map.put("config", result);
         map.put("license", appBizLicenseService.isShowLicense(appid, EBizType.FUND.getText()));
+        map.put("currentProvince", "");
         return SimpleResult.successResult(map);
     }
+
+    @RequestMapping(value = "/current/province", method = RequestMethod.POST)
+    public Object getCurrentProvince(@RequestParam String appid,
+                                     @RequestParam("latitude") Double latitude,
+                                     @RequestParam("longitude") Double longitude) {
+        if (StringUtils.isBlank(appid) || latitude == null || longitude == null) {
+            throw new IllegalArgumentException("Parameter is incorrect.");
+        }
+        Object result = moxieBusinessService.getCurrentProvince(latitude, longitude);
+        return SimpleResult.successResult(result);
+    }
+
 
     /**
      * 登录配置接口
@@ -192,8 +205,7 @@ public class FundController {
             return SimpleResult.failResult("任务查询失败");
         }
         String moxieTaskId = attribute.getValue();
-
-        fundMoxieService.submitTaskInput(moxieTaskId, input);
+        moxieBusinessService.verifyCodeInput(taskId, moxieTaskId, input);
         return SimpleResult.successResult(true);
     }
 
@@ -206,16 +218,10 @@ public class FundController {
      */
     @RequestMapping(value = "/next_directive", method = {RequestMethod.POST})
     public Object nextMoxieDirective(@RequestParam("taskid") Long taskid) throws Exception {
-
-        //判断是否需要验证码
-//        Map<String, Object> result = moxieBusinessService.requireCaptcha(taskid);
-//        if (!MapUtils.isEmpty(result)) {
-//            return SimpleResult.successResult(result);
-//        }
         String content = taskNextDirectiveService.getNextDirective(taskid);
         Map<String, Object> map = Maps.newHashMap();
         if (StringUtils.isEmpty(content)) {
-//             轮询过程中，判断任务是否超时
+            //轮询过程中，判断任务是否超时
             if (moxieTimeoutService.isTaskTimeout(taskid)) {
                 // 异步处理任务超时
                 moxieTimeoutService.handleTaskTimeout(taskid);
