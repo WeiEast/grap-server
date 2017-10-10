@@ -9,6 +9,7 @@ import com.treefinance.commonservice.facade.location.*;
 import com.treefinance.commonservice.uid.UidGenerator;
 import com.treefinance.saas.grapserver.dao.entity.TaskDevice;
 import com.treefinance.saas.grapserver.dao.mapper.TaskDeviceMapper;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -61,30 +62,35 @@ public class TaskDeviceService {
                     record.setTaskId(taskId);
                     // 增加经纬度校验
                     String positionData = (String) cardInfoMap.get("positionData");
-                    if (StringUtils.isNotEmpty(positionData)){
+                    if (StringUtils.isNotEmpty(positionData)) {
                         List<String> positionDataList = Splitter.on(',').omitEmptyStrings().splitToList(positionData);
-                        Double positionX = Doubles.tryParse(positionDataList.get(0));
-                        Double positionY = Doubles.tryParse(positionDataList.get(1));
-                        record.setPositionX(positionX);
-                        record.setPositionY(positionY);
-                        // 根据经纬度查询省市
-                        if(positionX != null && positionY != null){
-                            GeoPosition geoPosition = null;
-                            String geoCoordSysType = geoCoordSysTypeMap.get(coorType);
-                            if (StringUtils.isEmpty(geoCoordSysType)) {
-                                geoPosition = geocodeService.findPosition(positionX, positionY);
-                            } else {
-                                geoPosition = geocodeService.findPosition(positionX, positionY, GeoCoordSysType.valueOf(geoCoordSysType));
+                        if (CollectionUtils.isNotEmpty(positionDataList) && positionDataList.size() >= 2) {
+                            Double positionX = Doubles.tryParse(positionDataList.get(0));
+                            Double positionY = Doubles.tryParse(positionDataList.get(1));
+                            record.setPositionX(positionX);
+                            record.setPositionY(positionY);
+                            // 根据经纬度查询省市
+                            if (positionX != null && positionY != null) {
+                                GeoPosition geoPosition = null;
+                                String geoCoordSysType = geoCoordSysTypeMap.get(coorType);
+                                if (StringUtils.isEmpty(geoCoordSysType)) {
+                                    geoPosition = geocodeService.findPosition(positionX, positionY);
+                                } else {
+                                    geoPosition = geocodeService.findPosition(positionX, positionY, GeoCoordSysType.valueOf(geoCoordSysType));
+                                }
+                                // 填入省市名称
+                                if (geoPosition != null) {
+                                    record.setProvinceName(geoPosition.getProvince());
+                                    record.setCityName(geoPosition.getCity());
+                                }
                             }
-                            // 填入省市名称
-                            if (geoPosition != null){
-                                record.setProvinceName(geoPosition.getProvince());
-                                record.setCityName(geoPosition.getCity());
-                            }
+                        } else {
+                            logger.error("the positionData of task={} is empty : coorType={},ipAddress={},deviceInfo={}", taskId, coorType, ipAddress, deviceInfo);
                         }
+
                     }
                     record.setAppVersion((String) cardInfoMap.get("appVersion"));
-                    record.setPlatformId(cardInfoMap.get("platformId") == null ? null : Ints.tryParse(cardInfoMap.get("platformId").toString()) );
+                    record.setPlatformId(cardInfoMap.get("platformId") == null ? null : Ints.tryParse(cardInfoMap.get("platformId").toString()));
                     record.setPhoneBrand((String) cardInfoMap.get("phoneBrand"));
                     record.setPhoneModel((String) cardInfoMap.get("phoneModel"));
                     record.setPhoneVersion((String) cardInfoMap.get("phoneVersion"));
