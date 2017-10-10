@@ -282,12 +282,12 @@ public class MoxieBusinessService implements InitializingBean {
                     moxieCaptchaDTO.setValue(redisTemplate.opsForValue().get(key));
                     map.put("directive", "require_sms");
                     map.put("information", moxieCaptchaDTO);
-                    taskLogService.insert(taskId, ETaskStep.WAITING_USER_INPUT_IMAGE_CODE.getText(), new Date(), null);
+                    taskLogService.insert(taskId, ETaskStep.WAITING_USER_INPUT_MESSAGE_CODE.getText(), new Date(), null);
                 }
                 if (StringUtils.equalsIgnoreCase(type, "img")) {//需要图片验证码
                     map.put("directive", "require_picture");
                     map.put("information", moxieCaptchaDTO);
-                    taskLogService.insert(taskId, ETaskStep.WAITING_USER_INPUT_MESSAGE_CODE.getText(), new Date(), null);
+                    taskLogService.insert(taskId, ETaskStep.WAITING_USER_INPUT_IMAGE_CODE.getText(), new Date(), null);
 
                 }
                 logger.info("魔蝎公积金任务需要验证码,moxieCaptchaDTO={}", JSON.toJSONString(moxieCaptchaDTO));
