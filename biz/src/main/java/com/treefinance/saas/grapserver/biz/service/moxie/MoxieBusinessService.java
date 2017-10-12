@@ -101,6 +101,7 @@ public class MoxieBusinessService implements InitializingBean {
         List<MoxieCityInfoVO> cityList = this.queryCityList();
         logger.info("获取魔蝎城市公积金列表: cityList={}", JSON.toJSONString(cityList));
         if (CollectionUtils.isEmpty(cityList)) {
+            this.cache.put("citys", Lists.newArrayList());
             return;
         }
         this.cache.put("citys", cityList);
