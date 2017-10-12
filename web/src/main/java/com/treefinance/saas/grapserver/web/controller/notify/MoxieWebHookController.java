@@ -120,7 +120,7 @@ public class MoxieWebHookController {
                     }
                     if (StringUtils.equals(result, "true")) {
                         //通知状态变更为 '认证成功'
-                        moxieTaskEventNoticeService.loginSuccess(moxieTaskId);
+//                        moxieTaskEventNoticeService.loginSuccess(moxieTaskId);
                         LOGGER.info("task event. result={}", result);
                     }
                 }
