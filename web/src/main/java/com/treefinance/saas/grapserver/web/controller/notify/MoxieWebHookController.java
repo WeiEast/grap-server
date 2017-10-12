@@ -120,7 +120,7 @@ public class MoxieWebHookController {
                     }
                     if (StringUtils.equals(result, "true")) {
                         //通知状态变更为 '认证成功'
-//                        moxieTaskEventNoticeService.loginSuccess(moxieTaskId);
+                        moxieTaskEventNoticeService.loginSuccess(moxieTaskId);
                         LOGGER.info("task event. result={}", result);
                     }
                 }
@@ -162,7 +162,7 @@ public class MoxieWebHookController {
                     String result = map.get("result").toString();
                     String moxieTaskId = map.get("task_id") == null ? null : map.get("task_id").toString();
                     if (StringUtils.equals(result, "true")) {
-//                        moxieTaskEventNoticeService.bill(moxieTaskId);
+                        moxieTaskEventNoticeService.bill(moxieTaskId);
                         LOGGER.info("bill event. result={}, task_id={}", result, moxieTaskId);
                     }
                 }
