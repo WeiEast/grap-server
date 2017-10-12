@@ -438,11 +438,6 @@ public class MoxieBusinessService implements InitializingBean {
     private List<MoxieCityInfoVO> queryCityList() {
         List<MoxieCityInfoVO> result = Lists.newArrayList();
         List<MoxieCityInfoDTO> list = fundMoxieService.queryCityListEx();
-        String excludeCitys = diamondConfig.getMoxieFundExcludeCitys();
-        List<String> excludeCityList = Lists.newArrayList();
-        if (StringUtils.isNotBlank(excludeCitys)) {
-            excludeCityList = Splitter.on(",").splitToList(excludeCitys);
-        }
         //<province,list>
         Map<String, List<MoxieCityInfoDTO>> map = list.stream().collect(Collectors.groupingBy(MoxieCityInfoDTO::getProvince));
         for (Map.Entry<String, List<MoxieCityInfoDTO>> entry : map.entrySet()) {
@@ -457,9 +452,6 @@ public class MoxieBusinessService implements InitializingBean {
                 sonVO.setValue(dto.getArea_code());
                 sonVO.setSpell(convertToPinyinString(dto.getCity_name()));
                 sonVO.setStatus(dto.getStatus());
-                if (excludeCityList.contains(dto.getCity_name())) {
-                    sonVO.setStatus("1");//将配置中排除的城市status设置为1
-                }
                 sonList.add(sonVO);
             }
             sonList = sonList.stream().sorted((o1, o2) -> o1.getSpell().compareTo(o2.getSpell())).collect(Collectors.toList());

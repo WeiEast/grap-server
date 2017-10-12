@@ -37,9 +37,6 @@ public class DiamondConfig {
     @DAttribute(key = "check.uniqueId.count.max")
     private Integer maxCount;
 
-    @DAttribute(key = "moxie.fund.exclude.citys")
-    private String moxieFundExcludeCitys;
-
     @DAttribute(key = "moxie.fund.apiKey")
     private String moxieFundApiKey;
 
@@ -219,13 +216,5 @@ public class DiamondConfig {
 
     public void setMoxieUrlFundGetFundsEx(String moxieUrlFundGetFundsEx) {
         this.moxieUrlFundGetFundsEx = moxieUrlFundGetFundsEx;
-    }
-
-    public String getMoxieFundExcludeCitys() {
-        return moxieFundExcludeCitys;
-    }
-
-    public void setMoxieFundExcludeCitys(String moxieFundExcludeCitys) {
-        this.moxieFundExcludeCitys = moxieFundExcludeCitys;
     }
 }
