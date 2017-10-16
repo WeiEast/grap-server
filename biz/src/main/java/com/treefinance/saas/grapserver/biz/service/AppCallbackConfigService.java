@@ -8,6 +8,7 @@ import com.google.common.collect.Lists;
 import com.treefinance.saas.assistant.config.listener.handler.ConfigUpdateMessageHandler;
 import com.treefinance.saas.assistant.config.model.ConfigUpdateModel;
 import com.treefinance.saas.assistant.config.model.enums.ConfigType;
+import com.treefinance.saas.grapserver.common.enums.EDataType;
 import com.treefinance.saas.grapserver.common.model.dto.AppCallbackConfigDTO;
 import com.treefinance.saas.grapserver.common.utils.DataConverterUtils;
 import com.treefinance.saas.grapserver.dao.entity.AppCallbackBiz;
@@ -170,6 +171,40 @@ public class AppCallbackConfigService implements InitializingBean, ConfigUpdateM
         return null;
     }
 
+    public List<AppCallbackConfigDTO> getByAppIdAndBizType4DeliverAddress(String appId, Byte bizType) {
+        // 1.查询所有回调
+        List<AppCallbackConfig> list = getByAppId(appId).stream()
+                .filter(config -> EDataType.DELIVERY_ADDRESS.getType().equals(config.getDataType())).collect(Collectors.toList());
+        if (CollectionUtils.isEmpty(list)) {
+            return null;
+        }
+        Byte defaultType = Byte.valueOf("0");
+        // 2.查询回调类型
+        List<Integer> callbackIds = list.stream().map(AppCallbackConfig::getId).collect(Collectors.toList());
+
+
+        List<AppCallbackBiz> callbackBizs = getCallbackTypeList(callbackIds).stream()
+                .filter(appCallbackBiz -> bizType.equals(appCallbackBiz.getBizType()) || defaultType.equals(appCallbackBiz.getBizType()))
+                .collect(Collectors.toList());
+        if (CollectionUtils.isEmpty(callbackBizs)) {
+            return null;
+        }
+        // 3.根据业务类型匹配：如果存在此类型回调则使用，不存在则使用默认
+        Map<Byte, List<AppCallbackBiz>> callbackBizMap = callbackBizs.stream().collect(Collectors.groupingBy(AppCallbackBiz::getBizType));
+        if (callbackBizMap.containsKey(bizType)) {
+            List<Integer> bizCallbackIds = callbackBizMap.get(bizType).stream().map(AppCallbackBiz::getCallbackId).collect(Collectors.toList());
+            List<AppCallbackConfig> bizConfigs = list.stream().filter(config -> bizCallbackIds.contains(config.getId())).collect(Collectors.toList());
+            logger.info("根据业务类型匹配回调配置结果:bizConfigs={}", JSON.toJSONString(bizConfigs));
+            return DataConverterUtils.convert(bizConfigs, AppCallbackConfigDTO.class);
+        } else if (callbackBizMap.containsKey(defaultType)) {
+            List<Integer> bizCallbackIds = callbackBizMap.get(defaultType).stream().map(AppCallbackBiz::getCallbackId).collect(Collectors.toList());
+            List<AppCallbackConfig> defaultConfigs = list.stream().filter(config -> bizCallbackIds.contains(config.getId())).collect(Collectors.toList());
+            logger.info("根据业务类型匹配回调配置结果:defaultConfigs={}", JSON.toJSONString(defaultConfigs));
+            return DataConverterUtils.convert(defaultConfigs, AppCallbackConfigDTO.class);
+        }
+        return null;
+    }
+
     @Override
     public List<ConfigType> getConfigType() {
         return Lists.newArrayList(ConfigType.MERCHANT_CALLBACK);
@@ -211,4 +246,5 @@ public class AppCallbackConfigService implements InitializingBean, ConfigUpdateM
         this.callbackTypeCache.putAll(appCallbackBizList.stream().collect(
                 Collectors.groupingBy(AppCallbackBiz::getCallbackId)));
     }
+
 }
