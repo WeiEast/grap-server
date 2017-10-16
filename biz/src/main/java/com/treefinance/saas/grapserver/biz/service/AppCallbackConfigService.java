@@ -95,6 +95,7 @@ public class AppCallbackConfigService implements InitializingBean, ConfigUpdateM
         }
         try {
             list = this.callbackCache.get(appId);
+            logger.info("从本地缓存中获取appId={}的回调配置为list={}", appId, JSON.toJSONString(list));
         } catch (ExecutionException e) {
             logger.error("获取appId={}授权信息失败", appId, e);
         }
@@ -114,6 +115,7 @@ public class AppCallbackConfigService implements InitializingBean, ConfigUpdateM
         }
         try {
             Map<Integer, List<AppCallbackBiz>> map = this.callbackTypeCache.getAll(callbackIds);
+            logger.info("从本地缓存中获取callbackIds={}的回调业务类型数据map={}", JSON.toJSONString(callbackIds), JSON.toJSONString(map));
             if (map != null) {
                 map.forEach((callbackId, typeList) -> {
                     if (!CollectionUtils.isEmpty(typeList)) {
@@ -157,10 +159,12 @@ public class AppCallbackConfigService implements InitializingBean, ConfigUpdateM
         if (callbackBizMap.containsKey(bizType)) {
             List<Integer> bizCallbackIds = callbackBizMap.get(bizType).stream().map(AppCallbackBiz::getCallbackId).collect(Collectors.toList());
             List<AppCallbackConfig> bizConfigs = list.stream().filter(config -> bizCallbackIds.contains(config.getId())).collect(Collectors.toList());
+            logger.info("根据业务类型匹配回调配置结果:bizConfigs={}", JSON.toJSONString(bizConfigs));
             return DataConverterUtils.convert(bizConfigs, AppCallbackConfigDTO.class);
         } else if (callbackBizMap.containsKey(defaultType)) {
             List<Integer> bizCallbackIds = callbackBizMap.get(defaultType).stream().map(AppCallbackBiz::getCallbackId).collect(Collectors.toList());
             List<AppCallbackConfig> defaultConfigs = list.stream().filter(config -> bizCallbackIds.contains(config.getId())).collect(Collectors.toList());
+            logger.info("根据业务类型匹配回调配置结果:defaultConfigs={}", JSON.toJSONString(defaultConfigs));
             return DataConverterUtils.convert(defaultConfigs, AppCallbackConfigDTO.class);
         }
         return null;

@@ -160,6 +160,7 @@ public class DeliveryAddressService {
         String appId = taskDTO.getAppId();
         Byte bizType = taskDTO.getBizType();
         List<AppCallbackConfigDTO> configList = appCallbackConfigService.getByAppIdAndBizType(appId, bizType);
+        logger.info("根据业务类型匹配回调配置结果:configList={}", JSON.toJSONString(configList));
         if (CollectionUtils.isEmpty(configList)) {
             return Lists.newArrayList();
         }
