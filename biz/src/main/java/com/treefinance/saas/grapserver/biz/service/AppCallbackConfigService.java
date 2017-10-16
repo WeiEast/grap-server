@@ -184,7 +184,7 @@ public class AppCallbackConfigService implements InitializingBean, ConfigUpdateM
             return;
         }
         this.callbackCache.refresh(appId);
-        this.callbackTypeCache.invalidateAll();
+//        this.callbackTypeCache.invalidateAll();
     }
 
     @Override
