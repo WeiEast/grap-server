@@ -63,13 +63,13 @@ public class DeliveryAddressService {
         // 3.获取商户密钥
         AppLicense appLicense = appLicenseService.getAppLicense(appId);
         if (appLicense == null) {
-            logger.info("delivery address callback failed : appLicense of {} is null, message={}...", appId, JSON.toJSONString(message));
+            logger.info("delivery address callback failed : taskId={} appLicense of {} is null, message={}...", taskId, appId, JSON.toJSONString(message));
             return;
         }
 
         List<AppCallbackConfigDTO> callbackConfigs = getCallbackConfigs(taskDTO);
         if (CollectionUtils.isEmpty(callbackConfigs)) {
-            logger.info("delivery address callback failed : callbackConfigs of {} is null, message={}...", appId, JSON.toJSONString(message));
+            logger.info("delivery address callback failed :taskId={}, callbackConfigs of {} is null, message={}...", taskId, appId, JSON.toJSONString(message));
             return;
         }
         Map<String, Object> dataMap = JSON.parseObject(message.getData());
@@ -97,10 +97,10 @@ public class DeliveryAddressService {
                         dataMap.put("taskStatus", "003");
                     }
                     if (logger.isDebugEnabled()) {
-                        logger.debug("download data success : {}  >>>>>>> {}", JSON.toJSONString(dataMap), data);
+                        logger.debug("delivery address callback : download data success : {} ", data);
                     }
                 } catch (Exception e) {
-                    logger.error("download data failed : data={}", JSON.toJSONString(dataMap));
+                    logger.error("delivery address callback :  download data failed : data={}", JSON.toJSONString(dataMap));
                     dataMap.put("taskErrorMsg", "下载数据失败");
                     dataMap.put("taskStatus", "004");
                 }
@@ -110,23 +110,30 @@ public class DeliveryAddressService {
             dataMap.put("taskStatus", "002");
             dataMap.put("taskErrorMsg", "抓取失败");
         }
+        if (logger.isDebugEnabled()) {
+            logger.debug("delivery address callback : generate dataMap  {} ", JSON.toJSONString(dataMap));
+        }
         // 5.回调 aes加密
         String aesKey = appLicense.getDataSecretKey();
         for (AppCallbackConfigDTO configDTO : callbackConfigs) {
-            // 成功是否通知
-            if (!Byte.valueOf("1").equals(configDTO.getIsNotifySuccess()) && !isSuccess) {
+            // 任务成功但是成功不通知
+            if (isSuccess && !Byte.valueOf("1").equals(configDTO.getIsNotifySuccess())) {
+                logger.info("delivery address callback : 任务成功，但是成功不通知...taskId={}, config={}", taskId, JSON.toJSONString(configDTO));
                 continue;
             }
-            // 失败是否通知
-            if (!Byte.valueOf("1").equals(configDTO.getIsNotifyFailure()) && isSuccess) {
+            // 任务失败但是失败不通知
+            else if (!isSuccess && !Byte.valueOf("1").equals(configDTO.getIsNotifyFailure())) {
+                logger.info("delivery address callback : 任务失败，但是成功不通知...taskId={}, config={}", taskId, JSON.toJSONString(configDTO));
                 continue;
             }
+
             String result = "";
             Map<String, Object> paramMap = Maps.newHashMap();
             String callbackUrl = configDTO.getUrl();
             Long startTime = System.currentTimeMillis();
             try {
                 String params = callbackSecureHandler.encryptByAES(dataMap, aesKey);
+                logger.info("delivery address callback : encrypt data : taskId={}, params={}", taskId, params);
                 paramMap.put("params", params);
                 // 超时时间（秒）
                 Byte timeOut = configDTO.getTimeOut();
@@ -134,17 +141,18 @@ public class DeliveryAddressService {
                 Byte retryTimes = configDTO.getRetryTimes();
                 result = HttpClientUtils.doPostWithTimoutAndRetryTimes(callbackUrl, timeOut, retryTimes, paramMap);
                 taskLogService.insert(taskId, "收货地址回调通知成功", new Date(), result);
+                logger.info("delivery address callback : callback success : taskId={},callbackUrl={}, params={}", taskId, callbackUrl, params);
             } catch (CallbackEncryptException e) {
-                logger.error("encry data failed : data={},key={}", dataMap, aesKey, e);
+                logger.error("delivery address callback : encry data failed : data={},key={}", dataMap, aesKey, e);
                 result = e.getMessage();
             } catch (RequestFailedException e) {
-                logger.error("callback failed : data={}", dataMap, e);
+                logger.error("delivery address callback : 收货地址回调通知失败 : data={}", dataMap, e);
                 result = e.getResult();
                 taskLogService.insert(taskId, "收货地址回调通知失败", new Date(), result);
             } finally {
                 long consumeTime = System.currentTimeMillis() - startTime;
                 taskCallbackLogService.insert(callbackUrl, configDTO, taskId, JSON.toJSONString(originalDataMap), result, consumeTime);
-                logger.info("回调收货地址通知：config={},data={},paramMap={},result={}", JSON.toJSONString(configDTO), dataMap, paramMap, result);
+                logger.info("delivery address callback ：收货地址回调通知完成：config={},data={},paramMap={},result={}", JSON.toJSONString(configDTO), dataMap, paramMap, result);
             }
         }
 
