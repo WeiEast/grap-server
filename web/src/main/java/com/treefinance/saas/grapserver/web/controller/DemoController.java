@@ -25,13 +25,13 @@ public class DemoController {
     private DemoService demoService;
 
     @RequestMapping(value = "/fund/data", method = {RequestMethod.POST})
-    public Object createTask(@RequestParam("appid") String appid,
+    public Object createTask(@RequestParam("appid") String appId,
                              @RequestParam("params") String params,
                              HttpServletRequest request) {
-        if (StringUtils.isBlank(appid) || StringUtils.isBlank(params)) {
+        if (StringUtils.isBlank(appId) || StringUtils.isBlank(params)) {
             throw new IllegalArgumentException("Parameter is incorrect.");
         }
-        Object result = demoService.getFundData(params);
+        Object result = demoService.getFundData(appId, params);
         return Results.newSuccessResult(result);
 
 
