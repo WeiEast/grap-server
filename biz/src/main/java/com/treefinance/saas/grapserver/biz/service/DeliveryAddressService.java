@@ -20,6 +20,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -133,6 +135,7 @@ public class DeliveryAddressService {
             Long startTime = System.currentTimeMillis();
             try {
                 String params = callbackSecureHandler.encryptByAES(dataMap, aesKey);
+                params = URLEncoder.encode(params, "utf-8");
                 logger.info("delivery address callback : encrypt data : taskId={}, params={}", taskId, params);
                 paramMap.put("params", params);
                 // 超时时间（秒）
@@ -142,7 +145,7 @@ public class DeliveryAddressService {
                 result = HttpClientUtils.doPostWithTimoutAndRetryTimes(callbackUrl, timeOut, retryTimes, paramMap);
                 taskLogService.insert(taskId, "收货地址回调通知成功", new Date(), result);
                 logger.info("delivery address callback : callback success : taskId={},callbackUrl={}, params={}", taskId, callbackUrl, params);
-            } catch (CallbackEncryptException e) {
+            } catch (CallbackEncryptException | UnsupportedEncodingException e) {
                 logger.error("delivery address callback : encry data failed : data={},key={}", dataMap, aesKey, e);
                 result = e.getMessage();
             } catch (RequestFailedException e) {
