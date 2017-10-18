@@ -38,7 +38,7 @@ public class DemoController {
                                         @RequestParam("params") String params,
                                         @RequestParam("pageNum") Integer pageNum) {
 
-        if (StringUtils.isBlank(appId) || StringUtils.isBlank(params) || Optional.fromNullable(pageNum).or(0) <= 0) {
+        if (StringUtils.isBlank(appId) || StringUtils.isBlank(params) || Optional.fromNullable(pageNum).or(0) < 0) {
             throw new IllegalArgumentException("Parameter is incorrect.");
         }
         Object result = demoService.getFundBillRecordList(appId, params, pageNum);
@@ -49,7 +49,7 @@ public class DemoController {
     public Object getFundLoanInfoList(@RequestParam("appid") String appId,
                                       @RequestParam("params") String params,
                                       @RequestParam("pageNum") Integer pageNum) {
-        if (StringUtils.isBlank(appId) || StringUtils.isBlank(params) || Optional.fromNullable(pageNum).or(0) <= 0) {
+        if (StringUtils.isBlank(appId) || StringUtils.isBlank(params) || Optional.fromNullable(pageNum).or(0) < 0) {
             throw new IllegalArgumentException("Parameter is incorrect.");
         }
         Object result = demoService.getFundLoanInfoList(appId, params, pageNum);
@@ -60,7 +60,7 @@ public class DemoController {
     public Object getFundLoanRepayRecordList(@RequestParam("appid") String appId,
                                              @RequestParam("params") String params,
                                              @RequestParam("pageNum") Integer pageNum) {
-        if (StringUtils.isBlank(appId) || StringUtils.isBlank(params) || Optional.fromNullable(pageNum).or(0) <= 0) {
+        if (StringUtils.isBlank(appId) || StringUtils.isBlank(params) || Optional.fromNullable(pageNum).or(0) < 0) {
             throw new IllegalArgumentException("Parameter is incorrect.");
         }
         Object result = demoService.getFundLoanRepayRecordList(appId, params, pageNum);

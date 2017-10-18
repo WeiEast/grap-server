@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 
 import java.net.URLDecoder;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -47,22 +48,27 @@ public class DemoService {
 
         AppLicense appLicense = appLicenseService.getAppLicense(appId);
         if (appLicense == null) {
-            logger.error("公积金获取demo数据:通过appId={}查询密钥信息空", appId);
+            logger.error("获取demo数据:通过appId={}查询密钥信息空", appId);
             throw new BizException("获取数据失败,请求非法");
         }
         try {
             params = URLDecoder.decode(params, "utf-8");
             params = callbackSecureHandler.decrypt(params, appLicense.getServerPrivateKey());
-            logger.info("公积金获取demo数据:解密后的数据url为{}", JSON.toJSONString(params));
+            logger.info("获取demo数据:解密后的数据url为{}", JSON.toJSONString(params));
         } catch (Exception e) {
             logger.error("decryptRSAData failed", e);
             throw new BizException("获取数据失败,请求非法");
         }
-        String key = appId + "_" + params;
+        Map<String, Object> paramMap = JsonUtils.toJavaBean(params, Map.class);
+        if (!paramMap.containsKey("dataUrl")) {
+            logger.error("获取demo数据:解密后的params没有dataUrl属性 paramsMap={}", JSON.toJSONString(paramMap));
+            throw new BizException("获取数据失败,请求非法");
+        }
+        String key = appId + "_" + paramMap.get("dataUrl");
         String data = redisTemplate.opsForValue().get(key);
         if (StringUtils.isBlank(data)) {
             try {
-                byte[] result = RemoteDataDownloadUtils.download(params, byte[].class);
+                byte[] result = RemoteDataDownloadUtils.download(paramMap.get("dataUrl").toString(), byte[].class);
                 // 数据体默认使用商户密钥加密
                 data = callbackSecureHandler.decryptByAES(result, appLicense.getDataSecretKey());
             } catch (Exception e) {
@@ -106,8 +112,12 @@ public class DemoService {
         }
         FundDataDTO fundData = JsonUtils.toJavaBean(data, FundDataDTO.class);
         List<FundBillRecordDTO> list = fundData.getBillRecordList();
-        int start = (pageNum - 1) * 10;
-        int end = pageNum * 10;
+        int total = list.size();
+        int start = pageNum * 10;
+        int end = ((pageNum + 1) * 10) >= total ? total : ((pageNum + 1) * 10);
+        if (start > end) {
+            return Lists.newArrayList();
+        }
         List<FundBillRecordDTO> subList = list.subList(start, end);
         return subList;
     }
@@ -127,8 +137,12 @@ public class DemoService {
         }
         FundDataDTO fundData = JsonUtils.toJavaBean(data, FundDataDTO.class);
         List<FundLoanInfoDTO> list = fundData.getLoanInfoList();
-        int start = (pageNum - 1) * 10;
-        int end = pageNum * 10;
+        int total = list.size();
+        int start = pageNum * 10;
+        int end = ((pageNum + 1) * 10) >= total ? total : ((pageNum + 1) * 10);
+        if (start > end) {
+            return Lists.newArrayList();
+        }
         List<FundLoanInfoDTO> subList = list.subList(start, end);
         return subList;
     }
@@ -148,8 +162,12 @@ public class DemoService {
         }
         FundDataDTO fundData = JsonUtils.toJavaBean(data, FundDataDTO.class);
         List<FundLoanRepayRecordDTO> list = fundData.getLoanRepayRecordList();
-        int start = (pageNum - 1) * 10;
-        int end = pageNum * 10;
+        int total = list.size();
+        int start = pageNum * 10;
+        int end = ((pageNum + 1) * 10) >= total ? total : ((pageNum + 1) * 10);
+        if (start > end) {
+            return Lists.newArrayList();
+        }
         List<FundLoanRepayRecordDTO> subList = list.subList(start, end);
         return subList;
     }

@@ -100,103 +100,12 @@ public abstract class MoxieAbstractDirectiveProcessor extends CallbackableDirect
         }
     }
 
-    protected void generateData(MoxieDirectiveDTO directiveDTO, AppLicense appLicense) {
-        TaskDTO task = directiveDTO.getTask();
-        Map<String, Object> dataMap = ifNull(JSON.parseObject(directiveDTO.getRemark()), Maps.newHashMap());
-        dataMap.put("uniqueId", ifNull(dataMap.get("uniqueId"), directiveDTO.getTask().getUniqueId()));
-        dataMap.put("taskId", ifNull(dataMap.get("taskId"), directiveDTO.getTask().getId()));
-        dataMap.put("taskErrorMsg", ifNull(dataMap.get("taskErrorMsg"), ""));
 
-        dataMap.put("taskStatus", "001");
-        // 此次任务状态：001-抓取成功，002-抓取失败，003-抓取结果为空,004-任务取消
-        if (ETaskStatus.SUCCESS.getStatus().equals(task.getStatus())) {
-            dataMap.put("taskStatus", "001");
-        } else if (ETaskStatus.FAIL.getStatus().equals(task.getStatus())) {
-            dataMap.put("taskStatus", "002");
-        } else if (ETaskStatus.CANCEL.getStatus().equals(task.getStatus())) {
-            dataMap.put("taskStatus", "004");
-
-        }
-        logger.info("handle moxie directive generateData :data={}", JSON.toJSONString(dataMap));
-        try {
-            String params = encryptByRSA(dataMap, appLicense);
-            Map<String, Object> paramMap = Maps.newHashMap();
-            paramMap.put("params", params);
-            directiveDTO.setRemark(JSON.toJSONString(paramMap));
-        } catch (Exception e) {
-            logger.error("handle moxie directive error :encryptByRSA error dataMap={},key={}", dataMap, appLicense.getServerPublicKey(), e);
-            directiveDTO.setRemark("指令信息处理失败");
-        }
-    }
 
     protected <T> T ifNull(T value, T defaultValue) {
         return value == null ? defaultValue : value;
     }
 
-    /**
-     * RSA 加密
-     *
-     * @param dataMap
-     * @param appLicense
-     * @return
-     * @throws CallbackEncryptException
-     * @throws UnsupportedEncodingException
-     */
-    private String encryptByRSA(Map<String, Object> dataMap, AppLicense appLicense) throws CallbackEncryptException, UnsupportedEncodingException {
-        String rsaPublicKey = appLicense.getServerPublicKey();
-        String encryptedData = Helper.encryptResult(dataMap, rsaPublicKey);
-        String params = URLEncoder.encode(encryptedData, "utf-8");
-        return params;
-    }
-
-    static class Helper {
-
-
-        public static Encryptor getEncryptor(String publicKey) {
-            try {
-                if (StringUtils.isEmpty(publicKey)) {
-                    throw new IllegalArgumentException("Can not find commercial tenant's public key.");
-                }
-
-                return RSA.createEncryptor(publicKey);
-            } catch (Exception e) {
-                throw new CryptorException(
-                        "Error creating Encryptor with publicKey '" + publicKey + " to encrypt callback.", e);
-            }
-        }
-
-        public static String encryptResult(Object data, String publicKey) throws CallbackEncryptException {
-            Encryptor encryptor = getEncryptor(publicKey);
-            try {
-                byte[] json = Jackson.toJSONByteArray(data);
-                return encryptor.encryptAsBase64String(json);
-            } catch (Exception e) {
-                throw new CallbackEncryptException("Error encrypting callback data", e);
-            }
-        }
-
-        public static Decryptor getDecryptor(String privateKey) {
-            try {
-                if (StringUtils.isEmpty(privateKey)) {
-                    throw new IllegalArgumentException("Can not find commercial tenant's private key.");
-                }
-                return RSA.createDecryptor(privateKey);
-            } catch (Exception e) {
-                throw new CryptorException(
-                        "Error creating Decryptor with privateKey '" + privateKey + " to encrypt callback.", e);
-            }
-        }
-
-        public static String decryptResult(Object data, String privateKey) throws CallbackEncryptException {
-            Decryptor decryptor = getDecryptor(privateKey);
-            try {
-                byte[] json = Jackson.toJSONByteArray(data);
-                return decryptor.decryptWithBase64AsString(json);
-            } catch (Exception e) {
-                throw new CallbackEncryptException("Error decrypting callback data", e);
-            }
-        }
-    }
 
     /**
      * 处理指令
