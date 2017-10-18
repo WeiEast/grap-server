@@ -1,17 +1,23 @@
 package com.treefinance.saas.grapserver.biz.service;
 
 import com.alibaba.fastjson.JSON;
+import com.google.common.collect.Lists;
 import com.treefinance.saas.grapserver.biz.common.CallbackSecureHandler;
+import com.treefinance.saas.grapserver.common.exception.BizException;
+import com.treefinance.saas.grapserver.common.model.dto.demo.fund.*;
+import com.treefinance.saas.grapserver.common.utils.JsonUtils;
 import com.treefinance.saas.grapserver.common.utils.RemoteDataDownloadUtils;
 import com.treefinance.saas.grapserver.dao.entity.AppLicense;
-import com.treefinance.saas.knife.common.CommonStateCode;
-import com.treefinance.saas.knife.result.Results;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
 import java.net.URLDecoder;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 /**
  * H5界面演示系统业务处理类
@@ -26,13 +32,23 @@ public class DemoService {
     private CallbackSecureHandler callbackSecureHandler;
     @Autowired
     private AppLicenseService appLicenseService;
+    @Autowired
+    private RedisTemplate<String, String> redisTemplate;
 
-    public Object getFundData(String appId, String params) {
+
+    /**
+     * oss上获取数据,并做缓存
+     *
+     * @param appId
+     * @param params
+     * @return
+     */
+    private String getData(String appId, String params) {
 
         AppLicense appLicense = appLicenseService.getAppLicense(appId);
         if (appLicense == null) {
             logger.error("公积金获取demo数据:通过appId={}查询密钥信息空", appId);
-            return Results.newFailedResult(CommonStateCode.FAILURE);
+            throw new BizException("获取数据失败,请求非法");
         }
         try {
             params = URLDecoder.decode(params, "utf-8");
@@ -40,20 +56,101 @@ public class DemoService {
             logger.info("公积金获取demo数据:解密后的数据url为{}", JSON.toJSONString(params));
         } catch (Exception e) {
             logger.error("decryptRSAData failed", e);
-            return Results.newFailedResult(e.getMessage(), CommonStateCode.FAILURE);
+            throw new BizException("获取数据失败,请求非法");
         }
-        // oss 下载数据
-        String data;
-        try {
-            byte[] result = RemoteDataDownloadUtils.download(params, byte[].class);
-            // 数据体默认使用商户密钥加密
-            data = callbackSecureHandler.decryptByAES(result, appLicense.getDataSecretKey());
-        } catch (Exception e) {
-            logger.error("downloadData failed", e);
-            return Results.newFailedResult(e.getMessage(), CommonStateCode.FAILURE);
+        String key = appId + "_" + params;
+        String data = redisTemplate.opsForValue().get(key);
+        if (StringUtils.isBlank(data)) {
+            try {
+                byte[] result = RemoteDataDownloadUtils.download(params, byte[].class);
+                // 数据体默认使用商户密钥加密
+                data = callbackSecureHandler.decryptByAES(result, appLicense.getDataSecretKey());
+            } catch (Exception e) {
+                logger.error("downloadData failed", e);
+                throw new BizException("获取数据失败,下载失败");
+            }
+            redisTemplate.opsForValue().set(key, data, 5, TimeUnit.MINUTES);
         }
+        return data;
+    }
 
+    /**
+     * 获取公积金用户基本信息
+     *
+     * @param appId
+     * @param params
+     * @return
+     */
+    public Object getFundUserInfo(String appId, String params) {
+        String data = this.getData(appId, params);
+        if (StringUtils.isBlank(data)) {
+            return null;
+        }
+        FundDataDTO fundData = JsonUtils.toJavaBean(data, FundDataDTO.class);//json转化耗时
+        FundUserInfoDTO userInfo = fundData.getUserInfo();
+        return userInfo;
+    }
 
-        return null;
+    /**
+     * 获取公积金缴存记录
+     *
+     * @param appId
+     * @param params
+     * @param pageNum
+     * @return
+     */
+    public Object getFundBillRecordList(String appId, String params, Integer pageNum) {
+        String data = this.getData(appId, params);
+        if (StringUtils.isBlank(data)) {
+            return Lists.newArrayList();
+        }
+        FundDataDTO fundData = JsonUtils.toJavaBean(data, FundDataDTO.class);
+        List<FundBillRecordDTO> list = fundData.getBillRecordList();
+        int start = (pageNum - 1) * 10;
+        int end = pageNum * 10;
+        List<FundBillRecordDTO> subList = list.subList(start, end);
+        return subList;
+    }
+
+    /**
+     * 获取公积金贷款信息
+     *
+     * @param appId
+     * @param params
+     * @param pageNum
+     * @return
+     */
+    public Object getFundLoanInfoList(String appId, String params, Integer pageNum) {
+        String data = this.getData(appId, params);
+        if (StringUtils.isBlank(data)) {
+            return Lists.newArrayList();
+        }
+        FundDataDTO fundData = JsonUtils.toJavaBean(data, FundDataDTO.class);
+        List<FundLoanInfoDTO> list = fundData.getLoanInfoList();
+        int start = (pageNum - 1) * 10;
+        int end = pageNum * 10;
+        List<FundLoanInfoDTO> subList = list.subList(start, end);
+        return subList;
+    }
+
+    /**
+     * 获取公积金还款信息
+     *
+     * @param appId
+     * @param params
+     * @param pageNum
+     * @return
+     */
+    public Object getFundLoanRepayRecordList(String appId, String params, Integer pageNum) {
+        String data = this.getData(appId, params);
+        if (StringUtils.isBlank(data)) {
+            return Lists.newArrayList();
+        }
+        FundDataDTO fundData = JsonUtils.toJavaBean(data, FundDataDTO.class);
+        List<FundLoanRepayRecordDTO> list = fundData.getLoanRepayRecordList();
+        int start = (pageNum - 1) * 10;
+        int end = pageNum * 10;
+        List<FundLoanRepayRecordDTO> subList = list.subList(start, end);
+        return subList;
     }
 }

@@ -1,5 +1,6 @@
 package com.treefinance.saas.grapserver.web.controller;
 
+import com.google.common.base.Optional;
 import com.treefinance.saas.grapserver.biz.service.DemoService;
 import com.treefinance.saas.knife.result.Results;
 import org.apache.commons.lang3.StringUtils;
@@ -10,8 +11,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-
-import javax.servlet.http.HttpServletRequest;
 
 /**
  * Created by haojiahong on 2017/10/17.
@@ -24,17 +23,48 @@ public class DemoController {
     @Autowired
     private DemoService demoService;
 
-    @RequestMapping(value = "/fund/data", method = {RequestMethod.POST})
-    public Object createTask(@RequestParam("appid") String appId,
-                             @RequestParam("params") String params,
-                             HttpServletRequest request) {
+    @RequestMapping(value = "/fund/user_info", method = {RequestMethod.POST})
+    public Object getFundUserInfo(@RequestParam("appid") String appId,
+                                  @RequestParam("params") String params) {
         if (StringUtils.isBlank(appId) || StringUtils.isBlank(params)) {
             throw new IllegalArgumentException("Parameter is incorrect.");
         }
-        Object result = demoService.getFundData(appId, params);
+        Object result = demoService.getFundUserInfo(appId, params);
         return Results.newSuccessResult(result);
+    }
 
+    @RequestMapping(value = "/fund/bill_record/list", method = {RequestMethod.POST})
+    public Object getFundBillRecordList(@RequestParam("appid") String appId,
+                                        @RequestParam("params") String params,
+                                        @RequestParam("pageNum") Integer pageNum) {
 
+        if (StringUtils.isBlank(appId) || StringUtils.isBlank(params) || Optional.fromNullable(pageNum).or(0) <= 0) {
+            throw new IllegalArgumentException("Parameter is incorrect.");
+        }
+        Object result = demoService.getFundBillRecordList(appId, params, pageNum);
+        return Results.newSuccessResult(result);
+    }
+
+    @RequestMapping(value = "/fund/loan_info/list", method = {RequestMethod.POST})
+    public Object getFundLoanInfoList(@RequestParam("appid") String appId,
+                                      @RequestParam("params") String params,
+                                      @RequestParam("pageNum") Integer pageNum) {
+        if (StringUtils.isBlank(appId) || StringUtils.isBlank(params) || Optional.fromNullable(pageNum).or(0) <= 0) {
+            throw new IllegalArgumentException("Parameter is incorrect.");
+        }
+        Object result = demoService.getFundLoanInfoList(appId, params, pageNum);
+        return Results.newSuccessResult(result);
+    }
+
+    @RequestMapping(value = "/fund/loan_repay_record/list", method = {RequestMethod.POST})
+    public Object getFundLoanRepayRecordList(@RequestParam("appid") String appId,
+                                             @RequestParam("params") String params,
+                                             @RequestParam("pageNum") Integer pageNum) {
+        if (StringUtils.isBlank(appId) || StringUtils.isBlank(params) || Optional.fromNullable(pageNum).or(0) <= 0) {
+            throw new IllegalArgumentException("Parameter is incorrect.");
+        }
+        Object result = demoService.getFundLoanRepayRecordList(appId, params, pageNum);
+        return Results.newSuccessResult(result);
     }
 
 
