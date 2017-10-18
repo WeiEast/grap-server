@@ -2,6 +2,8 @@ package com.treefinance.saas.grapserver.biz.service;
 
 import com.alibaba.fastjson.JSON;
 import com.google.common.collect.Lists;
+import com.treefinance.basicservice.security.crypto.facade.EncryptionIntensityEnum;
+import com.treefinance.basicservice.security.crypto.facade.ISecurityCryptoService;
 import com.treefinance.saas.grapserver.biz.common.CallbackSecureHandler;
 import com.treefinance.saas.grapserver.common.exception.BizException;
 import com.treefinance.saas.grapserver.common.model.dto.demo.fund.*;
@@ -35,6 +37,8 @@ public class DemoService {
     private AppLicenseService appLicenseService;
     @Autowired
     private RedisTemplate<String, String> redisTemplate;
+    @Autowired
+    private ISecurityCryptoService iSecurityCryptoService;
 
 
     /**
@@ -94,6 +98,15 @@ public class DemoService {
         }
         FundDataDTO fundData = JsonUtils.toJavaBean(data, FundDataDTO.class);//json转化耗时
         FundUserInfoDTO userInfo = fundData.getUserInfo();
+        if (userInfo == null) {
+            return null;
+        }
+        if (StringUtils.isNotBlank(userInfo.getIdCard())) {
+            userInfo.setIdCard(iSecurityCryptoService.decrypt(userInfo.getIdCard(), EncryptionIntensityEnum.NORMAL));
+        }
+        if (StringUtils.isNotBlank(userInfo.getMobile())) {
+            userInfo.setMobile(iSecurityCryptoService.decrypt(userInfo.getMobile(), EncryptionIntensityEnum.NORMAL));
+        }
         return userInfo;
     }
 
@@ -144,6 +157,17 @@ public class DemoService {
             return Lists.newArrayList();
         }
         List<FundLoanInfoDTO> subList = list.subList(start, end);
+        for (FundLoanInfoDTO info : subList) {
+            if (StringUtils.isNotBlank(info.getIdCard())) {
+                info.setIdCard(iSecurityCryptoService.decrypt(info.getIdCard(), EncryptionIntensityEnum.NORMAL));
+            }
+            if (StringUtils.isNotBlank(info.getPhone())) {
+                info.setPhone(iSecurityCryptoService.decrypt(info.getPhone(), EncryptionIntensityEnum.NORMAL));
+            }
+            if (StringUtils.isNotBlank(info.getBankAccount())) {
+                info.setBankAccount(iSecurityCryptoService.decrypt(info.getBankAccount(), EncryptionIntensityEnum.NORMAL));
+            }
+        }
         return subList;
     }
 
