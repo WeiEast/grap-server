@@ -50,7 +50,7 @@ public class ListenerStarter {
 
     private void initDirectiveMessageMQ() throws MQClientException {
         directiveConsumer = new DefaultMQPushConsumer(mqConfig.getDirectiveGroupName());
-        directiveConsumer.setInstanceName(mqConfig.getDirectiveGroupName());
+//        directiveConsumer.setInstanceName(mqConfig.getDirectiveGroupName());
         directiveConsumer.setNamesrvAddr(mqConfig.getNamesrvAddr());
         directiveConsumer.subscribe(mqConfig.getConsumeDirectiveTopic(), mqConfig.getConsumeDirectiveTag());
         directiveConsumer.setMessageModel(CLUSTERING);
@@ -62,7 +62,7 @@ public class ListenerStarter {
 
     private void initTaskLogMessageMQ() throws MQClientException {
         taskLogConsumer = new DefaultMQPushConsumer(mqConfig.getTaskLogGroupName());
-        taskLogConsumer.setInstanceName(mqConfig.getTaskLogGroupName());
+//        taskLogConsumer.setInstanceName(mqConfig.getTaskLogGroupName());
         taskLogConsumer.setNamesrvAddr(mqConfig.getNamesrvAddr());
         taskLogConsumer.subscribe(mqConfig.getConsumeTaskLogTopic(), mqConfig.getConsumeTaskLogTag());
         taskLogConsumer.setMessageModel(CLUSTERING);
@@ -76,7 +76,7 @@ public class ListenerStarter {
     private void initDeliveryAddressMessageMQ() throws MQClientException {
         String group ="grap-data";
         deliveryAddressConsumer = new DefaultMQPushConsumer(group);
-        deliveryAddressConsumer.setInstanceName(group);
+//        deliveryAddressConsumer.setInstanceName(group);
         deliveryAddressConsumer.setNamesrvAddr(mqConfig.getNamesrvAddr());
         String topic = "ecommerce_trade_address";
         String tag = "ecommerce";
