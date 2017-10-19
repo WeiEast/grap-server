@@ -96,7 +96,7 @@ public class DemoService {
         if (StringUtils.isBlank(data)) {
             return null;
         }
-        FundDataDTO fundData = JsonUtils.toJavaBean(data, FundDataDTO.class);//json转化耗时
+        FundDataDTO fundData = JsonUtils.toJavaBean(data, FundDataDTO.class);
         FundUserInfoDTO userInfo = fundData.getUserInfo();
         if (userInfo == null) {
             return null;

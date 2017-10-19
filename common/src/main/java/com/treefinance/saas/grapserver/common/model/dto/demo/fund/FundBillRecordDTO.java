@@ -34,6 +34,50 @@ public class FundBillRecordDTO implements Serializable {
      */
     private Integer subsidyOutcome;
 
+    /**
+     * 余额
+     */
+    private Integer balance;
+
+    /**
+     * 缴存时间
+     */
+    private String dealTime;
+
+    /**
+     * 缴存年月
+     */
+    private String month;
+    /**
+     * 缴存公司名称
+     */
+    private String corporationName;
+
+    /**
+     * 公司缴存金额
+     */
+    private Integer corporationIncome;
+
+    /**
+     * 个人缴存金额
+     */
+    private Integer customerIncome;
+
+    /**
+     * 公司缴存比例
+     */
+    private String corporationRatio;
+
+    /**
+     * 个人缴存比例
+     */
+    private String customerRatio;
+
+    /**
+     * 补缴
+     */
+    private Integer additionalIncome;
+
     public Integer getOutcome() {
         return outcome;
     }
@@ -72,5 +116,77 @@ public class FundBillRecordDTO implements Serializable {
 
     public void setSubsidyOutcome(Integer subsidyOutcome) {
         this.subsidyOutcome = subsidyOutcome;
+    }
+
+    public Integer getBalance() {
+        return balance;
+    }
+
+    public void setBalance(Integer balance) {
+        this.balance = balance;
+    }
+
+    public String getDealTime() {
+        return dealTime;
+    }
+
+    public void setDealTime(String dealTime) {
+        this.dealTime = dealTime;
+    }
+
+    public String getMonth() {
+        return month;
+    }
+
+    public void setMonth(String month) {
+        this.month = month;
+    }
+
+    public String getCorporationName() {
+        return corporationName;
+    }
+
+    public void setCorporationName(String corporationName) {
+        this.corporationName = corporationName;
+    }
+
+    public Integer getCorporationIncome() {
+        return corporationIncome;
+    }
+
+    public void setCorporationIncome(Integer corporationIncome) {
+        this.corporationIncome = corporationIncome;
+    }
+
+    public Integer getCustomerIncome() {
+        return customerIncome;
+    }
+
+    public void setCustomerIncome(Integer customerIncome) {
+        this.customerIncome = customerIncome;
+    }
+
+    public String getCorporationRatio() {
+        return corporationRatio;
+    }
+
+    public void setCorporationRatio(String corporationRatio) {
+        this.corporationRatio = corporationRatio;
+    }
+
+    public String getCustomerRatio() {
+        return customerRatio;
+    }
+
+    public void setCustomerRatio(String customerRatio) {
+        this.customerRatio = customerRatio;
+    }
+
+    public Integer getAdditionalIncome() {
+        return additionalIncome;
+    }
+
+    public void setAdditionalIncome(Integer additionalIncome) {
+        this.additionalIncome = additionalIncome;
     }
 }
