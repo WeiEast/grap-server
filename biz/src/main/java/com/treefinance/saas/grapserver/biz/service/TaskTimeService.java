@@ -147,7 +147,7 @@ public class TaskTimeService {
                     // 清除已经处理的超时任务
                     if (CollectionUtils.isNotEmpty(timeoutTaskIds)) {
                         redisTemplate.opsForSet().remove(taskSetKey, timeoutTaskIds.toArray(new String[]{}));
-                        logger.info("scheduleTaskTimeout : task is timeout : timeoutTaskIds={}", completedTaskIds);
+                        logger.info("scheduleTaskTimeout : task is timeout : timeoutTaskIds={}", timeoutTaskIds);
                     }
                 }
 
