@@ -94,12 +94,12 @@ public class DemoService {
     public Object getFundUserInfo(String appId, String params) {
         String data = this.getData(appId, params);
         if (StringUtils.isBlank(data)) {
-            return null;
+            return Lists.newArrayList();
         }
         FundDataDTO fundData = JsonUtils.toJavaBean(data, FundDataDTO.class);
         FundUserInfoDTO userInfo = fundData.getUserInfo();
         if (userInfo == null) {
-            return null;
+            return Lists.newArrayList();
         }
         if (StringUtils.isNotBlank(userInfo.getIdCard())) {
             userInfo.setIdCard(iSecurityCryptoService.decrypt(userInfo.getIdCard(), EncryptionIntensityEnum.NORMAL));
@@ -107,7 +107,9 @@ public class DemoService {
         if (StringUtils.isNotBlank(userInfo.getMobile())) {
             userInfo.setMobile(iSecurityCryptoService.decrypt(userInfo.getMobile(), EncryptionIntensityEnum.NORMAL));
         }
-        return userInfo;
+        List<FundUserInfoDTO> userInfoList = Lists.newArrayList();
+        userInfoList.add(userInfo);
+        return userInfoList;
     }
 
     /**
