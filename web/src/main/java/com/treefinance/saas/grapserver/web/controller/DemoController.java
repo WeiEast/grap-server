@@ -25,7 +25,7 @@ public class DemoController {
 
     @RequestMapping(value = "/fund/user_info", method = {RequestMethod.POST})
     public Object getFundUserInfo(@RequestParam("appid") String appId,
-                                  @RequestParam("params") String params) {
+                                  @RequestParam("demoParams") String params) {
         if (StringUtils.isBlank(appId) || StringUtils.isBlank(params)) {
             throw new IllegalArgumentException("Parameter is incorrect.");
         }
@@ -35,7 +35,7 @@ public class DemoController {
 
     @RequestMapping(value = "/fund/bill_record/list", method = {RequestMethod.POST})
     public Object getFundBillRecordList(@RequestParam("appid") String appId,
-                                        @RequestParam("params") String params,
+                                        @RequestParam("demoParams") String params,
                                         @RequestParam("pageNum") Integer pageNum) {
 
         if (StringUtils.isBlank(appId) || StringUtils.isBlank(params) || Optional.fromNullable(pageNum).or(0) < 0) {
@@ -47,7 +47,7 @@ public class DemoController {
 
     @RequestMapping(value = "/fund/loan_info/list", method = {RequestMethod.POST})
     public Object getFundLoanInfoList(@RequestParam("appid") String appId,
-                                      @RequestParam("params") String params,
+                                      @RequestParam("demoParams") String params,
                                       @RequestParam("pageNum") Integer pageNum) {
         if (StringUtils.isBlank(appId) || StringUtils.isBlank(params) || Optional.fromNullable(pageNum).or(0) < 0) {
             throw new IllegalArgumentException("Parameter is incorrect.");
@@ -58,7 +58,7 @@ public class DemoController {
 
     @RequestMapping(value = "/fund/loan_repay_record/list", method = {RequestMethod.POST})
     public Object getFundLoanRepayRecordList(@RequestParam("appid") String appId,
-                                             @RequestParam("params") String params,
+                                             @RequestParam("demoParams") String params,
                                              @RequestParam("pageNum") Integer pageNum) {
         if (StringUtils.isBlank(appId) || StringUtils.isBlank(params) || Optional.fromNullable(pageNum).or(0) < 0) {
             throw new IllegalArgumentException("Parameter is incorrect.");
