@@ -1,8 +1,8 @@
 package com.treefinance.saas.grapserver.biz.service.directive.process.impl;
 
 import com.alibaba.fastjson.JSON;
-import com.treefinance.saas.grapserver.common.enums.EDirective;
 import com.treefinance.saas.grapserver.biz.service.directive.process.AbstractDirectiveProcessor;
+import com.treefinance.saas.grapserver.common.enums.EDirective;
 import com.treefinance.saas.grapserver.common.model.dto.DirectiveDTO;
 import org.springframework.stereotype.Component;
 
@@ -15,7 +15,7 @@ public class BaseDirectiveProcessor extends AbstractDirectiveProcessor {
 
     @Override
     protected void doProcess(EDirective directive, DirectiveDTO directiveDTO) {
-        logger.info("处理基础指令消息：{}", JSON.toJSONString(directiveDTO));
+        logger.info("处理基础指令消息aa：{}", JSON.toJSONString(directiveDTO));
     }
 
 }

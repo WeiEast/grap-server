@@ -195,4 +195,8 @@ public class DemoService {
         List<FundLoanRepayRecordDTO> subList = list.subList(start, end);
         return subList;
     }
+
+    public static void main(String[] args) {
+        System.out.println("aa");
+    }
 }
