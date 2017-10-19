@@ -1,10 +1,12 @@
 package com.treefinance.saas.grapserver.biz.service;
 
 import com.alibaba.fastjson.JSON;
+import com.google.common.base.Splitter;
 import com.google.common.collect.Lists;
 import com.treefinance.basicservice.security.crypto.facade.EncryptionIntensityEnum;
 import com.treefinance.basicservice.security.crypto.facade.ISecurityCryptoService;
 import com.treefinance.saas.grapserver.biz.common.CallbackSecureHandler;
+import com.treefinance.saas.grapserver.biz.config.DiamondConfig;
 import com.treefinance.saas.grapserver.common.exception.BizException;
 import com.treefinance.saas.grapserver.common.model.dto.demo.fund.*;
 import com.treefinance.saas.grapserver.common.utils.JsonUtils;
@@ -39,6 +41,8 @@ public class DemoService {
     private RedisTemplate<String, String> redisTemplate;
     @Autowired
     private ISecurityCryptoService iSecurityCryptoService;
+    @Autowired
+    private DiamondConfig diamondConfig;
 
 
     /**
@@ -92,6 +96,10 @@ public class DemoService {
      * @return
      */
     public Object getFundUserInfo(String appId, String params) {
+        if (!checkIsDemoApp(appId)) {
+            logger.error("此商户appId={}没有权限访问demo信息页面,demoAppIds={}", appId, diamondConfig.getDemoH5AppIds());
+            throw new BizException("获取数据失败,非法请求");
+        }
         String data = this.getData(appId, params);
         if (StringUtils.isBlank(data)) {
             return Lists.newArrayList();
@@ -121,6 +129,10 @@ public class DemoService {
      * @return
      */
     public Object getFundBillRecordList(String appId, String params, Integer pageNum) {
+        if (!checkIsDemoApp(appId)) {
+            logger.error("此商户appId={}没有权限访问demo信息页面,demoAppIds={}", appId, diamondConfig.getDemoH5AppIds());
+            throw new BizException("获取数据失败,非法请求");
+        }
         String data = this.getData(appId, params);
         if (StringUtils.isBlank(data)) {
             return Lists.newArrayList();
@@ -146,6 +158,10 @@ public class DemoService {
      * @return
      */
     public Object getFundLoanInfoList(String appId, String params, Integer pageNum) {
+        if (!checkIsDemoApp(appId)) {
+            logger.error("此商户appId={}没有权限访问demo信息页面,demoAppIds={}", appId, diamondConfig.getDemoH5AppIds());
+            throw new BizException("获取数据失败,非法请求");
+        }
         String data = this.getData(appId, params);
         if (StringUtils.isBlank(data)) {
             return Lists.newArrayList();
@@ -182,6 +198,10 @@ public class DemoService {
      * @return
      */
     public Object getFundLoanRepayRecordList(String appId, String params, Integer pageNum) {
+        if (!checkIsDemoApp(appId)) {
+            logger.error("此商户appId={}没有权限访问demo信息页面,demoAppIds={}", appId, diamondConfig.getDemoH5AppIds());
+            throw new BizException("获取数据失败,非法请求");
+        }
         String data = this.getData(appId, params);
         if (StringUtils.isBlank(data)) {
             return Lists.newArrayList();
@@ -196,5 +216,16 @@ public class DemoService {
         }
         List<FundLoanRepayRecordDTO> subList = list.subList(start, end);
         return subList;
+    }
+
+    private Boolean checkIsDemoApp(String appId) {
+        String demoAppIds = diamondConfig.getDemoH5AppIds();
+        if (StringUtils.isBlank(demoAppIds)) {
+            logger.error("配置中心中demo.h5.appIds属性未配置");
+            return false;
+        }
+        List<String> demoAppIdList = Splitter.on(",").splitToList(demoAppIds);
+        boolean flag = demoAppIdList.contains(appId);
+        return flag;
     }
 }
