@@ -15,7 +15,7 @@ public class BaseDirectiveProcessor extends AbstractDirectiveProcessor {
 
     @Override
     protected void doProcess(EDirective directive, DirectiveDTO directiveDTO) {
-        logger.info("处理基础指令消息aa：{}", JSON.toJSONString(directiveDTO));
+        logger.info("处理基础指令消息：{}", JSON.toJSONString(directiveDTO));
     }
 
 }
