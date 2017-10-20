@@ -28,11 +28,11 @@ import com.treefinance.saas.grapserver.common.exception.AppIdUncheckException;
 import com.treefinance.saas.grapserver.common.exception.ForbiddenException;
 import com.treefinance.saas.grapserver.common.model.AppLicenseKey;
 import com.treefinance.saas.grapserver.common.model.Constants;
-import com.treefinance.saas.grapserver.web.request.WrappedHttpServletRequest;
-import com.treefinance.saas.knife.result.SimpleResult;
 import com.treefinance.saas.grapserver.common.model.WebContext;
 import com.treefinance.saas.grapserver.common.utils.IpUtils;
 import com.treefinance.saas.grapserver.dao.entity.AppLicense;
+import com.treefinance.saas.grapserver.web.request.WrappedHttpServletRequest;
+import com.treefinance.saas.knife.result.SimpleResult;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -82,7 +82,7 @@ public class WebContextFilter extends AbstractRequestFilter {
             boolean isMatchOld = Pattern.matches(oldPattern, appId);
             boolean isMatch = Pattern.matches(pattern, appId);
             if (!isMatchOld && !isMatch) {
-                throw new AppIdUncheckException("appLicenseKey id is illegal in this environment");
+                throw new AppIdUncheckException("appLicenseKey id is illegal in this environment,appIdEnvironmentPrefix=" + diamondConfig.getAppIdEnvironmentPrefix());
             }
             String ip = null;
             try {
