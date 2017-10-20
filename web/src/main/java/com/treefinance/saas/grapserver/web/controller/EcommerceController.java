@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.Map;
@@ -40,28 +41,36 @@ public class EcommerceController {
     @Autowired
     private DiamondConfig diamondConfig;
 
-    /**
-     * 通知服务端生成taskId
-     *
-     * @param appid
-     * @param uniqueId
-     * @return
-     */
+//    /**
+//     * 通知服务端生成taskId
+//     *
+//     * @param appid
+//     * @param uniqueId
+//     * @return
+//     */
+//    @RequestMapping(value = "/start", method = {RequestMethod.POST})
+//    public Object createTask(@RequestParam("appid") String appid, @RequestParam("uniqueId") String uniqueId,
+//                             @RequestParam(name = "coorType", required = false) String coorType, @RequestParam("deviceInfo") String deviceInfo,
+//                             @RequestParam(name = "extra", required = false) String extra,
+//                             HttpServletRequest request) throws ForbiddenException {
+//        logger.info("createTask : appid={},uniqueId={},coorType={},deviceInfo={},extra={}", appid, uniqueId, coorType, deviceInfo, extra);
+//        taskLicenseService.verifyCreateTask(appid, EBizType.ECOMMERCE);
+//        Long taskId = taskServiceImpl.createTask(uniqueId, appid, EBizType.ECOMMERCE.getCode());
+//        Map<String, Object> map = Maps.newHashMap();
+//        map.put("taskid", taskId);
+//        map.put("color", merchantConfigService.getColorConfig(appid));
+//        map.put("title", diamondConfig.getSdkTitle(EBizType.ECOMMERCE));
+//        String ipAddress = IpUtils.getIpAddress(request);
+//        taskDeviceService.create(deviceInfo, ipAddress, coorType, taskId);
+//        return new SimpleResult<>(map);
+//    }
+
+
     @RequestMapping(value = "/start", method = {RequestMethod.POST})
-    public Object createTask(@RequestParam("appid") String appid, @RequestParam("uniqueId") String uniqueId,
-                             @RequestParam(name = "coorType", required = false) String coorType, @RequestParam("deviceInfo") String deviceInfo,
-                             @RequestParam(name = "extra", required = false) String extra,
-                             HttpServletRequest request) throws ForbiddenException {
-        logger.info("createTask : appid={},uniqueId={},coorType={},deviceInfo={},extra={}", appid, uniqueId, coorType, deviceInfo, extra);
-        taskLicenseService.verifyCreateTask(appid, EBizType.ECOMMERCE);
-        Long taskId = taskServiceImpl.createTask(uniqueId, appid, EBizType.ECOMMERCE.getCode());
-        Map<String, Object> map = Maps.newHashMap();
-        map.put("taskid", taskId);
-        map.put("color", merchantConfigService.getColorConfig(appid));
-        map.put("title", diamondConfig.getSdkTitle(EBizType.ECOMMERCE));
-        String ipAddress = IpUtils.getIpAddress(request);
-        taskDeviceService.create(deviceInfo, ipAddress, coorType, taskId);
-        return new SimpleResult<>(map);
+    public ModelAndView createTask() {
+        ModelAndView modelAndView = new ModelAndView("forward:/start");
+        modelAndView.addObject("bizType", EBizType.ECOMMERCE.getText());
+        return modelAndView;
     }
 
     /**

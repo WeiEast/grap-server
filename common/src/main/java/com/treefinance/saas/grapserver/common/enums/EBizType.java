@@ -53,4 +53,13 @@ public enum EBizType {
             throw new IllegalArgumentException("The task type '" + name + "' is unsupported.", e);
         }
     }
+
+    public static EBizType of(String name) {
+        for (EBizType item : EBizType.values()) {
+            if (item.text.equalsIgnoreCase(name)) {
+                return item;
+            }
+        }
+        return null;
+    }
 }
