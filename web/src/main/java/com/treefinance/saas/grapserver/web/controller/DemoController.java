@@ -1,6 +1,5 @@
 package com.treefinance.saas.grapserver.web.controller;
 
-import com.google.common.base.Optional;
 import com.treefinance.saas.grapserver.biz.service.DemoService;
 import com.treefinance.saas.knife.result.Results;
 import org.apache.commons.lang3.StringUtils;
@@ -38,7 +37,7 @@ public class DemoController {
                                         @RequestParam("demoParams") String params,
                                         @RequestParam("pageNum") Integer pageNum) {
 
-        if (StringUtils.isBlank(appId) || StringUtils.isBlank(params) || Optional.fromNullable(pageNum).or(0) < 0) {
+        if (StringUtils.isBlank(appId) || StringUtils.isBlank(params) || pageNum == null || pageNum < 0) {
             throw new IllegalArgumentException("Parameter is incorrect.");
         }
         Object result = demoService.getFundBillRecordList(appId, params, pageNum);
@@ -49,7 +48,7 @@ public class DemoController {
     public Object getFundLoanInfoList(@RequestParam("appid") String appId,
                                       @RequestParam("demoParams") String params,
                                       @RequestParam("pageNum") Integer pageNum) {
-        if (StringUtils.isBlank(appId) || StringUtils.isBlank(params) || Optional.fromNullable(pageNum).or(0) < 0) {
+        if (StringUtils.isBlank(appId) || StringUtils.isBlank(params) || pageNum == null || pageNum < 0) {
             throw new IllegalArgumentException("Parameter is incorrect.");
         }
         Object result = demoService.getFundLoanInfoList(appId, params, pageNum);
@@ -60,7 +59,7 @@ public class DemoController {
     public Object getFundLoanRepayRecordList(@RequestParam("appid") String appId,
                                              @RequestParam("demoParams") String params,
                                              @RequestParam("pageNum") Integer pageNum) {
-        if (StringUtils.isBlank(appId) || StringUtils.isBlank(params) || Optional.fromNullable(pageNum).or(0) < 0) {
+        if (StringUtils.isBlank(appId) || StringUtils.isBlank(params) || pageNum == null || pageNum < 0) {
             throw new IllegalArgumentException("Parameter is incorrect.");
         }
         Object result = demoService.getFundLoanRepayRecordList(appId, params, pageNum);

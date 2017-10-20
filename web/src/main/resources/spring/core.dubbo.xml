@@ -33,6 +33,7 @@
     <dubbo:service interface="com.treefinance.saas.gateway.servicefacade.TaskService" ref="gatewayTaskServiceFacade"/>
     <dubbo:service interface="com.treefinance.saas.gateway.servicefacade.AppLicenseService"
                    ref="gatewayAppLicenseServiceFacade"/>
+    <dubbo:service interface="com.treefinance.saas.grapserver.facade.service.MerchantFacade" ref="merchantFacade"/>
 </beans>
 
 
