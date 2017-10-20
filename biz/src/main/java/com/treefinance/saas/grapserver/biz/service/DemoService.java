@@ -9,6 +9,11 @@ import com.treefinance.saas.grapserver.biz.common.CallbackSecureHandler;
 import com.treefinance.saas.grapserver.biz.config.DiamondConfig;
 import com.treefinance.saas.grapserver.common.exception.BizException;
 import com.treefinance.saas.grapserver.common.model.dto.demo.fund.*;
+import com.treefinance.saas.grapserver.common.model.vo.demo.fund.FundBillRecordVO;
+import com.treefinance.saas.grapserver.common.model.vo.demo.fund.FundLoanInfoVO;
+import com.treefinance.saas.grapserver.common.model.vo.demo.fund.FundLoanRepayRecordVO;
+import com.treefinance.saas.grapserver.common.model.vo.demo.fund.FundUserInfoVO;
+import com.treefinance.saas.grapserver.common.utils.BeanUtils;
 import com.treefinance.saas.grapserver.common.utils.JsonUtils;
 import com.treefinance.saas.grapserver.common.utils.RemoteDataDownloadUtils;
 import com.treefinance.saas.grapserver.dao.entity.AppLicense;
@@ -19,6 +24,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.net.URLDecoder;
 import java.util.List;
 import java.util.Map;
@@ -115,8 +121,19 @@ public class DemoService {
         if (StringUtils.isNotBlank(userInfo.getMobile())) {
             userInfo.setMobile(iSecurityCryptoService.decrypt(userInfo.getMobile(), EncryptionIntensityEnum.NORMAL));
         }
-        List<FundUserInfoDTO> userInfoList = Lists.newArrayList();
-        userInfoList.add(userInfo);
+        FundUserInfoVO vo = new FundUserInfoVO();
+        BeanUtils.copyProperties(userInfo, vo);
+        vo.setBalance(new BigDecimal(userInfo.getBalance()).divide(new BigDecimal(100), 2, BigDecimal.ROUND_HALF_UP));
+        vo.setFundBalance(new BigDecimal(userInfo.getFundBalance()).divide(new BigDecimal(100), 2, BigDecimal.ROUND_HALF_UP));
+        vo.setSubsidyBalance(new BigDecimal(userInfo.getSubsidyBalance()).divide(new BigDecimal(100), 2, BigDecimal.ROUND_HALF_UP));
+        vo.setSubsidyIncome(new BigDecimal(userInfo.getSubsidyIncome()).divide(new BigDecimal(100), 2, BigDecimal.ROUND_HALF_UP));
+        vo.setMonthlyCorporationIncome(new BigDecimal(userInfo.getMonthlyCorporationIncome()).divide(new BigDecimal(100), 2, BigDecimal.ROUND_HALF_UP));
+        vo.setMonthlyCustomerIncome(new BigDecimal(userInfo.getMonthlyCustomerIncome()).divide(new BigDecimal(100), 2, BigDecimal.ROUND_HALF_UP));
+        vo.setMonthlyTotalIncome(new BigDecimal(userInfo.getMonthlyTotalIncome()).divide(new BigDecimal(100), 2, BigDecimal.ROUND_HALF_UP));
+        vo.setBaseNumber(new BigDecimal(userInfo.getBaseNumber()).divide(new BigDecimal(100), 2, BigDecimal.ROUND_HALF_UP));
+
+        List<FundUserInfoVO> userInfoList = Lists.newArrayList();
+        userInfoList.add(vo);
         return userInfoList;
     }
 
@@ -146,7 +163,21 @@ public class DemoService {
             return Lists.newArrayList();
         }
         List<FundBillRecordDTO> subList = list.subList(start, end);
-        return subList;
+        List<FundBillRecordVO> result = Lists.newArrayList();
+        for (FundBillRecordDTO dto : subList) {
+            FundBillRecordVO vo = new FundBillRecordVO();
+            BeanUtils.copyProperties(dto, vo);
+            vo.setOutcome(new BigDecimal(dto.getOutcome()).divide(new BigDecimal(100), 2, BigDecimal.ROUND_HALF_UP));
+            vo.setIncome(new BigDecimal(dto.getIncome()).divide(new BigDecimal(100), 2, BigDecimal.ROUND_HALF_UP));
+            vo.setSubsidyIncome(new BigDecimal(dto.getSubsidyIncome()).divide(new BigDecimal(100), 2, BigDecimal.ROUND_HALF_UP));
+            vo.setSubsidyOutcome(new BigDecimal(dto.getSubsidyOutcome()).divide(new BigDecimal(100), 2, BigDecimal.ROUND_HALF_UP));
+            vo.setBalance(new BigDecimal(dto.getBalance()).divide(new BigDecimal(100), 2, BigDecimal.ROUND_HALF_UP));
+            vo.setCorporationIncome(new BigDecimal(dto.getCorporationIncome()).divide(new BigDecimal(100), 2, BigDecimal.ROUND_HALF_UP));
+            vo.setCustomerIncome(new BigDecimal(dto.getCustomerIncome()).divide(new BigDecimal(100), 2, BigDecimal.ROUND_HALF_UP));
+            vo.setAdditionalIncome(new BigDecimal(dto.getAdditionalIncome()).divide(new BigDecimal(100), 2, BigDecimal.ROUND_HALF_UP));
+            result.add(vo);
+        }
+        return result;
     }
 
     /**
@@ -175,6 +206,7 @@ public class DemoService {
             return Lists.newArrayList();
         }
         List<FundLoanInfoDTO> subList = list.subList(start, end);
+        List<FundLoanInfoVO> result = Lists.newArrayList();
         for (FundLoanInfoDTO info : subList) {
             if (StringUtils.isNotBlank(info.getIdCard())) {
                 info.setIdCard(iSecurityCryptoService.decrypt(info.getIdCard(), EncryptionIntensityEnum.NORMAL));
@@ -185,8 +217,20 @@ public class DemoService {
             if (StringUtils.isNotBlank(info.getBankAccount())) {
                 info.setBankAccount(iSecurityCryptoService.decrypt(info.getBankAccount(), EncryptionIntensityEnum.NORMAL));
             }
+
+            FundLoanInfoVO vo = new FundLoanInfoVO();
+            BeanUtils.copyProperties(info, vo);
+            vo.setLoanAmount(new BigDecimal(info.getLoanAmount()).divide(new BigDecimal(100), 2, BigDecimal.ROUND_HALF_UP));
+            vo.setMonthlyRepayAmount(new BigDecimal(info.getMonthlyRepayAmount()).divide(new BigDecimal(100), 2, BigDecimal.ROUND_HALF_UP));
+            vo.setCommercialAmount(new BigDecimal(info.getCommercialAmount()).divide(new BigDecimal(100), 2, BigDecimal.ROUND_HALF_UP));
+            vo.setRemainAmount(new BigDecimal(info.getRemainAmount()).divide(new BigDecimal(100), 2, BigDecimal.ROUND_HALF_UP));
+            vo.setOverdueCapital(new BigDecimal(info.getOverdueCapital()).divide(new BigDecimal(100), 2, BigDecimal.ROUND_HALF_UP));
+            vo.setOverdueInterest(new BigDecimal(info.getOverdueInterest()).divide(new BigDecimal(100), 2, BigDecimal.ROUND_HALF_UP));
+            vo.setOverduePenalty(new BigDecimal(info.getOverduePenalty()).divide(new BigDecimal(100), 2, BigDecimal.ROUND_HALF_UP));
+            result.add(vo);
+
         }
-        return subList;
+        return result;
     }
 
     /**
@@ -215,7 +259,17 @@ public class DemoService {
             return Lists.newArrayList();
         }
         List<FundLoanRepayRecordDTO> subList = list.subList(start, end);
-        return subList;
+        List<FundLoanRepayRecordVO> result = Lists.newArrayList();
+        for (FundLoanRepayRecordDTO dto : subList) {
+            FundLoanRepayRecordVO vo = new FundLoanRepayRecordVO();
+            BeanUtils.copyProperties(dto, vo);
+            vo.setRepayAmount(new BigDecimal(dto.getRepayAmount()).divide(new BigDecimal(100), 2, BigDecimal.ROUND_HALF_UP));
+            vo.setRepayCapital(new BigDecimal(dto.getRepayCapital()).divide(new BigDecimal(100), 2, BigDecimal.ROUND_HALF_UP));
+            vo.setRepayInterest(new BigDecimal(dto.getRepayInterest()).divide(new BigDecimal(100), 2, BigDecimal.ROUND_HALF_UP));
+            vo.setRepayPenalty(new BigDecimal(dto.getRepayPenalty()).divide(new BigDecimal(100), 2, BigDecimal.ROUND_HALF_UP));
+            result.add(vo);
+        }
+        return result;
     }
 
     private Boolean checkIsDemoApp(String appId) {
