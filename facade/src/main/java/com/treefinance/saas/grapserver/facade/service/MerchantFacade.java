@@ -11,8 +11,8 @@ public interface MerchantFacade {
     /**
      * 根据taskId查询商户基本信息
      *
-     * @param taskId
-     * @return
+     * @param taskId 任务id(必传)
+     * @return 商户信息 {@Link MerchantBaseInfoRO}
      */
     SaasResult<MerchantBaseInfoRO> getMerchantBaseInfoByTaskId(Long taskId);
 

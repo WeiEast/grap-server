@@ -54,7 +54,7 @@ public class TaskServiceTest {
 
     @Test
     public void testMerchantFacade() {
-        Long taskId = 106007597898821632L;
+        Long taskId = -1L;
         SaasResult<MerchantBaseInfoRO> result = merchantFacade.getMerchantBaseInfoByTaskId(taskId);
         System.out.println(JSON.toJSONString(result));
 
