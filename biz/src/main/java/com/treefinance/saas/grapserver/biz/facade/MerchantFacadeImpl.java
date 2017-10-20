@@ -1,5 +1,7 @@
 package com.treefinance.saas.grapserver.biz.facade;
 
+import com.alibaba.fastjson.JSON;
+import com.treefinance.saas.grapserver.common.utils.BeanUtils;
 import com.treefinance.saas.grapserver.dao.entity.MerchantBaseInfo;
 import com.treefinance.saas.grapserver.dao.entity.MerchantBaseInfoCriteria;
 import com.treefinance.saas.grapserver.dao.entity.Task;
@@ -48,11 +50,12 @@ public class MerchantFacadeImpl implements MerchantFacade {
             logger.info("通过taskId查询商户基本信息,未查询到taskId={},appId={}的商户信息", taskId, task.getAppId());
             return Results.newSuccessResult(null);
         }
-
-
+        MerchantBaseInfo info = infoList.get(0);
         MerchantBaseInfoRO ro = new MerchantBaseInfoRO();
+        BeanUtils.copyProperties(info, ro);
         ro.setAppId(task.getAppId());
         ro.setUniqueId(task.getUniqueId());
-        return null;
+        logger.info("通过taskId={}查询商户基本信息result={}", taskId, JSON.toJSONString(ro));
+        return Results.newSuccessResult(ro);
     }
 }

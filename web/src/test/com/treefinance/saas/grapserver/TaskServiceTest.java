@@ -6,7 +6,10 @@ import com.alibaba.fastjson.JSON;
 import com.treefinance.saas.grapserver.biz.service.AppCallbackConfigService;
 import com.treefinance.saas.grapserver.biz.service.TaskService;
 import com.treefinance.saas.grapserver.common.model.dto.AppCallbackConfigDTO;
+import com.treefinance.saas.grapserver.facade.model.MerchantBaseInfoRO;
+import com.treefinance.saas.grapserver.facade.service.MerchantFacade;
 import com.treefinance.saas.grapserver.web.GrapServerApplication;
+import com.treefinance.saas.knife.result.SaasResult;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -31,6 +34,8 @@ public class TaskServiceTest {
 
     @Autowired
     private AppCallbackConfigService appCallbackConfigService;
+    @Autowired
+    private MerchantFacade merchantFacade;
 
     @Autowired
     private TaskService taskService;
@@ -46,4 +51,15 @@ public class TaskServiceTest {
         List<AppCallbackConfigDTO> list = appCallbackConfigService.getByAppIdAndBizType("QATestabcdefghQA", (byte) 4);
         System.out.println(JSON.toJSONString(list));
     }
+
+    @Test
+    public void testMerchantFacade() {
+        Long taskId = 106007597898821632L;
+        SaasResult<MerchantBaseInfoRO> result = merchantFacade.getMerchantBaseInfoByTaskId(taskId);
+        System.out.println(JSON.toJSONString(result));
+
+
+    }
+
+
 }
