@@ -2,9 +2,6 @@ package com.treefinance.saas.grapserver.biz.mq;
 
 import com.alibaba.rocketmq.client.consumer.DefaultMQPushConsumer;
 import com.alibaba.rocketmq.client.exception.MQClientException;
-
-import static com.alibaba.rocketmq.common.protocol.heartbeat.MessageModel.CLUSTERING;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,6 +9,8 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
+
+import static com.alibaba.rocketmq.common.protocol.heartbeat.MessageModel.CLUSTERING;
 
 /**
  * Created by luoyihua on 2017/4/26.
@@ -46,6 +45,9 @@ public class ListenerStarter {
 
         taskLogConsumer.shutdown();
         logger.info("关闭任务log数据的消费者");
+
+        deliveryAddressConsumer.shutdown();
+        logger.info("关闭收货地址数据的消费者");
     }
 
     private void initDirectiveMessageMQ() throws MQClientException {
@@ -74,7 +76,7 @@ public class ListenerStarter {
 
 
     private void initDeliveryAddressMessageMQ() throws MQClientException {
-        String group ="grap-data";
+        String group = "grap-data";
         deliveryAddressConsumer = new DefaultMQPushConsumer(group);
         deliveryAddressConsumer.setInstanceName(group);
         deliveryAddressConsumer.setNamesrvAddr(mqConfig.getNamesrvAddr());
