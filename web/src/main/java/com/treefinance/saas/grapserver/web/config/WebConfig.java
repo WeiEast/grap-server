@@ -14,10 +14,10 @@ import java.util.List;
 /**
  * Created by haojiahong on 2017/10/23.
  */
-//@Configuration
+@Configuration
 public class WebConfig extends WebMvcConfigurerAdapter {
     /**
-     * json返回结果中,将Long转换为String.
+     * json返回结果中,将Long转换为String,将BigDecimal转换为String
      *
      * @param converters
      */
@@ -30,9 +30,9 @@ public class WebConfig extends WebMvcConfigurerAdapter {
         simpleModule.addSerializer(Long.TYPE, ToStringSerializer.instance);
         objectMapper.registerModule(simpleModule);
 
-//        SimpleModule decimalSimpleModule = new SimpleModule();
-//        decimalSimpleModule.addSerializer(BigDecimal.class, ToStringSerializer.instance);
-//        objectMapper.registerModule(decimalSimpleModule);
+        SimpleModule decimalSimpleModule = new SimpleModule();
+        decimalSimpleModule.addSerializer(BigDecimal.class, ToStringSerializer.instance);
+        objectMapper.registerModule(decimalSimpleModule);
 
 //        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 //        objectMapper.setDateFormat(dateFormat);
