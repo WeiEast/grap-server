@@ -73,7 +73,7 @@ public class StartController {
         taskLicenseService.verifyCreateTask(appid, eBizType);
         Long taskId = taskServiceImpl.createTask(uniqueId, appid, eBizType.getCode());
         Map<String, Object> map = Maps.newHashMap();
-        map.put("taskid", taskId);
+        map.put("taskid", String.valueOf(taskId));
         map.put("color", merchantConfigService.getColorConfig(appid));
         map.put("title", diamondConfig.getSdkTitle(eBizType));
         String ipAddress = IpUtils.getIpAddress(request);
