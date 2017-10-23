@@ -16,6 +16,7 @@
 
 package com.treefinance.saas.grapserver.web.filter;
 
+import com.alibaba.fastjson.JSON;
 import com.datatrees.toolkits.util.http.servlet.ServletRequestUtils;
 import com.datatrees.toolkits.util.http.servlet.ServletResponseUtils;
 import com.datatrees.toolkits.util.json.Jackson;
@@ -144,7 +145,7 @@ public class WebContextFilter extends AbstractRequestFilter {
             throw new ForbiddenException("Can not find license for appLicenseKey '" + appId + "'.");
         }
         if (logger.isDebugEnabled()) {
-            logger.debug("Found license[{}] for appLicenseKey '{}'.", license.getId(), appId);
+            logger.debug("Found license[{}] for appLicenseKey '{}'.", JSON.toJSONString(license), appId);
         }
         AppLicenseKey appLicenseKey = new AppLicenseKey(license.getAppId(), license.getSdkPublicKey(), license.getSdkPrivateKey());
         WebContext context = new WebContext();
