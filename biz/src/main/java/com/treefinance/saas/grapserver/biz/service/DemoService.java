@@ -233,6 +233,10 @@ public class DemoService {
         }
         FundDataDTO fundData = JsonUtils.toJavaBean(data, FundDataDTO.class);
         List<FundLoanInfoDTO> list = fundData.getLoanInfoList();
+        list = list.stream()
+                .sorted((o1, o2) -> DateUtils.parseDate(o2.getStartDate(), "yyyy-MM-dd")
+                        .compareTo(DateUtils.parseDate(o1.getStartDate(), "yyyy-MM-dd")))
+                .collect(Collectors.toList());
         int total = list.size();
         int start = pageNum * 10;
         int end = ((pageNum + 1) * 10) >= total ? total : ((pageNum + 1) * 10);
