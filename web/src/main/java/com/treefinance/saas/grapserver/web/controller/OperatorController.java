@@ -144,14 +144,18 @@ public class OperatorController {
      *
      * @param taskid      任务ID
      * @param websiteName 爬虫提供
+     * @param groupCode   爬虫提供
+     * @param groupName   爬虫提供
      * @return
      */
     @RequestMapping(value = "/loginpage/prepare", method = {RequestMethod.POST})
     public Object prepare(@RequestParam("taskid") Long taskid,
                           @RequestParam("websiteName") String websiteName,
-                          @RequestParam(name = "accountNo", required = false) String accountNo) {
-        logger.info("模拟登录: 用户打开登陆页,taskid={},websiteName={}", taskid, websiteName);
-        operatorLoginSimulationService.prepare(taskid, websiteName, accountNo);
+                          @RequestParam(name = "accountNo", required = false) String accountNo,
+                          @RequestParam(name = "groupCode", required = false) String groupCode,
+                          @RequestParam(name = "groupName", required = false) String groupName) {
+        logger.info("模拟登录: 用户打开登陆页,taskid={},websiteName={},groupCode={},groupName={}", taskid, websiteName, groupCode, groupName);
+        operatorLoginSimulationService.prepare(taskid, websiteName, accountNo, groupCode, groupName);
         return SimpleResult.successResult(null);
     }
 

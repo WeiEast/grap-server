@@ -8,11 +8,11 @@ import java.io.Serializable;
 public class LoginMessage implements Serializable {
 
     /**
-	 * 
-	 */
-	private static final long serialVersionUID = 1L;
+     *
+     */
+    private static final long serialVersionUID = 1L;
 
-		/**
+    /**
      * 站点名
      */
     private String websiteName;
@@ -20,7 +20,7 @@ public class LoginMessage implements Serializable {
     /**
      * 任务ID
      */
-    private long   taskId;
+    private long taskId;
 
     /**
      * 结束url
@@ -38,6 +38,15 @@ public class LoginMessage implements Serializable {
     private String setCookie;
 
     private String accountNo;
+    /**
+     * 运营商：分组代码
+     */
+    private String groupCode;
+
+    /**
+     * 运营商：分组名称
+     */
+    private String groupName;
 
     public String getWebsiteName() {
         return websiteName;
@@ -93,4 +102,19 @@ public class LoginMessage implements Serializable {
         this.accountNo = accountNo;
     }
 
+    public String getGroupCode() {
+        return groupCode;
+    }
+
+    public void setGroupCode(String groupCode) {
+        this.groupCode = groupCode;
+    }
+
+    public String getGroupName() {
+        return groupName;
+    }
+
+    public void setGroupName(String groupName) {
+        this.groupName = groupName;
+    }
 }

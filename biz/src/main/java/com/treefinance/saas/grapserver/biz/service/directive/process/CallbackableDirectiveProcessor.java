@@ -1,6 +1,8 @@
 package com.treefinance.saas.grapserver.biz.service.directive.process;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
+import com.alibaba.rocketmq.shade.io.netty.util.internal.StringUtil;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.treefinance.saas.grapserver.biz.common.CallbackSecureHandler;
@@ -21,6 +23,7 @@ import com.treefinance.saas.grapserver.common.utils.HttpClientUtils;
 import com.treefinance.saas.grapserver.common.utils.RemoteDataDownloadUtils;
 import com.treefinance.saas.grapserver.dao.entity.AppLicense;
 import com.treefinance.saas.grapserver.dao.entity.TaskLog;
+import com.treefinance.saas.knife.result.SimpleResult;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -158,6 +161,7 @@ public abstract class CallbackableDirectiveProcessor {
         return 1;
 
     }
+
 
     /**
      * 获取回调配置
@@ -411,8 +415,32 @@ public abstract class CallbackableDirectiveProcessor {
 //            String paramsForLog = this.encryptParams(originalDataMap, appLicense, config);
             // 记录回调日志
             taskCallbackLogService.insert(callbackUrl, config, directiveDTO.getTaskId(), JSON.toJSONString(originalDataMap), result, consumeTime);
+            // 处理返回结果
+            handleRequestResult(directiveDTO, result);
         }
         return true;
+    }
+
+
+    /**
+     * 处理请求失败异常
+     *
+     * @param directiveDTO
+     * @param result
+     */
+    private void handleRequestResult(DirectiveDTO directiveDTO, String result) {
+        try {
+            result = result.trim();
+            if (!StringUtil.isNullOrEmpty(result) && result.startsWith("{") && result.endsWith("}")) {
+                SimpleResult simpleResult = JSON.parseObject(result, SimpleResult.class);
+                Map<String, Object> remarkMap = JSON.parseObject(directiveDTO.getRemark());
+                remarkMap.put("errorMsg", simpleResult.getErrorMsg());
+                directiveDTO.setRemark(JSON.toJSONString(remarkMap));
+                logger.info("handle result : result={},directiveDTO={}", result, JSON.toJSONString(directiveDTO));
+            }
+        } catch (Exception e) {
+            logger.info("handle result failed : directiveDTO={},   result={}", JSON.toJSONString(directiveDTO), result, e);
+        }
     }
 
     /**
