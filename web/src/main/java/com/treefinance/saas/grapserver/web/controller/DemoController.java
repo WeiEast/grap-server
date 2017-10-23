@@ -66,5 +66,4 @@ public class DemoController {
         return Results.newSuccessResult(result);
     }
 
-
 }
