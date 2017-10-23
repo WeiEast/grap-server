@@ -1,6 +1,7 @@
 package com.treefinance.saas.grapserver.biz.service;
 
 import com.alibaba.fastjson.JSON;
+import com.datatrees.common.util.DateUtils;
 import com.google.common.base.Splitter;
 import com.google.common.collect.Lists;
 import com.treefinance.basicservice.security.crypto.facade.EncryptionIntensityEnum;
@@ -29,6 +30,7 @@ import java.net.URLDecoder;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 /**
  * H5界面演示系统业务处理类
@@ -298,6 +300,10 @@ public class DemoService {
         }
         FundDataDTO fundData = JsonUtils.toJavaBean(data, FundDataDTO.class);
         List<FundLoanRepayRecordDTO> list = fundData.getLoanRepayRecordList();
+        list = list.stream()
+                .sorted((o1, o2) -> DateUtils.parseDate(o2.getRepayDate(), "yyyy-MM-dd")
+                        .compareTo(DateUtils.parseDate(o1.getRepayDate(), "yyyy-MM-dd")))
+                .collect(Collectors.toList());
         int total = list.size();
         int start = pageNum * 10;
         int end = ((pageNum + 1) * 10) >= total ? total : ((pageNum + 1) * 10);
