@@ -175,6 +175,7 @@ public class MoxieWebHookController {
     }
 
     private void writeMessage(HttpServletResponse response, int status, String content) {
+        LOGGER.info("执行魔蝎回调:status={},content={}", status, content);
         response.setStatus(status);
         try {
             PrintWriter printWriter = response.getWriter();
