@@ -138,7 +138,7 @@ public class AppCallbackConfigService implements InitializingBean, ConfigUpdateM
      * @param bizType
      * @return
      */
-    public List<AppCallbackConfigDTO> getByAppIdAndBizType(String appId, Byte bizType) {
+    public List<AppCallbackConfigDTO> getByAppIdAndBizType(String appId, Byte bizType, EDataType dataType) {
         // 1.查询所有回调
         List<AppCallbackConfig> list = getByAppId(appId);
         if (CollectionUtils.isEmpty(list)) {
@@ -146,59 +146,45 @@ public class AppCallbackConfigService implements InitializingBean, ConfigUpdateM
         }
         Byte defaultType = Byte.valueOf("0");
         // 2.查询回调类型
-        List<Integer> callbackIds = list.stream().map(AppCallbackConfig::getId).collect(Collectors.toList());
+        List<Integer> callbackIds = list.stream()
+                .filter(config -> config != null && dataType.getType().equals(config.getDataType()))
+                .map(AppCallbackConfig::getId)
+                .collect(Collectors.toList());
 
 
-        List<AppCallbackBiz> callbackBizs = getCallbackTypeList(callbackIds).stream()
+        List<AppCallbackBiz> callbackBizs = getCallbackTypeList(callbackIds)
+                .stream()
                 .filter(appCallbackBiz -> bizType.equals(appCallbackBiz.getBizType()) || defaultType.equals(appCallbackBiz.getBizType()))
                 .collect(Collectors.toList());
         if (CollectionUtils.isEmpty(callbackBizs)) {
             return null;
         }
         // 3.根据业务类型匹配：如果存在此类型回调则使用，不存在则使用默认
-        Map<Byte, List<AppCallbackBiz>> callbackBizMap = callbackBizs.stream().collect(Collectors.groupingBy(AppCallbackBiz::getBizType));
+        Map<Byte, List<AppCallbackBiz>> callbackBizMap = callbackBizs
+                .stream()
+                .collect(Collectors.groupingBy(AppCallbackBiz::getBizType));
         if (callbackBizMap.containsKey(bizType)) {
-            List<Integer> bizCallbackIds = callbackBizMap.get(bizType).stream().map(AppCallbackBiz::getCallbackId).collect(Collectors.toList());
-            List<AppCallbackConfig> bizConfigs = list.stream().filter(config -> bizCallbackIds.contains(config.getId())).collect(Collectors.toList());
+            List<Integer> bizCallbackIds = callbackBizMap
+                    .get(bizType)
+                    .stream()
+                    .map(AppCallbackBiz::getCallbackId)
+                    .collect(Collectors.toList());
+            List<AppCallbackConfig> bizConfigs = list
+                    .stream()
+                    .filter(config -> bizCallbackIds.contains(config.getId()))
+                    .collect(Collectors.toList());
             logger.info("根据业务类型匹配回调配置结果:bizConfigs={}", JSON.toJSONString(bizConfigs));
             return DataConverterUtils.convert(bizConfigs, AppCallbackConfigDTO.class);
         } else if (callbackBizMap.containsKey(defaultType)) {
-            List<Integer> bizCallbackIds = callbackBizMap.get(defaultType).stream().map(AppCallbackBiz::getCallbackId).collect(Collectors.toList());
-            List<AppCallbackConfig> defaultConfigs = list.stream().filter(config -> bizCallbackIds.contains(config.getId())).collect(Collectors.toList());
-            logger.info("根据业务类型匹配回调配置结果:defaultConfigs={}", JSON.toJSONString(defaultConfigs));
-            return DataConverterUtils.convert(defaultConfigs, AppCallbackConfigDTO.class);
-        }
-        return null;
-    }
-
-    public List<AppCallbackConfigDTO> getByAppIdAndBizType4DeliverAddress(String appId, Byte bizType) {
-        // 1.查询所有回调
-        List<AppCallbackConfig> list = getByAppId(appId).stream()
-                .filter(config -> EDataType.DELIVERY_ADDRESS.getType().equals(config.getDataType())).collect(Collectors.toList());
-        if (CollectionUtils.isEmpty(list)) {
-            return null;
-        }
-        Byte defaultType = Byte.valueOf("0");
-        // 2.查询回调类型
-        List<Integer> callbackIds = list.stream().map(AppCallbackConfig::getId).collect(Collectors.toList());
-
-
-        List<AppCallbackBiz> callbackBizs = getCallbackTypeList(callbackIds).stream()
-                .filter(appCallbackBiz -> bizType.equals(appCallbackBiz.getBizType()) || defaultType.equals(appCallbackBiz.getBizType()))
-                .collect(Collectors.toList());
-        if (CollectionUtils.isEmpty(callbackBizs)) {
-            return null;
-        }
-        // 3.根据业务类型匹配：如果存在此类型回调则使用，不存在则使用默认
-        Map<Byte, List<AppCallbackBiz>> callbackBizMap = callbackBizs.stream().collect(Collectors.groupingBy(AppCallbackBiz::getBizType));
-        if (callbackBizMap.containsKey(bizType)) {
-            List<Integer> bizCallbackIds = callbackBizMap.get(bizType).stream().map(AppCallbackBiz::getCallbackId).collect(Collectors.toList());
-            List<AppCallbackConfig> bizConfigs = list.stream().filter(config -> bizCallbackIds.contains(config.getId())).collect(Collectors.toList());
-            logger.info("根据业务类型匹配回调配置结果:bizConfigs={}", JSON.toJSONString(bizConfigs));
-            return DataConverterUtils.convert(bizConfigs, AppCallbackConfigDTO.class);
-        } else if (callbackBizMap.containsKey(defaultType)) {
-            List<Integer> bizCallbackIds = callbackBizMap.get(defaultType).stream().map(AppCallbackBiz::getCallbackId).collect(Collectors.toList());
-            List<AppCallbackConfig> defaultConfigs = list.stream().filter(config -> bizCallbackIds.contains(config.getId())).collect(Collectors.toList());
+            List<Integer> bizCallbackIds = callbackBizMap
+                    .get(defaultType)
+                    .stream()
+                    .map(AppCallbackBiz::getCallbackId)
+                    .collect(Collectors.toList());
+            List<AppCallbackConfig> defaultConfigs = list
+                    .stream()
+                    .filter(config -> bizCallbackIds.contains(config.getId()))
+                    .collect(Collectors.toList());
             logger.info("根据业务类型匹配回调配置结果:defaultConfigs={}", JSON.toJSONString(defaultConfigs));
             return DataConverterUtils.convert(defaultConfigs, AppCallbackConfigDTO.class);
         }

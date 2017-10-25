@@ -1,5 +1,6 @@
 package com.treefinance.saas.grapserver.biz.mq;
 
+import java.io.UnsupportedEncodingException;
 import java.util.UUID;
 
 import javax.annotation.PostConstruct;
@@ -55,13 +56,13 @@ public class MessageProducer {
             key = keyPrefix + "_" + tag;
         }
         try {
-            SendResult sendResult = producer.send(new Message(topic, tag, key, body.getBytes()));
+            SendResult sendResult = producer.send(new Message(topic, tag, key, body.getBytes("utf-8")));
             logger.debug("已发送消息[topic={},tag={},key={},body={},发送状态={}]", topic, tag, key, body, sendResult.getSendStatus());
             if (sendResult.getSendStatus() != SendStatus.SEND_OK) {
                 throw new FailureInSendingToMQException(
                         String.format("发送MQ消息[topic=%s,tag=%s,key=%s,body=%s]到消息中间件失败,发送状态为%s", topic, tag, key, body, sendResult.getSendStatus()));
             }
-        } catch (InterruptedException | RemotingException | MQClientException | MQBrokerException e) {
+        } catch (InterruptedException | RemotingException | MQClientException | MQBrokerException | UnsupportedEncodingException e) {
             throw new FailureInSendingToMQException(String.format("发送MQ消息[topic=%s,tag=%s,key=%s,body=%s]到消息中间件失败", topic, tag, key, body), e);
         }
     }

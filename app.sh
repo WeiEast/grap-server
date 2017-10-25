@@ -13,7 +13,7 @@ function restartApp(){
 		echo "wait kill $PID success"
 	fi;
 	if test ! -d "logs" ;then mkdir logs ; fi
-	nohup java  -jar $APP_NAME > /dev/null 2>logs/log &
+	nohup java $jvm_opt -jar $APP_NAME > /dev/null 2>logs/log &
 	echo "nohup java $jvm_opt -jar $APP_NAME > /dev/null 2>logs/log &"
 	echo "jps -l | grep $APP_NAME | awk '{print \$1}'"
 	PID=`jps -l | grep $APP_NAME | awk '{print $1}'`
@@ -34,6 +34,7 @@ function stopApp(){
 
 APP_NAME=`ls *.jar | tail -1`
 APP_HOME=`pwd`
+jvm_opt="-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=18543"
 if test -z "$APP_NAME" 
 then
 	echo "not found any jar in $APP_HOME "

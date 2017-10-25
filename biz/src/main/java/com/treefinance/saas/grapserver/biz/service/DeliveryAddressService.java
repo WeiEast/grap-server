@@ -75,6 +75,9 @@ public class DeliveryAddressService {
             return;
         }
         Map<String, Object> dataMap = JSON.parseObject(message.getData());
+        if (MapUtils.isEmpty(dataMap)) {
+            dataMap = Maps.newHashMap();
+        }
         Map<String, Object> originalDataMap = Maps.newHashMap(dataMap);
         // 填充uniqueId、taskId、taskStatus
         dataMap.put("uniqueId", taskDTO.getUniqueId());
@@ -170,7 +173,7 @@ public class DeliveryAddressService {
     protected List<AppCallbackConfigDTO> getCallbackConfigs(TaskDTO taskDTO) {
         String appId = taskDTO.getAppId();
         Byte bizType = taskDTO.getBizType();
-        List<AppCallbackConfigDTO> configList = appCallbackConfigService.getByAppIdAndBizType4DeliverAddress(appId, bizType);
+        List<AppCallbackConfigDTO> configList = appCallbackConfigService.getByAppIdAndBizType(appId, bizType, EDataType.DELIVERY_ADDRESS);
         logger.info("根据业务类型匹配回调配置结果:configList={}", JSON.toJSONString(configList));
         if (CollectionUtils.isEmpty(configList)) {
             return Lists.newArrayList();
