@@ -16,6 +16,7 @@
 
 package com.treefinance.saas.grapserver.web.filter;
 
+import com.alibaba.fastjson.JSON;
 import com.datatrees.toolkits.util.http.servlet.ServletRequestUtils;
 import com.datatrees.toolkits.util.http.servlet.ServletResponseUtils;
 import com.datatrees.toolkits.util.json.Jackson;
@@ -28,11 +29,11 @@ import com.treefinance.saas.grapserver.common.exception.AppIdUncheckException;
 import com.treefinance.saas.grapserver.common.exception.ForbiddenException;
 import com.treefinance.saas.grapserver.common.model.AppLicenseKey;
 import com.treefinance.saas.grapserver.common.model.Constants;
-import com.treefinance.saas.grapserver.web.request.WrappedHttpServletRequest;
-import com.treefinance.saas.knife.result.SimpleResult;
 import com.treefinance.saas.grapserver.common.model.WebContext;
 import com.treefinance.saas.grapserver.common.utils.IpUtils;
 import com.treefinance.saas.grapserver.dao.entity.AppLicense;
+import com.treefinance.saas.grapserver.web.request.WrappedHttpServletRequest;
+import com.treefinance.saas.knife.result.SimpleResult;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -82,7 +83,7 @@ public class WebContextFilter extends AbstractRequestFilter {
             boolean isMatchOld = Pattern.matches(oldPattern, appId);
             boolean isMatch = Pattern.matches(pattern, appId);
             if (!isMatchOld && !isMatch) {
-                throw new AppIdUncheckException("appLicenseKey id is illegal in this environment");
+                throw new AppIdUncheckException("appLicenseKey id is illegal in this environment,appIdEnvironmentPrefix=" + diamondConfig.getAppIdEnvironmentPrefix());
             }
             String ip = null;
             try {
@@ -144,7 +145,7 @@ public class WebContextFilter extends AbstractRequestFilter {
             throw new ForbiddenException("Can not find license for appLicenseKey '" + appId + "'.");
         }
         if (logger.isDebugEnabled()) {
-            logger.debug("Found license[{}] for appLicenseKey '{}'.", license.getId(), appId);
+            logger.debug("Found license[{}] for appLicenseKey '{}'.", JSON.toJSONString(license), appId);
         }
         AppLicenseKey appLicenseKey = new AppLicenseKey(license.getAppId(), license.getSdkPublicKey(), license.getSdkPrivateKey());
         WebContext context = new WebContext();

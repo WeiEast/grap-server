@@ -37,6 +37,9 @@ public class DiamondConfig {
     @DAttribute(key = "check.uniqueId.count.max")
     private Integer maxCount;
 
+    @DAttribute(key = "demo.h5.appIds")
+    private String demoH5AppIds;
+
     @DAttribute(key = "moxie.fund.apiKey")
     private String moxieFundApiKey;
 
@@ -216,5 +219,13 @@ public class DiamondConfig {
 
     public void setMoxieUrlFundGetFundsEx(String moxieUrlFundGetFundsEx) {
         this.moxieUrlFundGetFundsEx = moxieUrlFundGetFundsEx;
+    }
+
+    public String getDemoH5AppIds() {
+        return demoH5AppIds;
+    }
+
+    public void setDemoH5AppIds(String demoH5AppIds) {
+        this.demoH5AppIds = demoH5AppIds;
     }
 }

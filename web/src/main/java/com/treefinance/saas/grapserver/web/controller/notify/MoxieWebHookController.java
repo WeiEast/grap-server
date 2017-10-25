@@ -1,9 +1,11 @@
 package com.treefinance.saas.grapserver.web.controller.notify;
 
+import com.alibaba.fastjson.JSON;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Strings;
 import com.treefinance.saas.grapserver.biz.service.moxie.MoxieTaskEventNoticeService;
 import org.apache.commons.codec.binary.StringUtils;
+import org.apache.commons.collections.MapUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,7 +51,7 @@ public class MoxieWebHookController {
      * 回调接口, moxie通过此endpoint通知账单更新和任务状态更新
      */
     @RequestMapping(value = "/notifications", method = RequestMethod.POST)
-    public void notifyUpdateBill(@RequestBody String body, ServletRequest request, ServletResponse response) {
+    public void notifyUpdateBill(@RequestBody Map body, ServletRequest request, ServletResponse response) {
 
         HttpServletRequest httpServletRequest = (HttpServletRequest) request;
         HttpServletResponse httpServletResponse = (HttpServletResponse) response;
@@ -79,7 +81,7 @@ public class MoxieWebHookController {
         }
 
 
-        if (Strings.isNullOrEmpty(body)) {
+        if (MapUtils.isEmpty(body)) {
             writeMessage(httpServletResponse, HttpServletResponse.SC_BAD_REQUEST, "request body is empty");
             return;
         }
@@ -91,7 +93,7 @@ public class MoxieWebHookController {
 //        }
 
 
-        LOGGER.info("receive moxie eventName={},body={}", eventName.toLowerCase(), body);
+        LOGGER.info("receive moxie eventName={},body={}", eventName.toLowerCase(), JSON.toJSONString(body));
         //任务创建通知
         if (StringUtils.equals(eventName.toLowerCase(), "task.submit")) {
             //通知状态变更为 '认证中'
@@ -102,7 +104,7 @@ public class MoxieWebHookController {
         //{"mobile":"15368098198","timestamp":1476084445670,"result":false,"message":"[CALO-22001-10]-服务密码错误，请确认正确后输入。","user_id":"374791","task_id":"fdda6b30-8eba-11e6-b7e9-00163e10b2cd"}
         if (StringUtils.equals(eventName.toLowerCase(), "task")) {
             try {
-                Map<String, ?> map = objectMapper.readValue(body, Map.class);
+                Map<String, ?> map = body;
                 if (map.containsKey("result")) {
                     String result = map.get("result").toString();
                     String moxieTaskId = null;
@@ -133,7 +135,7 @@ public class MoxieWebHookController {
         //运营商的格式{"mobile":"13429801680","timestamp":1474641874728,"result":false,"message":"系统繁忙，请稍后再试","user_id":"1111","task_id":"3e9ff350-819c-11e6-b7fe-00163e004a23"}
         if (StringUtils.equals(eventName.toLowerCase(), "task.fail")) {
             try {
-                Map<String, ?> map = objectMapper.readValue(body, Map.class);
+                Map<String, ?> map = body;
                 if (map.containsKey("result") && map.containsKey("message")) {
                     String moxieTaskId = null;
                     if (map.containsKey("task_id")) {
@@ -157,7 +159,7 @@ public class MoxieWebHookController {
 
             //通知状态变更为 '认证完成'
             try {
-                Map<String, ?> map = objectMapper.readValue(body, Map.class);
+                Map<String, ?> map = body;
                 if (map.containsKey("result") && map.containsKey("task_id")) {
                     String result = map.get("result").toString();
                     String moxieTaskId = map.get("task_id") == null ? null : map.get("task_id").toString();
@@ -175,6 +177,7 @@ public class MoxieWebHookController {
     }
 
     private void writeMessage(HttpServletResponse response, int status, String content) {
+        LOGGER.info("执行魔蝎回调:status={},content={}", status, content);
         response.setStatus(status);
         try {
             PrintWriter printWriter = response.getWriter();

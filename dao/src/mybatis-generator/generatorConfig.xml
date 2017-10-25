@@ -76,19 +76,19 @@
 
     <!--</table>-->
 
-    <table tableName="app_callback_config" domainObjectName="AppCallbackConfig"
-           enableSelectPaginationByExample="true"
-           enableInsertOrUpdateBySelective="true"
-           enableBatchInsert="true"
-           enableBatchUpdateByPrimaryKey="true"
-           enableBatchUpdateByPrimaryKeySelective="true">
-      <property name="useActualColumnNames" value="true"/>
-      <generatedKey column="Id" sqlStatement="MySql" identity="true"/>
-    </table>
-
-    <!--<table tableName="task" domainObjectName="Task">-->
+    <!--<table tableName="app_callback_config" domainObjectName="AppCallbackConfig"-->
+           <!--enableSelectPaginationByExample="true"-->
+           <!--enableInsertOrUpdateBySelective="true"-->
+           <!--enableBatchInsert="true"-->
+           <!--enableBatchUpdateByPrimaryKey="true"-->
+           <!--enableBatchUpdateByPrimaryKeySelective="true">-->
       <!--<property name="useActualColumnNames" value="true"/>-->
+      <!--<generatedKey column="Id" sqlStatement="MySql" identity="true"/>-->
     <!--</table>-->
+
+    <table tableName="merchant_base" domainObjectName="MerchantBaseInfo">
+      <property name="useActualColumnNames" value="true"/>
+    </table>
 
     <!--<table tableName="task_log" domainObjectName="TaskLog">-->
       <!--<property name="useActualColumnNames" value="true"/>-->

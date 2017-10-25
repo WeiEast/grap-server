@@ -24,6 +24,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -57,37 +58,44 @@ public class FundController {
     @Autowired
     private MoxieTimeoutService moxieTimeoutService;
 
+//
+//    /**
+//     * 创建任务
+//     *
+//     * @param appid
+//     * @param uniqueId
+//     * @param coorType
+//     * @param deviceInfo
+//     * @param extra
+//     * @param request
+//     * @return
+//     * @throws ForbiddenException
+//     * @throws IOException
+//     */
+//    @RequestMapping(value = "/start", method = {RequestMethod.POST})
+//    public Object createTask(@RequestParam("appid") String appid,
+//                             @RequestParam("uniqueId") String uniqueId,
+//                             @RequestParam(name = "coorType", required = false) String coorType,
+//                             @RequestParam("deviceInfo") String deviceInfo,
+//                             @RequestParam(name = "extra", required = false) String extra,
+//                             HttpServletRequest request) throws ForbiddenException, IOException {
+//        logger.info("createTask : appid={},uniqueId={},coorType={},deviceInfo={},extra={}", appid, uniqueId, coorType,
+//                deviceInfo, extra);
+//        taskLicenseService.verifyCreateTask(appid, EBizType.FUND);
+//        String ipAddress = IpUtils.getIpAddress(request);
+//        Long taskId = taskService.startTask(uniqueId, appid, EBizType.FUND, deviceInfo, ipAddress, coorType, extra);
+//        Map<String, Object> map = Maps.newHashMap();
+//        map.put("taskid", String.valueOf(taskId));
+//        map.put("color", merchantConfigService.getColorConfig(appid));
+//        map.put("title", diamondConfig.getSdkTitle(EBizType.FUND));
+//        return SimpleResult.successResult(map);
+//    }
 
-    /**
-     * 创建任务
-     *
-     * @param appid
-     * @param uniqueId
-     * @param coorType
-     * @param deviceInfo
-     * @param extra
-     * @param request
-     * @return
-     * @throws ForbiddenException
-     * @throws IOException
-     */
     @RequestMapping(value = "/start", method = {RequestMethod.POST})
-    public Object createTask(@RequestParam("appid") String appid,
-                             @RequestParam("uniqueId") String uniqueId,
-                             @RequestParam(name = "coorType", required = false) String coorType,
-                             @RequestParam("deviceInfo") String deviceInfo,
-                             @RequestParam(name = "extra", required = false) String extra,
-                             HttpServletRequest request) throws ForbiddenException, IOException {
-        logger.info("createTask : appid={},uniqueId={},coorType={},deviceInfo={},extra={}", appid, uniqueId, coorType,
-                deviceInfo, extra);
-        taskLicenseService.verifyCreateTask(appid, EBizType.FUND);
-        String ipAddress = IpUtils.getIpAddress(request);
-        Long taskId = taskService.startTask(uniqueId, appid, EBizType.FUND, deviceInfo, ipAddress, coorType, extra);
-        Map<String, Object> map = Maps.newHashMap();
-        map.put("taskid", String.valueOf(taskId));
-        map.put("color", merchantConfigService.getColorConfig(appid));
-        map.put("title", diamondConfig.getSdkTitle(EBizType.FUND));
-        return SimpleResult.successResult(map);
+    public ModelAndView createTask() {
+        ModelAndView modelAndView = new ModelAndView("forward:/start");
+        modelAndView.addObject("bizType", EBizType.FUND.getText());
+        return modelAndView;
     }
 
     /**
