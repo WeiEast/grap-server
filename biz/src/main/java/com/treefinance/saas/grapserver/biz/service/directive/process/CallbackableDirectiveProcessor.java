@@ -171,7 +171,7 @@ public abstract class CallbackableDirectiveProcessor {
     protected List<AppCallbackConfigDTO> getCallbackConfigs(TaskDTO taskDTO) {
         String appId = taskDTO.getAppId();
         Byte bizType = taskDTO.getBizType();
-        List<AppCallbackConfigDTO> configList = appCallbackConfigService.getByAppIdAndBizType(appId, bizType);
+        List<AppCallbackConfigDTO> configList = appCallbackConfigService.getByAppIdAndBizType(appId, bizType, EDataType.MAIN_STREAM);
         if (CollectionUtils.isEmpty(configList)) {
             return Lists.newArrayList();
         }
