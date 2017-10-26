@@ -28,7 +28,7 @@ import java.util.Map;
  * Created by yh-treefinance on 2017/10/9.
  */
 @RestController
-@RequestMapping(value = {"/", "/grap"})
+@RequestMapping(value = {"/", "/grap", "/h5", "/grap/h5"})
 public class StartController {
     private static final Logger logger = LoggerFactory.getLogger(EcommerceController.class);
     @Autowired
