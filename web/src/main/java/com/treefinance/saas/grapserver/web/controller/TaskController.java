@@ -29,7 +29,7 @@ import java.util.Map;
  */
 
 @RestController
-@RequestMapping(value = {"/task", "/h5/task","grap/h5/task","/grap/task"})
+@RequestMapping(value = {"/task", "/h5/task", "grap/h5/task", "/grap/task"})
 public class TaskController {
     private static final Logger logger = LoggerFactory.getLogger(TaskController.class);
 
@@ -53,6 +53,8 @@ public class TaskController {
     private AppBizLicenseService appBizLicenseService;
     @Autowired
     private TaskBuryPointLogService taskBuryPointLogService;
+    @Autowired
+    private TaskBuryPointSpecialCodeService taskBuryPointSpecialCodeService;
 
     /**
      * 获取配置,电商在用
@@ -177,8 +179,10 @@ public class TaskController {
     @RequestMapping(value = "/bury/point/log", method = {RequestMethod.POST})
     public Object buryPointLog(@RequestParam("taskid") Long taskId,
                                @RequestParam("appid") String appId,
-                               @RequestParam("code") String code) throws Exception {
-        logger.info("记录埋点:taskid={},appid={},code={}", taskId, appId, code);
+                               @RequestParam("code") String code,
+                               @RequestParam(value = "bizType", required = false) String bizType,
+                               @RequestParam(value = "extra", required = false) String extra) throws Exception {
+        logger.info("记录埋点:taskid={},appid={},code={},bizType={},extra={}", taskId, appId, code, bizType, extra);
         if (taskId == null) {
             throw new ValidationException("参数taskid为空");
         }
@@ -189,6 +193,7 @@ public class TaskController {
             throw new ValidationException("参数code为空");
         }
         taskBuryPointLogService.pushTaskBuryPointLog(taskId, appId, code);
+        taskBuryPointSpecialCodeService.doProcess(code, taskId, appId, extra);
         return SimpleResult.successResult(null);
     }
 }
