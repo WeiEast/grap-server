@@ -72,7 +72,8 @@ public abstract class CallbackableDirectiveProcessor {
             try {
                 Map<String, Object> jsonObject = JSON.parseObject(remark);
                 if (!CollectionUtils.isEmpty(jsonObject)) {
-                    paramMap.putAll(jsonObject);
+                    paramMap.put(Constants.ERROR_MSG_NAME, jsonObject.get(Constants.ERROR_MSG_NAME));
+
                 }
             } catch (Exception e) {
             }
@@ -446,7 +447,7 @@ public abstract class CallbackableDirectiveProcessor {
                 SimpleResult simpleResult = JSON.parseObject(result, SimpleResult.class);
                 Map<String, Object> remarkMap = JSON.parseObject(directiveDTO.getRemark());
                 if (simpleResult != null && StringUtils.isNotEmpty(simpleResult.getErrorMsg())) {
-                    remarkMap.put("errorMsg", simpleResult.getErrorMsg());
+                    remarkMap.put(Constants.ERROR_MSG_NAME, simpleResult.getErrorMsg());
                 }
                 directiveDTO.setRemark(JSON.toJSONString(remarkMap));
                 logger.info("handle callback result : result={},directiveDTO={}", result, JSON.toJSONString(directiveDTO));

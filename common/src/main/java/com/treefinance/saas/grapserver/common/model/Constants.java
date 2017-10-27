@@ -33,4 +33,9 @@ public interface Constants {
      * 回调失败错误提示信息
      */
     String CALLBACK_FAIL_MSG = "验证失败，请稍后再试。";
+
+    /**
+     * 错误信息字段名
+     */
+    String ERROR_MSG_NAME = "errorMsg";
 }
