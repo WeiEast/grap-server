@@ -15,6 +15,7 @@ import com.treefinance.saas.grapserver.common.enums.EDirective;
 import com.treefinance.saas.grapserver.common.enums.ETaskStatus;
 import com.treefinance.saas.grapserver.common.exception.CallbackEncryptException;
 import com.treefinance.saas.grapserver.common.exception.RequestFailedException;
+import com.treefinance.saas.grapserver.common.model.Constants;
 import com.treefinance.saas.grapserver.common.model.dto.AppCallbackConfigDTO;
 import com.treefinance.saas.grapserver.common.model.dto.CallBackLicenseDTO;
 import com.treefinance.saas.grapserver.common.model.dto.DirectiveDTO;
@@ -434,9 +435,11 @@ public abstract class CallbackableDirectiveProcessor {
             if (!StringUtil.isNullOrEmpty(result) && result.startsWith("{") && result.endsWith("}")) {
                 SimpleResult simpleResult = JSON.parseObject(result, SimpleResult.class);
                 Map<String, Object> remarkMap = JSON.parseObject(directiveDTO.getRemark());
-                remarkMap.put("errorMsg", simpleResult.getErrorMsg());
+                if (simpleResult != null && StringUtils.isNotEmpty(simpleResult.getErrorMsg())) {
+                    remarkMap.put("errorMsg", simpleResult.getErrorMsg());
+                }
                 directiveDTO.setRemark(JSON.toJSONString(remarkMap));
-                logger.info("handle result : result={},directiveDTO={}", result, JSON.toJSONString(directiveDTO));
+                logger.info("handle callback result : result={},directiveDTO={}", result, JSON.toJSONString(directiveDTO));
             }
         } catch (Exception e) {
             logger.info("handle result failed : directiveDTO={},   result={}", JSON.toJSONString(directiveDTO), result, e);
