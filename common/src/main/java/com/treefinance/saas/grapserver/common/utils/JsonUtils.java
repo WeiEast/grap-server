@@ -3,6 +3,7 @@ package com.treefinance.saas.grapserver.common.utils;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson.TypeReference;
 import com.alibaba.fastjson.serializer.PropertyFilter;
 import com.google.common.collect.Lists;
 import org.slf4j.Logger;
@@ -11,6 +12,7 @@ import org.slf4j.LoggerFactory;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by yh-treefinance on 2017/7/6.
@@ -89,4 +91,17 @@ public class JsonUtils {
         return objectList;
     }
 
+    public static <K, V> Map<K, V> toMap(String jsonStr, Class<K> kClass, Class<V> vClass) {
+        Map<K, V> map = JSON.parseObject(jsonStr, new TypeReference<Map<K, V>>() {
+        });
+        return map;
+    }
+
+    public static void main(String[] args) {
+//        String str = "{\"test1\":{\"name\":\"zhangsan\"},\"test2\":{\"name\":\"lisi\"},\"test3\":{\"name\":\"wanger\"}}";
+        String str = "{\"test1\":\"zhangsan\",\"test2\":\"lisi\",\"test3\":\"wanger\"}";
+        Map<String, String> map = JsonUtils.toMap(str, String.class, String.class);
+        System.out.println(map);
+
+    }
 }
