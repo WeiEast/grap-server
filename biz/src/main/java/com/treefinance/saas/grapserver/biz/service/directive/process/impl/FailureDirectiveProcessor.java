@@ -1,13 +1,18 @@
 package com.treefinance.saas.grapserver.biz.service.directive.process.impl;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.rocketmq.shade.io.netty.util.internal.StringUtil;
+import com.treefinance.saas.gateway.servicefacade.enums.BizTypeEnum;
 import com.treefinance.saas.grapserver.biz.common.AsycExcutor;
 import com.treefinance.saas.grapserver.biz.service.MonitorService;
 import com.treefinance.saas.grapserver.biz.service.directive.process.AbstractDirectiveProcessor;
 import com.treefinance.saas.grapserver.common.enums.EDirective;
 import com.treefinance.saas.grapserver.common.enums.ETaskStatus;
+import com.treefinance.saas.grapserver.common.model.Constants;
 import com.treefinance.saas.grapserver.common.model.dto.DirectiveDTO;
 import com.treefinance.saas.grapserver.common.model.dto.TaskDTO;
 import com.treefinance.saas.grapserver.dao.entity.AppLicense;
+import com.treefinance.saas.knife.result.SimpleResult;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -44,9 +49,29 @@ public class FailureDirectiveProcessor extends AbstractDirectiveProcessor {
         // 6.回调之前预处理
         precallback(dataMap, appLicense, directiveDTO);
 
+        handleTaskFailMsg(directiveDTO, taskDTO);
         // 7.异步触发触发回调
         asycExcutor.runAsyc(directiveDTO, _directiveDTO -> {
             callback(dataMap, appLicense, _directiveDTO);
         });
+    }
+
+    /**
+     * 处理返回到前端的消息
+     *
+     * @param directiveDTO
+     * @param taskDTO
+     */
+    private void handleTaskFailMsg(DirectiveDTO directiveDTO, TaskDTO taskDTO) {
+        try {
+            if (BizTypeEnum.valueOfType(BizTypeEnum.OPERATOR).equals(taskDTO.getBizType())) {
+                Map<String, Object> remarkMap = JSON.parseObject(directiveDTO.getRemark());
+                remarkMap.put("errorMsg", Constants.OPERATOR_TASK_FAIL_MSG);
+                directiveDTO.setRemark(JSON.toJSONString(remarkMap));
+                logger.info("handle task-fail-msg: result={},directiveDTO={}", JSON.toJSONString(directiveDTO));
+            }
+        } catch (Exception e) {
+            logger.info("handle result failed : directiveDTO={}", JSON.toJSONString(directiveDTO), e);
+        }
     }
 }
