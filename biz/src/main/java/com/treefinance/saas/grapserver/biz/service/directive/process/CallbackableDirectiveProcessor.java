@@ -66,10 +66,20 @@ public abstract class CallbackableDirectiveProcessor {
      */
     protected boolean precallback(Map<String, Object> dataMap, AppLicense appLicense, DirectiveDTO directiveDTO) {
         // 使用商户密钥加密数据，返回给前端
+        Map<String, Object> paramMap = Maps.newHashMap();
+        String remark = directiveDTO.getRemark();
+        if (StringUtils.isNotEmpty(remark)) {
+            try {
+                Map<String, Object> jsonObject = JSON.parseObject(remark);
+                if (!CollectionUtils.isEmpty(jsonObject)) {
+                    paramMap.putAll(jsonObject);
+                }
+            } catch (Exception e) {
+            }
+        }
         try {
             logger.info("回调数据生成： {}", JSON.toJSONString(dataMap));
             String params = encryptByRSA(dataMap, appLicense);
-            Map<String, Object> paramMap = Maps.newHashMap();
             paramMap.put("params", params);
             directiveDTO.setRemark(JSON.toJSONString(paramMap));
         } catch (Exception e) {
