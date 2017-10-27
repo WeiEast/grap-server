@@ -4,8 +4,10 @@ import com.alibaba.fastjson.JSON;
 import com.google.common.collect.Lists;
 import com.treefinance.saas.assistant.model.HttpMonitorMessage;
 import com.treefinance.saas.assistant.model.TaskMonitorMessage;
+import com.treefinance.saas.assistant.model.TaskOperatorMonitorMessage;
 import com.treefinance.saas.assistant.plugin.HttpMonitorPlugin;
 import com.treefinance.saas.assistant.plugin.TaskMonitorPlugin;
+import com.treefinance.saas.assistant.plugin.TaskOperatorMonitorPlugin;
 import com.treefinance.saas.grapserver.common.enums.ETaskStatus;
 import com.treefinance.saas.grapserver.common.model.dto.TaskDTO;
 import com.treefinance.saas.grapserver.common.utils.DataConverterUtils;
@@ -40,6 +42,8 @@ public class MonitorService {
 
     @Autowired
     private HttpMonitorPlugin httpMonitorPlugin;
+    @Autowired
+    private TaskOperatorMonitorPlugin taskOperatorMonitorPlugin;
 
     /**
      * 发送监控消息
@@ -125,4 +129,21 @@ public class MonitorService {
             httpQueue.addAll(list);
         }
     }
+
+    /**
+     * 发送运营商监控消息
+     *
+     * @param message
+     */
+    public void sendTaskOperatorMonitorMessage(TaskOperatorMonitorMessage message) {
+        try {
+            taskOperatorMonitorPlugin.sendMessage(message);
+            logger.info("send message to monitor : message={}", JSON.toJSONString(message));
+        } catch (Exception e) {
+            logger.error(" send message to monitor failed : body=" + JSON.toJSONString(message), e);
+        }
+
+    }
+
+
 }
