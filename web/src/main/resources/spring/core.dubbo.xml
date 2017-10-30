@@ -14,7 +14,7 @@
     <dubbo:consumer check="false"/>
 
     <!--消费者 -->
-    <dubbo:reference id="crawlerService" interface="com.datatrees.rawdatacentral.api.CrawlerService"/>
+    <dubbo:reference id="crawlerService" interface="com.datatrees.rawdatacentral.api.CrawlerService" timeout="10000"/>
     <dubbo:reference id="iMobileAttributionService"
                      interface="com.treefinance.commonservice.facade.mobileattribution.IMobileAttributionService"/>
 
