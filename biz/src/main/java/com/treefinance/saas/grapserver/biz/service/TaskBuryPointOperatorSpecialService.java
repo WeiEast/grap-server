@@ -22,9 +22,21 @@ public class TaskBuryPointOperatorSpecialService {
     @Autowired
     private MonitorService monitorService;
 
-    public void doProcess(String extra) {
+    /**
+     * 运营商确认手机号人数,开始登陆人数
+     *
+     * @param extra  前端传入的特殊处理json字符串
+     * @param taskId
+     * @param appId
+     * @param code
+     */
+    public void doProcess(String extra, Long taskId, String appId, String code) {
+        if (!StringUtils.equalsIgnoreCase(code, "300502")
+                && !StringUtils.equalsIgnoreCase(code, "300701")) {
+            return;
+        }
         if (StringUtils.isBlank(extra)) {
-            logger.error("运营商监控中,extra为空,extra={}", extra);
+            logger.error("运营商监控中,extra为空,extra={},code={},taskId={},appId={}", extra, code, taskId, appId);
             return;
         }
         JSONObject jsonObject = (JSONObject) JsonUtils.toJsonObject(extra);
@@ -35,10 +47,17 @@ public class TaskBuryPointOperatorSpecialService {
             return;
         }
         TaskOperatorMonitorMessage message = new TaskOperatorMonitorMessage();
+        message.setTaskId(taskId);
+        message.setAppId(appId);
         message.setGroupCode(groupCode);
         message.setGroupName(groupName);
         message.setDataTime(new Date());
-        message.setStatus(ETaskOperatorStatus.COMFIRM_MOBILE.getStatus());
+        if (StringUtils.equalsIgnoreCase(code, "300502")) {
+            message.setStatus(ETaskOperatorStatus.COMFIRM_MOBILE.getStatus());
+        }
+        if (StringUtils.equalsIgnoreCase(code, "300701")) {
+            message.setStatus(ETaskOperatorStatus.LOGIN.getStatus());
+        }
         monitorService.sendTaskOperatorMonitorMessage(message);
 
     }

@@ -138,9 +138,9 @@ public class MonitorService {
     public void sendTaskOperatorMonitorMessage(TaskOperatorMonitorMessage message) {
         try {
             taskOperatorMonitorPlugin.sendMessage(message);
-            logger.info("send message to monitor : message={}", JSON.toJSONString(message));
+            logger.info("运营商监控,send message to monitor : message={}", JSON.toJSONString(message));
         } catch (Exception e) {
-            logger.error(" send message to monitor failed : body=" + JSON.toJSONString(message), e);
+            logger.error("运营商监控,send message to monitor failed : body={}", JSON.toJSONString(message), e);
         }
 
     }

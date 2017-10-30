@@ -33,7 +33,7 @@ public class TaskBuryPointSpecialService {
     public void doProcess(String bizType, String extra, Long taskId, String appId, String code) {
         //运营商确认手机号人数,开始登陆人数
         if (StringUtils.equalsIgnoreCase(bizType, EBizType.OPERATOR.getText())) {
-            taskBuryPointOperatorSpecialService.doProcess(extra);
+            taskBuryPointOperatorSpecialService.doProcess(extra, taskId, appId, code);
         }
 
     }
