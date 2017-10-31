@@ -1,7 +1,6 @@
 package com.treefinance.saas.grapserver.biz.service.directive.process;
 
 import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
 import com.alibaba.rocketmq.shade.io.netty.util.internal.StringUtil;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -445,7 +444,10 @@ public abstract class CallbackableDirectiveProcessor {
             result = result.trim();
             if (!StringUtil.isNullOrEmpty(result) && result.startsWith("{") && result.endsWith("}")) {
                 SimpleResult simpleResult = JSON.parseObject(result, SimpleResult.class);
-                Map<String, Object> remarkMap = JSON.parseObject(directiveDTO.getRemark());
+                Map<String, Object> remarkMap = Maps.newHashMap();
+                if (StringUtils.isNotBlank(directiveDTO.getRemark())) {
+                    remarkMap = JSON.parseObject(directiveDTO.getRemark());
+                }
                 if (simpleResult != null && StringUtils.isNotEmpty(simpleResult.getErrorMsg())) {
                     remarkMap.put(Constants.ERROR_MSG_NAME, simpleResult.getErrorMsg());
                 }
