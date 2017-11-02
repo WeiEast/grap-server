@@ -5,7 +5,6 @@ import com.datatrees.rawdatacentral.api.CrawlerService;
 import com.google.common.collect.Maps;
 import com.treefinance.saas.grapserver.biz.mq.model.DirectiveMessage;
 import com.treefinance.saas.grapserver.biz.service.*;
-import com.treefinance.saas.grapserver.biz.service.TaskBuryPointSpecialService;
 import com.treefinance.saas.grapserver.biz.service.directive.DirectiveService;
 import com.treefinance.saas.grapserver.common.enums.EDirective;
 import com.treefinance.saas.grapserver.common.enums.EOperatorCodeType;
@@ -54,6 +53,10 @@ public class TaskController {
     private AppBizLicenseService appBizLicenseService;
     @Autowired
     private TaskBuryPointLogService taskBuryPointLogService;
+    @Autowired
+    private TaskBuryPointSpecialCodeService taskBuryPointSpecialCodeService;
+    @Autowired
+    private TaskBuryPointSpecialService taskBuryPointSpecialService;
 
     /**
      * 获取配置,电商在用
@@ -193,6 +196,7 @@ public class TaskController {
         }
         taskBuryPointLogService.pushTaskBuryPointLog(taskId, appId, code);
         taskBuryPointSpecialCodeService.doProcess(code, taskId, appId, extra);
+        taskBuryPointSpecialService.doProcess(bizType, extra, taskId, appId, code);
         return SimpleResult.successResult(null);
     }
 }

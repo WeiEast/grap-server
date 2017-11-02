@@ -33,6 +33,7 @@ public class TaskBuryPointSpecialCodeService {
         if (StringUtils.equalsIgnoreCase(code, "300505")) {
             this.logTaskOperatorMaintainUser(taskId, appId, extra);
         }
+
     }
 
     private void logTaskOperatorMaintainUser(Long taskId, String appId, String extra) {
