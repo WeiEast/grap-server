@@ -5,10 +5,8 @@ import com.alibaba.rocketmq.shade.io.netty.util.internal.StringUtil;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.treefinance.saas.grapserver.biz.common.CallbackSecureHandler;
-import com.treefinance.saas.grapserver.biz.service.AppCallbackConfigService;
-import com.treefinance.saas.grapserver.biz.service.AppLicenseService;
-import com.treefinance.saas.grapserver.biz.service.TaskCallbackLogService;
-import com.treefinance.saas.grapserver.biz.service.TaskLogService;
+import com.treefinance.saas.grapserver.biz.service.*;
+import com.treefinance.saas.grapserver.common.enums.EBizType;
 import com.treefinance.saas.grapserver.common.enums.EDataType;
 import com.treefinance.saas.grapserver.common.enums.EDirective;
 import com.treefinance.saas.grapserver.common.enums.ETaskStatus;
@@ -22,7 +20,9 @@ import com.treefinance.saas.grapserver.common.model.dto.TaskDTO;
 import com.treefinance.saas.grapserver.common.utils.HttpClientUtils;
 import com.treefinance.saas.grapserver.common.utils.RemoteDataDownloadUtils;
 import com.treefinance.saas.grapserver.dao.entity.AppLicense;
+import com.treefinance.saas.grapserver.dao.entity.TaskAttribute;
 import com.treefinance.saas.grapserver.dao.entity.TaskLog;
+import com.treefinance.saas.grapserver.facade.enums.ETaskAttribute;
 import com.treefinance.saas.knife.result.SimpleResult;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -57,6 +57,8 @@ public abstract class CallbackableDirectiveProcessor {
     protected TaskCallbackLogService taskCallbackLogService;
     @Autowired
     protected TaskLogService taskLogService;
+    @Autowired
+    protected TaskAttributeService taskAttributeService;
 
     /**
      * 回调前处理
@@ -310,6 +312,16 @@ public abstract class CallbackableDirectiveProcessor {
                 }
             }
             dataMap.remove("dataUrl");
+        }
+        // 如果是运营商数据
+        if (directiveDTO.getTask() != null && EBizType.OPERATOR.getCode().equals(directiveDTO.getTask().getBizType())) {
+            Long taskId = directiveDTO.getTask().getId();
+            String groupCodeAttribute = ETaskAttribute.OPERATOR_GROUP_CODE.getAttribute();
+            String groupNameAttribute = ETaskAttribute.OPERATOR_GROUP_NAME.getAttribute();
+
+            Map<String, TaskAttribute> attributeMap = taskAttributeService.findByNames(taskId, false, groupCodeAttribute, groupNameAttribute);
+            dataMap.put(groupCodeAttribute, attributeMap.get(groupCodeAttribute) == null ? "" : attributeMap.get(groupCodeAttribute).getValue());
+            dataMap.put(groupNameAttribute, attributeMap.get(groupNameAttribute) == null ? "" : attributeMap.get(groupNameAttribute).getValue());
         }
     }
 

@@ -10,6 +10,7 @@ import com.treefinance.saas.grapserver.biz.mq.MessageProducer;
 import com.treefinance.saas.grapserver.biz.mq.MqConfig;
 import com.treefinance.saas.grapserver.biz.mq.model.LoginMessage;
 import com.treefinance.saas.grapserver.common.enums.EOperatorCodeType;
+import com.treefinance.saas.grapserver.facade.enums.ETaskAttribute;
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
@@ -62,8 +63,8 @@ public class OperatorLoginSimulationService {
         try {
             messageProducer.send(GsonUtils.toJson(loginMessage), mqConfig.getProviderRawdataTopic(),
                     mqConfig.getProviderRawdataTag(), taskId.toString());
-            taskAttributeService.insertOrUpdateSelective(taskId, "groupCode", groupCode);
-            taskAttributeService.insertOrUpdateSelective(taskId, "groupName", groupName);
+            taskAttributeService.insertOrUpdateSelective(taskId, ETaskAttribute.OPERATOR_GROUP_CODE.getAttribute(), groupCode);
+            taskAttributeService.insertOrUpdateSelective(taskId, ETaskAttribute.OPERATOR_GROUP_NAME.getAttribute(), groupName);
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
         }

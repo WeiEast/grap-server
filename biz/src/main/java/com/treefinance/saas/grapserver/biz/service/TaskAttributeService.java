@@ -3,6 +3,7 @@
  */
 package com.treefinance.saas.grapserver.biz.service;
 
+import com.google.common.collect.Maps;
 import com.treefinance.basicservice.security.crypto.facade.EncryptionIntensityEnum;
 import com.treefinance.basicservice.security.crypto.facade.ISecurityCryptoService;
 import com.treefinance.commonservice.uid.UidGenerator;
@@ -16,7 +17,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
 import javax.annotation.Resource;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by chenjh on 2017/7/5.
@@ -88,6 +91,32 @@ public class TaskAttributeService {
             taskAttribute.setValue(securityCryptoService.decrypt(taskAttribute.getValue(), EncryptionIntensityEnum.NORMAL));
         }
         return taskAttribute;
+    }
+
+    /**
+     * 批量通过属性名查询属性值
+     *
+     * @param taskId
+     * @param decrypt
+     * @param names
+     * @return
+     */
+    public Map<String, TaskAttribute> findByNames(Long taskId, boolean decrypt, String... names) {
+        List<String> namelist = Arrays.asList(names);
+        TaskAttributeCriteria criteria = new TaskAttributeCriteria();
+        criteria.createCriteria().andTaskIdEqualTo(taskId).andNameIn(namelist);
+        List<TaskAttribute> attributeList = taskAttributeMapper.selectByExample(criteria);
+
+        Map<String, TaskAttribute> attributeMap = Maps.newHashMap();
+        if (!CollectionUtils.isEmpty(attributeList)) {
+            for (TaskAttribute taskAttribute : attributeList) {
+                if (decrypt && StringUtils.isNotEmpty(taskAttribute.getValue())) {
+                    taskAttribute.setValue(securityCryptoService.decrypt(taskAttribute.getValue(), EncryptionIntensityEnum.NORMAL));
+                }
+                attributeMap.put(taskAttribute.getName(), taskAttribute);
+            }
+        }
+        return attributeMap;
     }
 
     /**
