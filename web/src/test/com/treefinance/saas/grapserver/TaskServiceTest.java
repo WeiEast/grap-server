@@ -5,6 +5,7 @@ package com.treefinance.saas.grapserver; /**
 import com.alibaba.fastjson.JSON;
 import com.treefinance.saas.grapserver.biz.service.AppCallbackConfigService;
 import com.treefinance.saas.grapserver.biz.service.TaskService;
+import com.treefinance.saas.grapserver.common.enums.EDataType;
 import com.treefinance.saas.grapserver.common.model.dto.AppCallbackConfigDTO;
 import com.treefinance.saas.grapserver.facade.model.MerchantBaseInfoRO;
 import com.treefinance.saas.grapserver.facade.service.MerchantFacade;
@@ -48,7 +49,7 @@ public class TaskServiceTest {
 
     @Test
     public void testA() {
-        List<AppCallbackConfigDTO> list = appCallbackConfigService.getByAppIdAndBizType("QATestabcdefghQA", (byte) 4);
+        List<AppCallbackConfigDTO> list = appCallbackConfigService.getByAppIdAndBizType("QATestabcdefghQA", (byte) 4, EDataType.DELIVERY_ADDRESS);
         System.out.println(JSON.toJSONString(list));
     }
 

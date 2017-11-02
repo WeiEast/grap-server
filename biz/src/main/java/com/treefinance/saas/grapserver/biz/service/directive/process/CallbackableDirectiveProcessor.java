@@ -1,6 +1,7 @@
 package com.treefinance.saas.grapserver.biz.service.directive.process;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.rocketmq.shade.io.netty.util.internal.StringUtil;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.treefinance.saas.grapserver.biz.common.CallbackSecureHandler;
@@ -13,6 +14,7 @@ import com.treefinance.saas.grapserver.common.enums.EDirective;
 import com.treefinance.saas.grapserver.common.enums.ETaskStatus;
 import com.treefinance.saas.grapserver.common.exception.CallbackEncryptException;
 import com.treefinance.saas.grapserver.common.exception.RequestFailedException;
+import com.treefinance.saas.grapserver.common.model.Constants;
 import com.treefinance.saas.grapserver.common.model.dto.AppCallbackConfigDTO;
 import com.treefinance.saas.grapserver.common.model.dto.CallBackLicenseDTO;
 import com.treefinance.saas.grapserver.common.model.dto.DirectiveDTO;
@@ -21,6 +23,7 @@ import com.treefinance.saas.grapserver.common.utils.HttpClientUtils;
 import com.treefinance.saas.grapserver.common.utils.RemoteDataDownloadUtils;
 import com.treefinance.saas.grapserver.dao.entity.AppLicense;
 import com.treefinance.saas.grapserver.dao.entity.TaskLog;
+import com.treefinance.saas.knife.result.SimpleResult;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -62,10 +65,21 @@ public abstract class CallbackableDirectiveProcessor {
      */
     protected boolean precallback(Map<String, Object> dataMap, AppLicense appLicense, DirectiveDTO directiveDTO) {
         // 使用商户密钥加密数据，返回给前端
+        Map<String, Object> paramMap = Maps.newHashMap();
+        String remark = directiveDTO.getRemark();
+        if (StringUtils.isNotEmpty(remark)) {
+            try {
+                Map<String, Object> jsonObject = JSON.parseObject(remark);
+                if (!CollectionUtils.isEmpty(jsonObject)) {
+                    paramMap.put(Constants.ERROR_MSG_NAME, jsonObject.get(Constants.ERROR_MSG_NAME));
+
+                }
+            } catch (Exception e) {
+            }
+        }
         try {
             logger.info("回调数据生成： {}", JSON.toJSONString(dataMap));
             String params = encryptByRSA(dataMap, appLicense);
-            Map<String, Object> paramMap = Maps.newHashMap();
             paramMap.put("params", params);
             directiveDTO.setRemark(JSON.toJSONString(paramMap));
         } catch (Exception e) {
@@ -159,6 +173,7 @@ public abstract class CallbackableDirectiveProcessor {
 
     }
 
+
     /**
      * 获取回调配置
      *
@@ -167,7 +182,7 @@ public abstract class CallbackableDirectiveProcessor {
     protected List<AppCallbackConfigDTO> getCallbackConfigs(TaskDTO taskDTO) {
         String appId = taskDTO.getAppId();
         Byte bizType = taskDTO.getBizType();
-        List<AppCallbackConfigDTO> configList = appCallbackConfigService.getByAppIdAndBizType(appId, bizType);
+        List<AppCallbackConfigDTO> configList = appCallbackConfigService.getByAppIdAndBizType(appId, bizType, EDataType.MAIN_STREAM);
         if (CollectionUtils.isEmpty(configList)) {
             return Lists.newArrayList();
         }
@@ -411,8 +426,37 @@ public abstract class CallbackableDirectiveProcessor {
 //            String paramsForLog = this.encryptParams(originalDataMap, appLicense, config);
             // 记录回调日志
             taskCallbackLogService.insert(callbackUrl, config, directiveDTO.getTaskId(), JSON.toJSONString(originalDataMap), result, consumeTime);
+            // 处理返回结果
+            handleRequestResult(directiveDTO, result);
         }
         return true;
+    }
+
+
+    /**
+     * 处理请求失败异常
+     *
+     * @param directiveDTO
+     * @param result
+     */
+    private void handleRequestResult(DirectiveDTO directiveDTO, String result) {
+        try {
+            result = result.trim();
+            if (!StringUtil.isNullOrEmpty(result) && result.startsWith("{") && result.endsWith("}")) {
+                SimpleResult simpleResult = JSON.parseObject(result, SimpleResult.class);
+                Map<String, Object> remarkMap = Maps.newHashMap();
+                if (StringUtils.isNotBlank(directiveDTO.getRemark())) {
+                    remarkMap = JSON.parseObject(directiveDTO.getRemark());
+                }
+                if (simpleResult != null && StringUtils.isNotEmpty(simpleResult.getErrorMsg())) {
+                    remarkMap.put(Constants.ERROR_MSG_NAME, simpleResult.getErrorMsg());
+                }
+                directiveDTO.setRemark(JSON.toJSONString(remarkMap));
+                logger.info("handle callback result : result={},directiveDTO={}", result, JSON.toJSONString(directiveDTO));
+            }
+        } catch (Exception e) {
+            logger.info("handle result failed : directiveDTO={},   result={}", JSON.toJSONString(directiveDTO), result, e);
+        }
     }
 
     /**

@@ -42,6 +42,8 @@ public class OperatorLoginSimulationService {
     private TaskService taskService;
     @Autowired
     private TaskTimeService taskTimeService;
+    @Autowired
+    private TaskAttributeService taskAttributeService;
 
     public String getOperator(String operatorName, String province) {
         operatorName = StringUtils.remove(operatorName, "中国");
@@ -50,14 +52,18 @@ public class OperatorLoginSimulationService {
         return province + operatorName;
     }
 
-    public void prepare(Long taskId, String websiteName, String accountNo) {
+    public void prepare(Long taskId, String websiteName, String accountNo, String groupCode, String groupName) {
         LoginMessage loginMessage = new LoginMessage();
         loginMessage.setTaskId(taskId);
         loginMessage.setWebsiteName(websiteName);
         loginMessage.setAccountNo(accountNo);
+        loginMessage.setGroupCode(groupCode);
+        loginMessage.setGroupName(groupName);
         try {
             messageProducer.send(GsonUtils.toJson(loginMessage), mqConfig.getProviderRawdataTopic(),
                     mqConfig.getProviderRawdataTag(), taskId.toString());
+            taskAttributeService.insertOrUpdateSelective(taskId, "groupCode", groupCode);
+            taskAttributeService.insertOrUpdateSelective(taskId, "groupName", groupName);
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
         }

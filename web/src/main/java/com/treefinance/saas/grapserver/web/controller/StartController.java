@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
+import java.io.IOException;
 import java.util.Map;
 
 /**
@@ -27,7 +28,7 @@ import java.util.Map;
  * Created by yh-treefinance on 2017/10/9.
  */
 @RestController
-@RequestMapping(value = {"/", "/grap"})
+@RequestMapping(value = {"/", "/grap", "/h5", "/grap/h5"})
 public class StartController {
     private static final Logger logger = LoggerFactory.getLogger(EcommerceController.class);
     @Autowired
@@ -63,7 +64,7 @@ public class StartController {
                         @RequestParam(name = "extra", required = false) String extra,
                         @RequestParam(name = "source", required = false) String source,
                         @RequestParam(name = "bizType", required = false) String bizType,
-                        HttpServletRequest request) throws ForbiddenException {
+                        HttpServletRequest request) throws ForbiddenException, IOException {
         if (StringUtils.isEmpty(bizType)) {
             bizType = (String) request.getAttribute("bizType");
         }
@@ -71,7 +72,7 @@ public class StartController {
                 appid, uniqueId, coorType, deviceInfo, extra, bizType, source);
         EBizType eBizType = EBizType.of(bizType);
         taskLicenseService.verifyCreateTask(appid, eBizType);
-        Long taskId = taskServiceImpl.createTask(uniqueId, appid, eBizType.getCode());
+        Long taskId = taskServiceImpl.createTask(uniqueId, appid, eBizType.getCode(), extra);
         Map<String, Object> map = Maps.newHashMap();
         map.put("taskid", String.valueOf(taskId));
         map.put("color", merchantConfigService.getColorConfig(appid));

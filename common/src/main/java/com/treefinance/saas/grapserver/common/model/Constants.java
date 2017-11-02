@@ -16,7 +16,7 @@ public interface Constants {
 
 
     /**
-     *  WEB_CONTEXT_ATTRIBUTE
+     * WEB_CONTEXT_ATTRIBUTE
      */
     String WEB_CONTEXT_ATTRIBUTE = "com.treefinance.saas.grapserver.common.model.WebContext";
 
@@ -25,4 +25,17 @@ public interface Constants {
      */
     String APP_ID = "appid";
 
+    /**
+     * 运营商错误提示信息
+     */
+    String OPERATOR_TASK_FAIL_MSG = "运营商验证失败，请稍后再试。";
+    /**
+     * 回调失败错误提示信息
+     */
+    String CALLBACK_FAIL_MSG = "验证失败，请稍后再试。";
+
+    /**
+     * 错误信息字段名
+     */
+    String ERROR_MSG_NAME = "errorMsg";
 }

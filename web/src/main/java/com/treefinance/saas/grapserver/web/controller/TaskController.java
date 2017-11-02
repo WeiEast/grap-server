@@ -54,8 +54,6 @@ public class TaskController {
     private AppBizLicenseService appBizLicenseService;
     @Autowired
     private TaskBuryPointLogService taskBuryPointLogService;
-    @Autowired
-    private TaskBuryPointSpecialService taskBuryPointSpecialService;
 
     /**
      * 获取配置,电商在用
@@ -183,7 +181,7 @@ public class TaskController {
                                @RequestParam("code") String code,
                                @RequestParam(value = "bizType", required = false) String bizType,
                                @RequestParam(value = "extra", required = false) String extra) throws Exception {
-        logger.info("记录埋点:taskid={},appid={},code={}", taskId, appId, code);
+        logger.info("记录埋点:taskid={},appid={},code={},bizType={},extra={}", taskId, appId, code, bizType, extra);
         if (taskId == null) {
             throw new ValidationException("参数taskid为空");
         }
@@ -194,8 +192,7 @@ public class TaskController {
             throw new ValidationException("参数code为空");
         }
         taskBuryPointLogService.pushTaskBuryPointLog(taskId, appId, code);
-
-        taskBuryPointSpecialService.doProcess(bizType, extra, taskId, appId, code);
+        taskBuryPointSpecialCodeService.doProcess(code, taskId, appId, extra);
         return SimpleResult.successResult(null);
     }
 }

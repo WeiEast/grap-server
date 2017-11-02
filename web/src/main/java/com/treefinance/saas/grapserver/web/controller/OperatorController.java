@@ -10,8 +10,6 @@ import com.treefinance.saas.grapserver.biz.config.DiamondConfig;
 import com.treefinance.saas.grapserver.biz.service.*;
 import com.treefinance.saas.grapserver.common.enums.EBizType;
 import com.treefinance.saas.grapserver.common.exception.CrawlerBizException;
-import com.treefinance.saas.grapserver.common.exception.ForbiddenException;
-import com.treefinance.saas.grapserver.common.utils.IpUtils;
 import com.treefinance.saas.grapserver.dao.entity.TaskAttribute;
 import com.treefinance.saas.knife.result.SimpleResult;
 import org.apache.commons.lang3.StringUtils;
@@ -25,9 +23,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.ModelAndView;
 
-import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
@@ -152,14 +148,18 @@ public class OperatorController {
      *
      * @param taskid      任务ID
      * @param websiteName 爬虫提供
+     * @param groupCode   爬虫提供
+     * @param groupName   爬虫提供
      * @return
      */
     @RequestMapping(value = "/loginpage/prepare", method = {RequestMethod.POST})
     public Object prepare(@RequestParam("taskid") Long taskid,
                           @RequestParam("websiteName") String websiteName,
-                          @RequestParam(name = "accountNo", required = false) String accountNo) {
-        logger.info("模拟登录: 用户打开登陆页,taskid={},websiteName={}", taskid, websiteName);
-        operatorLoginSimulationService.prepare(taskid, websiteName, accountNo);
+                          @RequestParam(name = "accountNo", required = false) String accountNo,
+                          @RequestParam(name = "groupCode", required = false) String groupCode,
+                          @RequestParam(name = "groupName", required = false) String groupName) {
+        logger.info("模拟登录: 用户打开登陆页,taskid={},websiteName={},groupCode={},groupName={}", taskid, websiteName, groupCode, groupName);
+        operatorLoginSimulationService.prepare(taskid, websiteName, accountNo, groupCode, groupName);
         return SimpleResult.successResult(null);
     }
 
@@ -201,7 +201,7 @@ public class OperatorController {
                         @RequestParam(value = "realName", required = false) String realName,
                         @RequestParam(value = "idCard", required = false) String idCard,
                         HttpServletResponse response) {
-        logger.info("模拟登录: 请求验证码,taskid={},username={},code={},randomPassword={}", taskid, username, code,
+        logger.info("模拟登录: 请求登录,taskid={},username={},code={},randomPassword={}", taskid, username, code,
                 randomPassword);
         HttpResult<String> httpResult;
         try {
@@ -218,7 +218,7 @@ public class OperatorController {
         } catch (Exception e) {
             logger.error("登陆失败，taskId=" + taskid, e);
             response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
-            return SimpleResult.failResult("登陆失败，taskId=" + taskid);
+            return SimpleResult.failResult("登陆失败,请重试");
         }
     }
 }
