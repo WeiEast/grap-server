@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+
+    <!--运营商埋点特殊处理-->
+    <bean id="operatorBuryPointSpecialProcessor"
+          class="com.treefinance.saas.grapserver.biz.processor.burypoint.operator.OperatorBuryPointSpecialProcessor">
+        <property name="components">
+            <set>
+                <ref bean="taskCreateSpecialComponent"/>
+                <ref bean="confirmMobileSpecialComponent"/>
+            </set>
+        </property>
+    </bean>
+
+    <!--运营商任务日志特殊处理-->
+    <bean id="operatorTaskLogSpecialProcessor"
+          class="com.treefinance.saas.grapserver.biz.processor.tasklog.operator.OperatorTaskLogSpecialProcessor">
+        <property name="components">
+            <set>
+                <ref bean="loginSuccessSpecialComponent"/>
+                <ref bean="crawlSuccessSpecialComponent"/>
+                <ref bean="processSuccessSpecialComponent"/>
+                <ref bean="callbackSuccessSpecialComponent"/>
+            </set>
+        </property>
+    </bean>
+
+
+</beans>

@@ -1,5 +1,7 @@
 package com.treefinance.saas.grapserver.biz.service;
 
+import com.treefinance.saas.grapserver.biz.processor.tasklog.operator.OperatorTaskLogSpecialProcessor;
+import com.treefinance.saas.grapserver.biz.processor.tasklog.operator.OperatorTaskLogSpecialRequest;
 import com.treefinance.saas.grapserver.common.enums.EBizType;
 import com.treefinance.saas.grapserver.common.model.dto.TaskDTO;
 import com.treefinance.saas.grapserver.common.utils.BeanUtils;
@@ -27,7 +29,7 @@ public class TaskLogSpecialService {
     @Autowired
     private TaskMapper taskMapper;
     @Autowired
-    private TaskLogOperatorSpecialService taskLogOperatorSpecialService;
+    private OperatorTaskLogSpecialProcessor operatorTaskLogSpecialProcessor;
 
 
     @Async
@@ -43,7 +45,11 @@ public class TaskLogSpecialService {
         TaskDTO taskDTO = new TaskDTO();
         BeanUtils.copyProperties(task, taskDTO);
         if (EBizType.OPERATOR.getCode().equals(task.getBizType())) {
-            taskLogOperatorSpecialService.doProcess(taskDTO, msg, processTime);
+            OperatorTaskLogSpecialRequest request = new OperatorTaskLogSpecialRequest();
+            request.setTaskDTO(taskDTO);
+            request.setMsg(msg);
+            request.setProcessTime(processTime);
+            operatorTaskLogSpecialProcessor.doService(request);
         }
 
     }

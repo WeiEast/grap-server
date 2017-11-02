@@ -1,5 +1,7 @@
 package com.treefinance.saas.grapserver.biz.service;
 
+import com.treefinance.saas.grapserver.biz.processor.burypoint.operator.OperatorBuryPointSpecialProcessor;
+import com.treefinance.saas.grapserver.biz.processor.burypoint.operator.OperatorBuryPointSpecialRequest;
 import com.treefinance.saas.grapserver.common.enums.EBizType;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -18,7 +20,7 @@ public class TaskBuryPointSpecialService {
     private final static Logger logger = LoggerFactory.getLogger(TaskBuryPointSpecialService.class);
 
     @Autowired
-    private TaskBuryPointOperatorSpecialService taskBuryPointOperatorSpecialService;
+    private OperatorBuryPointSpecialProcessor operatorBuryPointSpecialProcessor;
 
     /**
      * 业务埋点的特殊处理
@@ -31,9 +33,14 @@ public class TaskBuryPointSpecialService {
      */
     @Async
     public void doProcess(String bizType, String extra, Long taskId, String appId, String code) {
-        //运营商确认手机号人数,开始登陆人数
+        //运营商确认手机号人数,任务创建任务
         if (StringUtils.equalsIgnoreCase(bizType, EBizType.OPERATOR.getText())) {
-            taskBuryPointOperatorSpecialService.doProcess(extra, taskId, appId, code);
+            OperatorBuryPointSpecialRequest request = new OperatorBuryPointSpecialRequest();
+            request.setAppId(appId);
+            request.setTaskId(taskId);
+            request.setExtra(extra);
+            request.setCode(code);
+            operatorBuryPointSpecialProcessor.doService(request);
         }
 
     }

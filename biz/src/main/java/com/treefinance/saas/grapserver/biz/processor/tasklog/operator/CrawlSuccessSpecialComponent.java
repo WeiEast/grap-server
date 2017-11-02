@@ -1,8 +1,9 @@
-package com.treefinance.saas.grapserver.biz.service;
+package com.treefinance.saas.grapserver.biz.processor.tasklog.operator;
 
 import com.alibaba.fastjson.JSON;
 import com.treefinance.saas.assistant.model.TaskOperatorMonitorMessage;
-import com.treefinance.saas.grapserver.common.enums.ETaskOperatorStatus;
+import com.treefinance.saas.grapserver.biz.processor.BaseBusinessComponent;
+import com.treefinance.saas.grapserver.biz.service.MonitorService;
 import com.treefinance.saas.grapserver.common.enums.ETaskStep;
 import com.treefinance.saas.grapserver.common.model.dto.TaskDTO;
 import com.treefinance.saas.grapserver.dao.entity.TaskAttribute;
@@ -11,23 +12,23 @@ import com.treefinance.saas.grapserver.dao.entity.TaskLog;
 import com.treefinance.saas.grapserver.dao.entity.TaskLogCriteria;
 import com.treefinance.saas.grapserver.dao.mapper.TaskAttributeMapper;
 import com.treefinance.saas.grapserver.dao.mapper.TaskLogMapper;
+import com.treefinance.saas.grapserver.facade.model.enums.ETaskOperatorMonitorStatus;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
 import java.util.Date;
 import java.util.List;
 
 /**
- * Created by haojiahong on 2017/10/30.
+ * Created by haojiahong on 2017/11/2.
  */
-@Service
-public class TaskLogOperatorSpecialService {
-
-    private final static Logger logger = LoggerFactory.getLogger(TaskLogOperatorSpecialService.class);
+@Component("crawlSuccessSpecialComponent")
+public class CrawlSuccessSpecialComponent extends BaseBusinessComponent<OperatorTaskLogSpecialRequest> {
+    private final static Logger logger = LoggerFactory.getLogger(CrawlSuccessSpecialComponent.class);
 
     @Autowired
     private MonitorService monitorService;
@@ -36,21 +37,18 @@ public class TaskLogOperatorSpecialService {
     @Autowired
     private TaskAttributeMapper taskAttributeMapper;
 
-    /**
-     * 运营商监控,抓取失败人数，洗数失败人数
-     *
-     * @param taskDTO
-     * @param msg         taskLog消息msg
-     * @param processTime
-     */
-    public void doProcess(TaskDTO taskDTO, String msg, Date processTime) {
-        //收到的msg不是抓取失败或者洗数失败,不处理.
-        if (!StringUtils.equalsIgnoreCase(msg, ETaskStep.CRAWL_FAIL.getText())
-                && !StringUtils.equalsIgnoreCase(msg, ETaskStep.DATA_PREPROCESSED_FAIL.getText())
-                && !StringUtils.equalsIgnoreCase(msg, ETaskStep.DATA_PROCESS_FAIL.getText())
-                && !StringUtils.equalsIgnoreCase(msg, ETaskStep.DATA_SAVE_FAIL.getText())) {
+    @Override
+    protected void doBusiness(OperatorTaskLogSpecialRequest request) {
+        if (request == null || request.getTaskDTO() == null || StringUtils.isBlank(request.getMsg())) {
             return;
         }
+        //收到的msg不是抓取成功,不处理.
+        if (!StringUtils.equalsIgnoreCase(request.getMsg(), ETaskStep.CRAWL_SUCCESS.getText())) {
+            return;
+        }
+        String msg = request.getMsg();
+        TaskDTO taskDTO = request.getTaskDTO();
+        Date processTime = request.getProcessTime();
         TaskLogCriteria taskLogCriteria = new TaskLogCriteria();
         taskLogCriteria.createCriteria().andTaskIdEqualTo(taskDTO.getId()).andMsgEqualTo(msg);
         List<TaskLog> taskLogList = taskLogMapper.selectByExample(taskLogCriteria);
@@ -64,7 +62,6 @@ public class TaskLogOperatorSpecialService {
                     JSON.toJSONString(taskDTO), msg, processTime);
             return;
         }
-
         TaskAttributeCriteria taskAttributeCriteria = new TaskAttributeCriteria();
         taskAttributeCriteria.createCriteria().andTaskIdEqualTo(taskDTO.getId());
         List<TaskAttribute> taskAttributeList = taskAttributeMapper.selectByExample(taskAttributeCriteria);
@@ -93,15 +90,9 @@ public class TaskLogOperatorSpecialService {
         message.setAppId(taskDTO.getAppId());
         message.setGroupCode(groupCode);
         message.setGroupName(groupName);
-        message.setDataTime(new Date());
-        if (StringUtils.equalsIgnoreCase(msg, ETaskStep.CRAWL_FAIL.getText())) {
-            message.setStatus(ETaskOperatorStatus.CRAWL_FAIL.getStatus());
-        }
-        if (StringUtils.equalsIgnoreCase(msg, ETaskStep.DATA_PREPROCESSED_FAIL.getText())
-                || StringUtils.equalsIgnoreCase(msg, ETaskStep.DATA_PROCESS_FAIL.getText())
-                || StringUtils.equalsIgnoreCase(msg, ETaskStep.DATA_SAVE_FAIL.getText())) {
-            message.setStatus(ETaskOperatorStatus.PROCESS_FAIL.getStatus());
-        }
+        message.setDataTime(processTime);
+        message.setStatus(ETaskOperatorMonitorStatus.CRAWL_SUCCESS.getStatus());
+
         monitorService.sendTaskOperatorMonitorMessage(message);
 
     }

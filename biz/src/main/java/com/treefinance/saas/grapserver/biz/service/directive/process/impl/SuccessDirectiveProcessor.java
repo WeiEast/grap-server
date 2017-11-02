@@ -1,9 +1,11 @@
 package com.treefinance.saas.grapserver.biz.service.directive.process.impl;
 
 import com.treefinance.saas.grapserver.biz.service.MonitorService;
+import com.treefinance.saas.grapserver.biz.service.TaskLogSpecialService;
 import com.treefinance.saas.grapserver.biz.service.directive.process.AbstractDirectiveProcessor;
 import com.treefinance.saas.grapserver.common.enums.EDirective;
 import com.treefinance.saas.grapserver.common.enums.ETaskStatus;
+import com.treefinance.saas.grapserver.common.enums.ETaskStep;
 import com.treefinance.saas.grapserver.common.model.dto.DirectiveDTO;
 import com.treefinance.saas.grapserver.common.model.dto.TaskDTO;
 import com.treefinance.saas.grapserver.dao.entity.AppLicense;
@@ -21,6 +23,8 @@ import java.util.Map;
 public class SuccessDirectiveProcessor extends AbstractDirectiveProcessor {
     @Autowired
     protected MonitorService monitorService;
+    @Autowired
+    private TaskLogSpecialService taskLogSpecialService;
 
     @Override
     protected void doProcess(EDirective directive, DirectiveDTO directiveDTO) {
@@ -43,6 +47,7 @@ public class SuccessDirectiveProcessor extends AbstractDirectiveProcessor {
             taskDTO.setStatus(ETaskStatus.SUCCESS.getStatus());
         } else if (result == 1) {
             taskDTO.setStatus(ETaskStatus.SUCCESS.getStatus());
+            taskLogSpecialService.doProcess(taskId, ETaskStep.CALLBACK_SUCCESS.getText(), new Date());
         } else {
             // 指令发生变更 ： task_success -> callback_fail
             taskNextDirectiveService.insert(taskId, directiveDTO.getDirective());
