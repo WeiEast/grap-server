@@ -39,7 +39,7 @@ public class TaskCreateSpecialComponent extends BaseBusinessComponent<OperatorBu
         message.setTaskId(request.getTaskId());
         message.setAppId(request.getAppId());
         message.setDataTime(new Date());
-        message.setStatus(ETaskOperatorMonitorStatus.CREAT_TASK.getStatus());
+        message.setStatus(ETaskOperatorMonitorStatus.CREATE_TASK.getStatus());
 
         monitorService.sendTaskOperatorMonitorMessage(message);
 

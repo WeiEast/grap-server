@@ -6,7 +6,7 @@ package com.treefinance.saas.grapserver.facade.model.enums;
  */
 public enum ETaskOperatorMonitorStatus {
 
-    CREAT_TASK((byte) 1, "任务创建"),
+    CREATE_TASK((byte) 1, "任务创建"),
     COMFIRM_MOBILE((byte) 2, "确认手机号"),
     LOGIN_SUCCESS((byte) 3, "登陆成功"),
     CRAWL_SUCCESS((byte) 4, "抓取成功"),
@@ -28,5 +28,16 @@ public enum ETaskOperatorMonitorStatus {
 
     public String getName() {
         return name;
+    }
+
+    public static ETaskOperatorMonitorStatus getMonitorStats(Byte status) {
+        if (status != null) {
+            for (ETaskOperatorMonitorStatus item : ETaskOperatorMonitorStatus.values()) {
+                if (item.status.equals(status)) {
+                    return item;
+                }
+            }
+        }
+        return null;
     }
 }

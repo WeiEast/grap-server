@@ -182,9 +182,8 @@ public class TaskController {
     public Object buryPointLog(@RequestParam("taskid") Long taskId,
                                @RequestParam("appid") String appId,
                                @RequestParam("code") String code,
-                               @RequestParam(value = "bizType", required = false) String bizType,
                                @RequestParam(value = "extra", required = false) String extra) throws Exception {
-        logger.info("记录埋点:taskid={},appid={},code={},bizType={},extra={}", taskId, appId, code, bizType, extra);
+        logger.info("记录埋点:taskid={},appid={},code={},extra={}", taskId, appId, code, extra);
         if (taskId == null) {
             throw new ValidationException("参数taskid为空");
         }
@@ -196,7 +195,7 @@ public class TaskController {
         }
         taskBuryPointLogService.pushTaskBuryPointLog(taskId, appId, code);
         taskBuryPointSpecialCodeService.doProcess(code, taskId, appId, extra);
-        taskBuryPointSpecialService.doProcess(bizType, extra, taskId, appId, code);
+        taskBuryPointSpecialService.doProcess(extra, taskId, appId, code);
         return SimpleResult.successResult(null);
     }
 }

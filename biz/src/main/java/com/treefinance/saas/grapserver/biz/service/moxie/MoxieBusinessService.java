@@ -6,7 +6,6 @@ import com.github.stuxuhai.jpinyin.PinyinException;
 import com.github.stuxuhai.jpinyin.PinyinFormat;
 import com.github.stuxuhai.jpinyin.PinyinHelper;
 import com.google.common.base.Joiner;
-import com.google.common.base.Splitter;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
@@ -291,7 +290,7 @@ public class MoxieBusinessService implements InitializingBean {
                     taskLogService.insert(taskId, ETaskStep.WAITING_USER_INPUT_IMAGE_CODE.getText(), new Date(), null);
 
                 }
-                logger.info("魔蝎公积金任务需要验证码,moxieCaptchaDTO={}", JSON.toJSONString(moxieCaptchaDTO));
+                logger.info("魔蝎公积金任务需要验证码,moxieCaptchaDTO={},taskId={}", JSON.toJSONString(moxieCaptchaDTO), taskId);
             }
 
         }

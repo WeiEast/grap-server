@@ -2,7 +2,6 @@ package com.treefinance.saas.grapserver.biz.service;
 
 import com.treefinance.saas.grapserver.biz.processor.burypoint.operator.OperatorBuryPointSpecialProcessor;
 import com.treefinance.saas.grapserver.biz.processor.burypoint.operator.OperatorBuryPointSpecialRequest;
-import com.treefinance.saas.grapserver.common.enums.EBizType;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,16 +24,20 @@ public class TaskBuryPointSpecialService {
     /**
      * 业务埋点的特殊处理
      *
-     * @param bizType 业务类型
-     * @param extra   特殊处理字段
-     * @param taskId  任务id
-     * @param appId   商户id
-     * @param code    埋点编码
+     * @param extra
+     * @param taskId 任务id
+     * @param appId  商户id
+     * @param code   埋点编码
      */
     @Async
-    public void doProcess(String bizType, String extra, Long taskId, String appId, String code) {
-        //运营商确认手机号人数,任务创建任务
-        if (StringUtils.equalsIgnoreCase(bizType, EBizType.OPERATOR.getText())) {
+    public void doProcess(String extra, Long taskId, String appId, String code) {
+        logger.info("任务埋点特殊处理taskId={},code={},extra={}", taskId, code, extra);
+        //10-电商
+
+        //20-邮箱账单
+
+        //30-运营商
+        if (StringUtils.startsWithIgnoreCase(code, "30")) {
             OperatorBuryPointSpecialRequest request = new OperatorBuryPointSpecialRequest();
             request.setAppId(appId);
             request.setTaskId(taskId);
