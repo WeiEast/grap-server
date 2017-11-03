@@ -78,7 +78,7 @@ public class CrawlSuccessSpecialComponent extends BaseBusinessComponent<Operator
                 groupCode = taskAttribute.getValue();
             }
             if (StringUtils.equalsIgnoreCase(taskAttribute.getName(), ETaskAttribute.OPERATOR_GROUP_NAME.getAttribute())) {
-                groupName = taskAttribute.getName();
+                groupName = taskAttribute.getValue();
             }
         }
         if (StringUtils.isBlank(groupCode) || StringUtils.isBlank(groupName)) {
