@@ -475,6 +475,7 @@ public class HttpClientUtils {
         try {
             httpPost.setConfig(getBaseConfig());
             String json = JsonUtils.toJsonString(params);
+            json = new String(json.getBytes(), "utf-8");
             StringEntity s = new StringEntity(json);
             s.setContentEncoding("UTF-8");
             s.setContentType("application/json");
