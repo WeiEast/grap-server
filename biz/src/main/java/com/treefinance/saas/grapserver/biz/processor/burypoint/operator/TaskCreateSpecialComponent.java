@@ -1,5 +1,6 @@
 package com.treefinance.saas.grapserver.biz.processor.burypoint.operator;
 
+import com.alibaba.fastjson.JSON;
 import com.treefinance.saas.assistant.model.TaskOperatorMonitorMessage;
 import com.treefinance.saas.grapserver.biz.processor.BaseBusinessComponent;
 import com.treefinance.saas.grapserver.biz.service.MonitorService;
@@ -40,7 +41,8 @@ public class TaskCreateSpecialComponent extends BaseBusinessComponent<OperatorBu
         message.setAppId(request.getAppId());
         message.setDataTime(new Date());
         message.setStatus(ETaskOperatorMonitorStatus.CREATE_TASK.getStatus());
-
+        logger.info("运营商监控,发送任务创建(埋点)消息到monitor,message={},status={}",
+                JSON.toJSONString(message), ETaskOperatorMonitorStatus.CREATE_TASK);
         monitorService.sendTaskOperatorMonitorMessage(message);
 
     }

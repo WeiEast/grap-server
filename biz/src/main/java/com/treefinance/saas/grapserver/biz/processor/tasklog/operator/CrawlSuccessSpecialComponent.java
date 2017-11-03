@@ -12,6 +12,7 @@ import com.treefinance.saas.grapserver.dao.entity.TaskLog;
 import com.treefinance.saas.grapserver.dao.entity.TaskLogCriteria;
 import com.treefinance.saas.grapserver.dao.mapper.TaskAttributeMapper;
 import com.treefinance.saas.grapserver.dao.mapper.TaskLogMapper;
+import com.treefinance.saas.grapserver.facade.enums.ETaskAttribute;
 import com.treefinance.saas.grapserver.facade.model.enums.ETaskOperatorMonitorStatus;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -73,10 +74,10 @@ public class CrawlSuccessSpecialComponent extends BaseBusinessComponent<Operator
         String groupCode = null;
         String groupName = null;
         for (TaskAttribute taskAttribute : taskAttributeList) {
-            if (StringUtils.equalsIgnoreCase(taskAttribute.getName(), "group_code")) {
+            if (StringUtils.equalsIgnoreCase(taskAttribute.getName(), ETaskAttribute.OPERATOR_GROUP_CODE.getAttribute())) {
                 groupCode = taskAttribute.getValue();
             }
-            if (StringUtils.equalsIgnoreCase(taskAttribute.getName(), "group_name")) {
+            if (StringUtils.equalsIgnoreCase(taskAttribute.getName(), ETaskAttribute.OPERATOR_GROUP_NAME.getAttribute())) {
                 groupName = taskAttribute.getName();
             }
         }
@@ -92,7 +93,8 @@ public class CrawlSuccessSpecialComponent extends BaseBusinessComponent<Operator
         message.setGroupName(groupName);
         message.setDataTime(processTime);
         message.setStatus(ETaskOperatorMonitorStatus.CRAWL_SUCCESS.getStatus());
-
+        logger.info("运营商监控,发送抓取成功(任务日志)消息到monitor,message={},status={}",
+                JSON.toJSONString(message), ETaskOperatorMonitorStatus.CRAWL_SUCCESS);
         monitorService.sendTaskOperatorMonitorMessage(message);
 
     }

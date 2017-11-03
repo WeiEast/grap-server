@@ -15,7 +15,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.util.CollectionUtils;
 
 import java.util.Date;
 import java.util.List;
@@ -47,12 +46,7 @@ public class CallbackSuccessSpecialComponent extends BaseBusinessComponent<Opera
         TaskLogCriteria taskLogCriteria = new TaskLogCriteria();
         taskLogCriteria.createCriteria().andTaskIdEqualTo(taskDTO.getId()).andMsgEqualTo(msg);
         List<TaskLog> taskLogList = taskLogMapper.selectByExample(taskLogCriteria);
-        if (CollectionUtils.isEmpty(taskLogList)) {
-            logger.error("运营商监控,回调日志,未查询到相关任务日志,taskDTO={},msg={},processTime={}",
-                    JSON.toJSONString(taskDTO), msg, processTime);
-            return;
-        }
-        if (taskLogList.size() > 1) {
+        if (taskLogList.size() >= 1) {
             logger.info("运营商监控,回调日志重复不处理,taskDTO={},msg={},processTime={}",
                     JSON.toJSONString(taskDTO), msg, processTime);
             return;
@@ -62,7 +56,8 @@ public class CallbackSuccessSpecialComponent extends BaseBusinessComponent<Opera
         message.setAppId(taskDTO.getAppId());
         message.setDataTime(processTime);
         message.setStatus(ETaskOperatorMonitorStatus.CALLBACK_SUCCESS.getStatus());
-
+        logger.info("运营商监控,发送回调成功(任务日志)消息到monitor,message={},status={}",
+                JSON.toJSONString(message), ETaskOperatorMonitorStatus.CALLBACK_SUCCESS);
         monitorService.sendTaskOperatorMonitorMessage(message);
 
     }

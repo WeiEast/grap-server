@@ -55,7 +55,8 @@ public class ConfirmMobileSpecialComponent extends BaseBusinessComponent<Operato
         message.setGroupName(groupName);
         message.setDataTime(new Date());
         message.setStatus(ETaskOperatorMonitorStatus.COMFIRM_MOBILE.getStatus());
-
+        logger.info("运营商监控,发送确认手机号(埋点)消息到monitor,message={},status={}",
+                JSON.toJSONString(message), ETaskOperatorMonitorStatus.COMFIRM_MOBILE);
         monitorService.sendTaskOperatorMonitorMessage(message);
 
     }
