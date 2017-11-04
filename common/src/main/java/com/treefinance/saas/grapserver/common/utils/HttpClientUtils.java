@@ -21,6 +21,7 @@ import org.apache.http.config.RegistryBuilder;
 import org.apache.http.conn.socket.ConnectionSocketFactory;
 import org.apache.http.conn.socket.PlainConnectionSocketFactory;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
+import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
@@ -475,10 +476,9 @@ public class HttpClientUtils {
         try {
             httpPost.setConfig(getBaseConfig());
             String json = JsonUtils.toJsonString(params);
-            json = new String(json.getBytes(), "utf-8");
-            StringEntity s = new StringEntity(json);
+            StringEntity s = new StringEntity(json, ContentType.APPLICATION_JSON);
             s.setContentEncoding("UTF-8");
-            s.setContentType("application/json");
+//            s.setContentType("application/json");
 //            post.setEntity(s);
 //            List<NameValuePair> pairList = new ArrayList<>(params.size());
 //            for (Map.Entry<String, Object> entry : params.entrySet()) {
@@ -577,7 +577,15 @@ public class HttpClientUtils {
     }
 
     public static void main(String[] args) {
-        System.out.println(HttpClientUtils.doGet("http://n171t90503.iask.in:19859/p2pactivemq/gfd/callback/result"));
+
+//        Map<String, String> headers = Maps.newHashMap();
+//        StringBuilder sb = new StringBuilder();
+//        sb.append("apiKey").append(" ").append("11112222");
+//        headers.put("Authorization", sb.toString());
+//        Map<String, Object> params = Maps.newHashMap();
+//        params.put("input", "好号浩耗");
+//        System.out.println(HttpClientUtils.doPostWithHeaders("http://127.0.0.1:8443/saas/console/data/moxie/test", params, headers));
+//        System.out.println(HttpClientUtils.doGet("http://n171t90503.iask.in:19859/p2pactivemq/gfd/callback/result"));
 //        System.out.println(HttpClientUtils.doGet("http://www.baidu.com"));
 //        Map<String, Object> map = Maps.newHashMap();
 //        map.put("kw", "%E7%AC%AC%E4%B8%89%E6%96%B9%E7%9A%84");
