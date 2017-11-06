@@ -15,8 +15,8 @@ import java.util.Base64;
 public class AESUtils {
 
     public static void main(String[] args) throws Exception {
-        String url = "http://saas-taskdata.oss-cn-shanghai.aliyuncs.com/product/product_jTPOb5RLSoPUVpdR/20171020/OPERATOR/106044905780563968?Expires=1511248037&OSSAccessKeyId=v2V12KRXo6GNjZuu&Signature=Kjp%2B0yOpao5oHo5pZxJI4OS8m88%3D";
-        String key = "7DVxYY7WmibpwFlxTXuITg==";
+        String url = "http://saas-taskdata.oss-cn-shanghai.aliyuncs.com/product/product_TRlSLLkaZoeAH3UG/20171102/EMAIL/110834691871498240?Expires=1512389951&OSSAccessKeyId=v2V12KRXo6GNjZuu&Signature=Nx3sg0L%2FWvqjHoEaNklj6T0KxaY%3D";
+        String key = "K54BEs/LPGIoqpAcTp1k2w==";
         UrlResource resource = new UrlResource(url);
         byte[] data = IOUtils.toByteArray(resource.getInputStream());
         System.out.println(decrytData(data, key));
