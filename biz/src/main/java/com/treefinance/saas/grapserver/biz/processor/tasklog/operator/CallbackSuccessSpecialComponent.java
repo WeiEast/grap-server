@@ -6,15 +6,20 @@ import com.treefinance.saas.grapserver.biz.processor.BaseBusinessComponent;
 import com.treefinance.saas.grapserver.biz.service.MonitorService;
 import com.treefinance.saas.grapserver.common.enums.ETaskStep;
 import com.treefinance.saas.grapserver.common.model.dto.TaskDTO;
+import com.treefinance.saas.grapserver.dao.entity.TaskAttribute;
+import com.treefinance.saas.grapserver.dao.entity.TaskAttributeCriteria;
 import com.treefinance.saas.grapserver.dao.entity.TaskLog;
 import com.treefinance.saas.grapserver.dao.entity.TaskLogCriteria;
+import com.treefinance.saas.grapserver.dao.mapper.TaskAttributeMapper;
 import com.treefinance.saas.grapserver.dao.mapper.TaskLogMapper;
+import com.treefinance.saas.grapserver.facade.enums.ETaskAttribute;
 import com.treefinance.saas.grapserver.facade.model.enums.ETaskOperatorMonitorStatus;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
 
 import java.util.Date;
 import java.util.List;
@@ -30,6 +35,8 @@ public class CallbackSuccessSpecialComponent extends BaseBusinessComponent<Opera
     private MonitorService monitorService;
     @Autowired
     private TaskLogMapper taskLogMapper;
+    @Autowired
+    private TaskAttributeMapper taskAttributeMapper;
 
     @Override
     protected void doBusiness(OperatorTaskLogSpecialRequest request) {
@@ -48,6 +55,29 @@ public class CallbackSuccessSpecialComponent extends BaseBusinessComponent<Opera
         List<TaskLog> taskLogList = taskLogMapper.selectByExample(taskLogCriteria);
         if (taskLogList.size() >= 1) {
             logger.info("运营商监控,回调日志重复不处理,taskDTO={},msg={},processTime={}",
+                    JSON.toJSONString(taskDTO), msg, processTime);
+            return;
+        }
+        TaskAttributeCriteria taskAttributeCriteria = new TaskAttributeCriteria();
+        taskAttributeCriteria.createCriteria().andTaskIdEqualTo(taskDTO.getId());
+        List<TaskAttribute> taskAttributeList = taskAttributeMapper.selectByExample(taskAttributeCriteria);
+        if (CollectionUtils.isEmpty(taskAttributeList)) {
+            logger.error("运营商监控,task_attribute表中未查到group_code和group_name信息,taskDTO={},msg={},processTime={}",
+                    JSON.toJSONString(taskDTO), msg, processTime);
+            return;
+        }
+        String groupCode = null;
+        String groupName = null;
+        for (TaskAttribute taskAttribute : taskAttributeList) {
+            if (StringUtils.equalsIgnoreCase(taskAttribute.getName(), ETaskAttribute.OPERATOR_GROUP_CODE.getAttribute())) {
+                groupCode = taskAttribute.getValue();
+            }
+            if (StringUtils.equalsIgnoreCase(taskAttribute.getName(), ETaskAttribute.OPERATOR_GROUP_NAME.getAttribute())) {
+                groupName = taskAttribute.getValue();
+            }
+        }
+        if (StringUtils.isBlank(groupCode) || StringUtils.isBlank(groupName)) {
+            logger.error("运营商监控,未取到groupCode和groupName字段信息,taskDTO={},msg={},processTime={}",
                     JSON.toJSONString(taskDTO), msg, processTime);
             return;
         }
