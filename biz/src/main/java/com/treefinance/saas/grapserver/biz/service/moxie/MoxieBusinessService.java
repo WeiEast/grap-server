@@ -29,6 +29,7 @@ import com.treefinance.saas.grapserver.common.model.dto.moxie.*;
 import com.treefinance.saas.grapserver.common.model.vo.moxie.MoxieCityInfoVO;
 import com.treefinance.saas.grapserver.common.utils.JsonUtils;
 import com.treefinance.saas.grapserver.dao.entity.TaskAttribute;
+import com.treefinance.saas.grapserver.dao.entity.TaskLog;
 import com.treefinance.saas.processor.thirdparty.facade.fund.FundService;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
@@ -276,19 +277,32 @@ public class MoxieBusinessService implements InitializingBean {
                 moxieCaptchaDTO.setType(type);
                 moxieCaptchaDTO.setValue(value);
                 moxieCaptchaDTO.setWaitSeconds(waitSeconds);
+                //短信验证码需要自定义一个不同的value值,区分是两次不同的验证码请求,供前端轮询比较
+                String key = Joiner.on(":").useForNull("null").join(VERIFY_CODE_SMS_COUNT_PREFIX, taskId);
                 if (StringUtils.equalsIgnoreCase(type, "sms")) {//需要短信验证码
-                    //短信验证码需要自定义一个不同的value值,区分是两次不同的验证码请求,供前端轮询比较
-                    String key = Joiner.on(":").useForNull("null").join(VERIFY_CODE_SMS_COUNT_PREFIX, taskId);
                     moxieCaptchaDTO.setValue(redisTemplate.opsForValue().get(key));
                     map.put("directive", "require_sms");
                     map.put("information", moxieCaptchaDTO);
-                    taskLogService.insert(taskId, ETaskStep.WAITING_USER_INPUT_MESSAGE_CODE.getText(), new Date(), null);
+                    List<TaskLog> list = taskLogService.queryTaskLog(taskId, ETaskStep.WAITING_USER_INPUT_MESSAGE_CODE.getText());
+                    int inputCount = 0;
+                    if (StringUtils.isNotBlank(redisTemplate.opsForValue().get(key))) {
+                        inputCount = Integer.valueOf(redisTemplate.opsForValue().get(key));
+                    }
+                    if (inputCount < list.size()) {
+                        taskLogService.insert(taskId, ETaskStep.WAITING_USER_INPUT_MESSAGE_CODE.getText(), new Date(), null);
+                    }
                 }
                 if (StringUtils.equalsIgnoreCase(type, "img")) {//需要图片验证码
                     map.put("directive", "require_picture");
                     map.put("information", moxieCaptchaDTO);
-                    taskLogService.insert(taskId, ETaskStep.WAITING_USER_INPUT_IMAGE_CODE.getText(), new Date(), null);
-
+                    List<TaskLog> list = taskLogService.queryTaskLog(taskId, ETaskStep.WAITING_USER_INPUT_IMAGE_CODE.getText());
+                    int inputCount = 0;
+                    if (StringUtils.isNotBlank(redisTemplate.opsForValue().get(key))) {
+                        inputCount = Integer.valueOf(redisTemplate.opsForValue().get(key));
+                    }
+                    if (inputCount < list.size()) {
+                        taskLogService.insert(taskId, ETaskStep.WAITING_USER_INPUT_IMAGE_CODE.getText(), new Date(), null);
+                    }
                 }
                 logger.info("魔蝎公积金任务需要验证码,moxieCaptchaDTO={},taskId={}", JSON.toJSONString(moxieCaptchaDTO), taskId);
             }
@@ -401,7 +415,7 @@ public class MoxieBusinessService implements InitializingBean {
                 if (!MapUtils.isEmpty(captchaMap)) {
                     return captchaMap;
                 } else {
-                    logger.info("taskId={}公积金登录轮询,查询验证码时,判断不需要验证码");
+                    logger.info("taskId={}公积金登录轮询,查询验证码时,判断不需要验证码", taskId);
                     map.put("directive", "waiting");
                     map.put("information", "请等待");
                 }

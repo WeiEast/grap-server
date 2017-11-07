@@ -1,12 +1,13 @@
 package com.treefinance.saas.grapserver.biz.service;
 
 import com.alibaba.fastjson.JSON;
+import com.google.common.collect.Lists;
 import com.treefinance.commonservice.uid.UidGenerator;
+import com.treefinance.saas.grapserver.common.enums.ETaskStep;
 import com.treefinance.saas.grapserver.dao.entity.TaskLog;
 import com.treefinance.saas.grapserver.dao.entity.TaskLogCriteria;
 import com.treefinance.saas.grapserver.dao.mapper.TaskLogMapper;
 import com.treefinance.saas.grapserver.dao.mapper.TaskMapper;
-import com.treefinance.saas.grapserver.common.enums.ETaskStep;
 import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -122,6 +123,16 @@ public class TaskLogService {
 
     public Long logSuccessTask(Long taskId) {
         return insert(taskId, TASK_SUCCESS_LOG, new Date(), null);
+    }
+
+    public List<TaskLog> queryTaskLog(Long taskId, String msg) {
+        TaskLogCriteria criteria = new TaskLogCriteria();
+        criteria.createCriteria().andTaskIdEqualTo(taskId).andMsgEqualTo(msg);
+        List<TaskLog> list = taskLogMapper.selectByExample(criteria);
+        if (CollectionUtils.isEmpty(list)) {
+            return Lists.newArrayList();
+        }
+        return list;
     }
 
 
