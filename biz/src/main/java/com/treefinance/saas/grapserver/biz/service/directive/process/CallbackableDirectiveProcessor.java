@@ -59,6 +59,8 @@ public abstract class CallbackableDirectiveProcessor {
     protected TaskLogService taskLogService;
     @Autowired
     protected TaskAttributeService taskAttributeService;
+    @Autowired
+    protected CallbackResultService callbackResultService;
 
     /**
      * 回调前处理
@@ -421,6 +423,7 @@ public abstract class CallbackableDirectiveProcessor {
         Byte retryTimes = config.getRetryTimes();
         logger.info("回调执行：taskId={},dataMap={}, params={}", directiveDTO.getTaskId(), JSON.toJSONString(dataMap), JSON.toJSONString(paramMap));
         String result = "";
+        int httpCode = 200;
         Long startTime = System.currentTimeMillis();
         try {
             if (Byte.valueOf("0").equals(config.getNotifyModel())) {
@@ -431,6 +434,7 @@ public abstract class CallbackableDirectiveProcessor {
         } catch (RequestFailedException e) {
             logger.error("doCallBack exception: callbackUrl={},dataMap={}", callbackUrl, JSON.toJSONString(dataMap), e);
             result = e.getResult();
+            httpCode = e.getStatusCode();
             throw e;
         } finally {
             long consumeTime = System.currentTimeMillis() - startTime;
@@ -440,6 +444,8 @@ public abstract class CallbackableDirectiveProcessor {
             taskCallbackLogService.insert(callbackUrl, config, directiveDTO.getTaskId(), JSON.toJSONString(originalDataMap), result, consumeTime);
             // 处理返回结果
             handleRequestResult(directiveDTO, result);
+            // 回调处理
+            callbackResultService.handleResult(directiveDTO.getTask(), result, httpCode);
         }
         return true;
     }
