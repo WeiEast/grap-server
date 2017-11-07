@@ -9,11 +9,9 @@ import com.treefinance.saas.grapserver.biz.service.moxie.MoxieBusinessService;
 import com.treefinance.saas.grapserver.biz.service.moxie.MoxieTimeoutService;
 import com.treefinance.saas.grapserver.common.enums.EBizType;
 import com.treefinance.saas.grapserver.common.enums.moxie.EMoxieDirective;
-import com.treefinance.saas.grapserver.common.exception.ForbiddenException;
 import com.treefinance.saas.grapserver.common.model.dto.moxie.MoxieDirectiveDTO;
 import com.treefinance.saas.grapserver.common.model.dto.moxie.MoxieLoginParamsDTO;
 import com.treefinance.saas.grapserver.common.model.vo.moxie.MoxieCityInfoVO;
-import com.treefinance.saas.grapserver.common.utils.IpUtils;
 import com.treefinance.saas.grapserver.dao.entity.TaskAttribute;
 import com.treefinance.saas.knife.result.SimpleResult;
 import org.apache.commons.lang3.StringUtils;
@@ -28,7 +26,6 @@ import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
@@ -108,6 +105,7 @@ public class FundController {
     @RequestMapping(value = "/config", method = {RequestMethod.POST})
     public Object getConfig(@RequestParam String appid, @RequestParam("taskid") Long taskId, HttpServletRequest request, HttpServletResponse response) {
         if (StringUtils.isBlank(appid) || taskId == null) {
+            logger.error("商户配置接口,输入参数appid,taskid为空appid={},taskid={}", appid, taskId);
             throw new IllegalArgumentException("Parameter 'appid' or 'taskid' is incorrect.");
         }
         List<MoxieCityInfoVO> result = moxieBusinessService.getCityList();
@@ -123,6 +121,7 @@ public class FundController {
                                      @RequestParam("latitude") Double latitude,
                                      @RequestParam("longitude") Double longitude) {
         if (StringUtils.isBlank(appid) || latitude == null || longitude == null) {
+            logger.error("公积金获取当前身份输入参数为空,appid={},latitude={},longitude={}", appid, latitude, longitude);
             throw new IllegalArgumentException("Parameter is incorrect.");
         }
         Object result = moxieBusinessService.getCurrentProvince(latitude, longitude);
@@ -145,6 +144,7 @@ public class FundController {
                                  @RequestParam("area_code") String areaCode,
                                  HttpServletRequest request, HttpServletResponse response) {
         if (StringUtils.isBlank(appid) || taskId == null || StringUtils.isBlank(areaCode)) {
+            logger.error("公积金获取登录配置输入参数为空,appid={},taskid={},area_code={}", appid, taskId, areaCode);
             throw new IllegalArgumentException("Parameter is incorrect.");
         }
         Object loginElements = fundMoxieService.queryLoginElementsEx(areaCode);
@@ -152,6 +152,7 @@ public class FundController {
         Map<String, Object> map = Maps.newHashMap();
         map.put("information", information);
         map.put("loginElements", loginElements);
+        logger.info("公积金taskId={}获取登录配置data={}", taskId, JSON.toJSONString(map));
         return SimpleResult.successResult(map);
     }
 
@@ -186,12 +187,15 @@ public class FundController {
                                  HttpServletRequest request, HttpServletResponse response) {
         if (StringUtils.isBlank(appId) || taskId == null || StringUtils.isBlank(uniqueId) || StringUtils.isBlank(areaCode)
                 || StringUtils.isBlank(account) || StringUtils.isBlank(loginType) || StringUtils.isBlank(origin)) {
+            logger.error("公积金登录,输入参数为空,appid={},taskid={},uniqueid={},area_code={},account={},login_type={},origin={}",
+                    appId, taskId, uniqueId, areaCode, account, loginType, origin);
             throw new IllegalArgumentException("Parameter is incorrect.");
         }
 
         MoxieLoginParamsDTO moxieLoginParamsDTO = new MoxieLoginParamsDTO(String.valueOf(taskId), areaCode, account, password, loginType, idCard, mobile,
                 realName, subArea, loanAccount, loanPassword, corpAccount, corpName, origin, ip);
         Map<String, Object> map = moxieBusinessService.createMoxieTask(taskId, moxieLoginParamsDTO);
+        logger.info("taskId={}公积金登录轮询,下一指令信息={}", taskId, JSON.toJSONString(map));
         return SimpleResult.successResult(map);
     }
 
@@ -205,6 +209,7 @@ public class FundController {
     public Object submitTaskInput(@RequestParam("taskid") Long taskId,
                                   @RequestParam("verifycode") String input) {
         if (taskId == null || StringUtils.isBlank(input)) {
+            logger.info("taskId={}公积金输入验证码输入参数为空,input={}", input);
             throw new IllegalArgumentException("Parameter is incorrect.");
         }
         TaskAttribute attribute = taskAttributeService.findByName(taskId, "moxie-taskId", false);
@@ -247,7 +252,7 @@ public class FundController {
                 map.put("information", directiveMessage.getRemark());
             }
         }
-        logger.info("taskId={}下一指令信息={}", taskid, map);
+        logger.info("taskId={}公积金指令轮询,下一指令信息={}", taskid, map);
         return SimpleResult.successResult(map);
     }
 

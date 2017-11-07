@@ -343,7 +343,8 @@ public class MoxieBusinessService implements InitializingBean {
         Map<String, Object> map = Maps.newHashMap();
         TaskAttribute attribute = taskAttributeService.findByName(taskId, "moxie-taskId", false);
         if (attribute != null && StringUtils.isNotBlank(attribute.getValue())) {
-            logger.info("taskId={}已生成魔蝎任务moxieTaskId={},执行查询指令,等待魔蝎异步回调登录状态...", taskId, attribute.getValue());
+            logger.info("taskId={}已生成魔蝎任务moxieTaskId={},执行查询指令(验证登录是否超时,判断登录是否需要验证码,等待回调登录成功失败状态),等待魔蝎异步回调登录状态...",
+                    taskId, attribute.getValue());
             map = this.queryLoginStatusFromDirective(taskId, attribute.getValue());
             return map;
         }
@@ -352,7 +353,9 @@ public class MoxieBusinessService implements InitializingBean {
         String moxieId = null;
         try {
             moxieId = fundMoxieService.createTasks(params);
+            logger.info("taskId={}创建魔蝎任务成功moxieTaskId={},params={}", moxieId, JSON.toJSONString(params));
         } catch (RequestFailedException e) {
+            logger.info("taskId={}创建魔蝎任务失败,params={},e={}", JSON.toJSONString(params), e);
             map.put("directive", EMoxieDirective.LOGIN_FAIL.getText());
             String result = e.getResult();
             JSONObject object = (JSONObject) JsonUtils.toJsonObject(result);
@@ -398,6 +401,7 @@ public class MoxieBusinessService implements InitializingBean {
                 if (!MapUtils.isEmpty(captchaMap)) {
                     return captchaMap;
                 } else {
+                    logger.info("taskId={}公积金登录轮询,查询验证码时,判断不需要验证码");
                     map.put("directive", "waiting");
                     map.put("information", "请等待");
                 }
@@ -425,7 +429,6 @@ public class MoxieBusinessService implements InitializingBean {
                 }
             }
         }
-        logger.info("taskId={}下一指令信息={}", taskId, JSON.toJSONString(map));
         return map;
     }
 
@@ -477,6 +480,7 @@ public class MoxieBusinessService implements InitializingBean {
 
     public void verifyCodeInput(Long taskId, String moxieTaskId, String input) {
         fundMoxieService.submitTaskInput(moxieTaskId, input);
+        logger.info("taskId={}公积金输入验证码moxieTaskId={},input={}", moxieTaskId, input);
         String key = Joiner.on(":").useForNull("null").join(VERIFY_CODE_SMS_COUNT_PREFIX, taskId);
         Long count = redisTemplate.opsForValue().increment(key, 1);
         redisTemplate.opsForValue().getOperations().expire(key, 5, TimeUnit.MINUTES);
