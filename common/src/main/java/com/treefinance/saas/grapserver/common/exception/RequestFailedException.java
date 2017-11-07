@@ -25,12 +25,13 @@ public class RequestFailedException extends RuntimeException {
 
     /**
      * 异常创建
+     *
      * @param requestUrl
      * @param statusCode
      * @param result
      */
     public RequestFailedException(String requestUrl, int statusCode, String result) {
-        super("request url=" + requestUrl + " failed , statusCode = " + statusCode + ",result=" + result);
+        super("httpCode = " + statusCode + ",result=" + result);
         this.requestUrl = requestUrl;
         this.statusCode = statusCode;
         this.result = result;
@@ -38,13 +39,14 @@ public class RequestFailedException extends RuntimeException {
 
     /**
      * 异常创建
+     *
      * @param requestUrl
      * @param statusCode
      * @param result
      * @param cause
      */
     public RequestFailedException(String requestUrl, int statusCode, String result, Throwable cause) {
-        super("request url=" + requestUrl + " failed , statusCode = " + statusCode + ",result=" + result, cause);
+        super("httpCode = " + statusCode + ",result=" + result, cause);
         this.requestUrl = requestUrl;
         this.statusCode = statusCode;
         this.result = result;

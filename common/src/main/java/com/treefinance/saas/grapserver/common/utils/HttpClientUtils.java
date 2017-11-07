@@ -325,12 +325,12 @@ public class HttpClientUtils {
                 result = IOUtils.toString(instream, "UTF-8");
             }
             if (statusCode != HttpStatus.SC_OK) {
-                throw new RequestFailedException(apiUrl, statusCode, result);
+                throw new RequestFailedException(url, statusCode, result);
             }
         } catch (IOException e) {
             logger.error("doGet exception:url={}, params={}, statusCode={} , result={}",
                     apiUrl, JSON.toJSONString(params), statusCode, result, e);
-            throw new RequestFailedException(apiUrl, statusCode, result, e);
+            throw new RequestFailedException(url, statusCode, result, e);
         } finally {
             if (logger.isInfoEnabled()) {
                 logger.info(" doGet completed: url={}, params={}, statusCode={} , result={} , cost {} ms ",
