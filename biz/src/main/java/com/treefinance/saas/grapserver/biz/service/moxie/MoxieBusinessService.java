@@ -279,16 +279,16 @@ public class MoxieBusinessService implements InitializingBean {
                 moxieCaptchaDTO.setWaitSeconds(waitSeconds);
                 //短信验证码需要自定义一个不同的value值,区分是两次不同的验证码请求,供前端轮询比较
                 String key = Joiner.on(":").useForNull("null").join(VERIFY_CODE_SMS_COUNT_PREFIX, taskId);
+                int inputCount = 0;
+                if (StringUtils.isNotBlank(redisTemplate.opsForValue().get(key))) {
+                    inputCount = Integer.valueOf(redisTemplate.opsForValue().get(key));
+                }
                 if (StringUtils.equalsIgnoreCase(type, "sms")) {//需要短信验证码
                     moxieCaptchaDTO.setValue(redisTemplate.opsForValue().get(key));
                     map.put("directive", "require_sms");
                     map.put("information", moxieCaptchaDTO);
                     List<TaskLog> list = taskLogService.queryTaskLog(taskId, ETaskStep.WAITING_USER_INPUT_MESSAGE_CODE.getText());
-                    int inputCount = 0;
-                    if (StringUtils.isNotBlank(redisTemplate.opsForValue().get(key))) {
-                        inputCount = Integer.valueOf(redisTemplate.opsForValue().get(key));
-                    }
-                    if (inputCount < list.size()) {
+                    if (list.size() <= inputCount) {
                         taskLogService.insert(taskId, ETaskStep.WAITING_USER_INPUT_MESSAGE_CODE.getText(), new Date(), null);
                     }
                 }
@@ -296,11 +296,7 @@ public class MoxieBusinessService implements InitializingBean {
                     map.put("directive", "require_picture");
                     map.put("information", moxieCaptchaDTO);
                     List<TaskLog> list = taskLogService.queryTaskLog(taskId, ETaskStep.WAITING_USER_INPUT_IMAGE_CODE.getText());
-                    int inputCount = 0;
-                    if (StringUtils.isNotBlank(redisTemplate.opsForValue().get(key))) {
-                        inputCount = Integer.valueOf(redisTemplate.opsForValue().get(key));
-                    }
-                    if (inputCount < list.size()) {
+                    if (list.size() <= inputCount) {
                         taskLogService.insert(taskId, ETaskStep.WAITING_USER_INPUT_IMAGE_CODE.getText(), new Date(), null);
                     }
                 }
