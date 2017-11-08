@@ -287,6 +287,7 @@ public class MoxieBusinessService implements InitializingBean {
                     moxieCaptchaDTO.setValue(redisTemplate.opsForValue().get(key));
                     map.put("directive", "require_sms");
                     map.put("information", moxieCaptchaDTO);
+                    logger.info("魔蝎公积金任务需要短信验证码,moxieCaptchaDTO={},taskId={}", JSON.toJSONString(moxieCaptchaDTO), taskId);
                     List<TaskLog> list = taskLogService.queryTaskLog(taskId, ETaskStep.WAITING_USER_INPUT_MESSAGE_CODE.getText());
                     if (list.size() <= inputCount) {
                         taskLogService.insert(taskId, ETaskStep.WAITING_USER_INPUT_MESSAGE_CODE.getText(), new Date(), null);
@@ -295,12 +296,12 @@ public class MoxieBusinessService implements InitializingBean {
                 if (StringUtils.equalsIgnoreCase(type, "img")) {//需要图片验证码
                     map.put("directive", "require_picture");
                     map.put("information", moxieCaptchaDTO);
+                    logger.info("魔蝎公积金任务需要图片验证码,moxieCaptchaDTO={},taskId={}", JSON.toJSONString(moxieCaptchaDTO), taskId);
                     List<TaskLog> list = taskLogService.queryTaskLog(taskId, ETaskStep.WAITING_USER_INPUT_IMAGE_CODE.getText());
                     if (list.size() <= inputCount) {
                         taskLogService.insert(taskId, ETaskStep.WAITING_USER_INPUT_IMAGE_CODE.getText(), new Date(), null);
                     }
                 }
-                logger.info("魔蝎公积金任务需要验证码,moxieCaptchaDTO={},taskId={}", JSON.toJSONString(moxieCaptchaDTO), taskId);
             }
 
         }
@@ -409,6 +410,8 @@ public class MoxieBusinessService implements InitializingBean {
                 //如果还未收到登录状态的指令,判断是否需要验证码
                 Map<String, Object> captchaMap = this.requireCaptcha(taskId);
                 if (!MapUtils.isEmpty(captchaMap)) {
+                    //为了防止用户输入验证码过慢导致登录超时,若要输入验证码,则重置登录时间,重新计时90s
+                    moxieTimeoutService.resetLoginTaskTimeOut(taskId);
                     return captchaMap;
                 } else {
                     logger.info("taskId={}公积金登录轮询,查询验证码时,判断不需要验证码", taskId);
