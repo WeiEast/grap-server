@@ -97,7 +97,7 @@ public class MoxieWebHookController {
         //任务创建通知
         if (StringUtils.equals(eventName.toLowerCase(), "task.submit")) {
             //通知状态变更为 '认证中'
-            LOGGER.info("task submit event,魔蝎回调,任务创建通知,认证中...");
+            LOGGER.info("task submit event,魔蝎回调,任务创建通知,认证中...body={}", JSON.toJSONString(body));
         }
 
         //任务登录状态通知
@@ -118,13 +118,14 @@ public class MoxieWebHookController {
                         }
                         //通知状态变更为 '认证失败'
                         moxieTaskEventNoticeService.loginFail(moxieTaskId, message);
-                        LOGGER.info("task event.魔蝎回调,任务登录状态通知:登录失败,moxieTaskId={},result={}, message={}", moxieTaskId, result, message);
+                        LOGGER.info("task event.魔蝎回调,任务登录状态通知:登录失败,moxieTaskId={},result={}, message={},body={}",
+                                moxieTaskId, result, message, JSON.toJSONString(body));
                     }
                     if (StringUtils.equals(result, "true")) {
                         //通知状态变更为 '认证成功'
                         moxieTaskEventNoticeService.loginSuccess(moxieTaskId);
                         LOGGER.info("task event. result={}", result);
-                        LOGGER.info("task event.魔蝎回调,任务登录状态通知:登录成功,moxieTaskId={},result={}", moxieTaskId, result);
+                        LOGGER.info("task event.魔蝎回调,任务登录状态通知:登录成功,moxieTaskId={},result={},body={}", moxieTaskId, result, JSON.toJSONString(body));
                     }
                 }
             } catch (Exception e) {
@@ -147,7 +148,8 @@ public class MoxieWebHookController {
                     if (StringUtils.equals(result, "false")) {
                         //通知状态变更为 '任务采集失败'
                         moxieTaskEventNoticeService.taskFail(moxieTaskId, message);
-                        LOGGER.info("task fail event.魔蝎回调,任务过程中失败,result={}, message={}, moxieTaskId={}", result, message, moxieTaskId);
+                        LOGGER.info("task fail event.魔蝎回调,任务过程中失败,result={}, message={}, moxieTaskId={},body={}",
+                                result, message, moxieTaskId, JSON.toJSONString(body));
                     }
                 }
             } catch (Exception e) {
@@ -166,7 +168,7 @@ public class MoxieWebHookController {
                     String moxieTaskId = map.get("task_id") == null ? null : map.get("task_id").toString();
                     if (StringUtils.equals(result, "true")) {
                         moxieTaskEventNoticeService.bill(moxieTaskId);
-                        LOGGER.info("bill event.魔蝎回调,任务完成通知,result={}, moxieTaskId={}", result, moxieTaskId);
+                        LOGGER.info("bill event.魔蝎回调,任务完成通知,result={}, moxieTaskId={},body={}", result, moxieTaskId, JSON.toJSONString(body));
                     }
                 }
             } catch (Exception e) {
