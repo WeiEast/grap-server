@@ -10,6 +10,7 @@
             <set>
                 <ref bean="taskCreateSpecialComponent"/>
                 <ref bean="confirmMobileSpecialComponent"/>
+                <ref bean="startLoginSpecialComponent"/>
             </set>
         </property>
     </bean>
