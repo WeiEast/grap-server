@@ -303,9 +303,9 @@ public abstract class CallbackableDirectiveProcessor {
                         dataMap.put("taskStatus", "003");
                         flushData(dataMap, appLicense, directiveDTO);
                     }
-                    if (logger.isDebugEnabled()) {
-                        logger.debug("download data success : {}  >>>>>>> {}", JSON.toJSONString(dataMap), data);
-                    }
+//                    if (logger.isDebugEnabled()) {
+//                        logger.debug("download data success : {}  >>>>>>> {}", JSON.toJSONString(dataMap), data);
+//                    }
                 } catch (IOException e) {
                     logger.error("download data failed : data={}", JSON.toJSONString(dataMap));
                     dataMap.put("taskErrorMsg", "下载数据失败");
