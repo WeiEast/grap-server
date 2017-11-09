@@ -8,9 +8,6 @@ import com.treefinance.saas.assistant.model.TaskOperatorMonitorMessage;
 import com.treefinance.saas.assistant.plugin.HttpMonitorPlugin;
 import com.treefinance.saas.assistant.plugin.TaskMonitorPlugin;
 import com.treefinance.saas.assistant.plugin.TaskOperatorMonitorPlugin;
-import com.treefinance.saas.grapserver.biz.processor.OperatorMonitorSpecialProcessor;
-import com.treefinance.saas.grapserver.biz.processor.request.OperatorMonitorSpecialRequest;
-import com.treefinance.saas.grapserver.common.enums.EBizType;
 import com.treefinance.saas.grapserver.common.enums.ETaskStatus;
 import com.treefinance.saas.grapserver.common.model.dto.TaskDTO;
 import org.apache.commons.collections.CollectionUtils;
@@ -39,11 +36,6 @@ public class MonitorService {
     private HttpMonitorPlugin httpMonitorPlugin;
     @Autowired
     private TaskOperatorMonitorPlugin taskOperatorMonitorPlugin;
-    @Autowired
-    private OperatorMonitorSpecialProcessor operatorMonitorSpecialProcessor;
-
-    @Autowired
-    private TaskService taskService;
 
     /**
      * 发送监控消息
@@ -62,7 +54,7 @@ public class MonitorService {
         //发送任务监控消息
         this.sendTaskMonitorMessage(taskDTO);
         //发送运营商监控消息
-        this.sendTaskOperatorMonitorMessage(taskDTO);
+//        this.sendTaskOperatorMonitorMessage(taskDTO);
 
     }
 
@@ -149,20 +141,20 @@ public class MonitorService {
      *
      * @param taskDTO
      */
-    private void sendTaskOperatorMonitorMessage(TaskDTO taskDTO) {
-        if (taskDTO == null || taskDTO.getId() == null) {
-            return;
-        }
-        taskDTO = taskService.getById(taskDTO.getId());
-        if (taskDTO != null && EBizType.OPERATOR.getCode().equals(taskDTO.getBizType())) {
-            OperatorMonitorSpecialRequest request = new OperatorMonitorSpecialRequest();
-            request.setTaskId(taskDTO.getId());
-            request.setTask(taskDTO);
-            operatorMonitorSpecialProcessor.doService(request);
-        }
-
-
-    }
+//    private void sendTaskOperatorMonitorMessage(TaskDTO taskDTO) {
+//        if (taskDTO == null || taskDTO.getId() == null) {
+//            return;
+//        }
+//        taskDTO = taskService.getById(taskDTO.getId());
+//        if (taskDTO != null && EBizType.OPERATOR.getCode().equals(taskDTO.getBizType())) {
+//            OperatorMonitorSpecialRequest request = new OperatorMonitorSpecialRequest();
+//            request.setTaskId(taskDTO.getId());
+//            request.setTask(taskDTO);
+//            operatorMonitorSpecialProcessor.doService(request);
+//        }
+//
+//
+//    }
 
 
 }

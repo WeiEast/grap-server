@@ -26,31 +26,31 @@ public class TaskLogSpecialService {
 
     private final static Logger logger = LoggerFactory.getLogger(TaskLogSpecialService.class);
 
-    @Autowired
-    private TaskMapper taskMapper;
-    @Autowired
-    private OperatorTaskLogSpecialProcessor operatorTaskLogSpecialProcessor;
-
-
-    @Async
-    public void doProcess(Long taskId, String msg, Date processTime) {
-        TaskCriteria taskCriteria = new TaskCriteria();
-        taskCriteria.createCriteria().andIdEqualTo(taskId);
-        List<Task> taskList = taskMapper.selectByExample(taskCriteria);
-        if (CollectionUtils.isEmpty(taskList)) {
-            logger.error("根据taskId={}未查到task信息", taskId);
-            return;
-        }
-        Task task = taskList.get(0);
-        TaskDTO taskDTO = new TaskDTO();
-        BeanUtils.copyProperties(task, taskDTO);
-        if (EBizType.OPERATOR.getCode().equals(task.getBizType())) {
-            OperatorTaskLogSpecialRequest request = new OperatorTaskLogSpecialRequest();
-            request.setTaskDTO(taskDTO);
-            request.setMsg(msg);
-            request.setProcessTime(processTime);
-            operatorTaskLogSpecialProcessor.doService(request);
-        }
-
-    }
+//    @Autowired
+//    private TaskMapper taskMapper;
+//    @Autowired
+//    private OperatorTaskLogSpecialProcessor operatorTaskLogSpecialProcessor;
+//
+//
+//    @Async
+//    public void doProcess(Long taskId, String msg, Date processTime) {
+//        TaskCriteria taskCriteria = new TaskCriteria();
+//        taskCriteria.createCriteria().andIdEqualTo(taskId);
+//        List<Task> taskList = taskMapper.selectByExample(taskCriteria);
+//        if (CollectionUtils.isEmpty(taskList)) {
+//            logger.error("根据taskId={}未查到task信息", taskId);
+//            return;
+//        }
+//        Task task = taskList.get(0);
+//        TaskDTO taskDTO = new TaskDTO();
+//        BeanUtils.copyProperties(task, taskDTO);
+//        if (EBizType.OPERATOR.getCode().equals(task.getBizType())) {
+//            OperatorTaskLogSpecialRequest request = new OperatorTaskLogSpecialRequest();
+//            request.setTaskDTO(taskDTO);
+//            request.setMsg(msg);
+//            request.setProcessTime(processTime);
+//            operatorTaskLogSpecialProcessor.doService(request);
+//        }
+//
+//    }
 }
