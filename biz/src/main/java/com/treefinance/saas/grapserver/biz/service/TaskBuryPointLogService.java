@@ -30,7 +30,7 @@ public class TaskBuryPointLogService {
     @Autowired
     protected TaskBuryPointLogMapper taskBuryPointLogMapper;
 
-    @Scheduled(fixedRate = 5000)
+    @Scheduled(fixedRate = 1000)
     public void insert() {
         List<TaskBuryPointLog> list = Lists.newArrayList();
         while (!logQueue.isEmpty()) {
