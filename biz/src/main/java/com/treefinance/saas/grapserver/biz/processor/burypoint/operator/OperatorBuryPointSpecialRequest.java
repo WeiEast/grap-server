@@ -1,5 +1,7 @@
 package com.treefinance.saas.grapserver.biz.processor.burypoint.operator;
 
+import com.treefinance.saas.grapserver.common.model.dto.TaskDTO;
+
 import java.io.Serializable;
 
 /**
@@ -13,6 +15,16 @@ public class OperatorBuryPointSpecialRequest implements Serializable {
     private Long taskId;//任务id
     private String appId;//appId
     private String code;//埋点编码
+
+    private TaskDTO task;//任务信息
+
+    public TaskDTO getTask() {
+        return task;
+    }
+
+    public void setTask(TaskDTO task) {
+        this.task = task;
+    }
 
     public String getExtra() {
         return extra;

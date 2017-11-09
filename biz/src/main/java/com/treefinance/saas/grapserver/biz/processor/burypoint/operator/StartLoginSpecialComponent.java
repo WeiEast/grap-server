@@ -71,7 +71,7 @@ public class StartLoginSpecialComponent extends BaseBusinessComponent<OperatorBu
         message.setGroupName(groupName);
         message.setDataTime(new Date());
         message.setStatus(ETaskOperatorMonitorStatus.START_LOGIN.getStatus());
-        logger.info("运营商监控,发送确认手机号(埋点)消息到monitor,message={},status={}",
+        logger.info("运营商监控,发送开始登陆(埋点)消息到monitor,message={},status={}",
                 JSON.toJSONString(message), ETaskOperatorMonitorStatus.START_LOGIN);
         monitorService.sendTaskOperatorMonitorMessage(message);
 

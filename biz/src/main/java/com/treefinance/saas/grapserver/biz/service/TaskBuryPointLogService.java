@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSON;
 import com.google.common.collect.Lists;
 import com.treefinance.commonservice.uid.UidGenerator;
 import com.treefinance.saas.grapserver.dao.entity.TaskBuryPointLog;
+import com.treefinance.saas.grapserver.dao.entity.TaskBuryPointLogCriteria;
 import com.treefinance.saas.grapserver.dao.mapper.TaskBuryPointLogMapper;
 import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
@@ -62,5 +63,15 @@ public class TaskBuryPointLogService {
         log.setCode(code);
         log.setCreateTime(new Date());
         logQueue.offer(log);
+    }
+
+    public List<TaskBuryPointLog> queryTaskBuryPointLogByCode(Long taskId, String code) {
+        TaskBuryPointLogCriteria criteria = new TaskBuryPointLogCriteria();
+        criteria.createCriteria().andTaskIdEqualTo(taskId).andCodeEqualTo(code);
+        List<TaskBuryPointLog> list = taskBuryPointLogMapper.selectByExample(criteria);
+        if (CollectionUtils.isEmpty(list)) {
+            return Lists.newArrayList();
+        }
+        return list;
     }
 }

@@ -8,11 +8,11 @@ import com.treefinance.saas.assistant.model.TaskOperatorMonitorMessage;
 import com.treefinance.saas.assistant.plugin.HttpMonitorPlugin;
 import com.treefinance.saas.assistant.plugin.TaskMonitorPlugin;
 import com.treefinance.saas.assistant.plugin.TaskOperatorMonitorPlugin;
+import com.treefinance.saas.grapserver.biz.processor.OperatorMonitorSpecialProcessor;
+import com.treefinance.saas.grapserver.biz.processor.request.OperatorMonitorSpecialRequest;
+import com.treefinance.saas.grapserver.common.enums.EBizType;
 import com.treefinance.saas.grapserver.common.enums.ETaskStatus;
 import com.treefinance.saas.grapserver.common.model.dto.TaskDTO;
-import com.treefinance.saas.grapserver.common.utils.DataConverterUtils;
-import com.treefinance.saas.grapserver.dao.entity.Task;
-import com.treefinance.saas.grapserver.dao.mapper.TaskMapper;
 import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,19 +31,19 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 public class MonitorService {
     private static final Logger logger = LoggerFactory.getLogger(MonitorService.class);
 
-
-    @Autowired
-    private TaskMapper taskMapper;
-
     private final ConcurrentLinkedQueue<HttpMonitorMessage> httpQueue = new ConcurrentLinkedQueue<HttpMonitorMessage>();
 
     @Autowired
     private TaskMonitorPlugin taskMonitorPlugin;
-
     @Autowired
     private HttpMonitorPlugin httpMonitorPlugin;
     @Autowired
     private TaskOperatorMonitorPlugin taskOperatorMonitorPlugin;
+    @Autowired
+    private OperatorMonitorSpecialProcessor operatorMonitorSpecialProcessor;
+
+    @Autowired
+    private TaskService taskService;
 
     /**
      * 发送监控消息
@@ -59,6 +59,19 @@ public class MonitorService {
                 && !ETaskStatus.CANCEL.getStatus().equals(status)) {
             return;
         }
+        //发送任务监控消息
+        this.sendTaskMonitorMessage(taskDTO);
+        //发送运营商监控消息
+        this.sendTaskOperatorMonitorMessage(taskDTO);
+
+    }
+
+    /**
+     * 发送任务监控消息
+     *
+     * @param taskDTO
+     */
+    private void sendTaskMonitorMessage(TaskDTO taskDTO) {
         TaskMonitorMessage message = new TaskMonitorMessage();
         try {
             message.setAccountNo(taskDTO.getAccountNo());
@@ -72,26 +85,12 @@ public class MonitorService {
             message.setStepCode(taskDTO.getStepCode());
             taskMonitorPlugin.sendMessage(message);
             logger.info("send message to monitor : message={}", JSON.toJSONString(taskDTO));
+
         } catch (Exception e) {
             logger.error(" send message to monitor failed : body=" + JSON.toJSONString(message), e);
         }
     }
 
-    /**
-     * 发送监控消息
-     *
-     * @param taskId
-     */
-    public void sendMonitorMessage(Long taskId) {
-        Task task = taskMapper.selectByPrimaryKey(taskId);
-        if (task == null) {
-            return;
-        }
-        TaskDTO taskDTO = DataConverterUtils.convert(task, TaskDTO.class);
-        if (taskDTO != null) {
-            sendMonitorMessage(taskDTO);
-        }
-    }
 
     /**
      * 发送http监控消息
@@ -142,6 +141,26 @@ public class MonitorService {
         } catch (Exception e) {
             logger.error("运营商监控,send message to monitor failed : body={}", JSON.toJSONString(message), e);
         }
+
+    }
+
+    /**
+     * 发送运营商监控功能消息
+     *
+     * @param taskDTO
+     */
+    private void sendTaskOperatorMonitorMessage(TaskDTO taskDTO) {
+        if (taskDTO == null || taskDTO.getId() == null) {
+            return;
+        }
+        taskDTO = taskService.getById(taskDTO.getId());
+        if (taskDTO != null && EBizType.OPERATOR.getCode().equals(taskDTO.getBizType())) {
+            OperatorMonitorSpecialRequest request = new OperatorMonitorSpecialRequest();
+            request.setTaskId(taskDTO.getId());
+            request.setTask(taskDTO);
+            operatorMonitorSpecialProcessor.doService(request);
+        }
+
 
     }
 

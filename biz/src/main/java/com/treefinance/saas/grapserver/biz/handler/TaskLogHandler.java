@@ -3,7 +3,6 @@ package com.treefinance.saas.grapserver.biz.handler;
 import com.alibaba.fastjson.JSON;
 import com.treefinance.saas.grapserver.biz.mq.model.TaskLogMessage;
 import com.treefinance.saas.grapserver.biz.service.TaskLogService;
-import com.treefinance.saas.grapserver.biz.service.TaskLogSpecialService;
 import com.treefinance.saas.grapserver.biz.service.TaskService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,8 +22,6 @@ public class TaskLogHandler {
     private TaskLogService taskLogService;
     @Autowired
     private TaskService taskService;
-    @Autowired
-    private TaskLogSpecialService taskLogSepcialService;
 
     public void handle(String message) {
         TaskLogMessage taskLogMessage = JSON.parseObject(message, TaskLogMessage.class);
@@ -36,7 +33,6 @@ public class TaskLogHandler {
             }
             Date processTime = new Date(taskLogMessage.getTimestamp());
             taskLogService.insert(taskId, taskLogMessage.getMsg(), processTime, taskLogMessage.getErrorDetail());
-            taskLogSepcialService.doProcess(taskId, taskLogMessage.getMsg(), processTime);
             logger.info("日志保存成功：message={}", taskLogMessage);
         }
     }

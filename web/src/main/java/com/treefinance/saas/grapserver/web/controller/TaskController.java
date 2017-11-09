@@ -55,8 +55,6 @@ public class TaskController {
     private TaskBuryPointLogService taskBuryPointLogService;
     @Autowired
     private TaskBuryPointSpecialCodeService taskBuryPointSpecialCodeService;
-    @Autowired
-    private TaskBuryPointSpecialService taskBuryPointSpecialService;
 
     /**
      * 获取配置,电商在用
@@ -195,7 +193,6 @@ public class TaskController {
         }
         taskBuryPointLogService.pushTaskBuryPointLog(taskId, appId, code);
         taskBuryPointSpecialCodeService.doProcess(code, taskId, appId, extra);
-        taskBuryPointSpecialService.doProcess(extra, taskId, appId, code);
         return SimpleResult.successResult(null);
     }
 }
