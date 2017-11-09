@@ -4,7 +4,7 @@ import com.alibaba.fastjson.JSON;
 import com.treefinance.saas.assistant.model.TaskOperatorMonitorMessage;
 import com.treefinance.saas.grapserver.biz.processor.BaseBusinessComponent;
 import com.treefinance.saas.grapserver.biz.processor.request.OperatorMonitorSpecialRequest;
-import com.treefinance.saas.grapserver.biz.service.MonitorService;
+import com.treefinance.saas.grapserver.biz.service.MonitorPluginService;
 import com.treefinance.saas.grapserver.biz.service.TaskAttributeService;
 import com.treefinance.saas.grapserver.biz.service.TaskBuryPointLogService;
 import com.treefinance.saas.grapserver.biz.service.TaskLogService;
@@ -34,7 +34,7 @@ public class CrawlSuccessMonitorComponent extends BaseBusinessComponent<Operator
     @Autowired
     private TaskLogService taskLogService;
     @Autowired
-    private MonitorService monitorService;
+    private MonitorPluginService monitorPluginService;
     @Autowired
     private TaskAttributeService taskAttributeService;
 
@@ -80,7 +80,7 @@ public class CrawlSuccessMonitorComponent extends BaseBusinessComponent<Operator
         message.setStatus(ETaskOperatorMonitorStatus.CRAWL_SUCCESS.getStatus());
         logger.info("运营商监控,发送抓取成功(任务日志)消息到monitor,request={},message={},status={}",
                 JSON.toJSONString(request), JSON.toJSONString(message), ETaskOperatorMonitorStatus.CRAWL_SUCCESS);
-        monitorService.sendTaskOperatorMonitorMessage(message);
+        monitorPluginService.sendTaskOperatorMonitorMessage(message);
 
     }
 }

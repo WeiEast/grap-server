@@ -4,7 +4,7 @@ import com.alibaba.fastjson.JSON;
 import com.treefinance.saas.assistant.model.TaskOperatorMonitorMessage;
 import com.treefinance.saas.grapserver.biz.processor.BaseBusinessComponent;
 import com.treefinance.saas.grapserver.biz.processor.request.OperatorMonitorSpecialRequest;
-import com.treefinance.saas.grapserver.biz.service.MonitorService;
+import com.treefinance.saas.grapserver.biz.service.MonitorPluginService;
 import com.treefinance.saas.grapserver.biz.service.TaskBuryPointLogService;
 import com.treefinance.saas.grapserver.biz.service.TaskLogService;
 import com.treefinance.saas.grapserver.common.enums.ETaskStep;
@@ -30,7 +30,7 @@ public class TaskCreateMonitorComponent extends BaseBusinessComponent<OperatorMo
     @Autowired
     private TaskLogService taskLogService;
     @Autowired
-    private MonitorService monitorService;
+    private MonitorPluginService monitorPluginService;
 
     @Override
     protected void doBusiness(OperatorMonitorSpecialRequest request) {
@@ -50,7 +50,7 @@ public class TaskCreateMonitorComponent extends BaseBusinessComponent<OperatorMo
         message.setStatus(ETaskOperatorMonitorStatus.CREATE_TASK.getStatus());
         logger.info("运营商监控,发送任务创建(任务日志)消息到monitor,request={},message={},status={}",
                 JSON.toJSON(request), JSON.toJSONString(message), ETaskOperatorMonitorStatus.CREATE_TASK);
-        monitorService.sendTaskOperatorMonitorMessage(message);
+        monitorPluginService.sendTaskOperatorMonitorMessage(message);
 
     }
 }

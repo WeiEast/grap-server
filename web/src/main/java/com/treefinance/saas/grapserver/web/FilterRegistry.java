@@ -18,7 +18,7 @@ package com.treefinance.saas.grapserver.web;
 
 import com.treefinance.saas.grapserver.biz.config.DiamondConfig;
 import com.treefinance.saas.grapserver.biz.service.AppLicenseService;
-import com.treefinance.saas.grapserver.biz.service.MonitorService;
+import com.treefinance.saas.grapserver.biz.service.MonitorPluginService;
 import com.treefinance.saas.grapserver.web.filter.WebContextFilter;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
@@ -49,10 +49,10 @@ public class FilterRegistry {
     }
 
     @Bean
-    public FilterRegistrationBean webContextFilter(MonitorService monitorService,
+    public FilterRegistrationBean webContextFilter(MonitorPluginService monitorPluginService,
                                                    DiamondConfig diamondConfig,
                                                    AppLicenseService appLicenseService) {
-        WebContextFilter contextFilter = new WebContextFilter(monitorService, diamondConfig, appLicenseService);
+        WebContextFilter contextFilter = new WebContextFilter(monitorPluginService, diamondConfig, appLicenseService);
         contextFilter.addExcludeUrlPatterns("/moxie/webhook/**");
 
         FilterRegistrationBean registration = new FilterRegistrationBean();
