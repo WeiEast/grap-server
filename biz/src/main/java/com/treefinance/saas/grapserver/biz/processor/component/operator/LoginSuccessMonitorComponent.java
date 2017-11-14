@@ -74,6 +74,7 @@ public class LoginSuccessMonitorComponent extends BaseBusinessComponent<Operator
         TaskOperatorMonitorMessage message = new TaskOperatorMonitorMessage();
         message.setTaskId(request.getTaskId());
         message.setAppId(request.getTask().getAppId());
+        message.setUniqueId(request.getTask().getUniqueId());
         message.setGroupCode(groupCode);
         message.setGroupName(groupName);
         message.setDataTime(request.getTask().getCreateTime());

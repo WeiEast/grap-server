@@ -46,6 +46,7 @@ public class TaskCreateMonitorComponent extends BaseBusinessComponent<OperatorMo
         TaskOperatorMonitorMessage message = new TaskOperatorMonitorMessage();
         message.setTaskId(request.getTaskId());
         message.setAppId(request.getTask().getAppId());
+        message.setUniqueId(request.getTask().getUniqueId());
         message.setDataTime(request.getTask().getCreateTime());
         message.setStatus(ETaskOperatorMonitorStatus.CREATE_TASK.getStatus());
         logger.info("运营商监控,发送任务创建(任务日志)消息到monitor,request={},message={},status={}",

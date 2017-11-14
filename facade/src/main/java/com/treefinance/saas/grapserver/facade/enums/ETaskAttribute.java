@@ -5,7 +5,7 @@ package com.treefinance.saas.grapserver.facade.enums;
  * Created by yh-treefinance on 2017/11/1.
  */
 public enum ETaskAttribute {
-    FUND_MOXIE_TASKID("moxie-taskId", "运营商编码"),
+    FUND_MOXIE_TASKID("moxie-taskId", "魔蝎任务Id"),
     OPERATOR_GROUP_CODE("groupCode", "运营商编码"),
     OPERATOR_GROUP_NAME("groupName", "运营商名称");
 

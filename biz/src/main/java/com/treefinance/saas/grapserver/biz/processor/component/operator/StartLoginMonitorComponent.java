@@ -73,6 +73,7 @@ public class StartLoginMonitorComponent extends BaseBusinessComponent<OperatorMo
         TaskOperatorMonitorMessage message = new TaskOperatorMonitorMessage();
         message.setTaskId(request.getTaskId());
         message.setAppId(request.getTask().getAppId());
+        message.setUniqueId(request.getTask().getUniqueId());
         message.setGroupCode(groupCode);
         message.setGroupName(groupName);
         message.setDataTime(request.getTask().getCreateTime());
