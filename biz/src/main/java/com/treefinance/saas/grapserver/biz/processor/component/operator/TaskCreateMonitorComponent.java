@@ -43,6 +43,7 @@ public class TaskCreateMonitorComponent extends BaseBusinessComponent<OperatorMo
             logger.info("运营商监控,发送任务创建(任务日志)消息到monitor,未查询到任务创建日志信息,request={}", JSON.toJSONString(request));
             return;
         }
+        request.setOrder(1);
         TaskOperatorMonitorMessage message = new TaskOperatorMonitorMessage();
         message.setTaskId(request.getTaskId());
         message.setAppId(request.getTask().getAppId());

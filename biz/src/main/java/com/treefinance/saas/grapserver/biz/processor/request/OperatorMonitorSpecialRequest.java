@@ -19,6 +19,8 @@ public class OperatorMonitorSpecialRequest implements Serializable {
 
     private String groupName;//运营商名称
 
+    private Integer order;//操作顺序记录,如果上一步操作存在,则继续统计下一步数据,否则终止
+
     public Long getTaskId() {
         return taskId;
     }
@@ -49,5 +51,13 @@ public class OperatorMonitorSpecialRequest implements Serializable {
 
     public void setGroupName(String groupName) {
         this.groupName = groupName;
+    }
+
+    public Integer getOrder() {
+        return order;
+    }
+
+    public void setOrder(Integer order) {
+        this.order = order;
     }
 }

@@ -43,6 +43,10 @@ public class StartLoginMonitorComponent extends BaseBusinessComponent<OperatorMo
             logger.error("运营商监控,发送开始登陆(任务埋点)消息到monitor,请求参数为空,request={}", JSON.toJSONString(request));
             return;
         }
+        if (request.getOrder() == null || request.getOrder() < 2) {
+            logger.error("运营商监控,发送开始登陆(任务埋点)消息到monitor,存在环节遗漏,后续不再执行,request={}", JSON.toJSONString(request));
+            return;
+        }
         List<TaskBuryPointLog> list = taskBuryPointLogService.queryTaskBuryPointLogByCode(request.getTaskId(), "300701");
         if (CollectionUtils.isEmpty(list)) {
             logger.info("运营商监控,发送开始登陆(任务埋点)消息到monitor,未查询到开始登陆埋点信息(300701),request={}", JSON.toJSONString(request));
@@ -69,7 +73,7 @@ public class StartLoginMonitorComponent extends BaseBusinessComponent<OperatorMo
             request.setGroupCode(groupCode);
             request.setGroupName(groupName);
         }
-
+        request.setOrder(3);
         TaskOperatorMonitorMessage message = new TaskOperatorMonitorMessage();
         message.setTaskId(request.getTaskId());
         message.setAppId(request.getTask().getAppId());
