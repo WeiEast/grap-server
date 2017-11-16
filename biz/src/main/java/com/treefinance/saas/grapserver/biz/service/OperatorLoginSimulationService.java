@@ -65,6 +65,7 @@ public class OperatorLoginSimulationService {
                     mqConfig.getProviderRawdataTag(), taskId.toString());
             taskAttributeService.insertOrUpdateSelective(taskId, ETaskAttribute.OPERATOR_GROUP_CODE.getAttribute(), groupCode);
             taskAttributeService.insertOrUpdateSelective(taskId, ETaskAttribute.OPERATOR_GROUP_NAME.getAttribute(), groupName);
+            taskService.updateTask(taskId, accountNo, websiteName);
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
         }

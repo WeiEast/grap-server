@@ -1,6 +1,8 @@
 package com.treefinance.saas.grapserver.biz.processor.component.operator;
 
 import com.alibaba.fastjson.JSON;
+import com.treefinance.basicservice.security.crypto.facade.EncryptionIntensityEnum;
+import com.treefinance.basicservice.security.crypto.facade.ISecurityCryptoService;
 import com.treefinance.saas.assistant.model.TaskOperatorMonitorMessage;
 import com.treefinance.saas.grapserver.biz.processor.BaseBusinessComponent;
 import com.treefinance.saas.grapserver.biz.processor.request.OperatorMonitorSpecialRequest;
@@ -37,6 +39,8 @@ public class CrawlSuccessMonitorComponent extends BaseBusinessComponent<Operator
     private MonitorPluginService monitorPluginService;
     @Autowired
     private TaskAttributeService taskAttributeService;
+    @Autowired
+    private ISecurityCryptoService iSecurityCryptoService;
 
     @Override
     protected void doBusiness(OperatorMonitorSpecialRequest request) {
@@ -79,6 +83,10 @@ public class CrawlSuccessMonitorComponent extends BaseBusinessComponent<Operator
         message.setTaskId(request.getTaskId());
         message.setAppId(request.getTask().getAppId());
         message.setUniqueId(request.getTask().getUniqueId());
+        String accountNo = request.getTask().getAccountNo();
+        if (StringUtils.isNotBlank(accountNo)) {
+            message.setAccountNo(iSecurityCryptoService.decrypt(accountNo, EncryptionIntensityEnum.NORMAL));
+        }
         message.setGroupCode(groupCode);
         message.setGroupName(groupName);
         message.setDataTime(request.getTask().getCreateTime());

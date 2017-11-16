@@ -158,7 +158,7 @@ public class OperatorController {
                           @RequestParam(name = "accountNo", required = false) String accountNo,
                           @RequestParam(name = "groupCode", required = false) String groupCode,
                           @RequestParam(name = "groupName", required = false) String groupName) {
-        logger.info("模拟登录: 用户打开登陆页,taskid={},websiteName={},groupCode={},groupName={}", taskid, websiteName, groupCode, groupName);
+        logger.info("模拟登录: 用户打开登陆页,taskid={},websiteName={},accountNo={},groupCode={},groupName={}", taskid, websiteName, accountNo, groupCode, groupName);
         operatorLoginSimulationService.prepare(taskid, websiteName, accountNo, groupCode, groupName);
         return SimpleResult.successResult(null);
     }
