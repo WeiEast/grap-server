@@ -2,15 +2,11 @@ package com.treefinance.saas.grapserver.biz.service;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.rocketmq.shade.io.netty.util.internal.StringUtil;
-import com.google.common.base.Splitter;
-import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.treefinance.saas.grapserver.biz.config.DiamondConfig;
 import com.treefinance.saas.grapserver.biz.mq.MessageProducer;
 import com.treefinance.saas.grapserver.common.model.Constants;
 import com.treefinance.saas.grapserver.common.model.dto.TaskDTO;
 import com.treefinance.saas.knife.result.SimpleResult;
-import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,6 +40,7 @@ public class CallbackResultService {
     public void handleResult(TaskDTO task, String result, int httpCode) {
         Map<String, Object> messageMap = Maps.newHashMap();
         try {
+            messageMap.put("taskId", task.getId());
             messageMap.put("taskid", task.getId());
             messageMap.put("appId", task.getAppId());
             messageMap.put("uniqueId", task.getUniqueId());
