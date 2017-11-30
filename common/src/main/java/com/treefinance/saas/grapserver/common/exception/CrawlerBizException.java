@@ -8,7 +8,7 @@ package com.treefinance.saas.grapserver.common.exception;
  * <p>
  * 爬虫接口失败异常
  */
-public class CrawlerBizException extends RuntimeException {
+public class CrawlerBizException extends BizException {
     public CrawlerBizException() {
         super();
     }

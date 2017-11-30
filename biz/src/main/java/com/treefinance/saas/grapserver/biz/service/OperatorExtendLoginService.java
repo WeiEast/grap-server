@@ -123,7 +123,7 @@ public class OperatorExtendLoginService {
         if (!result.getStatus()) {
             logger.info("运营商:调用爬数登陆初始化,获取基本信息失败,operatorParam={},result={}",
                     JSON.toJSONString(operatorParam), JSON.toJSONString(result));
-            return SimpleResult.failResult(result.getMessage());
+            throw new CrawlerBizException(result.getMessage());
         }
         Long taskId = operatorParam.getTaskId();
         String groupCode = operatorParam.getGroupCode();
@@ -153,7 +153,7 @@ public class OperatorExtendLoginService {
         if (!result.getStatus()) {
             logger.info("运营商:调用爬数刷新图片验证码失败,operatorParam={},result={}",
                     JSON.toJSONString(operatorParam), JSON.toJSONString(result));
-            return SimpleResult.failResult(result.getMessage());
+            throw new CrawlerBizException(result.getMessage());
         }
         return SimpleResult.successResult(result.getData());
     }
@@ -175,7 +175,7 @@ public class OperatorExtendLoginService {
         if (!result.getStatus()) {
             logger.info("运营商:调用爬数刷新短信验证码失败,operatorParam={},result={}",
                     JSON.toJSONString(operatorParam), JSON.toJSONString(result));
-            return SimpleResult.failResult(result.getMessage());
+            throw new CrawlerBizException(result.getMessage());
         }
         return SimpleResult.successResult(result.getData());
     }
@@ -192,15 +192,15 @@ public class OperatorExtendLoginService {
             result = crawlerOperatorService.submit(operatorParam);
         } catch (Exception e) {
             logger.error("运营商:调用爬数运营商登陆异常,operatorParam={}", JSON.toJSONString(operatorParam), e);
-            return SimpleResult.failResult("登陆失败,请重试");
+            throw new CrawlerBizException("登陆失败,请重试");
         }
         if (!result.getStatus()) {
             logger.info("运营商:调用爬数运营商登陆失败,operatorParam={},result={}",
                     JSON.toJSONString(operatorParam), JSON.toJSONString(result));
             if (StringUtils.isNotBlank(result.getMessage())) {
-                return SimpleResult.failResult(result.getMessage());
+                throw new CrawlerBizException(result.getMessage());
             } else {
-                return SimpleResult.failResult("登陆失败,请重试");
+                throw new CrawlerBizException("登陆失败,请重试");
             }
         }
         Long taskId = operatorParam.getTaskId();

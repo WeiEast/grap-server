@@ -17,10 +17,7 @@ package com.treefinance.saas.grapserver.web.advice;
 
 import com.alibaba.fastjson.JSON;
 import com.google.common.collect.Maps;
-import com.treefinance.saas.grapserver.common.exception.AppIdUncheckException;
-import com.treefinance.saas.grapserver.common.exception.ForbiddenException;
-import com.treefinance.saas.grapserver.common.exception.TaskTimeOutException;
-import com.treefinance.saas.grapserver.common.exception.UnknownException;
+import com.treefinance.saas.grapserver.common.exception.*;
 import com.treefinance.saas.grapserver.common.exception.base.MarkBaseException;
 import com.treefinance.saas.knife.result.SimpleResult;
 import org.apache.commons.lang3.StringUtils;
@@ -96,6 +93,14 @@ public class GlobalExceptionAdvice extends ResponseEntityExceptionHandler {
         return handleExceptionInternal(ex, buildBody(ex), null, HttpStatus.INTERNAL_SERVER_ERROR, request);
     }
 
+    @ExceptionHandler(BizException.class)
+    @ResponseStatus(value = HttpStatus.INTERNAL_SERVER_ERROR)
+    @ResponseBody
+    public ResponseEntity<Object> handleBizException(WebRequest request, Exception ex) {
+        handleLog(request, ex);
+        return handleExceptionInternal(ex, buildBody(ex), null, HttpStatus.INTERNAL_SERVER_ERROR, request);
+    }
+
     @ExceptionHandler(ValidationException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ResponseBody
@@ -141,6 +146,8 @@ public class GlobalExceptionAdvice extends ResponseEntityExceptionHandler {
             result.setErrorMsg(((MarkBaseException) ex).getErrorMsg());
         } else if (ex instanceof MissingServletRequestParameterException) {
             result.setErrorMsg("参数异常");
+        } else if (ex instanceof BizException) {
+            result.setErrorMsg(ex.getMessage());
         }
         if (StringUtils.isEmpty(result.getErrorMsg())) {
             result.setErrorMsg("系统忙，请稍后重试");//暂时
