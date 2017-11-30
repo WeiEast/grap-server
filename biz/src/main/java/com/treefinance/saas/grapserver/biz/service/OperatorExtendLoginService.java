@@ -60,7 +60,7 @@ public class OperatorExtendLoginService {
             result = crawlerOperatorService.queryAllConfig();
         } catch (Exception e) {
             logger.error("运营商:调用爬数获取所有登录运营商配置异常,taskId={}", taskId, e);
-            throw new CrawlerBizException("运营商:调用爬数获取所有登录运营商配置异常");
+            throw e;
         }
         if (!result.getStatus()) {
             logger.info("运营商:调用爬数获取所有登录运营商配置失败,taskId={},result={}", taskId, JSON.toJSONString(result));
@@ -118,7 +118,7 @@ public class OperatorExtendLoginService {
             result = crawlerOperatorService.init(operatorParam);
         } catch (Exception e) {
             logger.error("运营商:调用爬数登陆初始化,获取基本信息异常,operatorParam={}", JSON.toJSONString(operatorParam), e);
-            throw new CrawlerBizException("运营商:调用爬数登陆初始化,获取基本信息异常");
+            throw e;
         }
         if (!result.getStatus()) {
             logger.info("运营商:调用爬数登陆初始化,获取基本信息失败,operatorParam={},result={}",
@@ -148,7 +148,7 @@ public class OperatorExtendLoginService {
             result = crawlerOperatorService.refeshPicCode(operatorParam);
         } catch (Exception e) {
             logger.error("运营商:调用爬数刷新图片验证码异常,operatorParam={}", JSON.toJSONString(operatorParam), e);
-            throw new CrawlerBizException("运营商:调用爬数刷新图片验证码异常");
+            throw e;
         }
         if (!result.getStatus()) {
             logger.info("运营商:调用爬数刷新图片验证码失败,operatorParam={},result={}",
@@ -170,7 +170,7 @@ public class OperatorExtendLoginService {
             result = crawlerOperatorService.refeshSmsCode(operatorParam);
         } catch (Exception e) {
             logger.error("运营商:调用爬数刷新短信验证码异常,operatorParam={}", JSON.toJSONString(operatorParam), e);
-            throw new CrawlerBizException("运营商:调用爬数刷新短信验证码异常");
+            throw e;
         }
         if (!result.getStatus()) {
             logger.info("运营商:调用爬数刷新短信验证码失败,operatorParam={},result={}",
@@ -192,7 +192,7 @@ public class OperatorExtendLoginService {
             result = crawlerOperatorService.submit(operatorParam);
         } catch (Exception e) {
             logger.error("运营商:调用爬数运营商登陆异常,operatorParam={}", JSON.toJSONString(operatorParam), e);
-            throw new CrawlerBizException("登陆失败,请重试");
+            throw e;
         }
         if (!result.getStatus()) {
             logger.info("运营商:调用爬数运营商登陆失败,operatorParam={},result={}",
