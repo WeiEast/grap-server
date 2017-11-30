@@ -112,7 +112,7 @@ public class OperatorExtendLoginService {
      *
      * @param operatorParam
      */
-    public Map<String, Object> prepare(OperatorParam operatorParam) {
+    public Object prepare(OperatorParam operatorParam) {
         HttpResult<Map<String, Object>> result;
         try {
             result = crawlerOperatorService.init(operatorParam);
@@ -123,7 +123,7 @@ public class OperatorExtendLoginService {
         if (!result.getStatus()) {
             logger.info("运营商:调用爬数登陆初始化,获取基本信息失败,operatorParam={},result={}",
                     JSON.toJSONString(operatorParam), JSON.toJSONString(result));
-            throw new CrawlerBizException(result.getMessage());
+            return SimpleResult.failResult(result.getMessage());
         }
         Long taskId = operatorParam.getTaskId();
         String groupCode = operatorParam.getGroupCode();
@@ -133,7 +133,7 @@ public class OperatorExtendLoginService {
         taskAttributeService.insertOrUpdateSelective(taskId, ETaskAttribute.OPERATOR_GROUP_CODE.getAttribute(), groupCode);
         taskAttributeService.insertOrUpdateSelective(taskId, ETaskAttribute.OPERATOR_GROUP_NAME.getAttribute(), groupName);
         taskService.updateTask(taskId, accountNo, websiteName);
-        return result.getData();
+        return SimpleResult.successResult(result.getData());
     }
 
     /**
@@ -142,7 +142,7 @@ public class OperatorExtendLoginService {
      * @param operatorParam
      * @return
      */
-    public Map<String, Object> refreshPicCode(OperatorParam operatorParam) {
+    public Object refreshPicCode(OperatorParam operatorParam) {
         HttpResult<Map<String, Object>> result;
         try {
             result = crawlerOperatorService.refeshPicCode(operatorParam);
@@ -153,9 +153,9 @@ public class OperatorExtendLoginService {
         if (!result.getStatus()) {
             logger.info("运营商:调用爬数刷新图片验证码失败,operatorParam={},result={}",
                     JSON.toJSONString(operatorParam), JSON.toJSONString(result));
-            throw new CrawlerBizException(result.getMessage());
+            return SimpleResult.failResult(result.getMessage());
         }
-        return result.getData();
+        return SimpleResult.successResult(result.getData());
     }
 
     /**
@@ -164,7 +164,7 @@ public class OperatorExtendLoginService {
      * @param operatorParam
      * @return
      */
-    public Map<String, Object> refreshSmsCode(OperatorParam operatorParam) {
+    public Object refreshSmsCode(OperatorParam operatorParam) {
         HttpResult<Map<String, Object>> result;
         try {
             result = crawlerOperatorService.refeshSmsCode(operatorParam);
@@ -175,9 +175,9 @@ public class OperatorExtendLoginService {
         if (!result.getStatus()) {
             logger.info("运营商:调用爬数刷新短信验证码失败,operatorParam={},result={}",
                     JSON.toJSONString(operatorParam), JSON.toJSONString(result));
-            throw new CrawlerBizException(result.getMessage());
+            return SimpleResult.failResult(result.getMessage());
         }
-        return result.getData();
+        return SimpleResult.successResult(result.getData());
     }
 
     /**
@@ -197,10 +197,14 @@ public class OperatorExtendLoginService {
         if (!result.getStatus()) {
             logger.info("运营商:调用爬数运营商登陆失败,operatorParam={},result={}",
                     JSON.toJSONString(operatorParam), JSON.toJSONString(result));
-            return SimpleResult.failResult("登陆失败,请重试");
+            if (StringUtils.isNotBlank(result.getMessage())) {
+                return SimpleResult.failResult(result.getMessage());
+            } else {
+                return SimpleResult.failResult("登陆失败,请重试");
+            }
         }
         Long taskId = operatorParam.getTaskId();
         taskTimeService.updateLoginTime(taskId, new Date());
-        return result.getData();
+        return SimpleResult.successResult(result.getData());
     }
 }
