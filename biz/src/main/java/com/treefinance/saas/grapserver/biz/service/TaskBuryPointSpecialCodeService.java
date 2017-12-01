@@ -3,6 +3,8 @@ package com.treefinance.saas.grapserver.biz.service;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.treefinance.basicservice.security.crypto.facade.EncryptionIntensityEnum;
+import com.treefinance.basicservice.security.crypto.facade.ISecurityCryptoService;
 import com.treefinance.commonservice.uid.UidGenerator;
 import com.treefinance.saas.grapserver.common.utils.JsonUtils;
 import com.treefinance.saas.grapserver.dao.entity.TaskOperatorMaintainUserLog;
@@ -31,6 +33,8 @@ public class TaskBuryPointSpecialCodeService {
     private TaskOperatorMaintainUserLogMapper taskOperatorMaintainUserLogMapper;
     @Autowired
     private TaskAttributeService taskAttributeService;
+    @Autowired
+    private ISecurityCryptoService iSecurityCryptoService;
 
 
     @Async
@@ -89,7 +93,7 @@ public class TaskBuryPointSpecialCodeService {
         log.setId(UidGenerator.getId());
         log.setTaskId(taskId);
         log.setAppId(appId);
-        log.setMobile(mobile);
+        log.setMobile(iSecurityCryptoService.encrypt(mobile, EncryptionIntensityEnum.NORMAL));
         log.setOperatorName(operatorName);
         taskOperatorMaintainUserLogMapper.insertSelective(log);
 
