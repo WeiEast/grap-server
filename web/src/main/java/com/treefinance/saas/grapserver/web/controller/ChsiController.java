@@ -3,6 +3,7 @@ package com.treefinance.saas.grapserver.web.controller;
 import com.alibaba.fastjson.JSON;
 import com.datatrees.rawdatacentral.domain.education.EducationParam;
 import com.treefinance.saas.grapserver.biz.service.ChsiLoginSimulationService;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,12 +46,54 @@ public class ChsiController {
     @RequestMapping(value = "/login/submit", method = {RequestMethod.POST})
     public Object loginSubmit(EducationParam param) {
         logger.info("学信网:登陆,传入参数,param={}", JSON.toJSONString(param));
-        if (param == null || param.getTaskId() == null) {
-            logger.error("学信网:登陆,参数缺失,taskId必传,param={}", JSON.toJSONString(param));
-            throw new IllegalArgumentException("学信网:登陆,参数缺失,taskId必传");
+        if (param == null || param.getTaskId() == null || StringUtils.isBlank(param.getLoginName())) {
+            logger.error("学信网:登陆,参数缺失,taskId,loginName必传,param={}", JSON.toJSONString(param));
+            throw new IllegalArgumentException("学信网:登陆,参数缺失,taskId,loginName必传");
         }
         Object result = chsiLoginSimulationService.loginSubmit(param);
         logger.info("学信网:登陆,返回结果,param={},result={}", JSON.toJSONString(param), JSON.toJSONString(result));
+        return result;
+    }
+
+    /**
+     * 注册时刷新图片验证码
+     *
+     * @param param
+     * @return
+     */
+    @RequestMapping(value = "/register/refresh/picCode", method = RequestMethod.POST)
+    public Object registerRefreshPicCode(EducationParam param) {
+        logger.info("学信网:注册时刷新图片验证码,传入参数,param={}", JSON.toJSONString(param));
+        Object result = chsiLoginSimulationService.registerRefreshPicCode(param);
+        logger.info("学信网:注册时刷新图片验证码,返回结果,param={},result={}", JSON.toJSONString(param), JSON.toJSONString(result));
+        return result;
+    }
+
+    /**
+     * 注册时验证图片验证码并发送短信
+     *
+     * @param param
+     * @return
+     */
+    @RequestMapping(value = "/register/validate/picCode/send/smsCode", method = RequestMethod.POST)
+    public Object registerValidatePicCodeAndSendSmsCode(EducationParam param) {
+        logger.info("学信网:注册时验证图片验证码并发送短信,传入参数,param={}", JSON.toJSONString(param));
+        Object result = chsiLoginSimulationService.registerValidatePicCodeAndSendSmsCode(param);
+        logger.info("学信网:注册时验证图片验证码并发送短信,返回结果,param={},result={}", JSON.toJSONString(param), JSON.toJSONString(result));
+        return result;
+    }
+
+    /**
+     * 注册提交
+     *
+     * @param param
+     * @return
+     */
+    @RequestMapping(value = "/register/submit", method = RequestMethod.POST)
+    public Object registerSubmit(EducationParam param) {
+        logger.info("学信网:注册提交,传入参数,param={}", JSON.toJSONString(param));
+        Object result = chsiLoginSimulationService.registerSubmit(param);
+        logger.info("学信网:注册提交,返回结果,param={},result={}", JSON.toJSONString(param), JSON.toJSONString(result));
         return result;
     }
 

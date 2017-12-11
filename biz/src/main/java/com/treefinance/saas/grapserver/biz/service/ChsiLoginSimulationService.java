@@ -23,8 +23,16 @@ public class ChsiLoginSimulationService {
 
     @Autowired
     private RpcEducationService rpcEducationService;
+    @Autowired
+    private TaskService taskService;
 
 
+    /**
+     * 登陆初始化
+     *
+     * @param educationParam
+     * @return
+     */
     public Object loginInit(EducationParam educationParam) {
         HttpResult<Map<String, Object>> result;
         try {
@@ -41,7 +49,91 @@ public class ChsiLoginSimulationService {
         return SimpleResult.successResult(result.getData());
     }
 
+    /**
+     * 登陆
+     *
+     * @param param
+     * @return
+     */
     public Object loginSubmit(EducationParam param) {
-        return null;
+        HttpResult<Map<String, Object>> result;
+        try {
+            result = rpcEducationService.loginSubmit(param);
+        } catch (Exception e) {
+            logger.error("学信网:调用爬数登陆异常,param={}", JSON.toJSONString(param), e);
+            throw e;
+        }
+        if (!result.getStatus()) {
+            logger.info("学信网:调用爬数登陆失败,param={},result={}", JSON.toJSONString(param), JSON.toJSONString(result));
+            throw new CrawlerBizException(result.getMessage());
+        }
+        Long taskId = param.getTaskId();
+        String website = param.getWebsiteName();
+        String loginName = param.getLoginName();
+        taskService.updateTask(taskId, loginName, website);
+        return SimpleResult.successResult(result.getData());
+    }
+
+    /**
+     * 注册时刷新图片验证码
+     *
+     * @param param
+     * @return
+     */
+    public Object registerRefreshPicCode(EducationParam param) {
+        HttpResult<Map<String, Object>> result;
+        try {
+            result = rpcEducationService.registerRefeshPicCode(param);
+        } catch (Exception e) {
+            logger.error("学信网:调用爬数注册时刷新图片验证码异常,param={}", JSON.toJSONString(param), e);
+            throw e;
+        }
+        if (!result.getStatus()) {
+            logger.info("学信网:调用爬数注册时刷新图片验证码失败,param={},result={}", JSON.toJSONString(param), JSON.toJSONString(result));
+            throw new CrawlerBizException(result.getMessage());
+        }
+        return SimpleResult.successResult(result.getData());
+    }
+
+    /**
+     * 注册时验证图片验证码并发送短信
+     *
+     * @param param
+     * @return
+     */
+    public Object registerValidatePicCodeAndSendSmsCode(EducationParam param) {
+        HttpResult<Map<String, Object>> result;
+        try {
+            result = rpcEducationService.registerValidatePicCodeAndSendSmsCode(param);
+        } catch (Exception e) {
+            logger.error("学信网:调用爬数注册时验证图片验证码并发送短信异常,param={}", JSON.toJSONString(param), e);
+            throw e;
+        }
+        if (!result.getStatus()) {
+            logger.info("学信网:调用爬数注册时验证图片验证码并发送短信失败,param={},result={}", JSON.toJSONString(param), JSON.toJSONString(result));
+            throw new CrawlerBizException(result.getMessage());
+        }
+        return SimpleResult.successResult(result.getData());
+    }
+
+    /**
+     * 注册提交
+     *
+     * @param param
+     * @return
+     */
+    public Object registerSubmit(EducationParam param) {
+        HttpResult<Map<String, Object>> result;
+        try {
+            result = rpcEducationService.registerSubmit(param);
+        } catch (Exception e) {
+            logger.error("学信网:调用爬数注册提交异常,param={}", JSON.toJSONString(param), e);
+            throw e;
+        }
+        if (!result.getStatus()) {
+            logger.info("学信网:调用爬数注册提交失败,param={},result={}", JSON.toJSONString(param), JSON.toJSONString(result));
+            throw new CrawlerBizException(result.getMessage());
+        }
+        return SimpleResult.successResult(result.getData());
     }
 }
