@@ -9,7 +9,8 @@ public enum EBizType {
     EMAIL("EMAIL", (byte) 1),
     ECOMMERCE("ECOMMERCE", (byte) 2),
     OPERATOR("OPERATOR", (byte) 3),
-    FUND("FUND", (byte) 4);
+    FUND("FUND", (byte) 4),
+    CHSI("CHSI", (byte) 7);
 
     private String text;
     private Byte code;
