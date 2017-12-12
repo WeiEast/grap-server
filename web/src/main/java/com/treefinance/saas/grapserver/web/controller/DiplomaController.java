@@ -35,7 +35,7 @@ public class DiplomaController {
     public Object getConfig(@RequestParam String appid,
                             @RequestParam("taskid") Long taskId) {
         if (StringUtils.isBlank(appid) || taskId == null) {
-            logger.error("学信网:获取配置,参数缺失,appid,taskid必传,appid={},taskId={}", appid, taskId);
+            logger.error("学信网:获取配置,参数缺失,appid,taskid必传,appid={},taskid={}", appid, taskId);
             throw new IllegalArgumentException("学信网:获取配置,参数缺失,appid,taskid必传");
         }
         logger.info("学信网:获取配置,传入参数,appid={},taskid={}", appid, taskId);
