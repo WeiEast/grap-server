@@ -4,8 +4,13 @@ import com.alibaba.fastjson.JSON;
 import com.datatrees.rawdatacentral.api.RpcEducationService;
 import com.datatrees.rawdatacentral.domain.education.EducationParam;
 import com.datatrees.rawdatacentral.domain.result.HttpResult;
+import com.google.common.collect.Maps;
+import com.treefinance.saas.grapserver.common.enums.EBizType;
 import com.treefinance.saas.grapserver.common.exception.CrawlerBizException;
+import com.treefinance.saas.grapserver.dao.entity.TaskAttribute;
+import com.treefinance.saas.grapserver.facade.enums.ETaskAttribute;
 import com.treefinance.saas.knife.result.SimpleResult;
+import org.apache.commons.collections.MapUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,13 +23,19 @@ import java.util.Map;
  * Created by haojiahong on 2017/12/11.
  */
 @Service
-public class ChsiLoginSimulationService {
-    private static final Logger logger = LoggerFactory.getLogger(ChsiLoginSimulationService.class);
+public class DiplomaLoginSimulationService {
+    private static final Logger logger = LoggerFactory.getLogger(DiplomaLoginSimulationService.class);
 
     @Autowired
     private RpcEducationService rpcEducationService;
     @Autowired
     private TaskService taskService;
+    @Autowired
+    private MerchantConfigService merchantConfigService;
+    @Autowired
+    private TaskAttributeService taskAttributeService;
+    @Autowired
+    private AppBizLicenseService appBizLicenseService;
 
 
     /**
@@ -135,5 +146,37 @@ public class ChsiLoginSimulationService {
             throw new CrawlerBizException(result.getMessage());
         }
         return SimpleResult.successResult(result.getData());
+    }
+
+    /**
+     * 获取配置
+     *
+     * @param appId
+     * @param taskId
+     * @return
+     */
+    public Object getConfig(String appId, Long taskId) {
+        Map<String, Object> colorMap = merchantConfigService.getColorConfig(appId);
+        Map<String, Object> map = Maps.newHashMap();
+        map.put("color", colorMap);
+        map.put("license", appBizLicenseService.isShowLicense(appId, EBizType.OPERATOR.getText()));
+        return SimpleResult.successResult(map);
+    }
+
+    /**
+     * 获取合作方属性值引用
+     *
+     * @param taskId
+     * @return
+     */
+    public Object getThirdPartyReference(Long taskId) {
+        Map<String, TaskAttribute> taskAttributeMap
+                = taskAttributeService.findByNames(taskId, true, ETaskAttribute.MOBILE.getAttribute(),
+                ETaskAttribute.NAME.getAttribute(), ETaskAttribute.ID_CARD.getAttribute());
+        Map<String, Object> map = Maps.newHashMap();
+        if (MapUtils.isNotEmpty(taskAttributeMap)) {
+            map.putAll(taskAttributeMap);
+        }
+        return SimpleResult.successResult(map);
     }
 }

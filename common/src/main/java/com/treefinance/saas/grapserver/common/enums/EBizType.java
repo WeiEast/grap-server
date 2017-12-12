@@ -10,7 +10,7 @@ public enum EBizType {
     ECOMMERCE("ECOMMERCE", (byte) 2),
     OPERATOR("OPERATOR", (byte) 3),
     FUND("FUND", (byte) 4),
-    CHSI("CHSI", (byte) 7);
+    DIPLOMA("DIPLOMA", (byte) 7);
 
     private String text;
     private Byte code;
