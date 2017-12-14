@@ -334,7 +334,7 @@ public class TaskService {
         String idCard = map.get(idCardAttribute) == null ? "" : String.valueOf(map.get(idCardAttribute));
         if (StringUtils.isNotBlank(idCard)) {
             String value = securityCryptoService.encrypt(idCard, EncryptionIntensityEnum.NORMAL);
-            taskAttributeService.insert(taskId, idCard, value);
+            taskAttributeService.insert(taskId, idCardAttribute, value);
         }
     }
 

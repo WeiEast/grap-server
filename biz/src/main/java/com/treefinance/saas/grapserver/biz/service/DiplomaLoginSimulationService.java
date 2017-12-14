@@ -11,6 +11,7 @@ import com.treefinance.saas.grapserver.dao.entity.TaskAttribute;
 import com.treefinance.saas.grapserver.facade.enums.ETaskAttribute;
 import com.treefinance.saas.knife.result.SimpleResult;
 import org.apache.commons.collections.MapUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -76,7 +77,11 @@ public class DiplomaLoginSimulationService {
         }
         if (!result.getStatus()) {
             logger.info("学信网:调用爬数登陆失败,param={},result={}", JSON.toJSONString(param), JSON.toJSONString(result));
-            throw new CrawlerBizException(result.getMessage());
+            if (StringUtils.isNotBlank(result.getMessage())) {
+                throw new CrawlerBizException(result.getMessage());
+            } else {
+                throw new CrawlerBizException("登陆失败,请重试");
+            }
         }
         Long taskId = param.getTaskId();
         String website = param.getWebsiteName();

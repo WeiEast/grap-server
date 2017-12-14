@@ -55,7 +55,7 @@ public class DiplomaController {
     public Object loginInit(EducationParam educationParam) {
         logger.info("学信网:登陆初始化,传入参数,param={}", JSON.toJSONString(educationParam));
         Object result = diplomaLoginSimulationService.loginInit(educationParam);
-        logger.info("运营商:登陆初始化,返回结果,param={},result={}", JSON.toJSONString(educationParam), JSON.toJSONString(result));
+        logger.info("学信网:登陆初始化,返回结果,param={},result={}", JSON.toJSONString(educationParam), JSON.toJSONString(result));
         return result;
     }
 

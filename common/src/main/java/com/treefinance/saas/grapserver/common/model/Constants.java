@@ -30,6 +30,10 @@ public interface Constants {
      */
     String OPERATOR_TASK_FAIL_MSG = "运营商导入失败，请稍后再试。";
     /**
+     * 学信网错误提示
+     */
+    String DIPLOMA_TASK_FAIL_MSG = "学历信息导入失败，请稍后再试。";
+    /**
      * 回调失败错误提示信息
      */
     String CALLBACK_FAIL_MSG = "导入失败，请稍后再试。";
