@@ -12,6 +12,7 @@ public class TaskRO implements Serializable {
     private String appId;
     private String accountNo;
     private Byte bizType;
+    private String bizTypeName;
     private Byte status;
     private String webSite;
     private String stepCode;
@@ -97,5 +98,13 @@ public class TaskRO implements Serializable {
 
     public void setStepCode(String stepCode) {
         this.stepCode = stepCode;
+    }
+
+    public String getBizTypeName() {
+        return bizTypeName;
+    }
+
+    public void setBizTypeName(String bizTypeName) {
+        this.bizTypeName = bizTypeName;
     }
 }
