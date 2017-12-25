@@ -91,6 +91,28 @@ public class DiplomaLoginSimulationService {
     }
 
     /**
+     * 注册初始化
+     *
+     * @param educationParam
+     * @return
+     */
+    public Object registerInit(EducationParam educationParam) {
+        HttpResult<Map<String, Object>> result;
+        try {
+            result = rpcEducationService.registerInit(educationParam);
+        } catch (Exception e) {
+            logger.error("学信网:调用爬数注册初始化异常,param={}", JSON.toJSONString(educationParam), e);
+            throw e;
+        }
+        if (!result.getStatus()) {
+            logger.info("学信网:调用爬数注册初始化失败,param={},result={}",
+                    JSON.toJSONString(educationParam), JSON.toJSONString(result));
+            throw new CrawlerBizException(result.getMessage());
+        }
+        return SimpleResult.successResult(result.getData());
+    }
+
+    /**
      * 注册时刷新图片验证码
      *
      * @param param

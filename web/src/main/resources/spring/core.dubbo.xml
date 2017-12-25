@@ -35,12 +35,15 @@
                      check="false" timeout="60000" cluster="failfast"/>
 
 
+    <!--生产者-->
+    <dubbo:service interface="com.treefinance.saas.grapserver.facade.service.TaskFacade" ref="taskFacade"/>
+
     <!--兼容老的生产者-->
     <dubbo:service interface="com.treefinance.saas.gateway.servicefacade.TaskService" ref="gatewayTaskServiceFacade"/>
     <dubbo:service interface="com.treefinance.saas.gateway.servicefacade.AppLicenseService"
                    ref="gatewayAppLicenseServiceFacade"/>
     <dubbo:service interface="com.treefinance.saas.grapserver.facade.service.MerchantFacade" ref="merchantFacade"/>
-    <dubbo:service interface="com.treefinance.saas.grapserver.facade.service.TaskFacade" ref="taskFacade"/>
+
 </beans>
 
 

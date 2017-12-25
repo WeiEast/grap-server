@@ -77,6 +77,22 @@ public class DiplomaController {
         return result;
     }
 
+
+    /**
+     * 登陆初始化
+     *
+     * @param educationParam
+     * @return
+     */
+    @RequestMapping(value = "/login/init", method = {RequestMethod.POST})
+    public Object registerInit(EducationParam educationParam) {
+        logger.info("学信网:注册初始化,传入参数,param={}", JSON.toJSONString(educationParam));
+        Object result = diplomaLoginSimulationService.registerInit(educationParam);
+        logger.info("学信网:注册初始化,返回结果,param={},result={}", JSON.toJSONString(educationParam), JSON.toJSONString(result));
+        return result;
+    }
+
+
     /**
      * 注册时刷新图片验证码
      *

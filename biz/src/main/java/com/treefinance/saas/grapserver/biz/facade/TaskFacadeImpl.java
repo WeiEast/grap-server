@@ -12,6 +12,7 @@ import com.treefinance.saas.grapserver.facade.service.TaskFacade;
 import com.treefinance.saas.knife.result.Results;
 import com.treefinance.saas.knife.result.SaasResult;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -19,6 +20,7 @@ import java.util.stream.Collectors;
 /**
  * Created by haojiahong on 2017/12/22.
  */
+@Component("taskFacade")
 public class TaskFacadeImpl implements TaskFacade {
     @Autowired
     private TaskMapper taskMapper;
