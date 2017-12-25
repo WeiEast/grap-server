@@ -7,6 +7,7 @@ import java.util.Date;
  * taskRO
  */
 public class TaskRO implements Serializable {
+    private static final long serialVersionUID = 1L;
     private Long id;
     private String uniqueId;
     private String appId;
@@ -17,7 +18,6 @@ public class TaskRO implements Serializable {
     private String stepCode;
     private Date createTime;
     private Date lastUpdateTime;
-    private static final long serialVersionUID = 1L;
 
     public Long getId() {
         return id;
