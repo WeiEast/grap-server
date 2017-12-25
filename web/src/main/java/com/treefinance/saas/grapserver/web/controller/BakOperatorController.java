@@ -94,11 +94,13 @@ public class BakOperatorController {
      * @return
      */
 //    @RequestMapping(value = "/config", method = {RequestMethod.POST})
-    public Object getConfig(@RequestParam String appid, @RequestParam("taskid") Long taskId) {
+    public Object getConfig(@RequestParam String appid,
+                            @RequestParam("taskid") Long taskId,
+                            @RequestParam(value = "style", required = false) String style) {
         if (StringUtils.isBlank(appid) || taskId == null) {
             throw new IllegalArgumentException("Parameter 'appid' or 'taskid' is incorrect.");
         }
-        Map<String, Object> colorMap = merchantConfigService.getColorConfig(appid);
+        Map<String, Object> colorMap = merchantConfigService.getColorConfig(appid, style);
         HttpResult<List<OperatorCatalogue>> result = crawlerService.queryAllOperatorConfig();
         if (!result.getStatus()) {
             throw new CrawlerBizException("get operator config from crawlerService failure");
