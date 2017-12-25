@@ -180,10 +180,11 @@ public class DiplomaLoginSimulationService {
      *
      * @param appId
      * @param taskId
+     * @param style
      * @return
      */
-    public Object getConfig(String appId, Long taskId) {
-        Map<String, Object> colorMap = merchantConfigService.getColorConfig(appId);
+    public Object getConfig(String appId, Long taskId, String style) {
+        Map<String, Object> colorMap = merchantConfigService.getColorConfig(appId, style);
         Map<String, Object> map = Maps.newHashMap();
         map.put("color", colorMap);
         map.put("license", appBizLicenseService.isShowLicense(appId, EBizType.OPERATOR.getText()));

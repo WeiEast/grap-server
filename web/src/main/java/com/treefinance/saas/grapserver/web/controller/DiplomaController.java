@@ -33,13 +33,14 @@ public class DiplomaController {
      */
     @RequestMapping(value = "config", method = RequestMethod.POST)
     public Object getConfig(@RequestParam String appid,
-                            @RequestParam("taskid") Long taskId) {
+                            @RequestParam("taskid") Long taskId,
+                            @RequestParam(value = "style", required = false) String style) {
         if (StringUtils.isBlank(appid) || taskId == null) {
             logger.error("学信网:获取配置,参数缺失,appid,taskid必传,appid={},taskid={}", appid, taskId);
             throw new IllegalArgumentException("学信网:获取配置,参数缺失,appid,taskid必传");
         }
         logger.info("学信网:获取配置,传入参数,appid={},taskid={}", appid, taskId);
-        Object result = diplomaLoginSimulationService.getConfig(appid, taskId);
+        Object result = diplomaLoginSimulationService.getConfig(appid, taskId, style);
         logger.info("学信网:获取配置,返回结果,appid={},taskid={},result={}", appid, taskId, JSON.toJSONString(result));
         return result;
     }
