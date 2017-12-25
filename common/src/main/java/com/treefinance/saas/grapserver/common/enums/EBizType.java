@@ -47,6 +47,17 @@ public enum EBizType {
         return -1;
     }
 
+    public static String getName(Byte code) {
+        if (Objects.nonNull(code)) {
+            for (EBizType item : EBizType.values()) {
+                if (code.equals(item.getCode())) {
+                    return item.getText();
+                }
+            }
+        }
+        return null;
+    }
+
     public static EBizType from(String name) {
         try {
             return EBizType.valueOf(name);

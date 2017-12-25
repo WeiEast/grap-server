@@ -2,7 +2,7 @@ package com.treefinance.saas.grapserver.biz.facade;
 
 import com.google.common.collect.Lists;
 import com.treefinance.saas.assistant.httpinvoker.utils.CollectionUtils;
-import com.treefinance.saas.gateway.servicefacade.enums.BizTypeEnum;
+import com.treefinance.saas.grapserver.common.enums.EBizType;
 import com.treefinance.saas.grapserver.common.utils.DataConverterUtils;
 import com.treefinance.saas.grapserver.dao.entity.Task;
 import com.treefinance.saas.grapserver.dao.entity.TaskCriteria;
@@ -48,11 +48,7 @@ public class TaskFacadeImpl implements TaskFacade {
             return null;
         }
         TaskRO result = DataConverterUtils.convert(task, TaskRO.class);
-        for (BizTypeEnum type : BizTypeEnum.values()) {
-            if (BizTypeEnum.valueOfType(type).equals(task.getBizType())) {
-                result.setBizTypeName(type.name());
-            }
-        }
+        result.setBizTypeName(EBizType.getName(task.getBizType()));
         return Results.newSuccessResult(result);
     }
 }
