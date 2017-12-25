@@ -5,7 +5,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.treefinance.saas.grapserver.biz.common.CallbackSecureHandler;
 import com.treefinance.saas.grapserver.biz.mq.model.DeliveryAddressMessage;
-import com.treefinance.saas.grapserver.common.enums.EDataType;
+import com.treefinance.saas.grapserver.facade.enums.EDataType;
 import com.treefinance.saas.grapserver.common.exception.CallbackEncryptException;
 import com.treefinance.saas.grapserver.common.exception.RequestFailedException;
 import com.treefinance.saas.grapserver.common.model.dto.AppCallbackConfigDTO;
