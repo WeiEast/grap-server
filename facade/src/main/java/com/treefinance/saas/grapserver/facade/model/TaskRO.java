@@ -7,17 +7,21 @@ import java.util.Date;
  * taskRO
  */
 public class TaskRO implements Serializable {
-    private static final long serialVersionUID = 1L;
     private Long id;
     private String uniqueId;
     private String appId;
     private String accountNo;
     private Byte bizType;
+    /**
+     * 业务类型名称
+     */
+    private String bizTypeName;
     private Byte status;
     private String webSite;
     private String stepCode;
     private Date createTime;
     private Date lastUpdateTime;
+    private static final long serialVersionUID = 1L;
 
     public Long getId() {
         return id;
@@ -97,5 +101,13 @@ public class TaskRO implements Serializable {
 
     public void setStepCode(String stepCode) {
         this.stepCode = stepCode;
+    }
+
+    public String getBizTypeName() {
+        return bizTypeName;
+    }
+
+    public void setBizTypeName(String bizTypeName) {
+        this.bizTypeName = bizTypeName;
     }
 }
