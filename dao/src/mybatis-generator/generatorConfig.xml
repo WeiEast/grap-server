@@ -86,9 +86,9 @@
       <!--<generatedKey column="Id" sqlStatement="MySql" identity="true"/>-->
     <!--</table>-->
 
-    <table tableName="merchant_base" domainObjectName="MerchantBaseInfo">
-      <property name="useActualColumnNames" value="true"/>
-    </table>
+    <!--<table tableName="merchant_base" domainObjectName="MerchantBaseInfo">-->
+      <!--<property name="useActualColumnNames" value="true"/>-->
+    <!--</table>-->
 
     <!--<table tableName="task_log" domainObjectName="TaskLog">-->
       <!--<property name="useActualColumnNames" value="true"/>-->
@@ -107,9 +107,9 @@
       <!--<generatedKey column="Id" sqlStatement="MySql" identity="true"/>-->
     <!--</table>-->
 
-    <!--<table tableName="app_color_config" domainObjectName="AppColorConfig">-->
-      <!--<property name="useActualColumnNames" value="true"/>-->
-    <!--</table>-->
+    <table tableName="app_color_config" domainObjectName="AppColorConfig">
+      <property name="useActualColumnNames" value="true"/>
+    </table>
 
     <!--<table tableName="task_device" domainObjectName="TaskDevice">-->
       <!--<property name="useActualColumnNames" value="true"/>-->

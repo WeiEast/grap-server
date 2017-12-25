@@ -53,8 +53,8 @@ public class OperatorExtendLoginService {
      * @param taskId
      * @return
      */
-    public Map<String, Object> getConfig(String appId, Long taskId) {
-        Map<String, Object> colorMap = merchantConfigService.getColorConfig(appId);
+    public Map<String, Object> getConfig(String appId, Long taskId, String style) {
+        Map<String, Object> colorMap = merchantConfigService.getColorConfig(appId, style);
         HttpResult<List<OperatorCatalogue>> result;
         try {
             result = crawlerOperatorService.queryAllConfig();

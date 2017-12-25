@@ -45,12 +45,14 @@ public class OperatorController {
      * @return
      */
     @RequestMapping(value = "/config", method = {RequestMethod.POST})
-    public Object getConfig(@RequestParam String appid, @RequestParam("taskid") Long taskId) {
+    public Object getConfig(@RequestParam String appid,
+                            @RequestParam("taskid") Long taskId,
+                            @RequestParam(value = "style", required = false) String style) {
         if (StringUtils.isBlank(appid) || taskId == null) {
             logger.error("运营商:获取配置,参数缺失,appid,taskid必传,appid={},taskId={}", appid, taskId);
             throw new IllegalArgumentException("运营商:获取配置,参数缺失,appid,taskid必传");
         }
-        Map<String, Object> map = operatorExtendLoginService.getConfig(appid, taskId);
+        Map<String, Object> map = operatorExtendLoginService.getConfig(appid, taskId, style);
         return SimpleResult.successResult(map);
     }
 

@@ -24,8 +24,8 @@ public class MerchantConfigService {
     private AppColorConfigService appColorConfigService;
 
     @SuppressWarnings("rawtypes")
-		public Map getColorConfig(String appId) {
-        AppColorConfig merchantColorConfig = appColorConfigService.getByAppId(appId);
+    public Map getColorConfig(String appId, String style) {
+        AppColorConfig merchantColorConfig = appColorConfigService.getByAppId(appId, style);
         Map<String, Object> map = Maps.newHashMap();
         if (merchantColorConfig != null) {
             map.put("main", merchantColorConfig.getMain());
