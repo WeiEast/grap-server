@@ -79,12 +79,12 @@ public class DiplomaController {
 
 
     /**
-     * 登陆初始化
+     * 注册初始化
      *
      * @param educationParam
      * @return
      */
-    @RequestMapping(value = "/login/init", method = {RequestMethod.POST})
+    @RequestMapping(value = "/register/init", method = {RequestMethod.POST})
     public Object registerInit(EducationParam educationParam) {
         logger.info("学信网:注册初始化,传入参数,param={}", JSON.toJSONString(educationParam));
         Object result = diplomaLoginSimulationService.registerInit(educationParam);
