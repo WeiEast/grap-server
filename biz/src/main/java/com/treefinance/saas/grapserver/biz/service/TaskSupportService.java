@@ -19,11 +19,11 @@ package com.treefinance.saas.grapserver.biz.service;
 import com.treefinance.saas.grapserver.dao.entity.TaskSupport;
 import com.treefinance.saas.grapserver.dao.entity.TaskSupportCriteria;
 import com.treefinance.saas.grapserver.dao.mapper.TaskSupportMapper;
-import java.util.List;
-
 import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 /**
  * @author Jerry
@@ -32,24 +32,28 @@ import org.springframework.stereotype.Service;
 @Service
 public class TaskSupportService {
 
-  @Autowired
-  private TaskSupportMapper taskSupportMapper;
+    @Autowired
+    private TaskSupportMapper taskSupportMapper;
 
 
-  public List<TaskSupport> getSupportedList(String supportType) {
-    TaskSupportCriteria supportCriteria = new TaskSupportCriteria();
-    supportCriteria.createCriteria().andEnableEqualTo(Boolean.TRUE).andCategoryEqualTo(supportType);
+    public List<TaskSupport> getSupportedList(String supportType, Integer id) {
+        TaskSupportCriteria supportCriteria = new TaskSupportCriteria();
+        TaskSupportCriteria.Criteria innerCriteria = supportCriteria.createCriteria();
+        innerCriteria.andEnableEqualTo(Boolean.TRUE).andCategoryEqualTo(supportType);
+        if (id != null) {
+            innerCriteria.andIdEqualTo(id);
+        }
 
-    return taskSupportMapper.selectByExample(supportCriteria);
-  }
-
-  public int getSupported(String category, String name) {
-    TaskSupportCriteria supportCriteria = new TaskSupportCriteria();
-    supportCriteria.createCriteria().andCategoryEqualTo(category).andNameEqualTo(name);
-    List<TaskSupport> list = taskSupportMapper.selectByExample(supportCriteria);
-    if (CollectionUtils.isEmpty(list)) {
-      return 0;
+        return taskSupportMapper.selectByExample(supportCriteria);
     }
-    return list.get(0).getEnable() ? 1 : 0;
-  }
+
+    public int getSupported(String category, String name) {
+        TaskSupportCriteria supportCriteria = new TaskSupportCriteria();
+        supportCriteria.createCriteria().andCategoryEqualTo(category).andNameEqualTo(name);
+        List<TaskSupport> list = taskSupportMapper.selectByExample(supportCriteria);
+        if (CollectionUtils.isEmpty(list)) {
+            return 0;
+        }
+        return list.get(0).getEnable() ? 1 : 0;
+    }
 }

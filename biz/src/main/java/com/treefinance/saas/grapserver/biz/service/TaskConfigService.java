@@ -49,14 +49,15 @@ public class TaskConfigService {
      * 获取配置信息
      *
      * @param type 分类
+     * @param id
      * @return
      */
 //  @Cacheable(value = "DAY", key = "'saas_crawler_task_config:'+#type")
-    public Object getTaskConfig(String type) {
+    public Object getTaskConfig(String type, Integer id) {
         EBizType supportType = EBizType.from(type);
 
         List<TaskSupport> supportedList = taskSupportService
-                .getSupportedList(supportType.name());
+                .getSupportedList(supportType.name(), id);
         if (CollectionUtils.isEmpty(supportedList)) {
             throw new IllegalArgumentException("Can not find any supported list.");
         }
