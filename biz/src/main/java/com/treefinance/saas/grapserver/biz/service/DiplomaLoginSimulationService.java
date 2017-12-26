@@ -17,6 +17,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Date;
 import java.util.Map;
 
 /**
@@ -37,6 +38,8 @@ public class DiplomaLoginSimulationService {
     private TaskAttributeService taskAttributeService;
     @Autowired
     private AppBizLicenseService appBizLicenseService;
+    @Autowired
+    private TaskTimeService taskTimeService;
 
 
     /**
@@ -87,6 +90,7 @@ public class DiplomaLoginSimulationService {
         String website = param.getWebsiteName();
         String loginName = param.getLoginName();
         taskService.updateTask(taskId, loginName, website);
+        taskTimeService.updateLoginTime(taskId, new Date());
         return SimpleResult.successResult(result.getData());
     }
 
