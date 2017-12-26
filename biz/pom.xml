@@ -146,7 +146,7 @@
         </dependency>
         <dependency>
             <groupId>com.treefinance.saas</groupId>
-            <artifactId>assistant-config</artifactId>
+            <artifactId>assistant-variable-notify</artifactId>
         </dependency>
         <dependency>
             <groupId>com.treefinance.saas</groupId>

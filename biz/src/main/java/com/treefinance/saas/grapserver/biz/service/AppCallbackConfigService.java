@@ -5,9 +5,8 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.google.common.collect.Lists;
-import com.treefinance.saas.assistant.config.listener.handler.ConfigUpdateMessageHandler;
-import com.treefinance.saas.assistant.config.model.ConfigUpdateModel;
-import com.treefinance.saas.assistant.config.model.enums.ConfigType;
+import com.treefinance.saas.assistant.variable.notify.client.VariableMessageHandler;
+import com.treefinance.saas.assistant.variable.notify.model.VariableMessage;
 import com.treefinance.saas.grapserver.common.enums.EDataType;
 import com.treefinance.saas.grapserver.common.model.dto.AppCallbackConfigDTO;
 import com.treefinance.saas.grapserver.common.utils.DataConverterUtils;
@@ -35,7 +34,7 @@ import java.util.stream.Collectors;
  * Created by luoyihua on 2017/5/11.
  */
 @Service
-public class AppCallbackConfigService implements InitializingBean, ConfigUpdateMessageHandler {
+public class AppCallbackConfigService implements InitializingBean, VariableMessageHandler {
     /**
      * logger
      */
@@ -192,23 +191,6 @@ public class AppCallbackConfigService implements InitializingBean, ConfigUpdateM
     }
 
     @Override
-    public List<ConfigType> getConfigType() {
-        return Lists.newArrayList(ConfigType.MERCHANT_CALLBACK);
-    }
-
-    @Override
-    public void updateConfig(ConfigUpdateModel configUpdateModel) {
-        logger.info("收到配置更新消息：config={}", JSON.toJSONString(configUpdateModel));
-        String appId = configUpdateModel.getConfigId();
-        if (StringUtils.isEmpty(appId)) {
-            logger.error("处理配置更新消息失败：configId非法，config={}", JSON.toJSONString(configUpdateModel));
-            return;
-        }
-        this.callbackCache.refresh(appId);
-//        this.callbackTypeCache.invalidateAll();
-    }
-
-    @Override
     public void afterPropertiesSet() throws Exception {
         // 1. 初始化appCallback
         AppCallbackConfigCriteria appCallbackConfigCriteria = new AppCallbackConfigCriteria();
@@ -233,4 +215,19 @@ public class AppCallbackConfigService implements InitializingBean, ConfigUpdateM
                 Collectors.groupingBy(AppCallbackBiz::getCallbackId)));
     }
 
+    @Override
+    public String getVariableName() {
+        return "merchant-callback";
+    }
+
+    @Override
+    public void handleMessage(VariableMessage variableMessage) {
+        logger.info("收到配置更新消息：config={}", JSON.toJSONString(variableMessage));
+        String appId = variableMessage.getVariableId();
+        if (StringUtils.isEmpty(appId)) {
+            logger.error("处理配置更新消息失败：VariableId非法，config={}", JSON.toJSONString(variableMessage));
+            return;
+        }
+        this.callbackCache.refresh(appId);
+    }
 }
