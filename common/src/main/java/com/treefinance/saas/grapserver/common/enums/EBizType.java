@@ -10,7 +10,8 @@ public enum EBizType {
     EMAIL_H5("EMAIL_H5", (byte) 1),
     ECOMMERCE("ECOMMERCE", (byte) 2),
     OPERATOR("OPERATOR", (byte) 3),
-    FUND("FUND", (byte) 4);
+    FUND("FUND", (byte) 4),
+    DIPLOMA("DIPLOMA", (byte) 7);
 
     private String text;
     private Byte code;
@@ -45,6 +46,18 @@ public enum EBizType {
             }
         }
         return -1;
+    }
+
+    public static String getName(Byte code) {
+        if (Objects.nonNull(code)) {
+            for (EBizType item : EBizType.values()) {
+                if (code.equals(item.getCode())) {
+                    return
+                            item.getText();
+                }
+            }
+        }
+        return null;
     }
 
     public static EBizType from(String name) {

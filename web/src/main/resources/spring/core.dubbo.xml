@@ -18,6 +18,8 @@
                      cluster="failfast"/>
     <dubbo:reference id="crawlerOperatorService" interface="com.datatrees.rawdatacentral.api.CrawlerOperatorService"
                      timeout="20000" cluster="failfast"/>
+    <dubbo:reference id="rpcEducationService" interface="com.datatrees.rawdatacentral.api.RpcEducationService"
+                     timeout="20000" cluster="failfast"/>
 
     <dubbo:reference id="rpcH5EmailService" interface="com.datatrees.rawdatacentral.api.RpcH5EmailService"
                      timeout="20000" cluster="failfast"/>
@@ -36,11 +38,15 @@
                      check="false" timeout="60000" cluster="failfast"/>
 
 
+    <!--生产者-->
+    <dubbo:service interface="com.treefinance.saas.grapserver.facade.service.TaskFacade" ref="taskFacade"  />
+
     <!--兼容老的生产者-->
     <dubbo:service interface="com.treefinance.saas.gateway.servicefacade.TaskService" ref="gatewayTaskServiceFacade"/>
     <dubbo:service interface="com.treefinance.saas.gateway.servicefacade.AppLicenseService"
                    ref="gatewayAppLicenseServiceFacade"/>
     <dubbo:service interface="com.treefinance.saas.grapserver.facade.service.MerchantFacade" ref="merchantFacade"/>
+
 </beans>
 
 

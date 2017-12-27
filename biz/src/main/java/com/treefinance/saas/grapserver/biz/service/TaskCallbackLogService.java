@@ -1,10 +1,13 @@
 package com.treefinance.saas.grapserver.biz.service;
 
+import com.google.common.collect.Lists;
 import com.treefinance.commonservice.uid.UidGenerator;
 import com.treefinance.saas.grapserver.common.model.dto.AppCallbackConfigDTO;
 import com.treefinance.saas.grapserver.dao.entity.TaskCallbackLog;
+import com.treefinance.saas.grapserver.dao.entity.TaskCallbackLogCriteria;
 import com.treefinance.saas.grapserver.dao.mapper.TaskCallbackLogMapper;
 import com.treefinance.saas.grapserver.dao.mapper.TaskCallbackLogUpdateMapper;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,6 +15,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Created by haojiahong on 2017/8/17.
@@ -45,4 +51,23 @@ public class TaskCallbackLogService {
         taskCallbackLog.setConsumeTime((int) consumeTime);
         taskCallbackLogUpdateMapper.insertOrUpdateSelective(taskCallbackLog);
     }
+
+    /**
+     * 查询任务ID
+     *
+     * @param taskId
+     * @param configIds
+     * @return
+     */
+    public List<TaskCallbackLog> getTaskCallbackLogs(Long taskId, List<Long> configIds) {
+        TaskCallbackLogCriteria taskCallbackLogCriteria = new TaskCallbackLogCriteria();
+        TaskCallbackLogCriteria.Criteria criteria = taskCallbackLogCriteria.createCriteria();
+        if (CollectionUtils.isNotEmpty(configIds)) {
+            criteria.andConfigIdIn(configIds);
+
+        }
+        criteria.andTaskIdEqualTo(taskId);
+        return taskCallbackLogMapper.selectByExample(taskCallbackLogCriteria);
+    }
+
 }

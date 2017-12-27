@@ -8,7 +8,7 @@ import com.google.common.collect.Lists;
 import com.treefinance.saas.assistant.config.listener.handler.ConfigUpdateMessageHandler;
 import com.treefinance.saas.assistant.config.model.ConfigUpdateModel;
 import com.treefinance.saas.assistant.config.model.enums.ConfigType;
-import com.treefinance.saas.grapserver.common.enums.EDataType;
+import com.treefinance.saas.grapserver.facade.enums.EDataType;
 import com.treefinance.saas.grapserver.common.model.dto.AppCallbackConfigDTO;
 import com.treefinance.saas.grapserver.common.utils.DataConverterUtils;
 import com.treefinance.saas.grapserver.dao.entity.AppCallbackBiz;
