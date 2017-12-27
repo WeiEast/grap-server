@@ -58,19 +58,11 @@ public class GrapDataCallbackService {
         EDataType dataType = EDataType.typeOf(asycGrapDTO.getDataType().byteValue());
         Assert.notNull(dataType, "dataType is illegal : json=" + JSON.toJSONString(asycGrapDTO));
 
-        // 2.记录日志
         Long taskId = asycGrapDTO.getTaskId();
-        taskLogService.insert(taskId, dataType.getName() + "爬取完成", new Date(), "");
-        // 2.获取任务
+        // 1.获取任务
         TaskDTO taskDTO = taskService.getById(taskId);
         if (taskDTO == null) {
             logger.info("{} callback failed : task {} not exists, message={}...", dataType.name(), taskId, JSON.toJSONString(asycGrapDTO));
-            return;
-        }
-
-        if (taskService.isTaskTimeout(taskId)) {
-            logger.info("{} callback failed : task {} is timeout, message={}...", dataType.name(), taskId, JSON.toJSONString(asycGrapDTO));
-            taskLogService.insert(taskId, dataType.getName() + "回调通知失败", new Date(), "任务超时");
             return;
         }
         String appId = taskDTO.getAppId();
@@ -86,6 +78,14 @@ public class GrapDataCallbackService {
             logger.info("{} callback failed :taskId={}, callbackConfigs of {} is null, message={}...", dataType.name(), taskId, appId, JSON.toJSONString(asycGrapDTO));
             return;
         }
+        // 2.记录日志
+        taskLogService.insert(taskId, dataType.getName() + "爬取完成", new Date(), "");
+        if (taskService.isTaskTimeout(taskId)) {
+            logger.info("{} callback failed : task {} is timeout, message={}...", dataType.name(), taskId, JSON.toJSONString(asycGrapDTO));
+            taskLogService.insert(taskId, dataType.getName() + "回调通知失败", new Date(), "任务超时");
+            return;
+        }
+
         Map<String, Object> dataMap = Maps.newHashMap();
         // 填充uniqueId、taskId、taskStatus
         dataMap.put("taskId", taskDTO.getId());
@@ -139,7 +139,7 @@ public class GrapDataCallbackService {
                 // 重试次数，3次
                 Byte retryTimes = configDTO.getRetryTimes();
                 result = HttpClientUtils.doPostWithTimoutAndRetryTimes(callbackUrl, timeOut, retryTimes, paramMap);
-                taskLogService.insert(taskId, dataType.getName() + "回调通知成功", new Date(), result);
+                taskLogService.insert(taskId, dataType.getName() + "回调通知成功", new Date(), "");
                 logger.info("{} callback : callback success : taskId={},callbackUrl={}, params={}", dataType.name(), taskId, callbackUrl, params);
             } catch (RequestFailedException e) {
                 logger.error("{} callback : 回调通知失败 : data={}", dataType.name(), dataMap, e);
@@ -170,7 +170,6 @@ public class GrapDataCallbackService {
         if (CollectionUtils.isEmpty(configList)) {
             return Lists.newArrayList();
         }
-        // 剔除非主流程数据
         return configList.stream()
                 .filter(config -> config != null && dataType.getType().equals(config.getDataType()))
                 .collect(Collectors.toList());
