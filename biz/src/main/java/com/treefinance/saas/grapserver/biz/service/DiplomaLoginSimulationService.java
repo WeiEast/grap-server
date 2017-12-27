@@ -191,7 +191,7 @@ public class DiplomaLoginSimulationService {
         Map<String, Object> colorMap = merchantConfigService.getColorConfig(appId, style);
         Map<String, Object> map = Maps.newHashMap();
         map.put("color", colorMap);
-        map.put("license", appBizLicenseService.isShowLicense(appId, EBizType.OPERATOR.getText()));
+        map.put("license", appBizLicenseService.isShowLicense(appId, EBizType.DIPLOMA.getText()));
         return SimpleResult.successResult(map);
     }
 
