@@ -112,6 +112,7 @@ public class FundController {
         Map<String, Object> map = Maps.newHashMap();
         map.put("config", result);
         map.put("license", appBizLicenseService.isShowLicense(appid, EBizType.FUND.getText()));
+        map.put("licenseTemplate", appBizLicenseService.getLicenseTemplate(appid, EBizType.FUND.getText()));
         map.put("currentProvince", "");
         return SimpleResult.successResult(map);
     }
