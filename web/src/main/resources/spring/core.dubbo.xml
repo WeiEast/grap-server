@@ -19,7 +19,7 @@
     <dubbo:reference id="crawlerOperatorService" interface="com.datatrees.rawdatacentral.api.CrawlerOperatorService"
                      timeout="20000" cluster="failfast"/>
 
-    <dubbo:reference id="rpcH5EmailService" interface="com.datatrees.rawdatacentral.api.RpcH5EmailService"
+    <dubbo:reference id="mailServiceApiForQQ" interface="com.datatrees.rawdatacentral.api.mail.qq.MailServiceApiForQQ"
                      timeout="20000" cluster="failfast"/>
 
     <dubbo:reference id="iMobileAttributionService"
