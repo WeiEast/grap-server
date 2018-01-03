@@ -5,13 +5,12 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.google.common.collect.Lists;
-import com.treefinance.saas.assistant.config.listener.handler.ConfigUpdateMessageHandler;
-import com.treefinance.saas.assistant.config.model.ConfigUpdateModel;
-import com.treefinance.saas.assistant.config.model.enums.ConfigType;
-import com.treefinance.saas.grapserver.common.enums.EBizType;
+import com.treefinance.saas.assistant.variable.notify.client.VariableMessageHandler;
+import com.treefinance.saas.assistant.variable.notify.model.VariableMessage;
 import com.treefinance.saas.grapserver.dao.entity.AppBizLicense;
 import com.treefinance.saas.grapserver.dao.entity.AppBizLicenseCriteria;
 import com.treefinance.saas.grapserver.dao.mapper.AppBizLicenseMapper;
+import com.treefinance.saas.grapserver.common.enums.EBizType;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,7 +28,7 @@ import java.util.stream.Collectors;
  * Created by luoyihua on 2017/5/10.
  */
 @Component
-public class AppBizLicenseService implements InitializingBean, ConfigUpdateMessageHandler {
+public class AppBizLicenseService implements InitializingBean, VariableMessageHandler {
     /**
      * logger
      */
@@ -139,35 +138,19 @@ public class AppBizLicenseService implements InitializingBean, ConfigUpdateMessa
     }
 
     @Override
-    public List<ConfigType> getConfigType() {
-        return Lists.newArrayList(ConfigType.MERCHANT_LICENSE, ConfigType.MERCHANT_BASE);
+    public String getVariableName() {
+        return "merchant-license";
     }
 
     @Override
-    public void updateConfig(ConfigUpdateModel configUpdateModel) {
-        logger.info("收到配置更新消息：config={}", JSON.toJSONString(configUpdateModel));
-        String appId = configUpdateModel.getConfigId();
+    public void handleMessage(VariableMessage variableMessage) {
+
+        logger.info("收到配置更新消息：config={}", JSON.toJSONString(variableMessage));
+        String appId = variableMessage.getVariableId();
         if (StringUtils.isEmpty(appId)) {
-            logger.error("处理配置更新消息失败：configId非法，config={}", JSON.toJSONString(configUpdateModel));
+            logger.error("处理配置更新消息失败：VariableId非法，config={}", JSON.toJSONString(variableMessage));
             return;
         }
         this.cache.refresh(appId);
-    }
-
-    public String getLicenseTemplate(String appId, String type) {
-        Byte bizType = EBizType.getCode(type);
-        if (bizType == null) {
-            return "DEFAULT";
-        }
-
-        List<AppBizLicense> list = getByAppId(appId);
-        if (CollectionUtils.isEmpty(list)) {
-            return "DEFAULT";
-        }
-        List<AppBizLicense> filterList = list.stream().filter(appBizLicense -> bizType.equals(appBizLicense.getBizType())).collect(Collectors.toList());
-        if (CollectionUtils.isEmpty(filterList)) {
-            return "DEFAULT";
-        }
-        return filterList.get(0).getLicenseTemplate();
     }
 }
