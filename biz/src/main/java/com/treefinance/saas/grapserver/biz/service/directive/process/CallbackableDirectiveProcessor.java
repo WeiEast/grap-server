@@ -7,7 +7,7 @@ import com.google.common.collect.Maps;
 import com.treefinance.saas.grapserver.biz.common.CallbackSecureHandler;
 import com.treefinance.saas.grapserver.biz.service.*;
 import com.treefinance.saas.grapserver.common.enums.EBizType;
-import com.treefinance.saas.grapserver.common.enums.EDataType;
+import com.treefinance.saas.grapserver.facade.enums.EDataType;
 import com.treefinance.saas.grapserver.common.enums.EDirective;
 import com.treefinance.saas.grapserver.common.enums.ETaskStatus;
 import com.treefinance.saas.grapserver.common.exception.CallbackEncryptException;
@@ -22,6 +22,7 @@ import com.treefinance.saas.grapserver.common.utils.RemoteDataDownloadUtils;
 import com.treefinance.saas.grapserver.dao.entity.AppLicense;
 import com.treefinance.saas.grapserver.dao.entity.TaskAttribute;
 import com.treefinance.saas.grapserver.dao.entity.TaskLog;
+import com.treefinance.saas.grapserver.facade.enums.EGrapStatus;
 import com.treefinance.saas.grapserver.facade.enums.ETaskAttribute;
 import com.treefinance.saas.knife.result.SimpleResult;
 import org.apache.commons.collections.MapUtils;
@@ -61,6 +62,8 @@ public abstract class CallbackableDirectiveProcessor {
     protected TaskAttributeService taskAttributeService;
     @Autowired
     protected CallbackResultService callbackResultService;
+    @Autowired
+    protected GrapDataCallbackService grapDataCallbackService;
 
     /**
      * 回调前处理
@@ -155,7 +158,7 @@ public abstract class CallbackableDirectiveProcessor {
                 // 执行回调
                 callbackSuccess = doCallBack(dataMap, appLicense, config, directiveDTO);
             } catch (Exception e) {
-                dataMap.put("taskStatus", "002");
+                dataMap.put("taskStatus", EGrapStatus.FAIL.getCode());
                 dataMap.put("taskErrorMsg", "回调通知失败");
                 flushData(dataMap, appLicense, directiveDTO);
                 callbackSuccess = Boolean.FALSE;
@@ -170,7 +173,7 @@ public abstract class CallbackableDirectiveProcessor {
         if (callbackFlags.contains(Boolean.FALSE)) {
             return -1;
         }
-        dataMap.put("taskStatus", "001");
+        dataMap.put("taskStatus", EGrapStatus.SUCCESS.getCode());
         dataMap.put("taskErrorMsg", "");
         taskLogService.insert(taskId, "回调通知成功", new Date(), null);
         return 1;
@@ -184,16 +187,7 @@ public abstract class CallbackableDirectiveProcessor {
      * @return
      */
     protected List<AppCallbackConfigDTO> getCallbackConfigs(TaskDTO taskDTO) {
-        String appId = taskDTO.getAppId();
-        Byte bizType = taskDTO.getBizType();
-        List<AppCallbackConfigDTO> configList = appCallbackConfigService.getByAppIdAndBizType(appId, bizType, EDataType.MAIN_STREAM);
-        if (CollectionUtils.isEmpty(configList)) {
-            return Lists.newArrayList();
-        }
-        // 剔除非主流程数据
-        return configList.stream()
-                .filter(config -> config != null && EDataType.MAIN_STREAM.getType().equals(config.getDataType()))
-                .collect(Collectors.toList());
+        return grapDataCallbackService.getCallbackConfigs(taskDTO,EDataType.MAIN_STREAM);
     }
 
     /**
@@ -250,23 +244,23 @@ public abstract class CallbackableDirectiveProcessor {
         dataMap.put("uniqueId", ifNull(dataMap.get("uniqueId"), directiveDTO.getTask().getUniqueId()));
         dataMap.put("taskId", ifNull(dataMap.get("taskId"), directiveDTO.getTask().getId()));
 
-        dataMap.put("taskStatus", "001");
+        dataMap.put("taskStatus", EGrapStatus.SUCCESS.getCode());
         dataMap.put("taskErrorMsg", "");
         // 此次任务状态：001-抓取成功，002-抓取失败，003-抓取结果为空,004-任务取消
         if (ETaskStatus.SUCCESS.getStatus().equals(task.getStatus())) {
-            dataMap.put("taskStatus", "001");
+            dataMap.put("taskStatus", EGrapStatus.SUCCESS.getCode());
             dataMap.put("taskErrorMsg", "");
         } else if (ETaskStatus.FAIL.getStatus().equals(task.getStatus())) {
-            dataMap.put("taskStatus", "002");
+            dataMap.put("taskStatus", EGrapStatus.FAIL.getCode());
             // 任务失败消息
             TaskLog log = taskLogService.queryLastestErrorLog(task.getId());
             if (log != null) {
                 dataMap.put("taskErrorMsg", log.getMsg());
             } else {
-                dataMap.put("taskErrorMsg", "爬数失败");
+                dataMap.put("taskErrorMsg", EGrapStatus.FAIL.getName());
             }
         } else if (ETaskStatus.CANCEL.getStatus().equals(task.getStatus())) {
-            dataMap.put("taskStatus", "004");
+            dataMap.put("taskStatus", EGrapStatus.CANCEL.getCode());
             dataMap.put("taskErrorMsg", "用户取消");
 
         }
@@ -299,8 +293,8 @@ public abstract class CallbackableDirectiveProcessor {
                     Map<String, Object> downloadDataMap = JSON.parseObject(data);
                     dataMap.put("data", downloadDataMap);
                     if (MapUtils.isEmpty(downloadDataMap)) {
-                        dataMap.put("taskErrorMsg", "抓取结果为空");
-                        dataMap.put("taskStatus", "003");
+                        dataMap.put("taskErrorMsg", EGrapStatus.RESULT_EMPTY.getName());
+                        dataMap.put("taskStatus", EGrapStatus.RESULT_EMPTY.getCode());
                         flushData(dataMap, appLicense, directiveDTO);
                     }
 //                    if (logger.isDebugEnabled()) {
@@ -309,7 +303,7 @@ public abstract class CallbackableDirectiveProcessor {
                 } catch (IOException e) {
                     logger.error("download data failed : data={}", JSON.toJSONString(dataMap));
                     dataMap.put("taskErrorMsg", "下载数据失败");
-                    dataMap.put("taskStatus", "004");
+                    dataMap.put("taskStatus", EGrapStatus.FAIL.getCode());
                     flushData(dataMap, appLicense, directiveDTO);
                 }
             }

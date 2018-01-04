@@ -47,6 +47,7 @@ public class TaskFacadeImpl implements TaskFacade {
         if (task == null) {
             return null;
         }
+
         TaskRO result = DataConverterUtils.convert(task, TaskRO.class);
         result.setBizTypeName(EBizType.getName(task.getBizType()));
         return Results.newSuccessResult(result);

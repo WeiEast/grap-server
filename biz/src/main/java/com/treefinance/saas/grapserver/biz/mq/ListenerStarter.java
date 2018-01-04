@@ -24,18 +24,23 @@ public class ListenerStarter {
     private DefaultMQPushConsumer directiveConsumer;
     private DefaultMQPushConsumer taskLogConsumer;
     private DefaultMQPushConsumer deliveryAddressConsumer;
+    private DefaultMQPushConsumer asyncGrapDataConsumer;
+
     @Autowired
     private DirectiveMessageListener directiveMessageListener;
     @Autowired
     private TaskLogMessageListener taskLogMessageListener;
     @Autowired
     private DeliveryAddressMessageListener deliveryAddressMessageListener;
+    @Autowired
+    private AsyncGrapDataMessageListener asyncGrapDataMessageListener;
 
     @PostConstruct
     public void init() throws MQClientException {
         initDirectiveMessageMQ();
         initTaskLogMessageMQ();
         initDeliveryAddressMessageMQ();
+        initAsyncGrapDataMessageMQ();
     }
 
     @PreDestroy
@@ -48,6 +53,9 @@ public class ListenerStarter {
 
         deliveryAddressConsumer.shutdown();
         logger.info("关闭收货地址数据的消费者");
+
+        asyncGrapDataConsumer.shutdown();
+        logger.info("关闭异步数据抓取的消费者");
     }
 
     private void initDirectiveMessageMQ() throws MQClientException {
@@ -89,4 +97,25 @@ public class ListenerStarter {
         logger.info("启动收货地址数据的消费者.nameserver:{},topic:{},tag:{}",
                 mqConfig.getNamesrvAddr(), topic, tag);
     }
+
+
+    /**
+     * 异步数据抓取
+     *
+     * @throws MQClientException
+     */
+    private void initAsyncGrapDataMessageMQ() throws MQClientException {
+        String group = "async_grap_data_group";
+        asyncGrapDataConsumer = new DefaultMQPushConsumer(group);
+        asyncGrapDataConsumer.setNamesrvAddr(mqConfig.getNamesrvAddr());
+        String topic = "async-grap-data";
+        String tag = "*";
+        asyncGrapDataConsumer.subscribe(topic, tag);
+        asyncGrapDataConsumer.setMessageModel(CLUSTERING);
+        asyncGrapDataConsumer.registerMessageListener(asyncGrapDataMessageListener);
+        asyncGrapDataConsumer.start();
+        logger.info("启动异步数据抓取的消费者.nameserver:{},topic:{},tag:{}",
+                mqConfig.getNamesrvAddr(), topic, tag);
+    }
+
 }

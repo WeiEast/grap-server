@@ -230,6 +230,25 @@ public class TaskService {
     }
 
     /**
+     * 任务是否完成
+     *
+     * @param task
+     * @return
+     */
+    public boolean isTaskCompleted(TaskDTO task) {
+        if (task == null) {
+            return false;
+        }
+        Byte status = task.getStatus();
+        if (ETaskStatus.CANCEL.getStatus().equals(status)
+                || ETaskStatus.FAIL.getStatus().equals(status)
+                || ETaskStatus.SUCCESS.getStatus().equals(status)) {
+            return true;
+        }
+        return false;
+    }
+
+    /**
      * 任务是否超时
      *
      * @param taskid

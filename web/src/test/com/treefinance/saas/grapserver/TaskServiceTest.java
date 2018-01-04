@@ -5,7 +5,7 @@ package com.treefinance.saas.grapserver; /**
 import com.alibaba.fastjson.JSON;
 import com.treefinance.saas.grapserver.biz.service.AppCallbackConfigService;
 import com.treefinance.saas.grapserver.biz.service.TaskService;
-import com.treefinance.saas.grapserver.common.enums.EDataType;
+import com.treefinance.saas.grapserver.facade.enums.EDataType;
 import com.treefinance.saas.grapserver.common.model.dto.AppCallbackConfigDTO;
 import com.treefinance.saas.grapserver.facade.model.MerchantBaseInfoRO;
 import com.treefinance.saas.grapserver.facade.model.TaskRO;

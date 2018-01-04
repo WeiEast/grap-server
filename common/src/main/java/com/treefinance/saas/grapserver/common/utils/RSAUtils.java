@@ -11,6 +11,7 @@ import javax.crypto.NoSuchPaddingException;
 import java.io.ByteArrayOutputStream;
 import java.io.Serializable;
 import java.net.URLDecoder;
+import java.net.URLEncoder;
 import java.security.*;
 import java.security.interfaces.RSAKey;
 import java.security.spec.InvalidKeySpecException;
@@ -46,6 +47,21 @@ public class RSAUtils {
         // 3.rsa解密
         data = Helper.decrypt(data, key);
         return new String(data);
+    }
+
+    /**
+     * RSA 数据加密
+     *
+     * @param data 数据字符串
+     * @param key
+     * @return
+     * @throws Exception
+     */
+    public static String encryptData(String data, String key) throws Exception {
+        byte[] bytes = Helper.encrypt(data.getBytes(), key);
+        String params = Base64.getEncoder().encodeToString(bytes);
+        params = URLEncoder.encode(params, "utf-8");
+        return params;
     }
 
     /**

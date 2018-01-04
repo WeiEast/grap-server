@@ -51,7 +51,8 @@ public enum EBizType {
         if (Objects.nonNull(code)) {
             for (EBizType item : EBizType.values()) {
                 if (code.equals(item.getCode())) {
-                    return item.getText();
+                    return
+                            item.getText();
                 }
             }
         }
