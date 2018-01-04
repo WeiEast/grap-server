@@ -18,6 +18,8 @@
                      cluster="failfast"/>
     <dubbo:reference id="crawlerOperatorService" interface="com.datatrees.rawdatacentral.api.CrawlerOperatorService"
                      timeout="20000" cluster="failfast"/>
+    <dubbo:reference id="rpcEducationService" interface="com.datatrees.rawdatacentral.api.RpcEducationService"
+                     timeout="20000" cluster="failfast"/>
 
     <dubbo:reference id="iMobileAttributionService"
                      interface="com.treefinance.commonservice.facade.mobileattribution.IMobileAttributionService"/>
