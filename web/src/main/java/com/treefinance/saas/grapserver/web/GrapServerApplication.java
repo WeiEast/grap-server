@@ -1,7 +1,7 @@
 package com.treefinance.saas.grapserver.web;
 
 import com.treefinance.saas.assistant.annotation.EnableMonitorPlugin;
-import com.treefinance.saas.assistant.config.annotation.EnableConfigUpdateListener;
+import com.treefinance.saas.assistant.variable.notify.annotation.EnableVariableNotifyListener;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.web.servlet.ServletComponentScan;
@@ -15,7 +15,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @ImportResource("classpath:spring/applicationContext.xml")
 @EnableAsync
 @EnableMonitorPlugin
-@EnableConfigUpdateListener
+@EnableVariableNotifyListener
 public class GrapServerApplication {
 
     public static void main(String[] args) {

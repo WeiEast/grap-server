@@ -195,6 +195,15 @@ public class TaskTimeService {
         Date loginTime = getLoginTime(taskId);
         Integer timeout = getTimeout(task.getBizType());
         TaskDTO taskDTO = DataConverterUtils.convert(task, TaskDTO.class);
+
+        // 任务超时: 当前时间-登录时间>超时时间
+        Date currentTime = new Date();
+        Date timeoutDate = DateUtils.addSeconds(loginTime, timeout);
+        logger.info("handleTaskTimeout: taskid={}，loginTime={},current={},timeout={}",
+                taskId, CommonUtils.date2Str(loginTime), CommonUtils.date2Str(currentTime), timeout);
+        if (timeoutDate.before(currentTime)) {
+            return false;
+        }
         taskTimeoutHandlers.forEach(handler -> {
             try {
                 handler.handleTaskTimeout(taskDTO, timeout, loginTime);
@@ -205,6 +214,6 @@ public class TaskTimeService {
                         handler.getClass(), taskId, DateFormatUtils.format(loginTime, "yyyyMMdd HH:mm:ss"), timeout, e);
             }
         });
-        return false;
+        return true;
     }
 }
