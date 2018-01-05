@@ -8,6 +8,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
@@ -47,7 +48,8 @@ public class EmailH5Controller {
      * @return
      */
     @RequestMapping(value = "/process/status", method = {RequestMethod.POST})
-    public Object processStatus(Long processId, Long taskId) {
+    public Object processStatus(@RequestParam("processId") Long processId,
+                                @RequestParam("taskId") Long taskId) {
         logger.info("邮箱账单:轮询处理状态,传入参数,processId={},taskId={}", processId, taskId);
         if (taskId == null) {
             logger.error("邮箱账单:轮询处理状态,参数缺失,taskId必传");
