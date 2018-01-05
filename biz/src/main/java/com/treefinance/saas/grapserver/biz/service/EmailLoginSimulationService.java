@@ -1,9 +1,11 @@
 package com.treefinance.saas.grapserver.biz.service;
 
 import com.alibaba.fastjson.JSON;
+import com.datatrees.rawdatacentral.api.CommonPluginApi;
 import com.datatrees.rawdatacentral.api.mail.qq.MailServiceApiForQQ;
-import com.datatrees.rawdatacentral.domain.mail.MailParam;
+import com.datatrees.rawdatacentral.domain.plugin.CommonPluginParam;
 import com.datatrees.rawdatacentral.domain.result.HttpResult;
+import com.datatrees.rawdatacentral.domain.result.ProcessResult;
 import com.treefinance.saas.grapserver.common.exception.CrawlerBizException;
 import com.treefinance.saas.knife.result.SimpleResult;
 import org.apache.commons.lang3.StringUtils;
@@ -11,8 +13,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import java.util.Map;
 
 /**
  * 邮箱账单模拟登陆
@@ -25,24 +25,26 @@ public class EmailLoginSimulationService {
 
     @Autowired
     private MailServiceApiForQQ mailServiceApiForQQ;
+    @Autowired
+    private CommonPluginApi commonPluginApi;
 
     /**
      * 登陆
      *
-     * @param mailParam
+     * @param param
      * @return
      */
-    public Object login(MailParam mailParam) {
-        HttpResult<Map<String, String>> result;
+    public Object login(CommonPluginParam param) {
+        HttpResult<Object> result;
         try {
-            result = mailServiceApiForQQ.login(mailParam);
+            result = mailServiceApiForQQ.login(param);
         } catch (Exception e) {
-            logger.error("邮箱账单:调用爬数邮箱账单登陆异常,mailParam={}", JSON.toJSONString(mailParam), e);
+            logger.error("邮箱账单:调用爬数邮箱账单登陆异常,param={}", JSON.toJSONString(param), e);
             throw e;
         }
         if (!result.getStatus()) {
-            logger.info("邮箱账单:调用爬数邮箱账单登陆失败,mailParam={},result={}",
-                    JSON.toJSONString(mailParam), JSON.toJSONString(result));
+            logger.info("邮箱账单:调用爬数邮箱账单登陆失败,param={},result={}",
+                    JSON.toJSONString(param), JSON.toJSONString(result));
             if (StringUtils.isNotBlank(result.getMessage())) {
                 throw new CrawlerBizException(result.getMessage());
             } else {
@@ -53,24 +55,20 @@ public class EmailLoginSimulationService {
     }
 
     /**
-     * 登陆状态(前端轮询)
+     * 轮询处理状态(通用接口)
      *
-     * @param mailParam
+     * @param processId
+     * @param taskId
      * @return
      */
-    public Object loginStatus(MailParam mailParam) {
-        HttpResult<Map<String, String>> result;
+    public Object processStatus(Long processId, Long taskId) {
+        ProcessResult result;
         try {
-            result = mailServiceApiForQQ.queryLoginStatus(mailParam);
+            result = commonPluginApi.queryProcessResult(processId);
         } catch (Exception e) {
-            logger.error("邮箱账单:调用爬数邮箱账单轮询登陆状态异常,emailParam={}", JSON.toJSONString(mailParam), e);
+            logger.error("邮箱账单:调用爬数邮箱账单轮询处理状态异常,processId={},taskId={}", processId, taskId, e);
             throw e;
         }
-        if (!result.getStatus()) {
-            logger.info("邮箱账单:调用爬数邮箱账单轮询登陆状态失败,mailParam={},result={}",
-                    JSON.toJSONString(mailParam), JSON.toJSONString(result));
-            throw new CrawlerBizException(result.getMessage());
-        }
-        return SimpleResult.successResult(result.getData());
+        return SimpleResult.successResult(result);
     }
 }
