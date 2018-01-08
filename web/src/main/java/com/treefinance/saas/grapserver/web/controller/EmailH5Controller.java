@@ -52,7 +52,7 @@ public class EmailH5Controller {
                                 @RequestParam("taskId") Long taskId) {
         logger.info("邮箱账单:轮询处理状态,传入参数,processId={},taskId={}", processId, taskId);
         if (taskId == null) {
-            logger.error("邮箱账单:轮询处理状态,参数缺失,taskId必传")
+            logger.error("邮箱账单:轮询处理状态,参数缺失,taskId必传");
             throw new IllegalArgumentException("邮箱账单:轮询处理状态,参数缺失,taskId必传");
         }
         Object result = emailLoginSimulationService.processStatus(processId, taskId);
