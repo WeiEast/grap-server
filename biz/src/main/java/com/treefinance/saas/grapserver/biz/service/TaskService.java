@@ -338,7 +338,7 @@ public class TaskService {
         String idCardAttribute = ETaskAttribute.ID_CARD.getAttribute();
         String mobile = map.get(mobileAttribute) == null ? "" : String.valueOf(map.get(mobileAttribute));
         if (StringUtils.isNotBlank(mobile)) {
-            boolean b = CommonUtils.regexMatch(mobile, "^1(3|4|5|7|8)[0-9]\\d{8}$");
+            boolean b = CommonUtils.regexMatch(mobile, "^1(3|4|5|6|7|8|9)[0-9]\\d{8}$");
             if (!b) {
                 throw new ValidationException(String.format("the mobile number is illegal! mobile=%s", mobile));
             }
