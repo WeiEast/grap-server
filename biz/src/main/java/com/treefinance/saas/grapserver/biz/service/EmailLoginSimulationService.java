@@ -51,7 +51,7 @@ public class EmailLoginSimulationService {
                 throw new CrawlerBizException("登陆失败,请重试");
             }
         }
-        return SimpleResult.successResult(result.getData());
+        return SimpleResult.successResult(result);
     }
 
     /**
