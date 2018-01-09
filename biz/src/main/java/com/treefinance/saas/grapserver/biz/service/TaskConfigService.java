@@ -137,7 +137,7 @@ public class TaskConfigService {
         loginConfig.put("isSimulate", conf.getSimulate());
         loginConfig.putAll(Jackson.parseMap(conf.getInitSetting(), String.class, Object.class));
 
-        if (conf.getSimulate()) {
+        if (conf.getSimulate() != null && conf.getSimulate()) {
             loginConfig.put("loginTip", conf.getLoginTip());
             loginConfig.put("verifyTip", conf.getVerifyTip());
 

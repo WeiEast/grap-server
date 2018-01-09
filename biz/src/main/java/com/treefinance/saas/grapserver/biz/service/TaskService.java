@@ -21,6 +21,7 @@ import com.treefinance.saas.grapserver.dao.entity.Task;
 import com.treefinance.saas.grapserver.dao.entity.TaskCriteria;
 import com.treefinance.saas.grapserver.dao.entity.TaskLog;
 import com.treefinance.saas.grapserver.dao.mapper.TaskMapper;
+import com.treefinance.saas.grapserver.facade.enums.ETaskAttribute;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateUtils;
@@ -113,7 +114,7 @@ public class TaskService {
             ObjectMapper objectMapper = new ObjectMapper();
             Map map = objectMapper.readValue(extra, Map.class);
             if (MapUtils.isNotEmpty(map)) {
-                setMobileAttribute(id, map);
+                setAttribute(id, map);
             }
         }
         // 记录创建日志
@@ -229,6 +230,25 @@ public class TaskService {
     }
 
     /**
+     * 任务是否完成
+     *
+     * @param task
+     * @return
+     */
+    public boolean isTaskCompleted(TaskDTO task) {
+        if (task == null) {
+            return false;
+        }
+        Byte status = task.getStatus();
+        if (ETaskStatus.CANCEL.getStatus().equals(status)
+                || ETaskStatus.FAIL.getStatus().equals(status)
+                || ETaskStatus.SUCCESS.getStatus().equals(status)) {
+            return true;
+        }
+        return false;
+    }
+
+    /**
      * 任务是否超时
      *
      * @param taskid
@@ -305,23 +325,35 @@ public class TaskService {
             ObjectMapper objectMapper = new ObjectMapper();
             Map map = objectMapper.readValue(extra, Map.class);
             if (MapUtils.isNotEmpty(map)) {
-                setMobileAttribute(taskId, map);
+                setAttribute(taskId, map);
             }
         }
         taskDeviceService.create(deviceInfo, ipAddress, coorType, taskId);
         return taskId;
     }
 
-    private void setMobileAttribute(Long taskId, Map map) {
-        String attribute = "mobile";
-        String _value = map.get(attribute) == null ? "" : String.valueOf(map.get(attribute));
-        if (StringUtils.isNotBlank(_value)) {
-            boolean b = CommonUtils.regexMatch(_value, "^1(3|4|5|7|8)[0-9]\\d{8}$");
+    private void setAttribute(Long taskId, Map map) {
+        String mobileAttribute = ETaskAttribute.MOBILE.getAttribute();
+        String nameAttribute = ETaskAttribute.NAME.getAttribute();
+        String idCardAttribute = ETaskAttribute.ID_CARD.getAttribute();
+        String mobile = map.get(mobileAttribute) == null ? "" : String.valueOf(map.get(mobileAttribute));
+        if (StringUtils.isNotBlank(mobile)) {
+            boolean b = CommonUtils.regexMatch(mobile, "^1(3|4|5|6|7|8|9)[0-9]\\d{8}$");
             if (!b) {
-                throw new ValidationException(String.format("the mobile number is illegal! mobile=%s", _value));
+                throw new ValidationException(String.format("the mobile number is illegal! mobile=%s", mobile));
             }
-            String value = securityCryptoService.encrypt(_value, EncryptionIntensityEnum.NORMAL);
-            taskAttributeService.insert(taskId, attribute, value);
+            String value = securityCryptoService.encrypt(mobile, EncryptionIntensityEnum.NORMAL);
+            taskAttributeService.insert(taskId, mobileAttribute, value);
+        }
+        String name = map.get(nameAttribute) == null ? "" : String.valueOf(map.get(nameAttribute));
+        if (StringUtils.isNotBlank(name)) {
+            String value = securityCryptoService.encrypt(name, EncryptionIntensityEnum.NORMAL);
+            taskAttributeService.insert(taskId, nameAttribute, value);
+        }
+        String idCard = map.get(idCardAttribute) == null ? "" : String.valueOf(map.get(idCardAttribute));
+        if (StringUtils.isNotBlank(idCard)) {
+            String value = securityCryptoService.encrypt(idCard, EncryptionIntensityEnum.NORMAL);
+            taskAttributeService.insert(taskId, idCardAttribute, value);
         }
     }
 

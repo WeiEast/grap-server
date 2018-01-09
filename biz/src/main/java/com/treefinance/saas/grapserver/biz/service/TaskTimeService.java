@@ -4,10 +4,13 @@ import com.datatrees.rawdatacentral.api.CrawlerService;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.treefinance.saas.grapserver.biz.service.directive.DirectiveService;
+import com.treefinance.saas.grapserver.biz.service.task.TaskTimeoutHandler;
 import com.treefinance.saas.grapserver.common.enums.EDirective;
 import com.treefinance.saas.grapserver.common.enums.ETaskStatus;
 import com.treefinance.saas.grapserver.common.model.dto.DirectiveDTO;
+import com.treefinance.saas.grapserver.common.model.dto.TaskDTO;
 import com.treefinance.saas.grapserver.common.utils.CommonUtils;
+import com.treefinance.saas.grapserver.common.utils.DataConverterUtils;
 import com.treefinance.saas.grapserver.common.utils.JsonUtils;
 import com.treefinance.saas.grapserver.dao.entity.AppBizType;
 import com.treefinance.saas.grapserver.dao.entity.Task;
@@ -61,13 +64,8 @@ public class TaskTimeService {
     private AppBizTypeService appBizTypeService;
 
     @Autowired
-    private DirectiveService directiveService;
+    private List<TaskTimeoutHandler> taskTimeoutHandlers;
 
-    @Autowired
-    private TaskLogService taskLogService;
-
-    @Autowired
-    private CrawlerService crawlerService;
 
     /**
      * 更新登录时间
@@ -193,44 +191,29 @@ public class TaskTimeService {
      * @return
      */
     public boolean handleTaskTimeout(Task task) {
-        Byte taskStatus = task.getStatus();
-        if (ETaskStatus.CANCEL.getStatus().equals(taskStatus)
-                || ETaskStatus.SUCCESS.getStatus().equals(taskStatus)
-                || ETaskStatus.FAIL.getStatus().equals(taskStatus)) {
-            logger.info("handleTaskTimeout error : the task is completed: {}", JsonUtils.toJsonString(task));
-            return false;
-        }
         Long taskId = task.getId();
         Date loginTime = getLoginTime(taskId);
         Integer timeout = getTimeout(task.getBizType());
+        TaskDTO taskDTO = DataConverterUtils.convert(task, TaskDTO.class);
+
         // 任务超时: 当前时间-登录时间>超时时间
         Date currentTime = new Date();
         Date timeoutDate = DateUtils.addSeconds(loginTime, timeout);
-        logger.info("isTaskTimeout: taskid={}，loginTime={},current={},timeout={}",
+        logger.info("handleTaskTimeout: taskid={}，loginTime={},current={},timeout={}",
                 taskId, CommonUtils.date2Str(loginTime), CommonUtils.date2Str(currentTime), timeout);
         if (timeoutDate.before(currentTime)) {
-            // 增加日志：任务超时
-            String errorMessage = "任务超时：当前时间(" + DateFormatUtils.format(currentTime, "yyyy-MM-dd HH:mm:ss")
-                    + ") - 登录时间(" + DateFormatUtils.format(loginTime, "yyyy-MM-dd HH:mm:ss")
-                    + ")> 超时时间(" + timeout + "秒)";
-            taskLogService.logTimeoutTask(task.getId(), errorMessage);
-
-            // 通知爬数取消任务
-            try {
-                Map<String, String> extMap = Maps.newHashMap();
-                extMap.put("reason", "timeout");
-                this.crawlerService.cancel(taskId, extMap);
-            } catch (Exception e) {
-                logger.error("crawlerService.cancel(" + taskId + ") failed", e);
-            }
-            // 超时处理：任务更新为失败
-            DirectiveDTO directiveDTO = new DirectiveDTO();
-            directiveDTO.setTaskId(task.getId());
-            directiveDTO.setDirective(EDirective.TASK_FAIL.getText());
-            directiveService.process(directiveDTO);
-
-            return true;
+            return false;
         }
-        return false;
+        taskTimeoutHandlers.forEach(handler -> {
+            try {
+                handler.handleTaskTimeout(taskDTO, timeout, loginTime);
+                logger.info("handle timeout task: handler={},task={},loginTime={},timeout={}",
+                        handler.getClass(), taskId, DateFormatUtils.format(loginTime, "yyyyMMdd HH:mm:ss"), timeout);
+            } catch (Exception e) {
+                logger.error("handle timeout task error: handler={},task={},loginTime={},timeout={}",
+                        handler.getClass(), taskId, DateFormatUtils.format(loginTime, "yyyyMMdd HH:mm:ss"), timeout, e);
+            }
+        });
+        return true;
     }
 }

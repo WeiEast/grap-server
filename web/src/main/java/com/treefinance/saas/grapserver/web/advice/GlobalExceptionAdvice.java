@@ -98,7 +98,7 @@ public class GlobalExceptionAdvice extends ResponseEntityExceptionHandler {
     @ResponseBody
     public ResponseEntity<Object> handleBizException(WebRequest request, Exception ex) {
         handleLog(request, ex);
-        return handleExceptionInternal(ex, buildBody(ex), null, HttpStatus.INTERNAL_SERVER_ERROR, request);
+        return handleExceptionInternal(ex, buildBody(ex), null, HttpStatus.BAD_REQUEST, request);
     }
 
     @ExceptionHandler(ValidationException.class)

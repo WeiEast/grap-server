@@ -71,6 +71,7 @@ public class OperatorExtendLoginService {
         map.put("config", result.getData());
         map.put("color", colorMap);
         map.put("license", appBizLicenseService.isShowLicense(appId, EBizType.OPERATOR.getText()));
+        map.put("licenseTemplate", appBizLicenseService.getLicenseTemplate(appId, EBizType.OPERATOR.getText()));
         if (taskAttribute != null) {
             map.put(taskAttribute.getName(), taskAttribute.getValue());
         }

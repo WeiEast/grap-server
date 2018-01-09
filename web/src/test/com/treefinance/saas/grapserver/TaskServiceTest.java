@@ -5,10 +5,12 @@ package com.treefinance.saas.grapserver; /**
 import com.alibaba.fastjson.JSON;
 import com.treefinance.saas.grapserver.biz.service.AppCallbackConfigService;
 import com.treefinance.saas.grapserver.biz.service.TaskService;
-import com.treefinance.saas.grapserver.common.enums.EDataType;
+import com.treefinance.saas.grapserver.facade.enums.EDataType;
 import com.treefinance.saas.grapserver.common.model.dto.AppCallbackConfigDTO;
 import com.treefinance.saas.grapserver.facade.model.MerchantBaseInfoRO;
+import com.treefinance.saas.grapserver.facade.model.TaskRO;
 import com.treefinance.saas.grapserver.facade.service.MerchantFacade;
+import com.treefinance.saas.grapserver.facade.service.TaskFacade;
 import com.treefinance.saas.grapserver.web.GrapServerApplication;
 import com.treefinance.saas.knife.result.SaasResult;
 import org.junit.BeforeClass;
@@ -40,6 +42,8 @@ public class TaskServiceTest {
 
     @Autowired
     private TaskService taskService;
+    @Autowired
+    private TaskFacade taskFacade;
 
     @Test
     public void testUpdateAccountNo() {
@@ -60,6 +64,12 @@ public class TaskServiceTest {
         System.out.println(JSON.toJSONString(result));
 
 
+    }
+
+    @Test
+    public void TestTaskFacade_getById() {
+        SaasResult<TaskRO> result = taskFacade.getById(129891186650411008L);
+        System.out.println(JSON.toJSONString(result));
     }
 
 
