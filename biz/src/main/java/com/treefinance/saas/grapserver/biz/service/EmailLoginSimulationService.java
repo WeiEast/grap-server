@@ -14,6 +14,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Date;
+
 /**
  * 邮箱账单模拟登陆
  * Created by haojiahong on 2017/12/26.
@@ -27,6 +29,10 @@ public class EmailLoginSimulationService {
     private MailServiceApiForQQ mailServiceApiForQQ;
     @Autowired
     private CommonPluginApi commonPluginApi;
+    @Autowired
+    private TaskService taskService;
+    @Autowired
+    private TaskTimeService taskTimeService;
 
     /**
      * 登陆
@@ -51,6 +57,12 @@ public class EmailLoginSimulationService {
                 throw new CrawlerBizException("登陆失败,请重试");
             }
         }
+        if (StringUtils.isNotEmpty(param.getUsername())) {
+            taskService.setAccountNo(param.getTaskId(), param.getUsername());
+        }
+        //// TODO: 2018/1/9 暂时写死qq.com
+        taskService.updateWebSite(param.getTaskId(), "qq.com");
+        taskTimeService.updateLoginTime(param.getTaskId(), new Date());
         return SimpleResult.successResult(result);
     }
 
