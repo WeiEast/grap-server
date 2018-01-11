@@ -65,7 +65,9 @@ public class StartController {
                         @RequestParam(name = "source", required = false) String source,
                         @RequestParam(name = "bizType", required = false) String bizType,
                         @RequestParam(name = "style", required = false) String style,
+                        @RequestParam(name = "website", required = false) String website,
                         HttpServletRequest request) throws ForbiddenException, IOException {
+
         if (StringUtils.isEmpty(bizType)) {
             bizType = (String) request.getAttribute("bizType");
         }
@@ -73,7 +75,7 @@ public class StartController {
                 appid, uniqueId, coorType, deviceInfo, extra, bizType, source);
         EBizType eBizType = EBizType.of(bizType);
         taskLicenseService.verifyCreateTask(appid, uniqueId, eBizType);
-        Long taskId = taskServiceImpl.createTask(uniqueId, appid, eBizType.getCode(), extra);
+        Long taskId = taskServiceImpl.createTask(uniqueId, appid, eBizType.getCode(), extra, website);
         Map<String, Object> map = Maps.newHashMap();
         map.put("taskid", String.valueOf(taskId));
         map.put("color", merchantConfigService.getColorConfig(appid, style));

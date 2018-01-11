@@ -87,11 +87,13 @@ public class TaskService {
      * @param uniqueId
      * @param appId
      * @param bizType
-     * @param extra
+     * @param extra    @return
+     * @param website
      * @return
+     * @throws IOException
      */
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
-    public Long createTask(String uniqueId, String appId, Byte bizType, String extra) throws IOException {
+    public Long createTask(String uniqueId, String appId, Byte bizType, String extra, String website) throws IOException {
         // 校验uniqueId
         String excludeAppId = diamondConfig.getExcludeAppId();
         if (StringUtils.isNotEmpty(excludeAppId)) {
@@ -108,6 +110,9 @@ public class TaskService {
         task.setAppId(appId);
         task.setBizType(bizType);
         task.setStatus((byte) 0);
+        if (StringUtils.isNotBlank(website)) {
+            task.setWebSite(website);
+        }
         task.setId(id);
         taskMapper.insertSelective(task);
         if (StringUtils.isNotBlank(extra)) {
@@ -320,7 +325,7 @@ public class TaskService {
      */
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
     public Long startTask(String uniqueId, String appid, EBizType type, String deviceInfo, String ipAddress, String coorType, String extra) throws IOException {
-        Long taskId = this.createTask(uniqueId, appid, type.getCode(), extra);
+        Long taskId = this.createTask(uniqueId, appid, type.getCode(), extra, extra);
         if (StringUtils.isNotBlank(extra)) {
             ObjectMapper objectMapper = new ObjectMapper();
             Map map = objectMapper.readValue(extra, Map.class);
