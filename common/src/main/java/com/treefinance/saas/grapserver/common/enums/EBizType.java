@@ -7,6 +7,7 @@ import java.util.Objects;
  */
 public enum EBizType {
     EMAIL("EMAIL", (byte) 1),
+    EMAIL_H5("EMAIL_H5", (byte) 1),
     ECOMMERCE("ECOMMERCE", (byte) 2),
     OPERATOR("OPERATOR", (byte) 3),
     FUND("FUND", (byte) 4),
