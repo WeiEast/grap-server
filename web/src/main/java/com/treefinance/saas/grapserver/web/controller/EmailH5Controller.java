@@ -28,14 +28,14 @@ public class EmailH5Controller {
      * @return
      */
     @RequestMapping(value = "/login/submit", method = {RequestMethod.POST})
-    public Object login(CommonPluginParam param, @RequestHeader("x-real-ip") String userIp, HttpServletRequest request) {
+    public Object login(CommonPluginParam param) {
         logger.info("邮箱账单:登陆,传入参数,param={}", JSON.toJSONString(param));
         if (param == null || param.getTaskId() == null) {
             logger.error("邮箱账单:登陆,参数缺失,taskId必传,param={}", JSON.toJSONString(param));
             throw new IllegalArgumentException("邮箱账单:登陆,参数缺失,taskId必传");
         }
         Object result = emailLoginSimulationService.login(param);
-        logger.info("邮箱账单:登陆,返回结果,userIp={},request={},param={},result={}", userIp, JSON.toJSONString(request.getParameterMap()), JSON.toJSONString(param), JSON.toJSONString(result));
+        logger.info("邮箱账单:登陆,返回结果,param={},result={}", JSON.toJSONString(param), JSON.toJSONString(result));
         return result;
     }
 
