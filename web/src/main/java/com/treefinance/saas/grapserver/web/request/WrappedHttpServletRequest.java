@@ -61,6 +61,17 @@ public class WrappedHttpServletRequest<T extends ServletInputStream> extends Htt
         if (map == null) {
             map = Maps.newHashMap();
         }
+        // 1.增加userIp参数
+        Enumeration<String> headerNames = request.getHeaderNames();
+        String userIpHeader = "X-Real-IP";
+        while (headerNames.hasMoreElements()) {
+            String headerName = headerNames.nextElement();
+            if ("X-Real-IP".equalsIgnoreCase(headerName)) {
+                userIpHeader = headerName;
+            }
+        }
+        map.put("userIp", new String[]{request.getHeader(userIpHeader)});
+        // 2. 增加appId
         if (map.containsKey(Constants.APP_ID)) {
             return map;
         }
