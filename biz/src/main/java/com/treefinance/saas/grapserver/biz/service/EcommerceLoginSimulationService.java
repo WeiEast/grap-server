@@ -69,7 +69,7 @@ public class EcommerceLoginSimulationService {
             throw new CrawlerBizException(result.getMessage());
         }
         if (result.getData() != null) {
-            JSONObject jsonObject = JSON.parseObject(result.getData().toString());
+            JSONObject jsonObject = JSON.parseObject(JSON.toJSONString(result.getData()));
             String status = jsonObject.getString("qrStatus");
             if (StringUtils.isNotBlank(status) && StringUtils.equalsIgnoreCase("CONFIRMED", status)) {
                 taskTimeService.updateLoginTime(param.getTaskId(), new Date());
