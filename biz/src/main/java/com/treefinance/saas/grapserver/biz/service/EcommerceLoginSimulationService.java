@@ -1,15 +1,19 @@
 package com.treefinance.saas.grapserver.biz.service;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import com.datatrees.rawdatacentral.api.economic.taobao.EconomicApiForTaoBaoQR;
 import com.datatrees.rawdatacentral.domain.plugin.CommonPluginParam;
 import com.datatrees.rawdatacentral.domain.result.HttpResult;
 import com.treefinance.saas.grapserver.common.exception.CrawlerBizException;
 import com.treefinance.saas.knife.result.SimpleResult;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.util.Date;
 
 /**
  * Created by haojiahong on 2018/1/11.
@@ -20,8 +24,8 @@ public class EcommerceLoginSimulationService {
 
     @Autowired
     private EconomicApiForTaoBaoQR economicApiForTaoBaoQR;
-//    @Autowired
-//    private TaskTimeService taskTimeService;
+    @Autowired
+    private TaskTimeService taskTimeService;
 
     /**
      * 获取二维码
@@ -64,13 +68,13 @@ public class EcommerceLoginSimulationService {
                     JSON.toJSONString(param), JSON.toJSONString(result));
             throw new CrawlerBizException(result.getMessage());
         }
-//        if (result.getData() != null) {
-//            JSONObject jsonObject = JSON.parseObject(JSON.toJSONString(result.getData()));
-//            String status = jsonObject.getString("qrStatus");
-//            if (StringUtils.isNotBlank(status) && StringUtils.equalsIgnoreCase("CONFIRMED", status)) {
-//                taskTimeService.updateLoginTime(param.getTaskId(), new Date());
-//            }
-//        }
+        if (result.getData() != null) {
+            JSONObject jsonObject = JSON.parseObject(JSON.toJSONString(result.getData()));
+            String status = jsonObject.getString("qrStatus");
+            if (StringUtils.isNotBlank(status) && StringUtils.equalsIgnoreCase("CONFIRMED", status)) {
+                taskTimeService.updateLoginTime(param.getTaskId(), new Date());
+            }
+        }
         return SimpleResult.successResult(result);
     }
 }
