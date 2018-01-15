@@ -24,8 +24,8 @@ public class EcommerceLoginSimulationService {
 
     @Autowired
     private EconomicApiForTaoBaoQR economicApiForTaoBaoQR;
-    @Autowired
-    private TaskTimeService taskTimeService;
+//    @Autowired
+//    private TaskTimeService taskTimeService;
 
     /**
      * 获取二维码
@@ -68,13 +68,13 @@ public class EcommerceLoginSimulationService {
                     JSON.toJSONString(param), JSON.toJSONString(result));
             throw new CrawlerBizException(result.getMessage());
         }
-        if (result.getData() != null) {
-            JSONObject jsonObject = JSON.parseObject(JSON.toJSONString(result.getData()));
-            String status = jsonObject.getString("qrStatus");
-            if (StringUtils.isNotBlank(status) && StringUtils.equalsIgnoreCase("CONFIRMED", status)) {
-                taskTimeService.updateLoginTime(param.getTaskId(), new Date());
-            }
-        }
+//        if (result.getData() != null) {
+//            JSONObject jsonObject = JSON.parseObject(JSON.toJSONString(result.getData()));
+//            String status = jsonObject.getString("qrStatus");
+//            if (StringUtils.isNotBlank(status) && StringUtils.equalsIgnoreCase("CONFIRMED", status)) {
+//                taskTimeService.updateLoginTime(param.getTaskId(), new Date());
+//            }
+//        }
         return SimpleResult.successResult(result);
     }
 }
