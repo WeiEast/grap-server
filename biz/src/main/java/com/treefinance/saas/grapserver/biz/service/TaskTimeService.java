@@ -1,13 +1,8 @@
 package com.treefinance.saas.grapserver.biz.service;
 
-import com.datatrees.rawdatacentral.api.CrawlerService;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-import com.treefinance.saas.grapserver.biz.service.directive.DirectiveService;
 import com.treefinance.saas.grapserver.biz.service.task.TaskTimeoutHandler;
-import com.treefinance.saas.grapserver.common.enums.EDirective;
 import com.treefinance.saas.grapserver.common.enums.ETaskStatus;
-import com.treefinance.saas.grapserver.common.model.dto.DirectiveDTO;
 import com.treefinance.saas.grapserver.common.model.dto.TaskDTO;
 import com.treefinance.saas.grapserver.common.utils.CommonUtils;
 import com.treefinance.saas.grapserver.common.utils.DataConverterUtils;
@@ -23,6 +18,7 @@ import org.apache.commons.lang3.time.DateUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -40,6 +36,7 @@ import java.util.stream.Collectors;
  * Created by yh-treefinance on 2017/8/3.
  */
 @Service
+@Lazy
 public class TaskTimeService {
     /**
      * logger
