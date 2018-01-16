@@ -6,10 +6,9 @@ import com.treefinance.saas.grapserver.biz.service.EmailLoginSimulationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import javax.servlet.http.HttpServletRequest;
 
 /**
  * Created by haojiahong on 2017/12/26.
@@ -29,8 +28,9 @@ public class EmailH5Controller {
      * @return
      */
     @RequestMapping(value = "/login/submit", method = {RequestMethod.POST})
-    public Object login(CommonPluginParam param) {
-        logger.info("邮箱账单:登陆,传入参数,param={}", JSON.toJSONString(param));
+    public Object login(CommonPluginParam param, String userIp) {
+        param.setUserIp(userIp);
+        logger.info("邮箱账单:登陆,传入参数,param={},userIp={}", JSON.toJSONString(param), userIp);
         if (param == null || param.getTaskId() == null) {
             logger.error("邮箱账单:登陆,参数缺失,taskId必传,param={}", JSON.toJSONString(param));
             throw new IllegalArgumentException("邮箱账单:登陆,参数缺失,taskId必传");

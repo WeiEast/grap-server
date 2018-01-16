@@ -105,6 +105,8 @@ public class WebContextFilter extends AbstractRequestFilter {
         } catch (AppIdUncheckException e) {
             appIdUncheck(request, response, e);
         } finally {
+            logger.info("{} of {} : params={}", request.getMethod(), request.getRequestURL(),
+                    JSON.toJSONString(request.getParameterMap()));
             monitorRequest(start, request, response);
         }
     }
