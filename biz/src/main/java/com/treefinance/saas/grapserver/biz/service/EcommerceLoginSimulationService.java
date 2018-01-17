@@ -1,7 +1,6 @@
 package com.treefinance.saas.grapserver.biz.service;
 
 import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
 import com.datatrees.rawdatacentral.api.economic.taobao.EconomicApiForTaoBaoQR;
 import com.datatrees.rawdatacentral.domain.plugin.CommonPluginParam;
 import com.datatrees.rawdatacentral.domain.result.HttpResult;
@@ -69,8 +68,7 @@ public class EcommerceLoginSimulationService {
             throw new CrawlerBizException(result.getMessage());
         }
         if (result.getData() != null) {
-            JSONObject jsonObject = JSON.parseObject(JSON.toJSONString(result.getData()));
-            String status = jsonObject.getString("qrStatus");
+            String status = String.valueOf(result.getData());
             if (StringUtils.isNotBlank(status) && StringUtils.equalsIgnoreCase("CONFIRMED", status)) {
                 taskTimeService.updateLoginTime(param.getTaskId(), new Date());
             }
