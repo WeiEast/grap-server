@@ -20,7 +20,7 @@ public class QRCodeAccountNoMessageListener extends AbstractRocketMqMessageListe
 
     @Override
     protected void handleMessage(String message) {
-        logger.info("记录二维码登录爬数回传账户信息,message={}", message);
+        logger.info("消费记录二维码登录爬数回传账户信息消息数据=====>{}", message);
         if (StringUtils.isNotBlank(message)) {
             qrCodeAccountNoLogService.logQRCodeAccountNo(message);
         }
