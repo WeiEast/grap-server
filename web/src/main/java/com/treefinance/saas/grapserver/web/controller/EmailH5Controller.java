@@ -66,7 +66,7 @@ public class EmailH5Controller {
      * @param param
      * @return
      */
-    @RequestMapping(value = "/query/qr_status", method = {RequestMethod.POST})
+    @RequestMapping(value = "/qr_code/status", method = {RequestMethod.POST})
     public Object queryQRStatus(CommonPluginParam param) {
         logger.info("邮箱账单:查询二维码状态,传入参数,param={}", JSON.toJSONString(param));
         if (param == null || param.getTaskId() == null) {
