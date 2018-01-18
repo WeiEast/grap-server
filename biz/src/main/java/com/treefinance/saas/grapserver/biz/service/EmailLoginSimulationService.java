@@ -35,7 +35,7 @@ public class EmailLoginSimulationService {
     private TaskTimeService taskTimeService;
 
     /**
-     * 登陆
+     * 登陆(异步)
      *
      * @param param
      * @return
@@ -67,6 +67,57 @@ public class EmailLoginSimulationService {
     }
 
     /**
+     * 刷新二维码(异步)
+     *
+     * @param param
+     * @return
+     */
+    public Object refreshQRCode(CommonPluginParam param) {
+        HttpResult<Object> result;
+        try {
+            result = mailServiceApiForQQ.refeshQRCode(param);
+        } catch (Exception e) {
+            logger.error("邮箱账单:调用爬数邮箱账单刷新二维码异常,param={}", JSON.toJSONString(param), e);
+            throw e;
+        }
+        if (!result.getStatus()) {
+            logger.info("邮箱账单:调用爬数邮箱账单刷新二维码失败,param={},result={}",
+                    JSON.toJSONString(param), JSON.toJSONString(result));
+            if (StringUtils.isNotBlank(result.getMessage())) {
+                throw new CrawlerBizException(result.getMessage());
+            }
+        }
+        return SimpleResult.successResult(result);
+    }
+
+    /**
+     * 查询二维码状态
+     *
+     * @param param
+     * @return
+     */
+    public Object queryQRStatus(CommonPluginParam param) {
+        HttpResult<Object> result;
+        try {
+            result = mailServiceApiForQQ.queryQRStatus(param);
+        } catch (Exception e) {
+            logger.error("邮箱账单:调用爬数邮箱账单查询二维码状态异常,param={}", JSON.toJSONString(param), e);
+            throw e;
+        }
+        if (!result.getStatus()) {
+            logger.info("邮箱账单:调用爬数邮箱账单查询二维码状态失败,param={},result={}",
+                    JSON.toJSONString(param), JSON.toJSONString(result));
+            if (StringUtils.isNotBlank(result.getMessage())) {
+                throw new CrawlerBizException(result.getMessage());
+            }
+        }
+        if (result.getData() != null && StringUtils.equals("CONFIRMED", String.valueOf(result.getData()))) {
+            taskTimeService.updateLoginTime(param.getTaskId(), new Date());
+        }
+        return SimpleResult.successResult(result);
+    }
+
+    /**
      * 轮询处理状态(通用接口)
      *
      * @param processId
@@ -83,4 +134,6 @@ public class EmailLoginSimulationService {
         }
         return SimpleResult.successResult(result);
     }
+
+
 }
