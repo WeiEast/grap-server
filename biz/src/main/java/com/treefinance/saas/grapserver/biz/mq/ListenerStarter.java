@@ -25,6 +25,7 @@ public class ListenerStarter {
     private DefaultMQPushConsumer taskLogConsumer;
     private DefaultMQPushConsumer deliveryAddressConsumer;
     private DefaultMQPushConsumer asyncGrapDataConsumer;
+    private DefaultMQPushConsumer qrCodeAccountNoConsumer;
 
     @Autowired
     private DirectiveMessageListener directiveMessageListener;
@@ -34,6 +35,8 @@ public class ListenerStarter {
     private DeliveryAddressMessageListener deliveryAddressMessageListener;
     @Autowired
     private AsyncGrapDataMessageListener asyncGrapDataMessageListener;
+    @Autowired
+    private QRCodeAccountNoMessageListener qrCodeAccountNoMessageListener;
 
     @PostConstruct
     public void init() throws MQClientException {
@@ -41,6 +44,7 @@ public class ListenerStarter {
         initTaskLogMessageMQ();
         initDeliveryAddressMessageMQ();
         initAsyncGrapDataMessageMQ();
+        initQRCodeAccountNoMessageMQ();
     }
 
     @PreDestroy
@@ -118,4 +122,23 @@ public class ListenerStarter {
                 mqConfig.getNamesrvAddr(), topic, tag);
     }
 
+
+    /**
+     * 二维码方式登录回传账号信息
+     *
+     * @throws MQClientException
+     */
+    private void initQRCodeAccountNoMessageMQ() throws MQClientException {
+        String group = "qr_code_account_no_group";
+        qrCodeAccountNoConsumer = new DefaultMQPushConsumer(group);
+        qrCodeAccountNoConsumer.setNamesrvAddr(mqConfig.getNamesrvAddr());
+        String topic = "qr_code_account_no";
+        String tag = "*";
+        qrCodeAccountNoConsumer.subscribe(topic, tag);
+        qrCodeAccountNoConsumer.setMessageModel(CLUSTERING);
+        qrCodeAccountNoConsumer.registerMessageListener(qrCodeAccountNoMessageListener);
+        qrCodeAccountNoConsumer.start();
+        logger.info("启动异步数据抓取的消费者.nameserver:{},topic:{},tag:{}",
+                mqConfig.getNamesrvAddr(), topic, tag);
+    }
 }
