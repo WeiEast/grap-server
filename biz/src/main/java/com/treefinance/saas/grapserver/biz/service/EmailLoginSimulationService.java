@@ -6,7 +6,9 @@ import com.datatrees.rawdatacentral.api.mail.qq.MailServiceApiForQQ;
 import com.datatrees.rawdatacentral.domain.plugin.CommonPluginParam;
 import com.datatrees.rawdatacentral.domain.result.HttpResult;
 import com.datatrees.rawdatacentral.domain.result.ProcessResult;
+import com.treefinance.proxy.api.ProxyProvider;
 import com.treefinance.saas.grapserver.common.exception.CrawlerBizException;
+import com.treefinance.saas.knife.result.Results;
 import com.treefinance.saas.knife.result.SimpleResult;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -33,6 +35,8 @@ public class EmailLoginSimulationService {
     private TaskService taskService;
     @Autowired
     private TaskTimeService taskTimeService;
+    @Autowired
+    private ProxyProvider proxyProvider;
 
     /**
      * 登陆(异步)
@@ -143,7 +147,14 @@ public class EmailLoginSimulationService {
      * @return
      */
     public Object supportProvinceProxy(CommonPluginParam param) {
-
-        return null;
+        Boolean flag = false;
+        try {
+            flag = proxyProvider.supportProvinceName(param.getUserIp(), null);
+        } catch (Exception e) {
+            logger.error("邮箱账单:调用爬数邮箱账单查询是否支持当前IP的省份代理异常,param={}", JSON.toJSONString(param), e);
+            throw e;
+        }
+        return Results.newSuccessResult(flag);
     }
+
 }
