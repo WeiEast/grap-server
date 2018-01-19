@@ -114,7 +114,7 @@ public class TaskController {
         Map<String, Object> map = Maps.newHashMap();
         if (StringUtils.isEmpty(content)) {
             // 轮询过程中，判断任务是否超时
-            if (taskServiceImpl.isTaskTimeout(taskid)) {
+            if (taskTimeService.isTaskTimeout(taskid)) {
                 // 异步处理任务超时
                 taskTimeService.handleTaskTimeout(taskid);
             }

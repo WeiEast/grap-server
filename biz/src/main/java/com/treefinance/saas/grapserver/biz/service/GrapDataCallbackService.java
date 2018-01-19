@@ -4,8 +4,8 @@ import com.alibaba.fastjson.JSON;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.treefinance.saas.grapserver.common.exception.RequestFailedException;
-import com.treefinance.saas.grapserver.common.model.dto.AsycGrapDTO;
 import com.treefinance.saas.grapserver.common.model.dto.AppCallbackConfigDTO;
+import com.treefinance.saas.grapserver.common.model.dto.AsycGrapDTO;
 import com.treefinance.saas.grapserver.common.model.dto.TaskDTO;
 import com.treefinance.saas.grapserver.common.utils.HttpClientUtils;
 import com.treefinance.saas.grapserver.common.utils.RSAUtils;
@@ -38,6 +38,8 @@ public class GrapDataCallbackService {
 
     @Autowired
     private TaskService taskService;
+    @Autowired
+    private TaskTimeService taskTimeService;
     @Autowired
     private TaskLogService taskLogService;
     @Autowired
@@ -80,7 +82,7 @@ public class GrapDataCallbackService {
         }
         // 2.记录日志
         taskLogService.insert(taskId, dataType.getName() + "爬取完成", new Date(), "");
-        if (taskService.isTaskTimeout(taskId)) {
+        if (taskTimeService.isTaskTimeout(taskId)) {
             logger.info("{} callback failed : task {} is timeout, message={}...", dataType.name(), taskId, JSON.toJSONString(asycGrapDTO));
             taskLogService.insert(taskId, dataType.getName() + "回调通知失败", new Date(), "任务超时");
             return;

@@ -30,6 +30,9 @@
 
     <dubbo:reference id="proxyProvider" interface="com.treefinance.proxy.api.ProxyProvider"/>
 
+    <dubbo:reference id="economicApiForTaoBaoQR"
+                     interface="com.datatrees.rawdatacentral.api.economic.taobao.EconomicApiForTaoBaoQR"/>
+
     <dubbo:reference id="iMobileAttributionService"
                      interface="com.treefinance.commonservice.facade.mobileattribution.IMobileAttributionService"/>
 
