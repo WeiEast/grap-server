@@ -25,6 +25,9 @@
                      timeout="20000" cluster="failfast"/>
     <dubbo:reference id="commonPluginApi" interface="com.datatrees.rawdatacentral.api.CommonPluginApi"/>
 
+    <dubbo:reference id="economicApiForTaoBaoQR"
+                     interface="com.datatrees.rawdatacentral.api.economic.taobao.EconomicApiForTaoBaoQR"/>
+
     <dubbo:reference id="iMobileAttributionService"
                      interface="com.treefinance.commonservice.facade.mobileattribution.IMobileAttributionService"/>
 

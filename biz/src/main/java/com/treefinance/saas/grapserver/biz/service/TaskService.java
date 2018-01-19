@@ -16,7 +16,6 @@ import com.treefinance.saas.grapserver.common.exception.base.MarkBaseException;
 import com.treefinance.saas.grapserver.common.model.dto.TaskDTO;
 import com.treefinance.saas.grapserver.common.utils.CommonUtils;
 import com.treefinance.saas.grapserver.common.utils.DataConverterUtils;
-import com.treefinance.saas.grapserver.dao.entity.AppBizType;
 import com.treefinance.saas.grapserver.dao.entity.Task;
 import com.treefinance.saas.grapserver.dao.entity.TaskCriteria;
 import com.treefinance.saas.grapserver.dao.entity.TaskLog;
@@ -24,7 +23,6 @@ import com.treefinance.saas.grapserver.dao.mapper.TaskMapper;
 import com.treefinance.saas.grapserver.facade.enums.ETaskAttribute;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.time.DateUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,10 +33,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.validation.ValidationException;
 import java.io.IOException;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -67,19 +63,7 @@ public class TaskService {
     @Autowired
     private TaskAttributeService taskAttributeService;
     @Autowired
-    private AppBizTypeService appBizTypeService;
-    @Autowired
-    private TaskTimeService taskTimeService;
-    @Autowired
     private DiamondConfig diamondConfig;
-
-    /**
-     * 本地任务缓存
-     */
-    private final LoadingCache<Long, Task> cache = CacheBuilder.newBuilder()
-            .expireAfterWrite(5, TimeUnit.MINUTES)
-            .maximumSize(20000)
-            .build(CacheLoader.from(taskid -> taskMapper.selectByPrimaryKey(taskid)));
 
     /**
      * 创建任务
@@ -87,11 +71,13 @@ public class TaskService {
      * @param uniqueId
      * @param appId
      * @param bizType
-     * @param extra
+     * @param extra    @return
+     * @param website
      * @return
+     * @throws IOException
      */
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
-    public Long createTask(String uniqueId, String appId, Byte bizType, String extra) throws IOException {
+    public Long createTask(String uniqueId, String appId, Byte bizType, String extra, String website) throws IOException {
         // 校验uniqueId
         String excludeAppId = diamondConfig.getExcludeAppId();
         if (StringUtils.isNotEmpty(excludeAppId)) {
@@ -108,6 +94,9 @@ public class TaskService {
         task.setAppId(appId);
         task.setBizType(bizType);
         task.setStatus((byte) 0);
+        if (StringUtils.isNotBlank(website)) {
+            task.setWebSite(website);
+        }
         task.setId(id);
         taskMapper.insertSelective(task);
         if (StringUtils.isNotBlank(extra)) {
@@ -248,39 +237,6 @@ public class TaskService {
         return false;
     }
 
-    /**
-     * 任务是否超时
-     *
-     * @param taskid
-     * @return
-     */
-    public boolean isTaskTimeout(Long taskid) {
-        try {
-            Task task = cache.get(taskid);
-            AppBizType bizType = appBizTypeService.getAppBizType(task.getBizType());
-            if (bizType == null || bizType.getTimeout() == null) {
-                return false;
-            }
-            // 超时时间秒
-            int timeout = bizType.getTimeout();
-            Date loginTime = taskTimeService.getLoginTime(taskid);
-            if (loginTime == null) {
-                return false;
-            }
-            // 未超时: 登录时间+超时时间 < 当前时间
-            Date timeoutDate = DateUtils.addSeconds(loginTime, timeout);
-            Date current = new Date();
-            logger.info("isTaskTimeout: taskid={}，loginTime={},current={},timeout={}",
-                    taskid, CommonUtils.date2Str(loginTime), CommonUtils.date2Str(current), timeout);
-            if (timeoutDate.after(current)) {
-                return false;
-            }
-        } catch (ExecutionException e) {
-            logger.error("task id=" + taskid + "is not exists...", e);
-        }
-        return true;
-    }
-
     public List<Long> getUserTaskIdList(Long taskId) {
         Task task = taskMapper.selectByPrimaryKey(taskId);
         TaskCriteria taskCriteria = new TaskCriteria();
@@ -320,7 +276,7 @@ public class TaskService {
      */
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
     public Long startTask(String uniqueId, String appid, EBizType type, String deviceInfo, String ipAddress, String coorType, String extra) throws IOException {
-        Long taskId = this.createTask(uniqueId, appid, type.getCode(), extra);
+        Long taskId = this.createTask(uniqueId, appid, type.getCode(), extra, extra);
         if (StringUtils.isNotBlank(extra)) {
             ObjectMapper objectMapper = new ObjectMapper();
             Map map = objectMapper.readValue(extra, Map.class);
