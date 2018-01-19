@@ -1,13 +1,12 @@
 package com.treefinance.saas.grapserver.biz.service;
 
-import com.datatrees.rawdatacentral.api.CrawlerService;
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-import com.treefinance.saas.grapserver.biz.service.directive.DirectiveService;
+import com.treefinance.saas.grapserver.biz.common.AsycExcutor;
 import com.treefinance.saas.grapserver.biz.service.task.TaskTimeoutHandler;
-import com.treefinance.saas.grapserver.common.enums.EDirective;
 import com.treefinance.saas.grapserver.common.enums.ETaskStatus;
-import com.treefinance.saas.grapserver.common.model.dto.DirectiveDTO;
 import com.treefinance.saas.grapserver.common.model.dto.TaskDTO;
 import com.treefinance.saas.grapserver.common.utils.CommonUtils;
 import com.treefinance.saas.grapserver.common.utils.DataConverterUtils;
@@ -24,7 +23,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
@@ -32,6 +30,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -65,6 +64,17 @@ public class TaskTimeService {
 
     @Autowired
     private List<TaskTimeoutHandler> taskTimeoutHandlers;
+
+    @Autowired
+    private AsycExcutor asycExcutor;
+
+    /**
+     * 本地任务缓存
+     */
+    private final LoadingCache<Long, Task> cache = CacheBuilder.newBuilder()
+            .expireAfterWrite(5, TimeUnit.MINUTES)
+            .maximumSize(20000)
+            .build(CacheLoader.from(taskid -> taskMapper.selectByPrimaryKey(taskid)));
 
 
     /**
@@ -174,13 +184,47 @@ public class TaskTimeService {
      *
      * @param taskId
      */
-    @Async
     public void handleTaskTimeout(Long taskId) {
         Task task = taskMapper.selectByPrimaryKey(taskId);
         logger.info("handleTaskTimeout async : taskId={}, task={}", taskId, JsonUtils.toJsonString(task));
         if (task != null) {
-            handleTaskTimeout(task);
+            asycExcutor.runAsyc(task, _task -> {
+                this.handleTaskTimeout(task);
+            });
         }
+    }
+
+    /**
+     * 任务是否超时
+     *
+     * @param taskid
+     * @return
+     */
+    public boolean isTaskTimeout(Long taskid) {
+        try {
+            Task task = cache.get(taskid);
+            AppBizType bizType = appBizTypeService.getAppBizType(task.getBizType());
+            if (bizType == null || bizType.getTimeout() == null) {
+                return false;
+            }
+            // 超时时间秒
+            int timeout = bizType.getTimeout();
+            Date loginTime = this.getLoginTime(taskid);
+            if (loginTime == null) {
+                return false;
+            }
+            // 未超时: 登录时间+超时时间 < 当前时间
+            Date timeoutDate = DateUtils.addSeconds(loginTime, timeout);
+            Date current = new Date();
+            logger.info("isTaskTimeout: taskid={}，loginTime={},current={},timeout={}",
+                    taskid, CommonUtils.date2Str(loginTime), CommonUtils.date2Str(current), timeout);
+            if (timeoutDate.after(current)) {
+                return false;
+            }
+        } catch (ExecutionException e) {
+            logger.error("task id=" + taskid + "is not exists...", e);
+        }
+        return true;
     }
 
 

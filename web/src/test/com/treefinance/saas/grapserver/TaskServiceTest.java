@@ -5,8 +5,9 @@ package com.treefinance.saas.grapserver; /**
 import com.alibaba.fastjson.JSON;
 import com.treefinance.saas.grapserver.biz.service.AppCallbackConfigService;
 import com.treefinance.saas.grapserver.biz.service.TaskService;
-import com.treefinance.saas.grapserver.facade.enums.EDataType;
+import com.treefinance.saas.grapserver.biz.service.TaskTimeService;
 import com.treefinance.saas.grapserver.common.model.dto.AppCallbackConfigDTO;
+import com.treefinance.saas.grapserver.facade.enums.EDataType;
 import com.treefinance.saas.grapserver.facade.model.MerchantBaseInfoRO;
 import com.treefinance.saas.grapserver.facade.model.TaskRO;
 import com.treefinance.saas.grapserver.facade.service.MerchantFacade;
@@ -44,6 +45,8 @@ public class TaskServiceTest {
     private TaskService taskService;
     @Autowired
     private TaskFacade taskFacade;
+    @Autowired
+    private TaskTimeService taskTimeService;
 
     @Test
     public void testUpdateAccountNo() {
@@ -70,6 +73,13 @@ public class TaskServiceTest {
     public void TestTaskFacade_getById() {
         SaasResult<TaskRO> result = taskFacade.getById(129891186650411008L);
         System.out.println(JSON.toJSONString(result));
+    }
+
+    @Test
+    public void testTaskTimeService() {
+        Long taskId = 137964901845987328L;
+        taskTimeService.handleTaskTimeout(taskId);
+
     }
 
 
