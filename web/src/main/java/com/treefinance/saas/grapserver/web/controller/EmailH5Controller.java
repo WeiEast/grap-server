@@ -3,6 +3,8 @@ package com.treefinance.saas.grapserver.web.controller;
 import com.alibaba.fastjson.JSON;
 import com.datatrees.rawdatacentral.domain.plugin.CommonPluginParam;
 import com.treefinance.saas.grapserver.biz.service.EmailLoginSimulationService;
+import com.treefinance.saas.knife.result.Results;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -75,6 +77,26 @@ public class EmailH5Controller {
         }
         Object result = emailLoginSimulationService.queryQRStatus(param);
         logger.info("邮箱账单:查询二维码状态,返回结果,param={},result={}", JSON.toJSONString(param), JSON.toJSONString(result));
+        return result;
+    }
+
+    /**
+     * 是否支持当前ip的省份代理(通用接口)
+     *
+     * @return true:支持.false:不支持
+     */
+    public Object supportProvinceProxy(CommonPluginParam param, String userIp) {
+        if (StringUtils.isBlank(userIp)) {
+            logger.info("邮箱账单:查询是否支持当前IP的省份代理,没有获取到当前用户的IP信息");
+            return Results.newSuccessResult(false);
+        }
+        if (param == null) {
+            param = new CommonPluginParam();
+        }
+        param.setUserIp(userIp);
+        logger.info("邮箱账单:查询是否支持当前IP的省份代理,传入参数,param={}", JSON.toJSONString(param));
+        Object result = emailLoginSimulationService.supportProvinceProxy(param);
+        logger.info("邮箱账单:查询是否支持当前IP的省份代理,返回结果,param={},result={}", JSON.toJSONString(param), JSON.toJSONString(result));
         return result;
     }
 

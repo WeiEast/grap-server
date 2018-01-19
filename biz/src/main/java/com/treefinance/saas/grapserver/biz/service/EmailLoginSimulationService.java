@@ -136,4 +136,14 @@ public class EmailLoginSimulationService {
     }
 
 
+    /**
+     * 是否支持当前ip的省份代理(通用接口)
+     *
+     * @param param
+     * @return
+     */
+    public Object supportProvinceProxy(CommonPluginParam param) {
+
+        return null;
+    }
 }
