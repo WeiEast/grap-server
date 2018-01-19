@@ -86,7 +86,8 @@ public class EmailH5Controller {
      * @return true:支持.false:不支持
      */
     @RequestMapping(value = "/support/province_proxy", method = {RequestMethod.POST})
-    public Object supportProvinceProxy(CommonPluginParam param, String userIp) {
+    public Object supportProvinceProxy(@RequestParam(required = false) CommonPluginParam param,
+                                       String userIp) {
         if (StringUtils.isBlank(userIp)) {
             logger.info("邮箱账单:查询是否支持当前IP的省份代理,没有获取到当前用户的IP信息");
             return Results.newSuccessResult(false);
