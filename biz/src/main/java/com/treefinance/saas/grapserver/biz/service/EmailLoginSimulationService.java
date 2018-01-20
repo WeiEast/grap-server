@@ -116,6 +116,7 @@ public class EmailLoginSimulationService {
             }
         }
         if (result.getData() != null && StringUtils.equals("CONFIRMED", String.valueOf(result.getData()))) {
+            taskService.updateWebSite(param.getTaskId(), "qq.com");
             taskTimeService.updateLoginTime(param.getTaskId(), new Date());
         }
         return SimpleResult.successResult(result);
