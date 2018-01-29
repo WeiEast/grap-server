@@ -24,6 +24,9 @@ public class EmailH5Controller {
     @Autowired
     private EmailLoginSimulationService emailLoginSimulationService;
 
+
+    //========QQ邮箱==========
+
     /**
      * 登陆(异步)
      *
@@ -79,6 +82,13 @@ public class EmailH5Controller {
         logger.info("邮箱账单:查询二维码状态,返回结果,param={},result={}", JSON.toJSONString(param), JSON.toJSONString(result));
         return result;
     }
+
+
+    //=====163邮箱=====
+
+
+
+
 
     /**
      * 是否支持当前ip的省份代理(通用接口)
