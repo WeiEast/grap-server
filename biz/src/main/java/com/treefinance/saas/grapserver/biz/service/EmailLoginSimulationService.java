@@ -2,6 +2,7 @@ package com.treefinance.saas.grapserver.biz.service;
 
 import com.alibaba.fastjson.JSON;
 import com.datatrees.rawdatacentral.api.CommonPluginApi;
+import com.datatrees.rawdatacentral.api.mail.qq.MailServiceApiFor163;
 import com.datatrees.rawdatacentral.api.mail.qq.MailServiceApiForQQ;
 import com.datatrees.rawdatacentral.domain.plugin.CommonPluginParam;
 import com.datatrees.rawdatacentral.domain.result.HttpResult;
@@ -29,6 +30,8 @@ public class EmailLoginSimulationService {
 
     @Autowired
     private MailServiceApiForQQ mailServiceApiForQQ;
+    @Autowired
+    private MailServiceApiFor163 mailServiceApiFor163;
     @Autowired
     private CommonPluginApi commonPluginApi;
     @Autowired
@@ -123,6 +126,89 @@ public class EmailLoginSimulationService {
     }
 
     /**
+     * 163邮箱登陆(异步)
+     *
+     * @param param
+     * @return
+     */
+    public Object loginFor163(CommonPluginParam param) {
+        HttpResult<Object> result;
+        try {
+            result = mailServiceApiFor163.login(param);
+        } catch (Exception e) {
+            logger.error("邮箱账单:调用爬数邮箱账单登陆异常,param={}", JSON.toJSONString(param), e);
+            throw e;
+        }
+        if (!result.getStatus()) {
+            logger.info("邮箱账单:调用爬数邮箱账单登陆失败,param={},result={}",
+                    JSON.toJSONString(param), JSON.toJSONString(result));
+            if (StringUtils.isNotBlank(result.getMessage())) {
+                throw new CrawlerBizException(result.getMessage());
+            } else {
+                throw new CrawlerBizException("登陆失败,请重试");
+            }
+        }
+        if (StringUtils.isNotEmpty(param.getUsername())) {
+            taskService.setAccountNo(param.getTaskId(), param.getUsername());
+        }
+        taskService.updateWebSite(param.getTaskId(), "163.com");
+        taskTimeService.updateLoginTime(param.getTaskId(), new Date());
+        return SimpleResult.successResult(result);
+    }
+
+    /**
+     * 163邮箱刷新二维码
+     *
+     * @param param
+     * @return
+     */
+    public Object refreshQRCodeFor163(CommonPluginParam param) {
+        HttpResult<Object> result;
+        try {
+            result = mailServiceApiFor163.refeshQRCode(param);
+        } catch (Exception e) {
+            logger.error("邮箱账单:调用爬数邮箱账单刷新二维码异常,param={}", JSON.toJSONString(param), e);
+            throw e;
+        }
+        if (!result.getStatus()) {
+            logger.info("邮箱账单:调用爬数邮箱账单刷新二维码失败,param={},result={}",
+                    JSON.toJSONString(param), JSON.toJSONString(result));
+            if (StringUtils.isNotBlank(result.getMessage())) {
+                throw new CrawlerBizException(result.getMessage());
+            }
+        }
+        return SimpleResult.successResult(result);
+    }
+
+    /**
+     * 163邮箱查询二维码状态
+     *
+     * @param param
+     * @return
+     */
+    public Object queryQRStatusFor163(CommonPluginParam param) {
+        HttpResult<Object> result;
+        try {
+            result = mailServiceApiFor163.queryQRStatus(param);
+        } catch (Exception e) {
+            logger.error("邮箱账单:调用爬数邮箱账单查询二维码状态异常,param={}", JSON.toJSONString(param), e);
+            throw e;
+        }
+        if (!result.getStatus()) {
+            logger.info("邮箱账单:调用爬数邮箱账单查询二维码状态失败,param={},result={}",
+                    JSON.toJSONString(param), JSON.toJSONString(result));
+            if (StringUtils.isNotBlank(result.getMessage())) {
+                throw new CrawlerBizException(result.getMessage());
+            }
+        }
+        if (result.getData() != null && StringUtils.equals("SUCCESS", String.valueOf(result.getData()))) {
+            taskService.updateWebSite(param.getTaskId(), "163.com");
+            taskTimeService.updateLoginTime(param.getTaskId(), new Date());
+        }
+        return SimpleResult.successResult(result);
+    }
+
+    /**
      * 轮询处理状态(通用接口)
      *
      * @param processId
@@ -157,5 +243,6 @@ public class EmailLoginSimulationService {
         }
         return Results.newSuccessResult(flag);
     }
+
 
 }
