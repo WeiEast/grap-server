@@ -118,7 +118,7 @@ public class EmailLoginSimulationService {
                 throw new CrawlerBizException(result.getMessage());
             }
         }
-        if (result.getData() != null && StringUtils.equals("CONFIRMED", String.valueOf(result.getData()))) {
+        if (result.getData() != null && StringUtils.equals("SUCCESS", String.valueOf(result.getData()))) {
             taskService.updateWebSite(param.getTaskId(), "qq.com");
             taskTimeService.updateLoginTime(param.getTaskId(), new Date());
         }
