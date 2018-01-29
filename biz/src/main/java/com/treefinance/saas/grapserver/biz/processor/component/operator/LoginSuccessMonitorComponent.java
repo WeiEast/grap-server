@@ -48,7 +48,7 @@ public class LoginSuccessMonitorComponent extends BaseBusinessComponent<Operator
             logger.error("运营商监控,发送登陆成功(任务日志)消息到monitor,请求参数为空,request={}", JSON.toJSONString(request));
             return;
         }
-        if (request.getOrder() == null || request.getOrder() < 3) {
+        if (request.getOrder() == null || request.getOrder() != 3) {
             logger.error("运营商监控,发送登陆成功(任务日志)消息到monitor,存在环节遗漏,后续不再执行,request={}", JSON.toJSONString(request));
             return;
         }

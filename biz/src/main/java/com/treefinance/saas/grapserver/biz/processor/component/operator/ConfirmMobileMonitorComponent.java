@@ -47,7 +47,7 @@ public class ConfirmMobileMonitorComponent extends BaseBusinessComponent<Operato
             logger.error("运营商监控,发送确认手机号(任务埋点)消息到monitor,请求参数为空,request={}", JSON.toJSONString(request));
             return;
         }
-        if (request.getOrder() == null || request.getOrder() < 1) {
+        if (request.getOrder() == null || request.getOrder() != 1) {
             logger.error("运营商监控,发送确认手机号(任务埋点)消息到monitor,存在环节遗漏,后续不再执行,request={}", JSON.toJSONString(request));
             return;
         }

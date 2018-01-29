@@ -47,7 +47,7 @@ public class StartLoginMonitorComponent extends BaseBusinessComponent<OperatorMo
             logger.error("运营商监控,发送开始登陆(任务埋点)消息到monitor,请求参数为空,request={}", JSON.toJSONString(request));
             return;
         }
-        if (request.getOrder() == null || request.getOrder() < 2) {
+        if (request.getOrder() == null || request.getOrder() != 2) {
             logger.error("运营商监控,发送开始登陆(任务埋点)消息到monitor,存在环节遗漏,后续不再执行,request={}", JSON.toJSONString(request));
             return;
         }
