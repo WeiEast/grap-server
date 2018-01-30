@@ -6,7 +6,9 @@ import com.datatrees.rawdatacentral.api.mail.qq.MailServiceApiForQQ;
 import com.datatrees.rawdatacentral.domain.plugin.CommonPluginParam;
 import com.datatrees.rawdatacentral.domain.result.HttpResult;
 import com.datatrees.rawdatacentral.domain.result.ProcessResult;
+import com.treefinance.proxy.api.ProxyProvider;
 import com.treefinance.saas.grapserver.common.exception.CrawlerBizException;
+import com.treefinance.saas.knife.result.Results;
 import com.treefinance.saas.knife.result.SimpleResult;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -33,9 +35,11 @@ public class EmailLoginSimulationService {
     private TaskService taskService;
     @Autowired
     private TaskTimeService taskTimeService;
+    @Autowired
+    private ProxyProvider proxyProvider;
 
     /**
-     * 登陆
+     * 登陆(异步)
      *
      * @param param
      * @return
@@ -67,6 +71,58 @@ public class EmailLoginSimulationService {
     }
 
     /**
+     * 刷新二维码(异步)
+     *
+     * @param param
+     * @return
+     */
+    public Object refreshQRCode(CommonPluginParam param) {
+        HttpResult<Object> result;
+        try {
+            result = mailServiceApiForQQ.refeshQRCode(param);
+        } catch (Exception e) {
+            logger.error("邮箱账单:调用爬数邮箱账单刷新二维码异常,param={}", JSON.toJSONString(param), e);
+            throw e;
+        }
+        if (!result.getStatus()) {
+            logger.info("邮箱账单:调用爬数邮箱账单刷新二维码失败,param={},result={}",
+                    JSON.toJSONString(param), JSON.toJSONString(result));
+            if (StringUtils.isNotBlank(result.getMessage())) {
+                throw new CrawlerBizException(result.getMessage());
+            }
+        }
+        return SimpleResult.successResult(result);
+    }
+
+    /**
+     * 查询二维码状态
+     *
+     * @param param
+     * @return
+     */
+    public Object queryQRStatus(CommonPluginParam param) {
+        HttpResult<Object> result;
+        try {
+            result = mailServiceApiForQQ.queryQRStatus(param);
+        } catch (Exception e) {
+            logger.error("邮箱账单:调用爬数邮箱账单查询二维码状态异常,param={}", JSON.toJSONString(param), e);
+            throw e;
+        }
+        if (!result.getStatus()) {
+            logger.info("邮箱账单:调用爬数邮箱账单查询二维码状态失败,param={},result={}",
+                    JSON.toJSONString(param), JSON.toJSONString(result));
+            if (StringUtils.isNotBlank(result.getMessage())) {
+                throw new CrawlerBizException(result.getMessage());
+            }
+        }
+        if (result.getData() != null && StringUtils.equals("SUCCESS", String.valueOf(result.getData()))) {
+            taskService.updateWebSite(param.getTaskId(), "qq.com");
+            taskTimeService.updateLoginTime(param.getTaskId(), new Date());
+        }
+        return SimpleResult.successResult(result);
+    }
+
+    /**
      * 轮询处理状态(通用接口)
      *
      * @param processId
@@ -83,4 +139,23 @@ public class EmailLoginSimulationService {
         }
         return SimpleResult.successResult(result);
     }
+
+
+    /**
+     * 是否支持当前ip的省份代理(通用接口)
+     *
+     * @param param
+     * @return
+     */
+    public Object supportProvinceProxy(CommonPluginParam param) {
+        Boolean flag = false;
+        try {
+            flag = proxyProvider.supportProvinceName(param.getUserIp(), null);
+        } catch (Exception e) {
+            logger.error("邮箱账单:调用爬数邮箱账单查询是否支持当前IP的省份代理异常,param={}", JSON.toJSONString(param), e);
+            throw e;
+        }
+        return Results.newSuccessResult(flag);
+    }
+
 }
