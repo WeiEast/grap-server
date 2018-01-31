@@ -141,4 +141,15 @@ public class TaskAttributeService {
         return taskAttribute;
     }
 
+    /**
+     * 根据taskId查询所有属性
+     * @param taskId
+     * @return
+     */
+    public List<TaskAttribute> findByTaskId(Long taskId) {
+        TaskAttributeCriteria criteria = new TaskAttributeCriteria();
+        criteria.createCriteria().andTaskIdEqualTo(taskId);
+        List<TaskAttribute> attributeList = taskAttributeMapper.selectByExample(criteria);
+        return attributeList;
+    }
 }
