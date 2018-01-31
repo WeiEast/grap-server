@@ -157,7 +157,7 @@ public class DeliveryAddressService {
                 taskLogService.insert(taskId, "收货地址回调通知失败", new Date(), result);
             } finally {
                 long consumeTime = System.currentTimeMillis() - startTime;
-                taskCallbackLogService.insert(callbackUrl, configDTO, taskId, JSON.toJSONString(originalDataMap), result, consumeTime);
+                taskCallbackLogService.insert(configDTO, taskId, (byte) 1, JSON.toJSONString(originalDataMap), result, consumeTime);
                 logger.info("delivery address callback ：收货地址回调通知完成：config={},data={},paramMap={},result={}", JSON.toJSONString(configDTO), dataMap, paramMap, result);
             }
         }
