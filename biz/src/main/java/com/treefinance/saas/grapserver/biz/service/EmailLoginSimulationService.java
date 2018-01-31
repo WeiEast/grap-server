@@ -2,7 +2,7 @@ package com.treefinance.saas.grapserver.biz.service;
 
 import com.alibaba.fastjson.JSON;
 import com.datatrees.rawdatacentral.api.CommonPluginApi;
-import com.datatrees.rawdatacentral.api.mail.qq.MailServiceApiFor163;
+import com.datatrees.rawdatacentral.api.mail._163.MailServiceApiFor163;
 import com.datatrees.rawdatacentral.api.mail.qq.MailServiceApiForQQ;
 import com.datatrees.rawdatacentral.domain.plugin.CommonPluginParam;
 import com.datatrees.rawdatacentral.domain.result.HttpResult;
