@@ -88,6 +88,4 @@ public class MonitorService {
         }
         ecommerceMonitorService.sendMessage(taskDTO);
     }
-
-
 }
