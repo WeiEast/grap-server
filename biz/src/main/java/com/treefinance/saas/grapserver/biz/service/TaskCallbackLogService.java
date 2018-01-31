@@ -29,17 +29,18 @@ public class TaskCallbackLogService {
     @Autowired
     private TaskCallbackLogUpdateMapper taskCallbackLogUpdateMapper;
 
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
-    public void insert(String callbackUrl, AppCallbackConfigDTO config, Long taskId, String params, String result, long consumeTime) {
+    @Transactional(propagation = Propagation.REQUIRES_NEW, rollbackFor = Exception.class)
+    public void insert(AppCallbackConfigDTO config, Long taskId, Byte type, String params, String result, long consumeTime) {
         TaskCallbackLog taskCallbackLog = new TaskCallbackLog();
         taskCallbackLog.setId(UidGenerator.getId());
         taskCallbackLog.setTaskId(taskId);
         if (config != null) {
             taskCallbackLog.setConfigId(Long.valueOf(config.getId()));
+            taskCallbackLog.setUrl(config.getUrl());
         } else {
             taskCallbackLog.setConfigId(0L);
         }
-        taskCallbackLog.setUrl(callbackUrl);
+        taskCallbackLog.setType(type);
         if (StringUtils.isNotBlank(params)) {
             taskCallbackLog.setRequestParam(params.length() > 1000 ? params.substring(0, 1000) : params);
         } else {
