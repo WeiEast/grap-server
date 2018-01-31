@@ -36,6 +36,8 @@ public class TaskCallbackLogService {
         taskCallbackLog.setTaskId(taskId);
         if (config != null) {
             taskCallbackLog.setConfigId(Long.valueOf(config.getId()));
+        } else {
+            taskCallbackLog.setConfigId(0L);
         }
         taskCallbackLog.setUrl(callbackUrl);
         if (StringUtils.isNotBlank(params)) {
