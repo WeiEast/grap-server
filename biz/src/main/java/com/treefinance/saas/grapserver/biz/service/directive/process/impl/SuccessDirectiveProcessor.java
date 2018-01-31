@@ -5,7 +5,6 @@ import com.treefinance.saas.grapserver.biz.service.MonitorService;
 import com.treefinance.saas.grapserver.biz.service.directive.process.AbstractDirectiveProcessor;
 import com.treefinance.saas.grapserver.common.enums.EDirective;
 import com.treefinance.saas.grapserver.common.enums.ETaskStatus;
-import com.treefinance.saas.grapserver.common.model.dto.AppCallbackConfigDTO;
 import com.treefinance.saas.grapserver.common.model.dto.DirectiveDTO;
 import com.treefinance.saas.grapserver.common.model.dto.TaskDTO;
 import com.treefinance.saas.grapserver.dao.entity.AppLicense;
@@ -43,7 +42,7 @@ public class SuccessDirectiveProcessor extends AbstractDirectiveProcessor {
         int result = callback(dataMap, appLicense, directiveDTO);
         if (result == 0) {
             //任务成功但是不需要回调(前端回调),仍需记录回调日志,获取dataUrl提供数据下载以及回调统计
-            taskCallbackLogService.insert(null, new AppCallbackConfigDTO(), taskId, JSON.toJSONString(dataMap), null, 0);
+            taskCallbackLogService.insert(null, null, taskId, JSON.toJSONString(dataMap), null, 0);
             taskLogService.insert(taskId, "回调通知成功", new Date(), null);
 
             taskDTO.setStatus(ETaskStatus.SUCCESS.getStatus());
