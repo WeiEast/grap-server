@@ -14,6 +14,9 @@
             <if test="configId != null">
                 configId,
             </if>
+            <if test="type != null">
+                type,
+            </if>
             <if test="url != null">
                 url,
             </if>
@@ -42,6 +45,9 @@
             </if>
             <if test="configId != null">
                 #{configId,jdbcType=BIGINT},
+            </if>
+            <if test="type != null">
+                #{type,jdbcType=TINYINT},
             </if>
             <if test="url != null">
                 #{url,jdbcType=VARCHAR},
@@ -72,6 +78,9 @@
             </if>
             <if test="configId != null">
                 configId = #{configId,jdbcType=BIGINT},
+            </if>
+            <if test="type != null">
+                type =  #{type,jdbcType=TINYINT},
             </if>
             <if test="url != null">
                 url = #{url,jdbcType=VARCHAR},
