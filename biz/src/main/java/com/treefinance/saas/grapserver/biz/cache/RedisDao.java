@@ -55,7 +55,7 @@ public interface RedisDao {
      * @param lockMap 比较值,判断所要释放的锁是否是当前锁
      * @param expired 锁设定的超时时间(毫秒)
      */
-    void release(String lockKey, Map<String, Object> lockMap, long expired);
+    void releaseLock(String lockKey, Map<String, Object> lockMap, long expired);
 
 
 }

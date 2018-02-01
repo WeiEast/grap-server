@@ -217,7 +217,7 @@ public class OperatorExtendLoginService {
             }
             throw new CrawlerBizException("请求频繁");
         } finally {
-            redisDao.release(operatorParam.getTaskId().toString(), lockMap, 60 * 1000L);
+            redisDao.releaseLock(operatorParam.getTaskId().toString(), lockMap, 60 * 1000L);
         }
 
     }

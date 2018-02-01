@@ -126,7 +126,7 @@ public class TaskServiceTest {
             } catch (Exception e) {
                 e.printStackTrace();
             } finally {
-                redisDao.release(lockKey, lockMap, expire);
+                redisDao.releaseLock(lockKey, lockMap, expire);
             }
         }
     }

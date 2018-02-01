@@ -134,7 +134,7 @@ public class RedisDaoImpl implements RedisDao {
     }
 
     @Override
-    public void release(String lockKey, Map<String, Object> lockMap, long expireMsecs) {
+    public void releaseLock(String lockKey, Map<String, Object> lockMap, long expireMsecs) {
         if (MapUtils.isEmpty(lockMap)) {
             return;
         }
