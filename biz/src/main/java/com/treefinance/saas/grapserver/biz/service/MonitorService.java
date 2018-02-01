@@ -24,6 +24,8 @@ public class MonitorService {
     private TaskService taskService;
     @Autowired
     private OperatorMonitorSpecialProcessor operatorMonitorSpecialProcessor;
+    @Autowired
+    private EcommerceMonitorService ecommerceMonitorService;
 
     /**
      * 发送监控消息
@@ -41,8 +43,17 @@ public class MonitorService {
         }
         //发送任务监控消息
         monitorPluginService.sendTaskMonitorMessage(taskDTO);
-        //发送运营商监控消息
-        this.sendTaskOperatorMonitorMessage(taskDTO);
+        EBizType eBizType = EBizType.of(taskDTO.getBizType());
+        switch (eBizType) {
+            case OPERATOR:
+                //发送运营商监控消息
+                this.sendTaskOperatorMonitorMessage(taskDTO);
+                break;
+            case ECOMMERCE:
+                // 发送电商监控消息
+                this.sendEcommerceMonitorMessage(taskDTO);
+                break;
+        }
 
     }
 
@@ -63,9 +74,18 @@ public class MonitorService {
             request.setTask(taskDTO);
             operatorMonitorSpecialProcessor.doService(request);
         }
-
-
     }
 
 
+    /**
+     * 发送电商监控消息
+     *
+     * @param taskDTO
+     */
+    private void sendEcommerceMonitorMessage(TaskDTO taskDTO) {
+        if (taskDTO == null || taskDTO.getId() == null) {
+            return;
+        }
+        ecommerceMonitorService.sendMessage(taskDTO);
+    }
 }
