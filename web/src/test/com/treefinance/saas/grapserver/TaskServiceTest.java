@@ -3,6 +3,8 @@ package com.treefinance.saas.grapserver; /**
  */
 
 import com.alibaba.fastjson.JSON;
+import com.treefinance.saas.grapserver.biz.cache.RedisDao;
+import com.treefinance.saas.grapserver.biz.common.SpringUtils;
 import com.treefinance.saas.grapserver.biz.service.AppCallbackConfigService;
 import com.treefinance.saas.grapserver.biz.service.TaskService;
 import com.treefinance.saas.grapserver.biz.service.TaskTimeService;
@@ -21,7 +23,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by chenjh on 2017/6/26.
@@ -47,6 +51,8 @@ public class TaskServiceTest {
     private TaskFacade taskFacade;
     @Autowired
     private TaskTimeService taskTimeService;
+    @Autowired
+    private RedisDao redisDao;
 
     @Test
     public void testUpdateAccountNo() {
@@ -80,6 +86,49 @@ public class TaskServiceTest {
         Long taskId = 137964901845987328L;
         taskTimeService.handleTaskTimeout(taskId);
 
+    }
+
+
+    @Test
+    public void testRedisLock() throws InterruptedException {
+        String key = "1234567";
+        RedisKeyTask redisKeyTask = new RedisKeyTask(key, 20000L);
+        Thread thread1 = new Thread(redisKeyTask);
+        Thread thread2 = new Thread(redisKeyTask);
+        thread1.start();
+        thread2.start();
+        thread1.join();
+        thread2.join();
+
+    }
+
+    public class RedisKeyTask implements Runnable {
+        private RedisDao redisDao;
+        private String lockKey;
+        private Long expire;
+
+        RedisKeyTask(String lockKey, Long expire) {
+            this.redisDao = (RedisDao) SpringUtils.getBean("redisDaoImpl");
+            this.lockKey = lockKey;
+            this.expire = expire;
+        }
+
+        @Override
+        public void run() {
+            Map<String, Object> lockMap = new HashMap<>();
+            try {
+                lockMap = redisDao.acquireLock(lockKey, expire);
+                if (lockMap != null) {
+                    System.out.println("执行业务逻辑");
+                    Thread.sleep(10 * 1000);//获得锁，执行业务逻辑方法
+                    System.out.println("业务逻辑执行完成");
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            } finally {
+                redisDao.release(lockKey, lockMap, expire);
+            }
+        }
     }
 
 

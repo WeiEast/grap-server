@@ -8,6 +8,7 @@ import com.datatrees.rawdatacentral.domain.result.HttpResult;
 import com.google.common.collect.Maps;
 import com.treefinance.commonservice.facade.mobileattribution.IMobileAttributionService;
 import com.treefinance.commonservice.facade.mobileattribution.MobileAttributionDTO;
+import com.treefinance.saas.grapserver.biz.cache.RedisDao;
 import com.treefinance.saas.grapserver.common.enums.EBizType;
 import com.treefinance.saas.grapserver.common.exception.CrawlerBizException;
 import com.treefinance.saas.grapserver.dao.entity.TaskAttribute;
@@ -45,6 +46,8 @@ public class OperatorExtendLoginService {
     private TaskService taskService;
     @Autowired
     private TaskTimeService taskTimeService;
+    @Autowired
+    private RedisDao redisDao;
 
     /**
      * 获取运营商配置
@@ -188,24 +191,34 @@ public class OperatorExtendLoginService {
      * @return
      */
     public Object login(OperatorParam operatorParam) {
-        HttpResult<Map<String, Object>> result;
+        Map<String, Object> lockMap = Maps.newHashMap();
         try {
-            result = crawlerOperatorService.submit(operatorParam);
-        } catch (Exception e) {
-            logger.error("运营商:调用爬数运营商登陆异常,operatorParam={}", JSON.toJSONString(operatorParam), e);
-            throw e;
-        }
-        if (!result.getStatus()) {
-            logger.info("运营商:调用爬数运营商登陆失败,operatorParam={},result={}",
-                    JSON.toJSONString(operatorParam), JSON.toJSONString(result));
-            if (StringUtils.isNotBlank(result.getMessage())) {
-                throw new CrawlerBizException(result.getMessage());
-            } else {
-                throw new CrawlerBizException("登陆失败,请重试");
+            lockMap = redisDao.acquireLock(operatorParam.getTaskId().toString(), 60 * 1000L);
+            if (lockMap != null) {
+                HttpResult<Map<String, Object>> result;
+                try {
+                    result = crawlerOperatorService.submit(operatorParam);
+                } catch (Exception e) {
+                    logger.error("运营商:调用爬数运营商登陆异常,operatorParam={}", JSON.toJSONString(operatorParam), e);
+                    throw e;
+                }
+                if (!result.getStatus()) {
+                    logger.info("运营商:调用爬数运营商登陆失败,operatorParam={},result={}",
+                            JSON.toJSONString(operatorParam), JSON.toJSONString(result));
+                    if (StringUtils.isNotBlank(result.getMessage())) {
+                        throw new CrawlerBizException(result.getMessage());
+                    } else {
+                        throw new CrawlerBizException("登陆失败,请重试");
+                    }
+                }
+                Long taskId = operatorParam.getTaskId();
+                taskTimeService.updateLoginTime(taskId, new Date());
+                return SimpleResult.successResult(result.getData());
             }
+            throw new CrawlerBizException("请求频繁");
+        } finally {
+            redisDao.release(operatorParam.getTaskId().toString(), lockMap, 60 * 1000L);
         }
-        Long taskId = operatorParam.getTaskId();
-        taskTimeService.updateLoginTime(taskId, new Date());
-        return SimpleResult.successResult(result.getData());
+
     }
 }
