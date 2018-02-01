@@ -26,6 +26,10 @@
     <dubbo:reference id="mailServiceApiForQQ" interface="com.datatrees.rawdatacentral.api.mail.qq.MailServiceApiForQQ"
                      timeout="20000" cluster="failfast"/>
 
+    <dubbo:reference id="mailServiceApiFor163"
+                     interface="com.datatrees.rawdatacentral.api.mail._163.MailServiceApiFor163"
+                     timeout="20000" cluster="failfast"/>
+
     <dubbo:reference id="commonPluginApi" interface="com.datatrees.rawdatacentral.api.CommonPluginApi"/>
 
     <dubbo:reference id="proxyProvider" interface="com.treefinance.proxy.api.ProxyProvider"/>
