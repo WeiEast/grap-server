@@ -278,7 +278,7 @@ public class EmailLoginSimulationService {
                 if (result.getData() != null) {
                     Map<String, Object> map = JSONObject.parseObject(JSON.toJSONString(result.getData()));
                     if (MapUtils.isNotEmpty(map)) {
-                        if ("login_success".equals(map.get("directive"))) {
+                        if (StringUtils.equalsIgnoreCase("login_success", map.get("directive").toString())) {
                             taskTimeService.updateLoginTime(param.getTaskId(), new Date());
                         }
                     }
