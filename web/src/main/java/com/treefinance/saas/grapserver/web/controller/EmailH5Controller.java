@@ -142,6 +142,9 @@ public class EmailH5Controller {
         return result;
     }
 
+    //======新浪邮箱=======
+
+
 
     /**
      * 是否支持当前ip的省份代理(通用接口)

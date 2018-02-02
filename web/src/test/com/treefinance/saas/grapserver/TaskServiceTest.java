@@ -119,9 +119,11 @@ public class TaskServiceTest {
             try {
                 lockMap = redisDao.acquireLock(lockKey, expire);
                 if (lockMap != null) {
-                    System.out.println("执行业务逻辑");
+                    System.out.println(Thread.currentThread().getName() + "执行业务逻辑");
                     Thread.sleep(10 * 1000);//获得锁，执行业务逻辑方法
                     System.out.println("业务逻辑执行完成");
+                } else {
+                    System.out.println(Thread.currentThread().getName() + "未获取到锁");
                 }
             } catch (Exception e) {
                 e.printStackTrace();

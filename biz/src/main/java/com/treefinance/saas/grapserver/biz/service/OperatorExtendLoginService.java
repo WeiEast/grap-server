@@ -11,6 +11,8 @@ import com.treefinance.commonservice.facade.mobileattribution.MobileAttributionD
 import com.treefinance.saas.grapserver.biz.cache.RedisDao;
 import com.treefinance.saas.grapserver.common.enums.EBizType;
 import com.treefinance.saas.grapserver.common.exception.CrawlerBizException;
+import com.treefinance.saas.grapserver.common.model.Constants;
+import com.treefinance.saas.grapserver.common.utils.RedisKeyUtils;
 import com.treefinance.saas.grapserver.dao.entity.TaskAttribute;
 import com.treefinance.saas.grapserver.facade.enums.ETaskAttribute;
 import com.treefinance.saas.knife.result.SimpleResult;
@@ -193,7 +195,7 @@ public class OperatorExtendLoginService {
     public Object login(OperatorParam operatorParam) {
         Map<String, Object> lockMap = Maps.newHashMap();
         try {
-            lockMap = redisDao.acquireLock(operatorParam.getTaskId().toString(), 60 * 1000L);
+            lockMap = redisDao.acquireLock(RedisKeyUtils.genLoginLockKey(operatorParam.getTaskId()), 60 * 1000L);
             if (lockMap != null) {
                 HttpResult<Map<String, Object>> result;
                 try {
@@ -215,9 +217,9 @@ public class OperatorExtendLoginService {
                 taskTimeService.updateLoginTime(taskId, new Date());
                 return SimpleResult.successResult(result.getData());
             }
-            throw new CrawlerBizException("请求频繁");
+            throw new CrawlerBizException(Constants.REDIS_LOCK_ERROR_MSG);
         } finally {
-            redisDao.releaseLock(operatorParam.getTaskId().toString(), lockMap, 60 * 1000L);
+            redisDao.releaseLock(RedisKeyUtils.genLoginLockKey(operatorParam.getTaskId()), lockMap, 60 * 1000L);
         }
 
     }

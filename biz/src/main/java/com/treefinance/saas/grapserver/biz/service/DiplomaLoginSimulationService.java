@@ -5,8 +5,11 @@ import com.datatrees.rawdatacentral.api.RpcEducationService;
 import com.datatrees.rawdatacentral.domain.education.EducationParam;
 import com.datatrees.rawdatacentral.domain.result.HttpResult;
 import com.google.common.collect.Maps;
+import com.treefinance.saas.grapserver.biz.cache.RedisDao;
 import com.treefinance.saas.grapserver.common.enums.EBizType;
 import com.treefinance.saas.grapserver.common.exception.CrawlerBizException;
+import com.treefinance.saas.grapserver.common.model.Constants;
+import com.treefinance.saas.grapserver.common.utils.RedisKeyUtils;
 import com.treefinance.saas.grapserver.dao.entity.TaskAttribute;
 import com.treefinance.saas.grapserver.facade.enums.ETaskAttribute;
 import com.treefinance.saas.knife.result.SimpleResult;
@@ -40,6 +43,8 @@ public class DiplomaLoginSimulationService {
     private AppBizLicenseService appBizLicenseService;
     @Autowired
     private TaskTimeService taskTimeService;
+    @Autowired
+    private RedisDao redisDao;
 
 
     /**
@@ -49,19 +54,31 @@ public class DiplomaLoginSimulationService {
      * @return
      */
     public Object loginInit(EducationParam educationParam) {
-        HttpResult<Map<String, Object>> result;
+        Map<String, Object> lockMap = Maps.newHashMap();
+        String key = RedisKeyUtils.genRedisLockKey(educationParam.getTaskId(), "diploma_login_init");
         try {
-            result = rpcEducationService.loginInit(educationParam);
-        } catch (Exception e) {
-            logger.error("学信网:调用爬数登陆初始化异常,param={}", JSON.toJSONString(educationParam), e);
-            throw e;
+            lockMap = redisDao.acquireLock(key, 60 * 1000L);
+            if (lockMap != null) {
+                HttpResult<Map<String, Object>> result;
+                try {
+                    result = rpcEducationService.loginInit(educationParam);
+                } catch (Exception e) {
+                    logger.error("学信网:调用爬数登陆初始化异常,param={}", JSON.toJSONString(educationParam), e);
+                    throw e;
+                }
+                if (!result.getStatus()) {
+                    logger.info("学信网:调用爬数登陆初始化失败,param={},result={}",
+                            JSON.toJSONString(educationParam), JSON.toJSONString(result));
+                    throw new CrawlerBizException(result.getMessage());
+                }
+                return SimpleResult.successResult(result.getData());
+            }
+            throw new CrawlerBizException(Constants.REDIS_LOCK_ERROR_MSG);
+        } finally {
+            redisDao.releaseLock(key, lockMap, 60 * 1000L);
+
         }
-        if (!result.getStatus()) {
-            logger.info("学信网:调用爬数登陆初始化失败,param={},result={}",
-                    JSON.toJSONString(educationParam), JSON.toJSONString(result));
-            throw new CrawlerBizException(result.getMessage());
-        }
-        return SimpleResult.successResult(result.getData());
+
     }
 
     /**
@@ -71,27 +88,38 @@ public class DiplomaLoginSimulationService {
      * @return
      */
     public Object loginSubmit(EducationParam param) {
-        HttpResult<Map<String, Object>> result;
+        Map<String, Object> lockMap = Maps.newHashMap();
+        String key = RedisKeyUtils.genLoginLockKey(param.getTaskId());
         try {
-            result = rpcEducationService.loginSubmit(param);
-        } catch (Exception e) {
-            logger.error("学信网:调用爬数登陆异常,param={}", JSON.toJSONString(param), e);
-            throw e;
-        }
-        if (!result.getStatus()) {
-            logger.info("学信网:调用爬数登陆失败,param={},result={}", JSON.toJSONString(param), JSON.toJSONString(result));
-            if (StringUtils.isNotBlank(result.getMessage())) {
-                throw new CrawlerBizException(result.getMessage());
-            } else {
-                throw new CrawlerBizException("登陆失败,请重试");
+            lockMap = redisDao.acquireLock(key, 60 * 1000L);
+            if (lockMap != null) {
+                HttpResult<Map<String, Object>> result;
+                try {
+                    result = rpcEducationService.loginSubmit(param);
+                } catch (Exception e) {
+                    logger.error("学信网:调用爬数登陆异常,param={}", JSON.toJSONString(param), e);
+                    throw e;
+                }
+                if (!result.getStatus()) {
+                    logger.info("学信网:调用爬数登陆失败,param={},result={}", JSON.toJSONString(param), JSON.toJSONString(result));
+                    if (StringUtils.isNotBlank(result.getMessage())) {
+                        throw new CrawlerBizException(result.getMessage());
+                    } else {
+                        throw new CrawlerBizException("登陆失败,请重试");
+                    }
+                }
+                Long taskId = param.getTaskId();
+                String website = param.getWebsiteName();
+                String loginName = param.getLoginName();
+                taskService.updateTask(taskId, loginName, website);
+                taskTimeService.updateLoginTime(taskId, new Date());
+                return SimpleResult.successResult(result.getData());
             }
+            throw new CrawlerBizException(Constants.REDIS_LOCK_ERROR_MSG);
+        } finally {
+            redisDao.releaseLock(key, lockMap, 60 * 1000L);
         }
-        Long taskId = param.getTaskId();
-        String website = param.getWebsiteName();
-        String loginName = param.getLoginName();
-        taskService.updateTask(taskId, loginName, website);
-        taskTimeService.updateLoginTime(taskId, new Date());
-        return SimpleResult.successResult(result.getData());
+
     }
 
     /**
@@ -101,19 +129,31 @@ public class DiplomaLoginSimulationService {
      * @return
      */
     public Object registerInit(EducationParam educationParam) {
-        HttpResult<Map<String, Object>> result;
+        Map<String, Object> lockMap = Maps.newHashMap();
+        String key = RedisKeyUtils.genRedisLockKey(educationParam.getTaskId(), "diploma_register_init");
         try {
-            result = rpcEducationService.registerInit(educationParam);
-        } catch (Exception e) {
-            logger.error("学信网:调用爬数注册初始化异常,param={}", JSON.toJSONString(educationParam), e);
-            throw e;
+            lockMap = redisDao.acquireLock(key, 60 * 1000L);
+            if (lockMap != null) {
+                HttpResult<Map<String, Object>> result;
+                try {
+                    result = rpcEducationService.registerInit(educationParam);
+                } catch (Exception e) {
+                    logger.error("学信网:调用爬数注册初始化异常,param={}", JSON.toJSONString(educationParam), e);
+                    throw e;
+                }
+                if (!result.getStatus()) {
+                    logger.info("学信网:调用爬数注册初始化失败,param={},result={}",
+                            JSON.toJSONString(educationParam), JSON.toJSONString(result));
+                    throw new CrawlerBizException(result.getMessage());
+                }
+                return SimpleResult.successResult(result.getData());
+            }
+            throw new CrawlerBizException(Constants.REDIS_LOCK_ERROR_MSG);
+        } finally {
+            redisDao.releaseLock(key, lockMap, 60 * 1000L);
         }
-        if (!result.getStatus()) {
-            logger.info("学信网:调用爬数注册初始化失败,param={},result={}",
-                    JSON.toJSONString(educationParam), JSON.toJSONString(result));
-            throw new CrawlerBizException(result.getMessage());
-        }
-        return SimpleResult.successResult(result.getData());
+
+
     }
 
     /**
@@ -165,18 +205,29 @@ public class DiplomaLoginSimulationService {
      * @return
      */
     public Object registerSubmit(EducationParam param) {
-        HttpResult<Map<String, Object>> result;
+        Map<String, Object> lockMap = Maps.newHashMap();
+        String key = RedisKeyUtils.genRedisLockKey(param.getTaskId(), "diploma_register_submit");
         try {
-            result = rpcEducationService.registerSubmit(param);
-        } catch (Exception e) {
-            logger.error("学信网:调用爬数注册提交异常,param={}", JSON.toJSONString(param), e);
-            throw e;
+            lockMap = redisDao.acquireLock(key, 60 * 1000L);
+            if (lockMap != null) {
+                HttpResult<Map<String, Object>> result;
+                try {
+                    result = rpcEducationService.registerSubmit(param);
+                } catch (Exception e) {
+                    logger.error("学信网:调用爬数注册提交异常,param={}", JSON.toJSONString(param), e);
+                    throw e;
+                }
+                if (!result.getStatus()) {
+                    logger.info("学信网:调用爬数注册提交失败,param={},result={}", JSON.toJSONString(param), JSON.toJSONString(result));
+                    throw new CrawlerBizException(result.getMessage());
+                }
+                return SimpleResult.successResult(result.getData());
+            }
+            throw new CrawlerBizException(Constants.REDIS_LOCK_ERROR_MSG);
+        } finally {
+            redisDao.releaseLock(key, lockMap, 60 * 1000L);
         }
-        if (!result.getStatus()) {
-            logger.info("学信网:调用爬数注册提交失败,param={},result={}", JSON.toJSONString(param), JSON.toJSONString(result));
-            throw new CrawlerBizException(result.getMessage());
-        }
-        return SimpleResult.successResult(result.getData());
+
     }
 
     /**
