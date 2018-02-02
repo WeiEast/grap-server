@@ -1,16 +1,23 @@
 package com.treefinance.saas.grapserver.biz.service;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import com.datatrees.rawdatacentral.api.CommonPluginApi;
 import com.datatrees.rawdatacentral.api.mail._163.MailServiceApiFor163;
 import com.datatrees.rawdatacentral.api.mail.qq.MailServiceApiForQQ;
+import com.datatrees.rawdatacentral.api.mail.sina.MailServiceApiForSina;
 import com.datatrees.rawdatacentral.domain.plugin.CommonPluginParam;
 import com.datatrees.rawdatacentral.domain.result.HttpResult;
 import com.datatrees.rawdatacentral.domain.result.ProcessResult;
+import com.google.common.collect.Maps;
 import com.treefinance.proxy.api.ProxyProvider;
+import com.treefinance.saas.grapserver.biz.cache.RedisDao;
 import com.treefinance.saas.grapserver.common.exception.CrawlerBizException;
+import com.treefinance.saas.grapserver.common.model.Constants;
+import com.treefinance.saas.grapserver.common.utils.RedisKeyUtils;
 import com.treefinance.saas.knife.result.Results;
 import com.treefinance.saas.knife.result.SimpleResult;
+import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,6 +25,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
+import java.util.Map;
 
 /**
  * 邮箱账单模拟登陆
@@ -33,6 +41,8 @@ public class EmailLoginSimulationService {
     @Autowired
     private MailServiceApiFor163 mailServiceApiFor163;
     @Autowired
+    private MailServiceApiForSina mailServiceApiForSina;
+    @Autowired
     private CommonPluginApi commonPluginApi;
     @Autowired
     private TaskService taskService;
@@ -40,9 +50,11 @@ public class EmailLoginSimulationService {
     private TaskTimeService taskTimeService;
     @Autowired
     private ProxyProvider proxyProvider;
+    @Autowired
+    private RedisDao redisDao;
 
     /**
-     * 登陆(异步)
+     * QQ邮箱登陆(异步)
      *
      * @param param
      * @return
@@ -74,7 +86,7 @@ public class EmailLoginSimulationService {
     }
 
     /**
-     * 刷新二维码(异步)
+     * QQ邮箱刷新二维码(异步)
      *
      * @param param
      * @return
@@ -98,7 +110,7 @@ public class EmailLoginSimulationService {
     }
 
     /**
-     * 查询二维码状态
+     * QQ邮箱查询二维码状态
      *
      * @param param
      * @return
@@ -206,6 +218,94 @@ public class EmailLoginSimulationService {
             taskTimeService.updateLoginTime(param.getTaskId(), new Date());
         }
         return SimpleResult.successResult(result);
+    }
+
+    /**
+     * 新浪邮箱登录初始化
+     *
+     * @param param taskId必传
+     * @return
+     */
+    public Object loginInitForSina(CommonPluginParam param) {
+        HttpResult<Object> result;
+        try {
+            result = mailServiceApiForSina.init(param);
+        } catch (Exception e) {
+            logger.error("邮箱账单:调用爬数登陆初始化异常,param={}", JSON.toJSONString(param), e);
+            throw e;
+        }
+        if (!result.getStatus()) {
+            logger.info("邮箱账单:调用爬数登陆初始化失败,param={},result={}",
+                    JSON.toJSONString(param), JSON.toJSONString(result));
+            throw new CrawlerBizException(result.getMessage());
+        }
+        return SimpleResult.successResult(result.getData());
+    }
+
+
+    /**
+     * 新浪邮箱登录
+     *
+     * @param param
+     * @return
+     */
+    public Object loginForSina(CommonPluginParam param) {
+        Map<String, Object> lockMap = Maps.newHashMap();
+        String key = RedisKeyUtils.genLoginLockKey(param.getTaskId());
+        try {
+            lockMap = redisDao.acquireLock(key, 60 * 1000L);
+            if (lockMap != null) {
+                HttpResult<Object> result;
+                try {
+                    result = mailServiceApiForSina.login(param);
+                } catch (Exception e) {
+                    logger.error("邮箱账单:调用爬数邮箱账单登陆异常,param={}", JSON.toJSONString(param), e);
+                    throw e;
+                }
+                if (!result.getStatus()) {
+                    logger.info("邮箱账单:调用爬数邮箱账单登陆失败,param={},result={}",
+                            JSON.toJSONString(param), JSON.toJSONString(result));
+                    if (StringUtils.isNotBlank(result.getMessage())) {
+                        throw new CrawlerBizException(result.getMessage());
+                    } else {
+                        throw new CrawlerBizException("登陆失败,请重试");
+                    }
+                }
+                if (StringUtils.isNotEmpty(param.getUsername())) {
+                    taskService.setAccountNo(param.getTaskId(), param.getUsername());
+                }
+                taskService.updateWebSite(param.getTaskId(), "sina.com");
+                if (result.getData() != null) {
+                    Map<String, Object> map = JSONObject.parseObject(JSON.toJSONString(result.getData()));
+                    if (MapUtils.isNotEmpty(map)) {
+                        if ("login_success".equals(map.get("directive"))) {
+                            taskTimeService.updateLoginTime(param.getTaskId(), new Date());
+                        }
+                    }
+                }
+                return SimpleResult.successResult(result);
+
+            }
+            throw new CrawlerBizException(Constants.REDIS_LOCK_ERROR_MSG);
+        } finally {
+            redisDao.releaseLock(key, lockMap, 60 * 1000L);
+        }
+    }
+
+    public Object refreshPicCodeForSina(CommonPluginParam param) {
+        HttpResult<Object> result;
+        try {
+            result = mailServiceApiForSina.refeshPicCode(param);
+        } catch (Exception e) {
+            logger.error("邮箱账单:调用爬数刷新图片验证码异常,param={}", JSON.toJSONString(param), e);
+            throw e;
+        }
+        if (!result.getStatus()) {
+            logger.info("邮箱账单:调用爬数刷新图片验证码失败,param={},result={}",
+                    JSON.toJSONString(param), JSON.toJSONString(result));
+            throw new CrawlerBizException(result.getMessage());
+        }
+        return SimpleResult.successResult(result.getData());
     }
 
     /**

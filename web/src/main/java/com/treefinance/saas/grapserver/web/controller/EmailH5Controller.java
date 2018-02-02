@@ -144,6 +144,52 @@ public class EmailH5Controller {
 
     //======新浪邮箱=======
 
+    /**
+     * 登陆初始化
+     *
+     * @param param
+     * @return
+     */
+    @RequestMapping(value = "/sina/login/init", method = {RequestMethod.POST})
+    public Object loginInitForSina(CommonPluginParam param) {
+        logger.info("邮箱账单:登陆初始化,传入参数,param={}", JSON.toJSONString(param));
+        Object result = emailLoginSimulationService.loginInitForSina(param);
+        logger.info("邮箱账单:登陆初始化,返回结果,param={},result={}", JSON.toJSONString(param), JSON.toJSONString(result));
+        return result;
+    }
+
+    /**
+     * 登陆(轮询,有可能需要验证码登录)
+     *
+     * @param param
+     * @return
+     */
+    @RequestMapping(value = "/sina/login/submit", method = {RequestMethod.POST})
+    public Object loginForSina(CommonPluginParam param) {
+        if (param == null || param.getTaskId() == null) {
+            logger.error("邮箱账单:登陆,参数缺失,taskId必传,param={}", JSON.toJSONString(param));
+            throw new IllegalArgumentException("邮箱账单:登陆,参数缺失,taskId必传");
+        }
+        logger.info("邮箱账单:登陆,传入参数,param={}", JSON.toJSONString(param));
+        Object result = emailLoginSimulationService.loginForSina(param);
+        logger.info("邮箱账单:登陆,返回结果,param={},result={}", JSON.toJSONString(param), JSON.toJSONString(result));
+        return result;
+    }
+
+
+    /**
+     * 刷新图片验证码
+     *
+     * @param param
+     * @return
+     */
+    @RequestMapping(value = "/sina/refresh/picCode", method = RequestMethod.POST)
+    public Object refreshPicCodeForSina(CommonPluginParam param) {
+        logger.info("邮箱账单:刷新图片验证码,传入参数,param={}", JSON.toJSONString(param));
+        Object result = emailLoginSimulationService.refreshPicCodeForSina(param);
+        logger.info("邮箱账单:刷新图片验证码,返回结果,param={},result={}", JSON.toJSONString(param), JSON.toJSONString(result));
+        return result;
+    }
 
 
     /**
