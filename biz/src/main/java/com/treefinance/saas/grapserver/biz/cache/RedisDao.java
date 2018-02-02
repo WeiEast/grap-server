@@ -16,24 +16,46 @@
 
 package com.treefinance.saas.grapserver.biz.cache;
 
-import java.util.List;
 import org.springframework.data.redis.core.RedisTemplate;
+
+import java.util.List;
+import java.util.Map;
 
 public interface RedisDao {
 
-  boolean saveListString(final String key, final List<String> valueList);
+    boolean saveListString(final String key, final List<String> valueList);
 
-  boolean saveString2List(final String key, final String value);
+    boolean saveString2List(final String key, final String value);
 
-  String getStringFromList(final String key);
+    String getStringFromList(final String key);
 
-  boolean pushMessage(String submitRedisKey, String messageType);
+    boolean pushMessage(String submitRedisKey, String messageType);
 
-  boolean pushMessage(String submitRedisKey, String messageType, int ttlSeconds);
+    boolean pushMessage(String submitRedisKey, String messageType, int ttlSeconds);
 
-  String pullResult(String obtainRedisKey);
+    String pullResult(String obtainRedisKey);
 
-  RedisTemplate<String, String> getRedisTemplate();
+    RedisTemplate<String, String> getRedisTemplate();
 
-  void deleteKey(String key);
+    void deleteKey(String key);
+
+    /**
+     * 分布式锁,获取锁
+     *
+     * @param lockKey 锁key
+     * @param expired 锁的超时时间(毫秒),超时时间后自动释放锁,防止死锁
+     * @return
+     */
+    Map<String, Object> acquireLock(String lockKey, long expired);
+
+    /**
+     * 分布式锁,释放锁
+     *
+     * @param lockKey 锁key
+     * @param lockMap 比较值,判断所要释放的锁是否是当前锁
+     * @param expired 锁设定的超时时间(毫秒)
+     */
+    void releaseLock(String lockKey, Map<String, Object> lockMap, long expired);
+
+
 }
