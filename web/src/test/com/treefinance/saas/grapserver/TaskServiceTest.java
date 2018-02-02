@@ -108,7 +108,7 @@ public class TaskServiceTest {
         private Long expire;
 
         RedisKeyTask(String lockKey, Long expire) {
-            this.redisDao = (RedisDao) SpringUtils.getBean("redisDaoImpl");
+            this.redisDao = (RedisDao) SpringUtils.getBean("redisDao");
             this.lockKey = lockKey;
             this.expire = expire;
         }

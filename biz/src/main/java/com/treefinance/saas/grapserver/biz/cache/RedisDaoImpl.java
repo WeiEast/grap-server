@@ -31,7 +31,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
-@Component
+@Component("redisDao")
 public class RedisDaoImpl implements RedisDao {
 
     private static final Logger logger = LoggerFactory.getLogger(RedisDaoImpl.class);
@@ -112,7 +112,7 @@ public class RedisDaoImpl implements RedisDao {
         boolean acquired = redisTemplate.opsForValue().setIfAbsent(lockKey, String.valueOf(value));
         if (acquired) {
             map.put("isSuccess", true);
-            map.put("expireTimeStr", value);
+            map.put("expireTimeStr", String.valueOf(value));
             return map;
         } else {
             long oldValue = Long.valueOf(redisTemplate.opsForValue().get(lockKey));
@@ -122,7 +122,7 @@ public class RedisDaoImpl implements RedisDao {
                 //上一个锁超时后会有很多线程去争夺锁，所以只有拿到oldValue的线程才是获得锁的。
                 if (Long.valueOf(getValue) == oldValue) {
                     map.put("isSuccess", true);
-                    map.put("expireTimeStr", value);
+                    map.put("expireTimeStr", String.valueOf(value));
                     return map;
                 } else {
                     return null;
