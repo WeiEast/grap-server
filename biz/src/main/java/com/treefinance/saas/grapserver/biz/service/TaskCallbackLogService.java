@@ -1,6 +1,5 @@
 package com.treefinance.saas.grapserver.biz.service;
 
-import com.google.common.collect.Lists;
 import com.treefinance.commonservice.uid.UidGenerator;
 import com.treefinance.saas.grapserver.common.model.dto.AppCallbackConfigDTO;
 import com.treefinance.saas.grapserver.dao.entity.TaskCallbackLog;
@@ -17,7 +16,6 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * Created by haojiahong on 2017/8/17.
@@ -31,13 +29,18 @@ public class TaskCallbackLogService {
     @Autowired
     private TaskCallbackLogUpdateMapper taskCallbackLogUpdateMapper;
 
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
-    public void insert(String callbackUrl, AppCallbackConfigDTO config, Long taskId, String params, String result, long consumeTime) {
+    @Transactional(propagation = Propagation.REQUIRES_NEW, rollbackFor = Exception.class)
+    public void insert(AppCallbackConfigDTO config, Long taskId, Byte type, String params, String result, long consumeTime) {
         TaskCallbackLog taskCallbackLog = new TaskCallbackLog();
         taskCallbackLog.setId(UidGenerator.getId());
         taskCallbackLog.setTaskId(taskId);
-        taskCallbackLog.setConfigId(Long.valueOf(config.getId()));
-        taskCallbackLog.setUrl(callbackUrl);
+        if (config != null) {
+            taskCallbackLog.setConfigId(Long.valueOf(config.getId()));
+            taskCallbackLog.setUrl(config.getUrl());
+        } else {
+            taskCallbackLog.setConfigId(0L);
+        }
+        taskCallbackLog.setType(type);
         if (StringUtils.isNotBlank(params)) {
             taskCallbackLog.setRequestParam(params.length() > 1000 ? params.substring(0, 1000) : params);
         } else {
