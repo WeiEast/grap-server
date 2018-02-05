@@ -7,7 +7,6 @@ import com.google.common.collect.Maps;
 import com.treefinance.saas.grapserver.biz.common.CallbackSecureHandler;
 import com.treefinance.saas.grapserver.biz.service.*;
 import com.treefinance.saas.grapserver.common.enums.EBizType;
-import com.treefinance.saas.grapserver.facade.enums.EDataType;
 import com.treefinance.saas.grapserver.common.enums.EDirective;
 import com.treefinance.saas.grapserver.common.enums.ETaskStatus;
 import com.treefinance.saas.grapserver.common.exception.CallbackEncryptException;
@@ -22,6 +21,7 @@ import com.treefinance.saas.grapserver.common.utils.RemoteDataDownloadUtils;
 import com.treefinance.saas.grapserver.dao.entity.AppLicense;
 import com.treefinance.saas.grapserver.dao.entity.TaskAttribute;
 import com.treefinance.saas.grapserver.dao.entity.TaskLog;
+import com.treefinance.saas.grapserver.facade.enums.EDataType;
 import com.treefinance.saas.grapserver.facade.enums.EGrapStatus;
 import com.treefinance.saas.grapserver.facade.enums.ETaskAttribute;
 import com.treefinance.saas.knife.result.SimpleResult;
@@ -187,7 +187,7 @@ public abstract class CallbackableDirectiveProcessor {
      * @return
      */
     protected List<AppCallbackConfigDTO> getCallbackConfigs(TaskDTO taskDTO) {
-        return grapDataCallbackService.getCallbackConfigs(taskDTO,EDataType.MAIN_STREAM);
+        return grapDataCallbackService.getCallbackConfigs(taskDTO, EDataType.MAIN_STREAM);
     }
 
     /**
@@ -435,7 +435,7 @@ public abstract class CallbackableDirectiveProcessor {
             // 保存的参数（含dataUrl）
 //            String paramsForLog = this.encryptParams(originalDataMap, appLicense, config);
             // 记录回调日志
-            taskCallbackLogService.insert(callbackUrl, config, directiveDTO.getTaskId(), JSON.toJSONString(originalDataMap), result, consumeTime);
+            taskCallbackLogService.insert(config, directiveDTO.getTaskId(), (byte) 1, JSON.toJSONString(originalDataMap), result, consumeTime);
             // 处理返回结果
             handleRequestResult(directiveDTO, result);
             // 回调处理

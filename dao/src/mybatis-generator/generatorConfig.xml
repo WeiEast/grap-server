@@ -48,20 +48,28 @@
             <property name="enableSubPackages" value="true"/>
         </javaClientGenerator>
 
+        <table tableName="task_callback_log" domainObjectName="TaskCallbackLog"
+               enableSelectPaginationByExample="true"
+               enableBatchInsert="true"
+               enableBatchUpdateByPrimaryKey="true"
+               enableBatchUpdateByPrimaryKeySelective="true">
+            <property name="useActualColumnNames" value="true"/>
+        </table>
+
         <!--<table tableName="app_license" domainObjectName="AppLicense">-->
         <!--<property name="useActualColumnNames" value="true"/>-->
         <!--<generatedKey column="Id" sqlStatement="MySql" identity="true"/>-->
         <!--</table>-->
 
 
-        <table tableName="app_biz_license" domainObjectName="AppBizLicense"
-               enableSelectPaginationByExample="true"
-               enableInsertOrUpdateBySelective="true"
-               enableBatchInsert="true"
-               enableBatchUpdateByPrimaryKey="true"
-               enableBatchUpdateByPrimaryKeySelective="true">
-            <property name="useActualColumnNames" value="true"/>
-        </table>
+        <!--<table tableName="app_biz_license" domainObjectName="AppBizLicense"-->
+               <!--enableSelectPaginationByExample="true"-->
+               <!--enableInsertOrUpdateBySelective="true"-->
+               <!--enableBatchInsert="true"-->
+               <!--enableBatchUpdateByPrimaryKey="true"-->
+               <!--enableBatchUpdateByPrimaryKeySelective="true">-->
+            <!--<property name="useActualColumnNames" value="true"/>-->
+        <!--</table>-->
 
         <!--<table tableName="task_bury_point_log" domainObjectName="TaskBuryPointLog"-->
         <!--enableSelectPaginationByExample="true"-->
