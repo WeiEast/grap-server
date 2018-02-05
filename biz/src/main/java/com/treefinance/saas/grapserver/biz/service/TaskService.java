@@ -77,7 +77,7 @@ public class TaskService {
      * @throws IOException
      */
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
-    public Long createTask(String uniqueId, String appId, Byte bizType, String extra, String website) throws IOException {
+    public Long createTask(String uniqueId, String appId, Byte bizType, String extra, String website, String source) throws IOException {
         // 校验uniqueId
         String excludeAppId = diamondConfig.getExcludeAppId();
         if (StringUtils.isNotEmpty(excludeAppId)) {
@@ -105,6 +105,9 @@ public class TaskService {
             if (MapUtils.isNotEmpty(map)) {
                 setAttribute(id, map);
             }
+        }
+        if (StringUtils.isNotEmpty(source)) {
+            taskAttributeService.insert(id, ETaskAttribute.SOURCE_TYPE.getAttribute(), source);
         }
         // 记录创建日志
         taskLogService.logCreateTask(id);
@@ -275,8 +278,8 @@ public class TaskService {
      * @return
      */
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
-    public Long startTask(String uniqueId, String appid, EBizType type, String deviceInfo, String ipAddress, String coorType, String extra) throws IOException {
-        Long taskId = this.createTask(uniqueId, appid, type.getCode(), extra, extra);
+    public Long startTask(String uniqueId, String appid, EBizType type, String deviceInfo, String ipAddress, String coorType, String extra, String source) throws IOException {
+        Long taskId = this.createTask(uniqueId, appid, type.getCode(), extra, extra, source);
         if (StringUtils.isNotBlank(extra)) {
             ObjectMapper objectMapper = new ObjectMapper();
             Map map = objectMapper.readValue(extra, Map.class);

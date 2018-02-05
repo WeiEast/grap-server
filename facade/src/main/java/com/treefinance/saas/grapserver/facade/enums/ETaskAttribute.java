@@ -10,7 +10,8 @@ public enum ETaskAttribute {
     OPERATOR_GROUP_NAME("groupName", "运营商名称"),
     MOBILE("mobile", "手机号"),
     NAME("name", "姓名"),
-    ID_CARD("idCard", "身份证号");
+    ID_CARD("idCard", "身份证号"),
+    SOURCE_TYPE("sourceType", "请求来源");
 
     private String attribute;
     private String desc;

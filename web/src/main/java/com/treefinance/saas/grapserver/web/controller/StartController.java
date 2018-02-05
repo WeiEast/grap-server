@@ -75,7 +75,7 @@ public class StartController {
                 appid, uniqueId, coorType, deviceInfo, extra, bizType, source);
         EBizType eBizType = EBizType.of(bizType);
         taskLicenseService.verifyCreateTask(appid, uniqueId, eBizType);
-        Long taskId = taskServiceImpl.createTask(uniqueId, appid, eBizType.getCode(), extra, website);
+        Long taskId = taskServiceImpl.createTask(uniqueId, appid, eBizType.getCode(), extra, website, source);
         Map<String, Object> map = Maps.newHashMap();
         map.put("taskid", String.valueOf(taskId));
         map.put("color", merchantConfigService.getColorConfig(appid, style));
