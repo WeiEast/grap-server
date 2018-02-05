@@ -63,29 +63,35 @@ public class EcommerceMonitorService {
         List<TaskLog> taskLogs = taskLogService.queryTaskLog(taskId, ETaskStep.TASK_CREATE.getText(),
                 ETaskStep.LOGIN_SUCCESS.getText(), ETaskStep.CRAWL_SUCCESS.getText(), ETaskStep.DATA_SAVE_SUCCESS.getText(),
                 ETaskStep.CALLBACK_SUCCESS.getText());
-        if (CollectionUtils.isNotEmpty(taskLogs)) {
-            List<String> taskLogMsgs = taskLogs.stream().map(TaskLog::getMsg).collect(Collectors.toList());
-            if (taskLogMsgs.contains(ETaskStep.TASK_CREATE.getText())) {
-                taskSteps.add(new TaskStep(1, EProcessStep.CREATE.getCode(), EProcessStep.CREATE.getName()));
-            }
-            if (taskLogMsgs.contains(ETaskStep.LOGIN_SUCCESS.getText())) {
-                taskSteps.add(new TaskStep(3, EProcessStep.LOGIN.getCode(), EProcessStep.LOGIN.getName()));
-            }
-            if (taskLogMsgs.contains(ETaskStep.CRAWL_SUCCESS.getText())) {
-                taskSteps.add(new TaskStep(4, EProcessStep.CRAWL.getCode(), EProcessStep.CRAWL.getName()));
-            }
-            if (taskLogMsgs.contains(ETaskStep.DATA_SAVE_SUCCESS.getText())) {
-                taskSteps.add(new TaskStep(5, EProcessStep.PROCESS.getCode(), EProcessStep.PROCESS.getName()));
-            }
-            if (taskLogMsgs.contains(ETaskStep.CALLBACK_SUCCESS.getText())) {
-                taskSteps.add(new TaskStep(6, EProcessStep.CALLBACK.getCode(), EProcessStep.CALLBACK.getName()));
-            }
+        List<String> taskLogMsgs = taskLogs.stream().map(TaskLog::getMsg).collect(Collectors.toList());
+        // 任务创建
+        if (taskLogMsgs.contains(ETaskStep.TASK_CREATE.getText())) {
+            taskSteps.add(new TaskStep(1, EProcessStep.CREATE.getCode(), EProcessStep.CREATE.getName()));
         }
-        // 3.H5版本基于埋点数据，判断是否一键登录
-        List<TaskBuryPointLog> taskBuryPointLogs = taskBuryPointLogService.queryTaskBuryPointLogByCode(taskId, "100803");
-        if (CollectionUtils.isNotEmpty(taskBuryPointLogs)) {
+        // 一键登录或者登录成功
+        if (taskLogMsgs.contains(ETaskStep.LOGIN_SUCCESS.getText())) {
             taskSteps.add(new TaskStep(2, EProcessStep.CONFIRM_LOGIN.getCode(), EProcessStep.CONFIRM_LOGIN.getName()));
+            taskSteps.add(new TaskStep(3, EProcessStep.LOGIN.getCode(), EProcessStep.LOGIN.getName()));
+        } else {
+            // H5版本基于埋点数据，判断是否一键登录
+            List<TaskBuryPointLog> taskBuryPointLogs = taskBuryPointLogService.queryTaskBuryPointLogByCode(taskId, "100803");
+            if (CollectionUtils.isNotEmpty(taskBuryPointLogs)) {
+                taskSteps.add(new TaskStep(2, EProcessStep.CONFIRM_LOGIN.getCode(), EProcessStep.CONFIRM_LOGIN.getName()));
+            }
         }
+        // 爬取成功
+        if (taskLogMsgs.contains(ETaskStep.CRAWL_SUCCESS.getText())) {
+            taskSteps.add(new TaskStep(4, EProcessStep.CRAWL.getCode(), EProcessStep.CRAWL.getName()));
+        }
+        // 数据保存成功
+        if (taskLogMsgs.contains(ETaskStep.DATA_SAVE_SUCCESS.getText())) {
+            taskSteps.add(new TaskStep(5, EProcessStep.PROCESS.getCode(), EProcessStep.PROCESS.getName()));
+        }
+        // 回调成功
+        if (taskLogMsgs.contains(ETaskStep.CALLBACK_SUCCESS.getText())) {
+            taskSteps.add(new TaskStep(6, EProcessStep.CALLBACK.getCode(), EProcessStep.CALLBACK.getName()));
+        }
+
         message.setTaskSteps(taskSteps);
 
         // 4.发送消息
