@@ -325,8 +325,8 @@ public class EmailLoginSimulationService {
                 Map<Object, Object> map = redisDao.getRedisTemplate().opsForHash().entries(key);
                 //记录账号
                 taskService.setAccountNo(Long.valueOf(map.get("taskId").toString()), map.get("userName").toString());
-                //记录website
-                taskService.updateWebSite(Long.valueOf(map.get("taskId").toString()), map.get("website").toString());
+                //记录webSite
+                taskService.updateWebSite(Long.valueOf(map.get("taskId").toString()), map.get("webSite").toString());
                 //更新登录成功时间
                 taskTimeService.updateLoginTime(Long.valueOf(map.get("taskId").toString()), new Date());
             }
