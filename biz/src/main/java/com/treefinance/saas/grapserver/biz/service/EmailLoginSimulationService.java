@@ -9,6 +9,7 @@ import com.datatrees.rawdatacentral.api.mail.sina.MailServiceApiForSina;
 import com.datatrees.rawdatacentral.domain.plugin.CommonPluginParam;
 import com.datatrees.rawdatacentral.domain.result.HttpResult;
 import com.datatrees.rawdatacentral.domain.result.ProcessResult;
+import com.google.common.base.Joiner;
 import com.google.common.collect.Maps;
 import com.treefinance.proxy.api.ProxyProvider;
 import com.treefinance.saas.grapserver.biz.cache.RedisDao;
@@ -26,6 +27,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.Date;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 /**
  * 邮箱账单模拟登陆
@@ -35,6 +37,8 @@ import java.util.Map;
 public class EmailLoginSimulationService {
 
     private static final Logger logger = LoggerFactory.getLogger(EmailLoginSimulationService.class);
+
+    private static final String EMAIL_LOGIN_PROCESS_KEY_PREFIX = "email_login_key";
 
     @Autowired
     private MailServiceApiForQQ mailServiceApiForQQ;
@@ -76,12 +80,7 @@ public class EmailLoginSimulationService {
                 throw new CrawlerBizException("登陆失败,请重试");
             }
         }
-        if (StringUtils.isNotEmpty(param.getUsername())) {
-            taskService.setAccountNo(param.getTaskId(), param.getUsername());
-        }
-        //// TODO: 2018/1/9 暂时写死qq.com
-        taskService.updateWebSite(param.getTaskId(), "qq.com");
-        taskTimeService.updateLoginTime(param.getTaskId(), new Date());
+        logEmailLoginInfo(param.getTaskId(), param.getUsername(), "qq.com", result.getData());
         return SimpleResult.successResult(result);
     }
 
@@ -160,11 +159,7 @@ public class EmailLoginSimulationService {
                 throw new CrawlerBizException("登陆失败,请重试");
             }
         }
-        if (StringUtils.isNotEmpty(param.getUsername())) {
-            taskService.setAccountNo(param.getTaskId(), param.getUsername());
-        }
-        taskService.updateWebSite(param.getTaskId(), "163.com");
-        taskTimeService.updateLoginTime(param.getTaskId(), new Date());
+        logEmailLoginInfo(param.getTaskId(), param.getUsername(), "163.com", result.getData());
         return SimpleResult.successResult(result);
     }
 
@@ -323,6 +318,20 @@ public class EmailLoginSimulationService {
             logger.error("邮箱账单:调用爬数邮箱账单轮询处理状态异常,processId={},taskId={}", processId, taskId, e);
             throw e;
         }
+        if (StringUtils.equalsIgnoreCase("SUCCESS", result.getProcessStatus())) {
+            String key = Joiner.on(":").join(EMAIL_LOGIN_PROCESS_KEY_PREFIX, processId);
+            boolean hasKey = redisDao.getRedisTemplate().hasKey(key);
+            if (hasKey) {
+                Map<Object, Object> map = redisDao.getRedisTemplate().opsForHash().entries(key);
+                //记录账号
+                taskService.setAccountNo(Long.valueOf(map.get("taskId").toString()), map.get("userName").toString());
+                //记录website
+                taskService.updateWebSite(Long.valueOf(map.get("taskId").toString()), map.get("website").toString());
+                //更新登录成功时间
+                taskTimeService.updateLoginTime(Long.valueOf(map.get("taskId").toString()), new Date());
+            }
+
+        }
         return SimpleResult.successResult(result);
     }
 
@@ -344,5 +353,33 @@ public class EmailLoginSimulationService {
         return Results.newSuccessResult(flag);
     }
 
+
+    /**
+     * 账号密码登录,记录登录信息
+     *
+     * @param taskId
+     * @param userName
+     * @param webSite
+     * @param result
+     */
+    private void logEmailLoginInfo(Long taskId, String userName, String webSite, Object result) {
+        try {
+            JSONObject jsonObject = JSON.parseObject(JSON.toJSONString(result));
+            Long processId = jsonObject.getLong("processId");
+            if (StringUtils.isNotEmpty(userName) && processId != null) {
+                String key = Joiner.on(":").join(EMAIL_LOGIN_PROCESS_KEY_PREFIX, processId);
+                Map<String, Object> map = Maps.newHashMap();
+                map.put("taskId", taskId);
+                map.put("userName", userName);
+                map.put("webSite", webSite);
+                redisDao.getRedisTemplate().opsForHash().putAll(key, map);
+                if (redisDao.getRedisTemplate().getExpire(key) == -1) {
+                    redisDao.getRedisTemplate().expire(key, 10, TimeUnit.MINUTES);
+                }
+            }
+        } catch (Exception e) {
+            logger.error("邮箱账单:账号密码登陆时,记录登录信息异常.taskId={}", taskId, e);
+        }
+    }
 
 }
