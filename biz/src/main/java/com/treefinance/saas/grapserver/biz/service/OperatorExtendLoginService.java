@@ -208,7 +208,7 @@ public class OperatorExtendLoginService {
                     logger.info("运营商:调用爬数运营商登陆失败,operatorParam={},result={}",
                             JSON.toJSONString(operatorParam), JSON.toJSONString(result));
                     if (StringUtils.isNotBlank(result.getMessage())) {
-                        throw new CrawlerBizException(result.getMessage());
+                        throw new CrawlerBizException(result.getResponseCode(), result.getMessage());
                     } else {
                         throw new CrawlerBizException("登陆失败,请重试");
                     }
