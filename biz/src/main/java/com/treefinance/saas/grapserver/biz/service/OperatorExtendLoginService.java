@@ -154,7 +154,7 @@ public class OperatorExtendLoginService {
         if (!result.getStatus()) {
             logger.info("运营商:调用爬数刷新图片验证码失败,operatorParam={},result={}",
                     JSON.toJSONString(operatorParam), JSON.toJSONString(result));
-            throw new CrawlerBizException(result.getMessage());
+            throw new CrawlerBizException(result.getResponseCode(), result.getMessage());
         }
         return SimpleResult.successResult(result.getData());
     }
@@ -176,7 +176,7 @@ public class OperatorExtendLoginService {
         if (!result.getStatus()) {
             logger.info("运营商:调用爬数刷新短信验证码失败,operatorParam={},result={}",
                     JSON.toJSONString(operatorParam), JSON.toJSONString(result));
-            throw new CrawlerBizException(result.getMessage());
+            throw new CrawlerBizException(result.getResponseCode(), result.getMessage());
         }
         return SimpleResult.successResult(result.getData());
     }
@@ -199,7 +199,7 @@ public class OperatorExtendLoginService {
             logger.info("运营商:调用爬数运营商登陆失败,operatorParam={},result={}",
                     JSON.toJSONString(operatorParam), JSON.toJSONString(result));
             if (StringUtils.isNotBlank(result.getMessage())) {
-                throw new CrawlerBizException(result.getMessage());
+                throw new CrawlerBizException(result.getResponseCode(), result.getMessage());
             } else {
                 throw new CrawlerBizException("登陆失败,请重试");
             }
