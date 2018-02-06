@@ -369,7 +369,7 @@ public class EmailLoginSimulationService {
             if (StringUtils.isNotEmpty(userName) && processId != null) {
                 String key = Joiner.on(":").join(EMAIL_LOGIN_PROCESS_KEY_PREFIX, processId);
                 Map<String, Object> map = Maps.newHashMap();
-                map.put("taskId", taskId);
+                map.put("taskId", taskId + "");
                 map.put("userName", userName);
                 map.put("webSite", webSite);
                 redisDao.getRedisTemplate().opsForHash().putAll(key, map);
