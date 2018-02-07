@@ -17,6 +17,10 @@ public class CrawlerBizException extends BizException {
         super(message);
     }
 
+    public CrawlerBizException(int code, String message) {
+        super(message, code);
+    }
+
     public CrawlerBizException(String message, Throwable cause) {
         super(message, cause);
     }
