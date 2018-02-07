@@ -72,5 +72,4 @@ public class TaskCallbackLogService {
         criteria.andTaskIdEqualTo(taskId);
         return taskCallbackLogMapper.selectByExample(taskCallbackLogCriteria);
     }
-
 }

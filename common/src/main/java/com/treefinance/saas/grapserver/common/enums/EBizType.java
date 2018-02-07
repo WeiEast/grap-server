@@ -85,4 +85,19 @@ public enum EBizType {
         }
         return null;
     }
+
+    /**
+     * 根据编码获取
+     *
+     * @param code
+     * @return
+     */
+    public static EBizType getByCode(Byte code) {
+        for (EBizType item : EBizType.values()) {
+            if (item != EMAIL_H5 && item.code.equals(code)) {
+                return item;
+            }
+        }
+        return null;
+    }
 }
