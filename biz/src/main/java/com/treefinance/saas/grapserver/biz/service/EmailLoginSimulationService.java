@@ -268,7 +268,7 @@ public class EmailLoginSimulationService {
                 }
                 if (result.getData() != null) {
                     Map<String, Object> map = JSONObject.parseObject(JSON.toJSONString(result.getData()));
-                    if (MapUtils.isNotEmpty(map)) {
+                    if (MapUtils.isNotEmpty(map) && map.get("directive") != null) {
                         if (StringUtils.equalsIgnoreCase("login_success", map.get("directive").toString())) {
                             if (StringUtils.isNotEmpty(param.getUsername())) {
                                 taskService.setAccountNo(param.getTaskId(), param.getUsername());
