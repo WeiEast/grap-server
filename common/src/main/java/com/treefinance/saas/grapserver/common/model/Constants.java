@@ -37,6 +37,10 @@ public interface Constants {
      * 回调失败错误提示信息
      */
     String CALLBACK_FAIL_MSG = "导入失败，请稍后再试。";
+    /**
+     * redis锁获取失败错误提示信息
+     */
+    String REDIS_LOCK_ERROR_MSG = "请求频繁,请稍后再试";
 
     /**
      * 错误信息字段名
