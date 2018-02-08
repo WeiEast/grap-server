@@ -148,6 +148,7 @@ public class GlobalExceptionAdvice extends ResponseEntityExceptionHandler {
             result.setErrorMsg("参数异常");
         } else if (ex instanceof BizException) {
             result.setErrorMsg(ex.getMessage());
+            result.setErrorCode(((BizException) ex).getCode());
         }
         if (StringUtils.isEmpty(result.getErrorMsg())) {
             result.setErrorMsg("系统忙，请稍后重试");//暂时
