@@ -67,13 +67,13 @@ public class GrapDataDowloadService {
     public String getEncryptGrapData(String appId, String bizType, Long taskId) throws ForbiddenException {
         TaskDTO taskDTO = taskService.getById(taskId);
         if (taskDTO == null) {
-            throw new AppIdUncheckException("taskId不存在");
-        }
-        if (!taskService.isTaskCompleted(taskDTO)) {
-            throw new MarkBaseException("0", "任务进行中");
+            throw new MarkBaseException("0", "taskId不存在");
         }
         if (!taskDTO.getAppId().equals(appId)) {
             throw new MarkBaseException("0", "非授权用户taskId");
+        }
+        if (!taskService.isTaskCompleted(taskDTO)) {
+            throw new MarkBaseException("0", "任务进行中");
         }
         // 校验范围权限
         EBizType ebizType = EBizType.of(bizType);
