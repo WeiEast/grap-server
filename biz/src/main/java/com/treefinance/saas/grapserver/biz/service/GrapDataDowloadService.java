@@ -67,21 +67,21 @@ public class GrapDataDowloadService {
     public String getEncryptGrapData(String appId, String bizType, Long taskId) throws ForbiddenException {
         TaskDTO taskDTO = taskService.getById(taskId);
         if (taskDTO == null) {
-            throw new MarkBaseException("0", "taskId不存在");
+            throw new BizException("taskId不存在");
         }
         if (!taskDTO.getAppId().equals(appId)) {
-            throw new MarkBaseException("0", "非授权用户taskId");
+            throw new BizException("非授权用户taskId");
         }
         if (!taskService.isTaskCompleted(taskDTO)) {
-            throw new MarkBaseException("0", "任务进行中");
+            throw new BizException("任务进行中");
         }
         // 校验范围权限
         EBizType ebizType = EBizType.of(bizType);
         if (ebizType == null) {
-            throw new MarkBaseException("0", "未开通相关业务");
+            throw new BizException("未开通相关业务");
         }
         if (!ebizType.getCode().equals(taskDTO.getBizType())) {
-            throw new MarkBaseException("0", "非所属业务taskId");
+            throw new BizException("非所属业务taskId");
         }
         taskLicenseService.verifyCreateTask(appId, taskDTO.getUniqueId(), EBizType.of(bizType));
         // 1.获取回调日志中的数据
