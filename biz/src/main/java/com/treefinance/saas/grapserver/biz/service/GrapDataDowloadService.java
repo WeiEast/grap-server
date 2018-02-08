@@ -6,10 +6,8 @@ import com.google.common.collect.Maps;
 import com.treefinance.saas.grapserver.biz.common.CallbackSecureHandler;
 import com.treefinance.saas.grapserver.common.enums.EBizType;
 import com.treefinance.saas.grapserver.common.enums.ETaskStatus;
-import com.treefinance.saas.grapserver.common.exception.AppIdUncheckException;
-import com.treefinance.saas.grapserver.common.exception.BizException;
 import com.treefinance.saas.grapserver.common.exception.ForbiddenException;
-import com.treefinance.saas.grapserver.common.exception.base.MarkBaseException;
+import com.treefinance.saas.grapserver.common.exception.ParamsCheckException;
 import com.treefinance.saas.grapserver.common.model.dto.AppCallbackConfigDTO;
 import com.treefinance.saas.grapserver.common.model.dto.TaskDTO;
 import com.treefinance.saas.grapserver.dao.entity.AppLicense;
@@ -67,21 +65,21 @@ public class GrapDataDowloadService {
     public String getEncryptGrapData(String appId, String bizType, Long taskId) throws ForbiddenException {
         TaskDTO taskDTO = taskService.getById(taskId);
         if (taskDTO == null) {
-            throw new BizException("taskId不存在");
+            throw new ParamsCheckException("taskId不存在");
         }
         if (!taskDTO.getAppId().equals(appId)) {
-            throw new BizException("非授权用户taskId");
+            throw new ParamsCheckException("非授权用户taskId");
         }
         if (!taskService.isTaskCompleted(taskDTO)) {
-            throw new BizException("任务进行中");
+            throw new ParamsCheckException("任务进行中");
         }
         // 校验范围权限
         EBizType ebizType = EBizType.of(bizType);
         if (ebizType == null) {
-            throw new BizException("未开通相关业务");
+            throw new ParamsCheckException("未开通相关业务");
         }
         if (!ebizType.getCode().equals(taskDTO.getBizType())) {
-            throw new BizException("非所属业务taskId");
+            throw new ParamsCheckException("非所属业务taskId");
         }
         taskLicenseService.verifyCreateTask(appId, taskDTO.getUniqueId(), EBizType.of(bizType));
         // 1.获取回调日志中的数据
