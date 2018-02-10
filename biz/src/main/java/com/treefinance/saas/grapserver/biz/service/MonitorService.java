@@ -33,7 +33,6 @@ public class MonitorService {
      *
      * @param taskDTO
      */
-    @Async
     public void sendMonitorMessage(TaskDTO taskDTO) {
         logger.info("TransactionSynchronizationManager: start task={}", JSON.toJSONString(taskDTO));
         // 事务完成之后，发送消息
