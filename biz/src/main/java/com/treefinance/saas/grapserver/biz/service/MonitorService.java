@@ -36,18 +36,12 @@ public class MonitorService {
      * @param taskDTO
      */
     public void sendMonitorMessage(TaskDTO taskDTO) {
-        Byte status = taskDTO.getStatus();
-        // 仅成功、失败、取消发送任务
-        if (!ETaskStatus.SUCCESS.getStatus().equals(status)
-                && !ETaskStatus.FAIL.getStatus().equals(status)
-                && !ETaskStatus.CANCEL.getStatus().equals(status)) {
-            return;
-        }
+        logger.info("TransactionSynchronizationManager: start task={}", JSON.toJSONString(taskDTO));
         // 事务完成之后，发送消息
         TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronizationAdapter() {
             @Override
             public void afterCommit() {
-                logger.info("TransactionSynchronizationManager: task={}", JSON.toJSONString(taskDTO));
+                logger.info("TransactionSynchronizationManager: running task={}", JSON.toJSONString(taskDTO));
                 doSendMonitorMessage(taskDTO);
             }
         });
@@ -56,6 +50,7 @@ public class MonitorService {
 
     @Async
     public void doSendMonitorMessage(TaskDTO taskDTO) {
+        taskDTO = taskService.getById(taskDTO.getId());
         Byte status = taskDTO.getStatus();
         // 仅成功、失败、取消发送任务
         if (!ETaskStatus.SUCCESS.getStatus().equals(status)
