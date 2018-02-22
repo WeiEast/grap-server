@@ -40,11 +40,11 @@ public class MonitorService {
             logger.info("TransactionSynchronizationManager: start task={}", JSON.toJSONString(taskDTO));
             // 事务完成之后，发送消息
             TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronizationAdapter() {
-                @Override
-                public void afterCommit() {
-                    logger.info("TransactionSynchronizationManager: running task={}", JSON.toJSONString(taskDTO));
-                    doSendMonitorMessage(taskDTO);
-                }
+//                @Override
+//                public void afterCommit() {
+//                    logger.info("TransactionSynchronizationManager: running task={}", JSON.toJSONString(taskDTO));
+//                    doSendMonitorMessage(taskDTO);
+//                }
 
                 @Override
                 public void afterCompletion(int status) {
@@ -57,6 +57,7 @@ public class MonitorService {
                         statusCode = "STATUS_UNKNOWN";
                     }
                     logger.info("TransactionSynchronizationManager: completion : status={},statusCode={}, task={}", status, statusCode, JSON.toJSONString(taskDTO));
+                    doSendMonitorMessage(taskDTO);
                 }
             });
 
