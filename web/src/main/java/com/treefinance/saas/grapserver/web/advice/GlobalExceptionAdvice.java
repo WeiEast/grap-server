@@ -126,7 +126,7 @@ public class GlobalExceptionAdvice extends ResponseEntityExceptionHandler {
         logger.error(logBuffer.toString(), ex);
     }
 
-    private SimpleResult buildBody(Exception ex) {
+    private Object buildBody(Exception ex) {
         logger.error("系统异常", ex);
         SimpleResult result = new SimpleResult();
         if (ex instanceof ForbiddenException) {
@@ -147,6 +147,14 @@ public class GlobalExceptionAdvice extends ResponseEntityExceptionHandler {
         } else if (ex instanceof MissingServletRequestParameterException) {
             result.setErrorMsg("参数异常");
         } else if (ex instanceof BizException) {
+            result.setErrorMsg(ex.getMessage());
+            Map<String, Object> map = JSON.parseObject(JSON.toJSONString(result));
+            map.put("errorCode", ((BizException) ex).getCode());
+            if (map.get("errorMsg") == null) {
+                map.put("errorMsg", "系统忙，请稍后重试");
+            }
+            return map;
+        } else if (ex instanceof ParamsCheckException) {
             result.setErrorMsg(ex.getMessage());
         }
         if (StringUtils.isEmpty(result.getErrorMsg())) {

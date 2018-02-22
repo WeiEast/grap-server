@@ -16,18 +16,22 @@
 
 package com.treefinance.saas.grapserver.biz.cache;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.TimeUnit;
-
+import com.treefinance.saas.grapserver.biz.cache.redis.MoreRedisTemplate;
 import com.treefinance.saas.grapserver.common.model.Constants;
+import org.apache.commons.collections.MapUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
 
-@Component
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.TimeUnit;
+
+@Component("redisDao")
 public class RedisDaoImpl implements RedisDao {
 
     private static final Logger logger = LoggerFactory.getLogger(RedisDaoImpl.class);
@@ -35,6 +39,8 @@ public class RedisDaoImpl implements RedisDao {
 
     @Autowired
     RedisTemplate<String, String> redisTemplate;
+    @Autowired
+    MoreRedisTemplate moreRedisTemplate;
 
     @Override
     public boolean saveString2List(final String key, final String value) {
@@ -80,10 +86,11 @@ public class RedisDaoImpl implements RedisDao {
         }
         return true;
     }
-    
+
     /**
      * @return the redisTemplate
      */
+    @Override
     public RedisTemplate<String, String> getRedisTemplate() {
         return redisTemplate;
     }
@@ -96,6 +103,58 @@ public class RedisDaoImpl implements RedisDao {
     @Override
     public void deleteKey(String key) {
         redisTemplate.delete(key);
+    }
+
+    @Override
+    public Map<String, Object> acquireLock(String lockKey, long expired) {
+        Map<String, Object> map = new HashMap<>();
+        long value = System.currentTimeMillis() + expired + 1;
+        boolean acquired = redisTemplate.opsForValue().setIfAbsent(lockKey, String.valueOf(value));
+        if (acquired) {
+            map.put("isSuccess", true);
+            map.put("expireTimeStr", String.valueOf(value));
+            return map;
+        } else {
+            long oldValue = Long.valueOf(redisTemplate.opsForValue().get(lockKey));
+            //如果其他资源之前获得锁已经超时
+            if (oldValue < System.currentTimeMillis()) {
+                String getValue = redisTemplate.opsForValue().getAndSet(lockKey, String.valueOf(value));
+                //上一个锁超时后会有很多线程去争夺锁，所以只有拿到oldValue的线程才是获得锁的。
+                if (Long.valueOf(getValue) == oldValue) {
+                    map.put("isSuccess", true);
+                    map.put("expireTimeStr", String.valueOf(value));
+                    return map;
+                } else {
+                    return null;
+                }
+            } else {
+                return null;
+            }
+        }
+    }
+
+    @Override
+    public void releaseLock(String lockKey, Map<String, Object> lockMap, long expireMsecs) {
+        if (MapUtils.isEmpty(lockMap)) {
+            return;
+        }
+        Boolean locked = (Boolean) lockMap.get("isSuccess");
+        String lockExpiresStr = (String) lockMap.get("expireTimeStr");
+        if (locked) {
+            String oldValueStr = redisTemplate.opsForValue().get(lockKey);
+            if (oldValueStr != null) {
+                // 竞争的 redis.getSet 导致其时间跟原有的由误差，若误差在 超时范围内，说明仍旧是 原来的锁
+                Long diff = Long.parseLong(lockExpiresStr) - Long.parseLong(oldValueStr);
+                if (diff < expireMsecs) {
+                    redisTemplate.delete(lockKey);
+                } else {
+                    // 这个进程的锁超时了，被新的进程锁获得替换了。则不进行任何操作。打印日志，方便后续跟进
+                    logger.error("the lockKey over time.lockKey:{}.expireMsecs:{},over time is",
+                            lockKey, expireMsecs, System.currentTimeMillis() - Long.valueOf(lockExpiresStr));
+                }
+            }
+        }
+
     }
 
 

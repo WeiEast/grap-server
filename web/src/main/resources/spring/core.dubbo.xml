@@ -18,13 +18,21 @@
                      cluster="failfast"/>
 
     <dubbo:reference id="crawlerOperatorService" interface="com.datatrees.rawdatacentral.api.CrawlerOperatorService"
-                     timeout="20000" cluster="failfast"/>
+                     timeout="20000"/>
 
     <dubbo:reference id="rpcEducationService" interface="com.datatrees.rawdatacentral.api.RpcEducationService"
-                     timeout="20000" cluster="failfast"/>
+                     timeout="20000"/>
 
     <dubbo:reference id="mailServiceApiForQQ" interface="com.datatrees.rawdatacentral.api.mail.qq.MailServiceApiForQQ"
-                     timeout="20000" cluster="failfast"/>
+                     timeout="20000"/>
+
+    <dubbo:reference id="mailServiceApiFor163"
+                     interface="com.datatrees.rawdatacentral.api.mail._163.MailServiceApiFor163"
+                     timeout="20000"/>
+
+    <dubbo:reference id="mailServiceApiForSina"
+                     interface="com.datatrees.rawdatacentral.api.mail.sina.MailServiceApiForSina"
+                     timeout="20000"/>
 
     <dubbo:reference id="commonPluginApi" interface="com.datatrees.rawdatacentral.api.CommonPluginApi"/>
 

@@ -1,5 +1,6 @@
 package com.treefinance.saas.grapserver.biz.service;
 
+import com.alibaba.fastjson.JSON;
 import com.treefinance.saas.grapserver.biz.processor.OperatorMonitorSpecialProcessor;
 import com.treefinance.saas.grapserver.biz.processor.request.OperatorMonitorSpecialRequest;
 import com.treefinance.saas.grapserver.common.enums.EBizType;
@@ -10,6 +11,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.support.TransactionSynchronizationAdapter;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 /**
  * Created by yh-treefinance on 2017/6/20.
@@ -32,8 +35,27 @@ public class MonitorService {
      *
      * @param taskDTO
      */
-    @Async
     public void sendMonitorMessage(TaskDTO taskDTO) {
+        try {
+            logger.info("TransactionSynchronizationManager: start task={}", JSON.toJSONString(taskDTO));
+            // 事务完成之后，发送消息
+            TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronizationAdapter() {
+                @Override
+                public void afterCommit() {
+                    logger.info("TransactionSynchronizationManager: running task={}", JSON.toJSONString(taskDTO));
+                    doSendMonitorMessage(taskDTO);
+                }
+            });
+
+        } catch (Exception e) {
+            logger.error("sendMonitorMessage failed : task={},", JSON.toJSONString(taskDTO), e);
+        }
+    }
+
+
+    @Async
+    public void doSendMonitorMessage(TaskDTO taskDTO) {
+        taskDTO = taskService.getById(taskDTO.getId());
         Byte status = taskDTO.getStatus();
         // 仅成功、失败、取消发送任务
         if (!ETaskStatus.SUCCESS.getStatus().equals(status)
@@ -54,7 +76,6 @@ public class MonitorService {
                 this.sendEcommerceMonitorMessage(taskDTO);
                 break;
         }
-
     }
 
 
@@ -64,16 +85,11 @@ public class MonitorService {
      * @param taskDTO
      */
     private void sendTaskOperatorMonitorMessage(TaskDTO taskDTO) {
-        if (taskDTO == null || taskDTO.getId() == null) {
-            return;
-        }
-        taskDTO = taskService.getById(taskDTO.getId());
-        if (taskDTO != null && EBizType.OPERATOR.getCode().equals(taskDTO.getBizType())) {
-            OperatorMonitorSpecialRequest request = new OperatorMonitorSpecialRequest();
-            request.setTaskId(taskDTO.getId());
-            request.setTask(taskDTO);
-            operatorMonitorSpecialProcessor.doService(request);
-        }
+        OperatorMonitorSpecialRequest request = new OperatorMonitorSpecialRequest();
+        request.setTaskId(taskDTO.getId());
+        request.setTask(taskDTO);
+        operatorMonitorSpecialProcessor.doService(request);
+        logger.info("sendTaskOperatorMonitorMessage: task={},request={}", JSON.toJSONString(taskDTO), JSON.toJSONString(request));
     }
 
 
@@ -83,9 +99,7 @@ public class MonitorService {
      * @param taskDTO
      */
     private void sendEcommerceMonitorMessage(TaskDTO taskDTO) {
-        if (taskDTO == null || taskDTO.getId() == null) {
-            return;
-        }
         ecommerceMonitorService.sendMessage(taskDTO);
+        logger.info("sendEcommerceMonitorMessage: task={},request={}", JSON.toJSONString(taskDTO), JSON.toJSONString(taskDTO));
     }
 }

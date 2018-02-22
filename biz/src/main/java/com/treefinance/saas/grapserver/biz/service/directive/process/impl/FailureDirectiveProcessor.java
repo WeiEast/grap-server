@@ -65,7 +65,11 @@ public class FailureDirectiveProcessor extends AbstractDirectiveProcessor {
         try {
             if (BizTypeEnum.valueOfType(BizTypeEnum.OPERATOR).equals(taskDTO.getBizType())) {
                 Map<String, Object> remarkMap = JSON.parseObject(directiveDTO.getRemark());
-                remarkMap.put("errorMsg", Constants.OPERATOR_TASK_FAIL_MSG);
+                //如果是运营商维护导致任务失败,爬数发来的任务指令中,directiveDTO的remark字段为{"errorMsg","当前运营商正在维护中，请稍后重试"}.
+                //如果是其他原因导致的任务失败,则返回下面的默认值.
+                if (remarkMap.get("errorMsg") == null) {
+                    remarkMap.put("errorMsg", Constants.OPERATOR_TASK_FAIL_MSG);
+                }
                 directiveDTO.setRemark(JSON.toJSONString(remarkMap));
                 logger.info("handle task-fail-msg: result={},directiveDTO={}", JSON.toJSONString(directiveDTO));
             }
