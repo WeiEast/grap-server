@@ -45,6 +45,19 @@ public class MonitorService {
                     logger.info("TransactionSynchronizationManager: running task={}", JSON.toJSONString(taskDTO));
                     doSendMonitorMessage(taskDTO);
                 }
+
+                @Override
+                public void afterCompletion(int status) {
+                    String statusCode = "";
+                    if (status == 0) {
+                        statusCode = "STATUS_COMMITTED";
+                    } else if (status == 1) {
+                        statusCode = "STATUS_ROLLED_BACK";
+                    } else if (status == 2) {
+                        statusCode = "STATUS_UNKNOWN";
+                    }
+                    logger.info("TransactionSynchronizationManager: completion : status={},statusCode={}, task={}", status, statusCode, JSON.toJSONString(taskDTO));
+                }
             });
 
         } catch (Exception e) {
