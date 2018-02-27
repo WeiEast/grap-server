@@ -54,6 +54,9 @@
     <dubbo:reference id="fundService" interface="com.treefinance.saas.processor.thirdparty.facade.fund.FundService"
                      check="false" timeout="60000" cluster="failfast"/>
 
+    <dubbo:reference interface="com.datatrees.rawdatacentral.api.CrawlerTaskService"
+                     id="crawlerTaskService"/>
+
 
     <!--生产者-->
     <dubbo:service interface="com.treefinance.saas.grapserver.facade.service.TaskFacade" ref="taskFacade"/>
