@@ -83,6 +83,39 @@ public class EmailH5Controller {
         return result;
     }
 
+    //=====qq企业邮箱=====
+    /**
+     * 登陆(异步)
+     *
+     * @param param
+     * @return
+     */
+    @RequestMapping(value = {"/qq/exmail/login/submit"}, method = {RequestMethod.POST})
+    public Object loginForQQExMail(CommonPluginParam param, String userIp) {
+        logger.info("邮箱账单:登陆,传入参数,param={},userIp={}", JSON.toJSONString(param), userIp);
+        if (param == null || param.getTaskId() == null) {
+            logger.error("邮箱账单:登陆,参数缺失,taskId必传,param={}", JSON.toJSONString(param));
+            throw new IllegalArgumentException("邮箱账单:登陆,参数缺失,taskId必传");
+        }
+        param.setUserIp(userIp);
+        Object result = emailLoginSimulationService.loginForQQExMail(param);
+        logger.info("邮箱账单:登陆,返回结果,param={},result={}", JSON.toJSONString(param), JSON.toJSONString(result));
+        return result;
+    }
+
+    /**
+     * 登陆初始化
+     *
+     * @param param
+     * @return
+     */
+    @RequestMapping(value = "/qq/exmail/login/init", method = {RequestMethod.POST})
+    public Object loginInitForQQExMail(CommonPluginParam param) {
+        logger.info("邮箱账单:登陆初始化,传入参数,param={}", JSON.toJSONString(param));
+        Object result = emailLoginSimulationService.loginInitForQQExMail(param);
+        logger.info("邮箱账单:登陆初始化,返回结果,param={},result={}", JSON.toJSONString(param), JSON.toJSONString(result));
+        return result;
+    }
 
     //=====163邮箱=====
 
@@ -190,6 +223,8 @@ public class EmailH5Controller {
         logger.info("邮箱账单:刷新图片验证码,返回结果,param={},result={}", JSON.toJSONString(param), JSON.toJSONString(result));
         return result;
     }
+
+
 
 
     //=============通用接口==============

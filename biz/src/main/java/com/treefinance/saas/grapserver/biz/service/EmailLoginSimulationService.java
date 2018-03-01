@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.datatrees.rawdatacentral.api.CommonPluginApi;
 import com.datatrees.rawdatacentral.api.mail._163.MailServiceApiFor163;
+import com.datatrees.rawdatacentral.api.mail.exmail_qq.MailServiceApiForExMailQQ;
 import com.datatrees.rawdatacentral.api.mail.qq.MailServiceApiForQQ;
 import com.datatrees.rawdatacentral.api.mail.sina.MailServiceApiForSina;
 import com.datatrees.rawdatacentral.domain.plugin.CommonPluginParam;
@@ -47,6 +48,8 @@ public class EmailLoginSimulationService {
     @Autowired
     private MailServiceApiForSina mailServiceApiForSina;
     @Autowired
+    private MailServiceApiForExMailQQ mailServiceApiForExMailQQ;
+    @Autowired
     private CommonPluginApi commonPluginApi;
     @Autowired
     private TaskService taskService;
@@ -72,13 +75,7 @@ public class EmailLoginSimulationService {
             throw e;
         }
         if (!result.getStatus()) {
-            logger.info("邮箱账单:调用爬数邮箱账单登陆失败,param={},result={}",
-                    JSON.toJSONString(param), JSON.toJSONString(result));
-            if (StringUtils.isNotBlank(result.getMessage())) {
-                throw new CrawlerBizException(result.getMessage());
-            } else {
-                throw new CrawlerBizException("登陆失败,请重试");
-            }
+            loginFailProcess(param, result);
         }
         logEmailLoginInfo(param.getTaskId(), param.getUsername(), "qq.com", result.getData());
         return SimpleResult.successResult(result);
@@ -137,6 +134,82 @@ public class EmailLoginSimulationService {
     }
 
     /**
+     * qq企业邮箱登录初始化
+     *
+     * @param param taskId必传
+     * @return
+     */
+    public Object loginInitForQQExMail(CommonPluginParam param) {
+        HttpResult<Object> result;
+        try {
+            result = mailServiceApiForExMailQQ.init(param);
+        } catch (Exception e) {
+            logger.error("邮箱账单:调用爬数登陆初始化异常,param={}", JSON.toJSONString(param), e);
+            throw e;
+        }
+        if (!result.getStatus()) {
+            logger.info("邮箱账单:调用爬数登陆初始化失败,param={},result={}",
+                    JSON.toJSONString(param), JSON.toJSONString(result));
+            throw new CrawlerBizException(result.getMessage());
+        }
+        return SimpleResult.successResult(result.getData());
+    }
+
+    /**
+     * qq企业邮箱登录
+     *
+     * @param param
+     *
+     * */
+    public Object loginForQQExMail(CommonPluginParam param) {
+        Map<String, Object> lockMap = Maps.newHashMap();
+        String key = RedisKeyUtils.genLoginLockKey(param.getTaskId());
+        try {
+            lockMap = redisDao.acquireLock(key, 60 * 1000L);
+            if (lockMap != null) {
+                HttpResult<Object> result;
+                try {
+                    result = mailServiceApiForExMailQQ.login(param);
+                } catch (Exception e) {
+                    logger.error("邮箱账单:调用爬数邮箱账单登陆异常,param={}", JSON.toJSONString(param), e);
+                    throw e;
+                }
+                if (!result.getStatus()) {
+                    return loginFailProcess(param, result);
+                }
+                if (result.getData() != null) {
+                    Map<String, Object> map = JSONObject.parseObject(JSON.toJSONString(result.getData()));
+                    if (MapUtils.isNotEmpty(map) && map.get("directive") != null) {
+                        if (StringUtils.equalsIgnoreCase("login_success", map.get("directive").toString())) {
+                            if (StringUtils.isNotEmpty(param.getUsername())) {
+                                taskService.setAccountNo(param.getTaskId(), param.getUsername());
+                            }
+                            taskService.updateWebSite(param.getTaskId(), "exmail.qq.com");
+                            taskTimeService.updateLoginTime(param.getTaskId(), new Date());
+                        }
+                    }
+                }
+                return SimpleResult.successResult(result);
+
+            }
+            throw new CrawlerBizException(Constants.REDIS_LOCK_ERROR_MSG);
+        } finally {
+            redisDao.releaseLock(key, lockMap, 60 * 1000L);
+        }
+    }
+
+    private Object loginFailProcess(CommonPluginParam param, HttpResult<Object> result) {
+        logger.info("邮箱账单:调用爬数邮箱账单登陆失败,param={},result={}",
+                JSON.toJSONString(param), JSON.toJSONString(result));
+        if (StringUtils.isNotBlank(result.getMessage())) {
+            throw new CrawlerBizException(result.getMessage());
+        } else {
+            throw new CrawlerBizException("登陆失败,请重试");
+        }
+    }
+
+
+    /**
      * 163邮箱登陆(异步)
      *
      * @param param
@@ -151,13 +224,7 @@ public class EmailLoginSimulationService {
             throw e;
         }
         if (!result.getStatus()) {
-            logger.info("邮箱账单:调用爬数邮箱账单登陆失败,param={},result={}",
-                    JSON.toJSONString(param), JSON.toJSONString(result));
-            if (StringUtils.isNotBlank(result.getMessage())) {
-                throw new CrawlerBizException(result.getMessage());
-            } else {
-                throw new CrawlerBizException("登陆失败,请重试");
-            }
+            loginFailProcess(param, result);
         }
         logEmailLoginInfo(param.getTaskId(), param.getUsername(), "163.com", result.getData());
         return SimpleResult.successResult(result);
@@ -258,13 +325,7 @@ public class EmailLoginSimulationService {
                     throw e;
                 }
                 if (!result.getStatus()) {
-                    logger.info("邮箱账单:调用爬数邮箱账单登陆失败,param={},result={}",
-                            JSON.toJSONString(param), JSON.toJSONString(result));
-                    if (StringUtils.isNotBlank(result.getMessage())) {
-                        throw new CrawlerBizException(result.getMessage());
-                    } else {
-                        throw new CrawlerBizException("登陆失败,请重试");
-                    }
+                    loginFailProcess(param, result);
                 }
                 if (result.getData() != null) {
                     Map<String, Object> map = JSONObject.parseObject(JSON.toJSONString(result.getData()));
