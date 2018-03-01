@@ -9,7 +9,12 @@ public enum EOperatorCodeType {
 
     SMS("SMS", 0),
     IMG("IMG", 1),
-    QR("QR", 2);
+    QR("QR", 2),
+    /**
+     * 独立密码
+     */
+    PWD("PWD", 3),;
+
 
     private Integer code;
     private String text;
