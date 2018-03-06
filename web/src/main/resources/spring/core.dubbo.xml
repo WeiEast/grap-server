@@ -30,6 +30,10 @@
                      interface="com.datatrees.rawdatacentral.api.mail._163.MailServiceApiFor163"
                      timeout="20000"/>
 
+    <dubbo:reference id="mailServiceApiFor126"
+                     interface="com.datatrees.rawdatacentral.api.mail._126.MailServiceApiFor126"
+                     timeout="20000"/>
+
     <dubbo:reference id="mailServiceApiForSina"
                      interface="com.datatrees.rawdatacentral.api.mail.sina.MailServiceApiForSina"
                      timeout="20000"/>
