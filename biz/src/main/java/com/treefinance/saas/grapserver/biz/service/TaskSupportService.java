@@ -43,7 +43,7 @@ public class TaskSupportService {
         TaskSupportCriteria.Criteria innerCriteria = supportCriteria.createCriteria();
         innerCriteria.andEnableEqualTo(Boolean.TRUE).andCategoryEqualTo(supportType);
         if (StringUtils.isBlank(name)) {
-            innerCriteria.andShowEqualTo(Boolean.TRUE);
+            innerCriteria.andIsShowEqualTo(Boolean.TRUE);
         }
         if (id != null) {
             innerCriteria.andIdEqualTo(id);
