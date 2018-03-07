@@ -175,6 +175,64 @@ public class EmailH5Controller {
         return result;
     }
 
+    //====126邮箱====
+
+    /**
+     * 登陆(异步)
+     *
+     * @param param
+     * @return
+     */
+    @RequestMapping(value = {"/126/login/submit"}, method = {RequestMethod.POST})
+    public Object loginFor126(CommonPluginParam param, String userIp) {
+        if (param == null || param.getTaskId() == null) {
+            logger.error("邮箱账单:登陆,参数缺失,taskId必传,param={}", JSON.toJSONString(param));
+            throw new IllegalArgumentException("邮箱账单:登陆,参数缺失,taskId必传");
+        }
+        param.setUserIp(userIp);
+        logger.info("邮箱账单:登陆,传入参数,param={},userIp={}", JSON.toJSONString(param), userIp);
+        Object result = emailLoginSimulationService.loginFor126(param);
+        logger.info("邮箱账单:登陆,返回结果,param={},result={}", JSON.toJSONString(param), JSON.toJSONString(result));
+        return result;
+    }
+
+    /**
+     * 刷新二维码(异步)
+     *
+     * @param param
+     * @return
+     */
+    @RequestMapping(value = {"/126/refresh/qr_code"}, method = {RequestMethod.POST})
+    public Object refreshQRCodeFor126(CommonPluginParam param) {
+        logger.info("邮箱账单:刷新二维码,传入参数,param={}", JSON.toJSONString(param));
+        if (param == null || param.getTaskId() == null) {
+            logger.error("邮箱账单:刷新二维码,参数缺失,taskId必传,param={}", JSON.toJSONString(param));
+            throw new IllegalArgumentException("邮箱账单:刷新二维码,参数缺失,taskId必传");
+        }
+        Object result = emailLoginSimulationService.refreshQRCodeFor126(param);
+        logger.info("邮箱账单:刷新二维码,返回结果,param={},result={}", JSON.toJSONString(param), JSON.toJSONString(result));
+        return result;
+    }
+
+
+    /**
+     * 查询二维码状态
+     *
+     * @param param
+     * @return
+     */
+    @RequestMapping(value = {"/126/qr_code/status"}, method = {RequestMethod.POST})
+    public Object queryQRStatusFor126(CommonPluginParam param) {
+        logger.info("邮箱账单:查询二维码状态,传入参数,param={}", JSON.toJSONString(param));
+        if (param == null || param.getTaskId() == null) {
+            logger.error("邮箱账单:查询二维码状态,参数缺失,taskId必传,param={}", JSON.toJSONString(param));
+            throw new IllegalArgumentException("邮箱账单:查询二维码状态,参数缺失,taskId必传");
+        }
+        Object result = emailLoginSimulationService.queryQRStatusFor126(param);
+        logger.info("邮箱账单:查询二维码状态,返回结果,param={},result={}", JSON.toJSONString(param), JSON.toJSONString(result));
+        return result;
+    }
+
     //======新浪邮箱=======
 
     /**

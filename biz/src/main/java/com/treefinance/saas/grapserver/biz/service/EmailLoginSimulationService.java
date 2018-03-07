@@ -3,6 +3,7 @@ package com.treefinance.saas.grapserver.biz.service;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.datatrees.rawdatacentral.api.CommonPluginApi;
+import com.datatrees.rawdatacentral.api.mail._126.MailServiceApiFor126;
 import com.datatrees.rawdatacentral.api.mail._163.MailServiceApiFor163;
 import com.datatrees.rawdatacentral.api.mail.exmail_qq.MailServiceApiForExMailQQ;
 import com.datatrees.rawdatacentral.api.mail.qq.MailServiceApiForQQ;
@@ -45,6 +46,8 @@ public class EmailLoginSimulationService {
     private MailServiceApiForQQ mailServiceApiForQQ;
     @Autowired
     private MailServiceApiFor163 mailServiceApiFor163;
+    @Autowired
+    private MailServiceApiFor126 mailServiceApiFor126;
     @Autowired
     private MailServiceApiForSina mailServiceApiForSina;
     @Autowired
@@ -277,6 +280,86 @@ public class EmailLoginSimulationService {
         }
         if (result.getData() != null && StringUtils.equals("SUCCESS", String.valueOf(result.getData()))) {
             taskService.updateWebSite(param.getTaskId(), "163.com");
+            taskTimeService.updateLoginTime(param.getTaskId(), new Date());
+        }
+        return SimpleResult.successResult(result);
+    }
+
+
+    /**
+     * 126邮箱登陆(异步)
+     *
+     * @param param
+     * @return
+     */
+    public Object loginFor126(CommonPluginParam param) {
+        HttpResult<Object> result;
+        try {
+            result = mailServiceApiFor126.login(param);
+        } catch (Exception e) {
+            logger.error("邮箱账单:调用爬数邮箱账单登陆异常,param={}", JSON.toJSONString(param), e);
+            throw e;
+        }
+        if (!result.getStatus()) {
+            logger.info("邮箱账单:调用爬数邮箱账单登陆失败,param={},result={}",
+                    JSON.toJSONString(param), JSON.toJSONString(result));
+            if (StringUtils.isNotBlank(result.getMessage())) {
+                throw new CrawlerBizException(result.getMessage());
+            } else {
+                throw new CrawlerBizException("登陆失败,请重试");
+            }
+        }
+        logEmailLoginInfo(param.getTaskId(), param.getUsername(), "126.com", result.getData());
+        return SimpleResult.successResult(result);
+    }
+
+    /**
+     * 126邮箱刷新二维码
+     *
+     * @param param
+     * @return
+     */
+    public Object refreshQRCodeFor126(CommonPluginParam param) {
+        HttpResult<Object> result;
+        try {
+            result = mailServiceApiFor126.refeshQRCode(param);
+        } catch (Exception e) {
+            logger.error("邮箱账单:调用爬数邮箱账单刷新二维码异常,param={}", JSON.toJSONString(param), e);
+            throw e;
+        }
+        if (!result.getStatus()) {
+            logger.info("邮箱账单:调用爬数邮箱账单刷新二维码失败,param={},result={}",
+                    JSON.toJSONString(param), JSON.toJSONString(result));
+            if (StringUtils.isNotBlank(result.getMessage())) {
+                throw new CrawlerBizException(result.getMessage());
+            }
+        }
+        return SimpleResult.successResult(result);
+    }
+
+    /**
+     * 126邮箱查询二维码状态
+     *
+     * @param param
+     * @return
+     */
+    public Object queryQRStatusFor126(CommonPluginParam param) {
+        HttpResult<Object> result;
+        try {
+            result = mailServiceApiFor126.queryQRStatus(param);
+        } catch (Exception e) {
+            logger.error("邮箱账单:调用爬数邮箱账单查询二维码状态异常,param={}", JSON.toJSONString(param), e);
+            throw e;
+        }
+        if (!result.getStatus()) {
+            logger.info("邮箱账单:调用爬数邮箱账单查询二维码状态失败,param={},result={}",
+                    JSON.toJSONString(param), JSON.toJSONString(result));
+            if (StringUtils.isNotBlank(result.getMessage())) {
+                throw new CrawlerBizException(result.getMessage());
+            }
+        }
+        if (result.getData() != null && StringUtils.equals("SUCCESS", String.valueOf(result.getData()))) {
+            taskService.updateWebSite(param.getTaskId(), "126.com");
             taskTimeService.updateLoginTime(param.getTaskId(), new Date());
         }
         return SimpleResult.successResult(result);
