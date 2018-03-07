@@ -42,6 +42,9 @@ public class TaskSupportService {
         supportCriteria.setOrderByClause("Sort ASC");
         TaskSupportCriteria.Criteria innerCriteria = supportCriteria.createCriteria();
         innerCriteria.andEnableEqualTo(Boolean.TRUE).andCategoryEqualTo(supportType);
+        if (StringUtils.isBlank(name)) {
+            innerCriteria.andShowEqualTo(Boolean.TRUE);
+        }
         if (id != null) {
             innerCriteria.andIdEqualTo(id);
         }
