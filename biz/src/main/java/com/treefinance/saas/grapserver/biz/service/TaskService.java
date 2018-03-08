@@ -2,9 +2,6 @@ package com.treefinance.saas.grapserver.biz.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Splitter;
-import com.google.common.cache.CacheBuilder;
-import com.google.common.cache.CacheLoader;
-import com.google.common.cache.LoadingCache;
 import com.treefinance.basicservice.security.crypto.facade.EncryptionIntensityEnum;
 import com.treefinance.basicservice.security.crypto.facade.ISecurityCryptoService;
 import com.treefinance.commonservice.uid.UidGenerator;
@@ -35,7 +32,6 @@ import javax.validation.ValidationException;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 /**
@@ -111,6 +107,8 @@ public class TaskService {
         }
         // 记录创建日志
         taskLogService.logCreateTask(id);
+        //记录任务属性task_attribute的groupName,使每个任务都有groupName属性(商户任务总览功能),其中运营商会做更新
+        taskAttributeService.insertOrUpdateSelective(id, ETaskAttribute.OPERATOR_GROUP_NAME.getAttribute(), null);
         return id;
     }
 

@@ -10,6 +10,7 @@ import com.treefinance.saas.grapserver.common.enums.EDirective;
 import com.treefinance.saas.grapserver.common.enums.EOperatorCodeType;
 import com.treefinance.saas.grapserver.common.model.dto.DirectiveDTO;
 import com.treefinance.saas.grapserver.common.model.dto.TaskDTO;
+import com.treefinance.saas.grapserver.common.utils.JsonUtils;
 import com.treefinance.saas.grapserver.dao.entity.MerchantBaseInfo;
 import com.treefinance.saas.knife.result.SimpleResult;
 import org.apache.commons.lang3.StringUtils;
@@ -157,9 +158,12 @@ public class TaskController {
     public Object verifyCode(@RequestParam() String directiveId,
                              @RequestParam() Long taskid,
                              @RequestParam() String type,
-                             @RequestParam() String code) throws Exception {
+                             @RequestParam() String code,
+                             @RequestParam(value = "extra", required = false) String extra) throws Exception {
+        logger.info("taskId={}输入验证信息,directiveId={},type={},code={},extra={}",
+                taskid, directiveId, type, code, extra);
         taskNextDirectiveService.deleteNextDirective(taskid, null);
-        crawlerService.importCrawlCode(directiveId, taskid, EOperatorCodeType.getCode(type), code, null);
+        crawlerService.importCrawlCode(directiveId, taskid, EOperatorCodeType.getCode(type), code, JsonUtils.toMap(extra, String.class, String.class));
         return new SimpleResult<>();
     }
 
