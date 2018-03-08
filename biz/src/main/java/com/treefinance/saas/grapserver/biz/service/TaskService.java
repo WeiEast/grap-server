@@ -107,8 +107,6 @@ public class TaskService {
         }
         // 记录创建日志
         taskLogService.logCreateTask(id);
-        //记录任务属性task_attribute的groupName,使每个任务都有groupName属性(商户任务总览功能),其中运营商会做更新
-        taskAttributeService.insertOrUpdateSelective(id, ETaskAttribute.OPERATOR_GROUP_NAME.getAttribute(), null);
         return id;
     }
 
