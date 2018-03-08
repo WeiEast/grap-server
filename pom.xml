@@ -50,6 +50,7 @@
         <mybatis-spring.version>1.3.1</mybatis-spring.version>
         <maven.build.timestamp.format>yyyyMMddHHmm</maven.build.timestamp.format>
         <grap-server.version>1.0.0-SNAPSHOT</grap-server.version>
+        <assistant.version>1.0.7</assistant.version>
     </properties>
 
     <dependencyManagement>
@@ -195,19 +196,19 @@
             <dependency>
                 <groupId>com.treefinance.saas</groupId>
                 <artifactId>assistant-monitor</artifactId>
-                <version>1.0.4-SNAPSHOT</version>
+                <version>${assistant.version}</version>
             </dependency>
 
             <dependency>
                 <groupId>com.treefinance.saas</groupId>
                 <artifactId>assistant-variable-notify</artifactId>
-                <version>1.0.4-SNAPSHOT</version>
+                <version>${assistant.version}</version>
             </dependency>
 
             <dependency>
                 <groupId>com.treefinance.saas</groupId>
                 <artifactId>assistant-httpinvoker</artifactId>
-                <version>1.0.4-SNAPSHOT</version>
+                <version>${assistant.version}</version>
             </dependency>
 
             <dependency>

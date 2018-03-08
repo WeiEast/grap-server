@@ -27,6 +27,8 @@ public class MonitorService {
     private TaskService taskService;
     @Autowired
     private OperatorMonitorSpecialProcessor operatorMonitorSpecialProcessor;
+    @Autowired
+    private EcommerceMonitorService ecommerceMonitorService;
 
     /**
      * 发送监控消息
@@ -34,15 +36,34 @@ public class MonitorService {
      * @param taskDTO
      */
     public void sendMonitorMessage(TaskDTO taskDTO) {
-        logger.info("TransactionSynchronizationManager: start task={}", JSON.toJSONString(taskDTO));
-        // 事务完成之后，发送消息
-        TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronizationAdapter() {
-            @Override
-            public void afterCommit() {
-                logger.info("TransactionSynchronizationManager: running task={}", JSON.toJSONString(taskDTO));
-                doSendMonitorMessage(taskDTO);
-            }
-        });
+        try {
+            logger.info("TransactionSynchronizationManager: start task={}", JSON.toJSONString(taskDTO));
+            // 事务完成之后，发送消息
+            TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronizationAdapter() {
+//                @Override
+//                public void afterCommit() {
+//                    logger.info("TransactionSynchronizationManager: running task={}", JSON.toJSONString(taskDTO));
+//                    doSendMonitorMessage(taskDTO);
+//                }
+
+                @Override
+                public void afterCompletion(int status) {
+                    String statusCode = "";
+                    if (status == 0) {
+                        statusCode = "STATUS_COMMITTED";
+                    } else if (status == 1) {
+                        statusCode = "STATUS_ROLLED_BACK";
+                    } else if (status == 2) {
+                        statusCode = "STATUS_UNKNOWN";
+                    }
+                    logger.info("TransactionSynchronizationManager: completion : status={},statusCode={}, task={}", status, statusCode, JSON.toJSONString(taskDTO));
+                    doSendMonitorMessage(taskDTO);
+                }
+            });
+
+        } catch (Exception e) {
+            logger.error("sendMonitorMessage failed : task={},", JSON.toJSONString(taskDTO), e);
+        }
     }
 
 
@@ -58,8 +79,17 @@ public class MonitorService {
         }
         //发送任务监控消息
         monitorPluginService.sendTaskMonitorMessage(taskDTO);
-        //发送运营商监控消息
-        this.sendTaskOperatorMonitorMessage(taskDTO);
+        EBizType eBizType = EBizType.of(taskDTO.getBizType());
+        switch (eBizType) {
+            case OPERATOR:
+                //发送运营商监控消息
+                this.sendTaskOperatorMonitorMessage(taskDTO);
+                break;
+            case ECOMMERCE:
+                // 发送电商监控消息
+                this.sendEcommerceMonitorMessage(taskDTO);
+                break;
+        }
     }
 
 
@@ -69,19 +99,21 @@ public class MonitorService {
      * @param taskDTO
      */
     private void sendTaskOperatorMonitorMessage(TaskDTO taskDTO) {
-        if (taskDTO == null || taskDTO.getId() == null) {
-            return;
-        }
-        taskDTO = taskService.getById(taskDTO.getId());
-        if (taskDTO != null && EBizType.OPERATOR.getCode().equals(taskDTO.getBizType())) {
-            OperatorMonitorSpecialRequest request = new OperatorMonitorSpecialRequest();
-            request.setTaskId(taskDTO.getId());
-            request.setTask(taskDTO);
-            operatorMonitorSpecialProcessor.doService(request);
-        }
-
-
+        OperatorMonitorSpecialRequest request = new OperatorMonitorSpecialRequest();
+        request.setTaskId(taskDTO.getId());
+        request.setTask(taskDTO);
+        operatorMonitorSpecialProcessor.doService(request);
+        logger.info("sendTaskOperatorMonitorMessage: task={},request={}", JSON.toJSONString(taskDTO), JSON.toJSONString(request));
     }
 
 
+    /**
+     * 发送电商监控消息
+     *
+     * @param taskDTO
+     */
+    private void sendEcommerceMonitorMessage(TaskDTO taskDTO) {
+        ecommerceMonitorService.sendMessage(taskDTO);
+        logger.info("sendEcommerceMonitorMessage: task={},request={}", JSON.toJSONString(taskDTO), JSON.toJSONString(taskDTO));
+    }
 }

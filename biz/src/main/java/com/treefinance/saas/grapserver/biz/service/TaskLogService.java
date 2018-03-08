@@ -14,6 +14,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -129,6 +130,31 @@ public class TaskLogService {
         TaskLogCriteria criteria = new TaskLogCriteria();
         criteria.createCriteria().andTaskIdEqualTo(taskId).andMsgEqualTo(msg);
         List<TaskLog> list = taskLogMapper.selectByExample(criteria);
+        if (CollectionUtils.isEmpty(list)) {
+            return Lists.newArrayList();
+        }
+        return list;
+    }
+
+    /**
+     * 查询日志
+     *
+     * @param taskId
+     * @param msgs
+     * @return
+     */
+    public List<TaskLog> queryTaskLog(Long taskId, String... msgs) {
+        List<String> msgLists = null;
+        if (msgs != null && msgs.length > 0) {
+            msgLists = Arrays.asList(msgs);
+        }
+        TaskLogCriteria taskLogCriteria = new TaskLogCriteria();
+        TaskLogCriteria.Criteria criteria = taskLogCriteria.createCriteria();
+        criteria.andTaskIdEqualTo(taskId);
+        if (CollectionUtils.isNotEmpty(msgLists)) {
+            criteria.andMsgIn(msgLists);
+        }
+        List<TaskLog> list = taskLogMapper.selectByExample(taskLogCriteria);
         if (CollectionUtils.isEmpty(list)) {
             return Lists.newArrayList();
         }

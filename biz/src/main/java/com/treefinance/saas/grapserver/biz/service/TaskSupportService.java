@@ -38,6 +38,7 @@ public class TaskSupportService {
 
     public List<TaskSupport> getSupportedList(String supportType, Integer id) {
         TaskSupportCriteria supportCriteria = new TaskSupportCriteria();
+        supportCriteria.setOrderByClause("Sort asc");
         TaskSupportCriteria.Criteria innerCriteria = supportCriteria.createCriteria();
         innerCriteria.andEnableEqualTo(Boolean.TRUE).andCategoryEqualTo(supportType);
         if (id != null) {

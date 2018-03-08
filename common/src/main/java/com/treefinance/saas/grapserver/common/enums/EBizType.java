@@ -77,6 +77,15 @@ public enum EBizType {
         return null;
     }
 
+    public static EBizType of(Byte bizType) {
+        for (EBizType item : EBizType.values()) {
+            if (item.code.equals(bizType)) {
+                return item;
+            }
+        }
+        return null;
+    }
+
     /**
      * 根据编码获取
      *
