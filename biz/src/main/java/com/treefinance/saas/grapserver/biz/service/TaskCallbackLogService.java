@@ -1,5 +1,7 @@
 package com.treefinance.saas.grapserver.biz.service;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import com.treefinance.commonservice.uid.UidGenerator;
 import com.treefinance.saas.grapserver.common.model.dto.AppCallbackConfigDTO;
 import com.treefinance.saas.grapserver.dao.entity.TaskCallbackLog;
@@ -30,7 +32,8 @@ public class TaskCallbackLogService {
     private TaskCallbackLogUpdateMapper taskCallbackLogUpdateMapper;
 
     @Transactional(propagation = Propagation.REQUIRES_NEW, rollbackFor = Exception.class)
-    public void insert(AppCallbackConfigDTO config, Long taskId, Byte type, String params, String result, long consumeTime) {
+    public void insert(AppCallbackConfigDTO config, Long taskId, Byte type, String params, String result,
+                       long consumeTime, int httpCode) {
         TaskCallbackLog taskCallbackLog = new TaskCallbackLog();
         taskCallbackLog.setId(UidGenerator.getId());
         taskCallbackLog.setTaskId(taskId);
@@ -48,10 +51,31 @@ public class TaskCallbackLogService {
         }
         if (StringUtils.isNotBlank(result)) {
             taskCallbackLog.setResponseData(result.length() > 1000 ? result.substring(0, 1000) : result);
+            if (httpCode == 200) {
+                taskCallbackLog.setCallbackMsg("回调成功");
+            } else {
+                try {
+                    JSONObject jsonObject = JSON.parseObject(result);
+                    String errorMsg = jsonObject.getString("errorMsg");
+                    String errorCode = jsonObject.getString("code");
+                    taskCallbackLog.setCallbackCode(errorCode);
+                    if (StringUtils.isNotBlank(errorMsg)) {
+                        taskCallbackLog.setCallbackMsg(errorMsg);
+                    } else {
+                        taskCallbackLog.setCallbackMsg("回调错误信息为空");
+                    }
+                } catch (Exception e) {
+                    logger.error("记录回调错误信息:解析返回回调结果json有误,taskId={},回调返回结果result={}", taskId, result);
+                    taskCallbackLog.setCallbackMsg(result.length() > 1000 ? result.substring(0, 100) + "..." : result);
+                }
+
+            }
         } else {
             taskCallbackLog.setResponseData("");
         }
+        taskCallbackLog.setHttpCode(httpCode);
         taskCallbackLog.setConsumeTime((int) consumeTime);
+
         taskCallbackLogUpdateMapper.insertOrUpdateSelective(taskCallbackLog);
     }
 

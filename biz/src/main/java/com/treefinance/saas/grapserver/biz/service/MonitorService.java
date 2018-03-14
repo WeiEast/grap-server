@@ -77,6 +77,7 @@ public class MonitorService {
                 && !ETaskStatus.CANCEL.getStatus().equals(status)) {
             return;
         }
+
         //发送任务监控消息
         monitorPluginService.sendTaskMonitorMessage(taskDTO);
         EBizType eBizType = EBizType.of(taskDTO.getBizType());
