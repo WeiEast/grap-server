@@ -24,7 +24,7 @@ import com.google.common.collect.Maps;
 import com.treefinance.saas.assistant.model.HttpMonitorMessage;
 import com.treefinance.saas.grapserver.biz.config.DiamondConfig;
 import com.treefinance.saas.grapserver.biz.service.AppLicenseService;
-import com.treefinance.saas.grapserver.biz.service.MonitorPluginService;
+import com.treefinance.saas.grapserver.biz.service.monitor.MonitorPluginService;
 import com.treefinance.saas.grapserver.common.exception.AppIdUncheckException;
 import com.treefinance.saas.grapserver.common.exception.ForbiddenException;
 import com.treefinance.saas.grapserver.common.model.AppLicenseKey;
