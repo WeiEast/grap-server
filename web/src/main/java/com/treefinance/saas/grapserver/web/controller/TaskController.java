@@ -62,18 +62,22 @@ public class TaskController {
      *
      * @param appid
      * @param type
+     * @param id    过滤task_support表中的id字段
+     * @param style
+     * @param name  过滤task_support表中的type字段
      * @return
      */
     @RequestMapping(value = "/config", method = {RequestMethod.GET, RequestMethod.POST})
     public Object getConfig(@RequestParam String appid,
                             @RequestParam String type,
                             @RequestParam(value = "id", required = false) Integer id,
-                            @RequestParam(value = "style", required = false) String style) {
+                            @RequestParam(value = "style", required = false) String style,
+                            @RequestParam(value = "name", required = false) String name) {
         if (StringUtils.isBlank(type)) {
             throw new IllegalArgumentException("Parameter 'type' is incorrect.");
         }
         Map<String, Object> colorMap = merchantConfigService.getColorConfig(appid, style);
-        Object defaultConfig = taskConfigService.getTaskConfig(type, id);
+        Object defaultConfig = taskConfigService.getTaskConfig(type, id, name);
         Map<String, Object> map = Maps.newHashMap();
         map.put("config", defaultConfig);
         map.put("color", colorMap);
