@@ -435,7 +435,8 @@ public abstract class CallbackableDirectiveProcessor {
             // 保存的参数（含dataUrl）
 //            String paramsForLog = this.encryptParams(originalDataMap, appLicense, config);
             // 记录回调日志
-            taskCallbackLogService.insert(config, directiveDTO.getTaskId(), (byte) 1, JSON.toJSONString(originalDataMap), result, consumeTime);
+            taskCallbackLogService.insert(config, directiveDTO.getTaskId(), (byte) 1, JSON.toJSONString(originalDataMap),
+                    result, consumeTime, httpCode);
             // 处理返回结果
             handleRequestResult(directiveDTO, result);
             // 回调处理
