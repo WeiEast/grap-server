@@ -20,6 +20,7 @@ import com.treefinance.saas.grapserver.dao.entity.TaskSupport;
 import com.treefinance.saas.grapserver.dao.entity.TaskSupportCriteria;
 import com.treefinance.saas.grapserver.dao.mapper.TaskSupportMapper;
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -36,13 +37,19 @@ public class TaskSupportService {
     private TaskSupportMapper taskSupportMapper;
 
 
-    public List<TaskSupport> getSupportedList(String supportType, Integer id) {
+    public List<TaskSupport> getSupportedList(String supportType, Integer id, String name) {
         TaskSupportCriteria supportCriteria = new TaskSupportCriteria();
-        supportCriteria.setOrderByClause("Sort asc");
+        supportCriteria.setOrderByClause("Sort ASC");
         TaskSupportCriteria.Criteria innerCriteria = supportCriteria.createCriteria();
         innerCriteria.andEnableEqualTo(Boolean.TRUE).andCategoryEqualTo(supportType);
+        if (StringUtils.isBlank(name)) {
+            innerCriteria.andIsShowEqualTo(Boolean.TRUE);
+        }
         if (id != null) {
             innerCriteria.andIdEqualTo(id);
+        }
+        if (StringUtils.isNotBlank(name)) {
+            innerCriteria.andTypeEqualTo(name);
         }
 
         return taskSupportMapper.selectByExample(supportCriteria);

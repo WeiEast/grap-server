@@ -26,6 +26,10 @@
     <dubbo:reference id="mailServiceApiForQQ" interface="com.datatrees.rawdatacentral.api.mail.qq.MailServiceApiForQQ"
                      timeout="20000"/>
 
+    <dubbo:reference id="mailServiceApiForExMailQQ"
+                     interface="com.datatrees.rawdatacentral.api.mail.exmail_qq.MailServiceApiForExMailQQ"
+                     timeout="20000"/>
+
     <dubbo:reference id="mailServiceApiFor163"
                      interface="com.datatrees.rawdatacentral.api.mail._163.MailServiceApiFor163"
                      timeout="20000"/>
@@ -57,6 +61,9 @@
 
     <dubbo:reference id="fundService" interface="com.treefinance.saas.processor.thirdparty.facade.fund.FundService"
                      check="false" timeout="60000" cluster="failfast"/>
+
+    <dubbo:reference interface="com.datatrees.rawdatacentral.api.CrawlerTaskService"
+                     id="crawlerTaskService"/>
 
 
     <!--生产者-->

@@ -1,6 +1,7 @@
 package com.treefinance.saas.grapserver.biz.service.directive.process;
 
 import com.alibaba.fastjson.JSON;
+import com.treefinance.saas.grapserver.biz.service.QRCodeAccountNoLogService;
 import com.treefinance.saas.grapserver.biz.service.TaskNextDirectiveService;
 import com.treefinance.saas.grapserver.biz.service.TaskService;
 import com.treefinance.saas.grapserver.common.enums.EDirective;
@@ -26,6 +27,8 @@ public abstract class AbstractDirectiveProcessor extends CallbackableDirectivePr
     protected TaskService taskService;
     @Autowired
     protected TaskNextDirectiveService taskNextDirectiveService;
+    @Autowired
+    private QRCodeAccountNoLogService qrCodeAccountNoLogService;
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -65,6 +68,7 @@ public abstract class AbstractDirectiveProcessor extends CallbackableDirectivePr
         try {
             this.doProcess(directive, directiveDTO);
         } finally {
+            qrCodeAccountNoLogService.logQRCodeAccountNo(taskId);
             taskNextDirectiveService.insert(taskId, directiveDTO.getDirective());
             taskNextDirectiveService.putNextDirectiveToRedis(taskId, JsonUtils.toJsonString(directiveDTO, "task"));
             logger.info("process directive completed  cost {} ms : directive={}", System.currentTimeMillis() - start, JSON.toJSONString(directiveDTO));
