@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -65,9 +66,13 @@ public class TaskBuryPointLogService {
         logQueue.offer(log);
     }
 
-    public List<TaskBuryPointLog> queryTaskBuryPointLogByCode(Long taskId, String code) {
+    public List<TaskBuryPointLog> queryTaskBuryPointLogByCode(Long taskId, String... codes) {
         TaskBuryPointLogCriteria criteria = new TaskBuryPointLogCriteria();
-        criteria.createCriteria().andTaskIdEqualTo(taskId).andCodeEqualTo(code);
+        TaskBuryPointLogCriteria.Criteria _criteria = criteria.createCriteria();
+        _criteria.andTaskIdEqualTo(taskId);
+        if (codes != null && codes.length >= 0) {
+            _criteria.andCodeIn(Arrays.asList(codes));
+        }
         List<TaskBuryPointLog> list = taskBuryPointLogMapper.selectByExample(criteria);
         if (CollectionUtils.isEmpty(list)) {
             return Lists.newArrayList();
