@@ -98,7 +98,7 @@
                 configId = #{configId,jdbcType=BIGINT},
             </if>
             <if test="type != null">
-                type =  #{type,jdbcType=TINYINT},
+                type = #{type,jdbcType=TINYINT},
             </if>
             <if test="url != null">
                 url = #{url,jdbcType=VARCHAR},
@@ -113,13 +113,13 @@
                 consumeTime = #{consumeTime,jdbcType=INTEGER},
             </if>
             <if test="httpCode != null">
-                #{httpCode,jdbcType=INTEGER},
+                httpCode = #{httpCode,jdbcType=INTEGER},
             </if>
             <if test="callbackCode != null">
-                #{callbackCode,jdbcType=VARCHAR},
+                callbackCode = #{callbackCode,jdbcType=VARCHAR},
             </if>
             <if test="callbackMsg != null">
-                #{callbackMsg,jdbcType=VARCHAR},
+                callbackMsg = #{callbackMsg,jdbcType=VARCHAR},
             </if>
             <if test="createTime != null">
                 createTime = #{createTime,jdbcType=TIMESTAMP},
