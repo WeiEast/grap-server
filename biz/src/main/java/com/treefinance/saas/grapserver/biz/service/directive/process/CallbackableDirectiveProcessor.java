@@ -145,6 +145,7 @@ public abstract class CallbackableDirectiveProcessor {
         List<AppCallbackConfigDTO> configList = getCallbackConfigs(taskDTO);
         if (CollectionUtils.isEmpty(configList)) {
             logger.info("callback exit: callbackconfig is empty, directive={}", JSON.toJSONString(directiveDTO));
+            monitorService.sendTaskCallbackMsgMonitorMessage(taskId, null, null, false);
             return 0;
         }
 
@@ -152,6 +153,7 @@ public abstract class CallbackableDirectiveProcessor {
         configList = configList.stream().filter(config -> checkCallbackable(config, directiveDTO)).collect(Collectors.toList());
         if (CollectionUtils.isEmpty(configList)) {
             logger.info("callback exit: the task no callback required, directive={}", JSON.toJSONString(directiveDTO));
+            monitorService.sendTaskCallbackMsgMonitorMessage(taskId, null, null, false);
             return 0;
         }
         // 6.执行回调，支持一个任务回调多方
@@ -443,7 +445,7 @@ public abstract class CallbackableDirectiveProcessor {
                     result, consumeTime, httpCode);
             //主流程回调做监控
             if (config.getDataType() != null && config.getDataType() == 0) {
-                monitorService.sendTaskCallbackMsgMonitorMessage(directiveDTO.getTaskId(), httpCode, result);
+                monitorService.sendTaskCallbackMsgMonitorMessage(directiveDTO.getTaskId(), httpCode, result, true);
             }
             // 处理返回结果
             handleRequestResult(directiveDTO, result);

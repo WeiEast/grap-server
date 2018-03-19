@@ -147,8 +147,8 @@ public class MonitorService {
      * @param result
      */
     @Async
-    public void sendTaskCallbackMsgMonitorMessage(Long taskId, Integer httpCode, String result) {
-        taskCallbackMsgMonitorService.sendMessage(taskId, httpCode, result);
-        logger.info("sendTaskCallbackMsgMonitorMessage:taskId={},httpCode={},result={}", taskId, httpCode, result);
+    public void sendTaskCallbackMsgMonitorMessage(Long taskId, Integer httpCode, String result, Boolean isCallback) {
+        taskCallbackMsgMonitorService.sendMessage(taskId, httpCode, result, isCallback);
+        logger.info("sendTaskCallbackMsgMonitorMessage:taskId={},httpCode={},result={},isCallback={}", taskId, httpCode, result, isCallback);
     }
 }
