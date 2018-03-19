@@ -32,6 +32,8 @@ public class MonitorService {
     private EcommerceMonitorService ecommerceMonitorService;
     @Autowired
     private EmailMonitorService emailMonitorService;
+    @Autowired
+    private TaskCallbackMsgMonitorService taskCallbackMsgMonitorService;
 
     /**
      * 发送监控消息
@@ -135,5 +137,18 @@ public class MonitorService {
     private void sendEmailMonitorMessage(TaskDTO taskDTO) {
         emailMonitorService.sendMessage(taskDTO);
         logger.info("sendEcommerceMonitorMessage: task={}", JSON.toJSONString(taskDTO));
+    }
+
+    /**
+     * 发送回调信息监控消息
+     *
+     * @param taskId
+     * @param httpCode
+     * @param result
+     */
+    @Async
+    public void sendTaskCallbackMsgMonitorMessage(Long taskId, Integer httpCode, String result) {
+        taskCallbackMsgMonitorService.sendMessage(taskId, httpCode, result);
+        logger.info("sendTaskCallbackMsgMonitorMessage:taskId={},httpCode={},result={}", taskId, httpCode, result);
     }
 }

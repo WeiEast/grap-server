@@ -6,6 +6,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.treefinance.saas.grapserver.biz.common.CallbackSecureHandler;
 import com.treefinance.saas.grapserver.biz.service.*;
+import com.treefinance.saas.grapserver.biz.service.monitor.MonitorService;
 import com.treefinance.saas.grapserver.common.enums.EBizType;
 import com.treefinance.saas.grapserver.common.enums.EDirective;
 import com.treefinance.saas.grapserver.common.enums.ETaskStatus;
@@ -64,6 +65,9 @@ public abstract class CallbackableDirectiveProcessor {
     protected CallbackResultService callbackResultService;
     @Autowired
     protected GrapDataCallbackService grapDataCallbackService;
+    @Autowired
+    protected MonitorService monitorService;
+
 
     /**
      * 回调前处理
@@ -437,6 +441,10 @@ public abstract class CallbackableDirectiveProcessor {
             // 记录回调日志
             taskCallbackLogService.insert(config, directiveDTO.getTaskId(), (byte) 1, JSON.toJSONString(originalDataMap),
                     result, consumeTime, httpCode);
+            //主流程回调做监控
+            if (config.getDataType() != null && config.getDataType() == 0) {
+                monitorService.sendTaskCallbackMsgMonitorMessage(directiveDTO.getTaskId(), httpCode, result);
+            }
             // 处理返回结果
             handleRequestResult(directiveDTO, result);
             // 回调处理
