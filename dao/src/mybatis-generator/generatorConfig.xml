@@ -48,13 +48,13 @@
             <property name="enableSubPackages" value="true"/>
         </javaClientGenerator>
 
-        <!--<table tableName="task_callback_log" domainObjectName="TaskCallbackLog"-->
-               <!--enableSelectPaginationByExample="true"-->
-               <!--enableBatchInsert="true"-->
-               <!--enableBatchUpdateByPrimaryKey="true"-->
-               <!--enableBatchUpdateByPrimaryKeySelective="true">-->
-            <!--<property name="useActualColumnNames" value="true"/>-->
-        <!--</table>-->
+        <table tableName="task_callback_log" domainObjectName="TaskCallbackLog"
+               enableSelectPaginationByExample="true"
+               enableBatchInsert="true"
+               enableBatchUpdateByPrimaryKey="true"
+               enableBatchUpdateByPrimaryKeySelective="true">
+            <property name="useActualColumnNames" value="true"/>
+        </table>
 
         <!--<table tableName="app_license" domainObjectName="AppLicense">-->
         <!--<property name="useActualColumnNames" value="true"/>-->
@@ -108,10 +108,10 @@
         <!--<property name="useActualColumnNames" value="true"/>-->
         <!--</table>-->
 
-        <table tableName="task_support" domainObjectName="TaskSupport">
-        <property name="useActualColumnNames" value="true"/>
-        <generatedKey column="Id" sqlStatement="MySql" identity="true"/>
-        </table>
+        <!--<table tableName="task_support" domainObjectName="TaskSupport">-->
+        <!--<property name="useActualColumnNames" value="true"/>-->
+        <!--<generatedKey column="Id" sqlStatement="MySql" identity="true"/>-->
+        <!--</table>-->
 
         <!--<table tableName="app_color_config" domainObjectName="AppColorConfig">-->
             <!--<property name="useActualColumnNames" value="true"/>-->

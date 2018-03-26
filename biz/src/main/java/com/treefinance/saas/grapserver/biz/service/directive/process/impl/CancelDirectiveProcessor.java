@@ -3,7 +3,7 @@ package com.treefinance.saas.grapserver.biz.service.directive.process.impl;
 import com.datatrees.rawdatacentral.api.CrawlerService;
 import com.google.common.collect.Maps;
 import com.treefinance.saas.grapserver.biz.common.AsycExcutor;
-import com.treefinance.saas.grapserver.biz.service.MonitorService;
+import com.treefinance.saas.grapserver.biz.service.monitor.MonitorService;
 import com.treefinance.saas.grapserver.biz.service.directive.process.AbstractDirectiveProcessor;
 import com.treefinance.saas.grapserver.common.enums.EDirective;
 import com.treefinance.saas.grapserver.common.enums.ETaskStatus;

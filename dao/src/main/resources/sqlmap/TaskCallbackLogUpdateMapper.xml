@@ -29,6 +29,15 @@
             <if test="consumeTime != null">
                 consumeTime,
             </if>
+            <if test="httpCode != null">
+                httpCode,
+            </if>
+            <if test="callbackCode != null">
+                callbackCode,
+            </if>
+            <if test="callbackMsg != null">
+                callbackMsg,
+            </if>
             <if test="createTime != null">
                 createTime,
             </if>
@@ -61,6 +70,15 @@
             <if test="consumeTime != null">
                 #{consumeTime,jdbcType=INTEGER},
             </if>
+            <if test="httpCode != null">
+                #{httpCode,jdbcType=INTEGER},
+            </if>
+            <if test="callbackCode != null">
+                #{callbackCode,jdbcType=VARCHAR},
+            </if>
+            <if test="callbackMsg != null">
+                #{callbackMsg,jdbcType=VARCHAR},
+            </if>
             <if test="createTime != null">
                 #{createTime,jdbcType=TIMESTAMP},
             </if>
@@ -80,7 +98,7 @@
                 configId = #{configId,jdbcType=BIGINT},
             </if>
             <if test="type != null">
-                type =  #{type,jdbcType=TINYINT},
+                type = #{type,jdbcType=TINYINT},
             </if>
             <if test="url != null">
                 url = #{url,jdbcType=VARCHAR},
@@ -93,6 +111,15 @@
             </if>
             <if test="consumeTime != null">
                 consumeTime = #{consumeTime,jdbcType=INTEGER},
+            </if>
+            <if test="httpCode != null">
+                httpCode = #{httpCode,jdbcType=INTEGER},
+            </if>
+            <if test="callbackCode != null">
+                callbackCode = #{callbackCode,jdbcType=VARCHAR},
+            </if>
+            <if test="callbackMsg != null">
+                callbackMsg = #{callbackMsg,jdbcType=VARCHAR},
             </if>
             <if test="createTime != null">
                 createTime = #{createTime,jdbcType=TIMESTAMP},

@@ -1,11 +1,16 @@
-package com.treefinance.saas.grapserver.biz.service;
+package com.treefinance.saas.grapserver.biz.service.monitor;
 
 import com.alibaba.fastjson.JSON;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.treefinance.saas.assistant.model.TaskEcommeceMonitorMessage;
+import com.treefinance.saas.assistant.model.TaskEmailMonitorMessage;
 import com.treefinance.saas.assistant.model.TaskStep;
 import com.treefinance.saas.assistant.plugin.TaskEcommerceMonitorPlugin;
+import com.treefinance.saas.assistant.plugin.TaskEmailMonitorPlugin;
+import com.treefinance.saas.grapserver.biz.service.TaskAttributeService;
+import com.treefinance.saas.grapserver.biz.service.TaskBuryPointLogService;
+import com.treefinance.saas.grapserver.biz.service.TaskLogService;
 import com.treefinance.saas.grapserver.common.enums.EProcessStep;
 import com.treefinance.saas.grapserver.common.enums.ETaskStep;
 import com.treefinance.saas.grapserver.common.model.dto.TaskDTO;
@@ -27,12 +32,12 @@ import java.util.stream.Collectors;
  * Created by yh-treefinance on 2018/1/31.
  */
 @Service
-public class EcommerceMonitorService {
+public class EmailMonitorService {
 
-    private static final Logger logger = LoggerFactory.getLogger(EcommerceMonitorService.class);
+    private static final Logger logger = LoggerFactory.getLogger(EmailMonitorService.class);
 
     @Autowired
-    private TaskEcommerceMonitorPlugin taskEcommerceMonitorPlugin;
+    private TaskEmailMonitorPlugin taskEmailMonitorPlugin;
     @Autowired
     private TaskAttributeService taskAttributeService;
     @Autowired
@@ -48,11 +53,12 @@ public class EcommerceMonitorService {
     public void sendMessage(TaskDTO taskDTO) {
         long start = System.currentTimeMillis();
         Long taskId = taskDTO.getId();
-        TaskEcommeceMonitorMessage message = DataConverterUtils.convert(taskDTO, TaskEcommeceMonitorMessage.class);
+        TaskEmailMonitorMessage message = DataConverterUtils.convert(taskDTO, TaskEmailMonitorMessage.class);
 
         // 1.获取任务属性
         List<TaskAttribute> attributeList = taskAttributeService.findByTaskId(taskId);
         Map<String, String> attributeMap = Maps.newHashMap();
+        attributeMap.put("email", taskDTO.getWebSite());
         if (CollectionUtils.isNotEmpty(attributeList)) {
             attributeList.forEach(taskAttribute -> attributeMap.put(taskAttribute.getName(), taskAttribute.getValue()));
         }
@@ -74,7 +80,8 @@ public class EcommerceMonitorService {
             taskSteps.add(new TaskStep(3, EProcessStep.LOGIN.getCode(), EProcessStep.LOGIN.getName()));
         } else {
             // H5版本基于埋点数据，判断是否一键登录
-            List<TaskBuryPointLog> taskBuryPointLogs = taskBuryPointLogService.queryTaskBuryPointLogByCode(taskId, "100803");
+            List<TaskBuryPointLog> taskBuryPointLogs = taskBuryPointLogService.queryTaskBuryPointLogByCode(taskId,
+                    "200804", "200807");
             if (CollectionUtils.isNotEmpty(taskBuryPointLogs)) {
                 taskSteps.add(new TaskStep(2, EProcessStep.CONFIRM_LOGIN.getCode(), EProcessStep.CONFIRM_LOGIN.getName()));
             }
@@ -95,7 +102,7 @@ public class EcommerceMonitorService {
         message.setTaskSteps(taskSteps);
 
         // 4.发送消息
-        taskEcommerceMonitorPlugin.sendMessage(message);
-        logger.info("send task ecommerce message to saas-monitor cost{}ms , message={}", System.currentTimeMillis() - start, JSON.toJSONString(message));
+        taskEmailMonitorPlugin.sendMessage(message);
+        logger.info("send task email message to saas-monitor cost{}ms , message={}", System.currentTimeMillis() - start, JSON.toJSONString(message));
     }
 }

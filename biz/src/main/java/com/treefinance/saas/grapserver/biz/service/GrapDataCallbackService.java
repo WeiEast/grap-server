@@ -152,7 +152,7 @@ public class GrapDataCallbackService {
                 result = e.getMessage();
             } finally {
                 long consumeTime = System.currentTimeMillis() - startTime;
-                taskCallbackLogService.insert(configDTO, taskId, (byte) 1, JSON.toJSONString(dataMap), result, consumeTime);
+                taskCallbackLogService.insert(configDTO, taskId, (byte) 1, JSON.toJSONString(dataMap), result, consumeTime, 0);
                 logger.info("{} callback ：{}回调通知完成：config={},data={},paramMap={},result={}", dataType.name(),
                         dataType.getName(), JSON.toJSONString(configDTO), dataMap, paramMap, result);
             }

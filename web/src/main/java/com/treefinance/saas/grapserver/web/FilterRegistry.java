@@ -18,7 +18,7 @@ package com.treefinance.saas.grapserver.web;
 
 import com.treefinance.saas.grapserver.biz.config.DiamondConfig;
 import com.treefinance.saas.grapserver.biz.service.AppLicenseService;
-import com.treefinance.saas.grapserver.biz.service.MonitorPluginService;
+import com.treefinance.saas.grapserver.biz.service.monitor.MonitorPluginService;
 import com.treefinance.saas.grapserver.web.filter.WebContextFilter;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;

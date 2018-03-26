@@ -3,6 +3,7 @@ package com.treefinance.saas.grapserver.common.model.dto;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.Map;
 
 /**
  * Created by luoyihua on 2017/5/10.
@@ -17,6 +18,7 @@ public class TaskDTO implements Serializable {
     private Byte status;
     private String webSite;
     private String stepCode;
+    private Map<String, Object> attributes;
 
     private Date createTime;
     private Date lastUpdateTime;
@@ -100,5 +102,13 @@ public class TaskDTO implements Serializable {
 
     public void setBizType(Byte bizType) {
         this.bizType = bizType;
+    }
+
+    public Map<String, Object> getAttributes() {
+        return attributes;
+    }
+
+    public void setAttributes(Map<String, Object> attributes) {
+        this.attributes = attributes;
     }
 }
