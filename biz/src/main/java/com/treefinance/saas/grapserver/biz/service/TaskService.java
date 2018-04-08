@@ -5,6 +5,7 @@ import com.google.common.base.Splitter;
 import com.treefinance.basicservice.security.crypto.facade.EncryptionIntensityEnum;
 import com.treefinance.basicservice.security.crypto.facade.ISecurityCryptoService;
 import com.treefinance.commonservice.uid.UidGenerator;
+import com.treefinance.saas.assistant.model.Constants;
 import com.treefinance.saas.grapserver.biz.config.DiamondConfig;
 import com.treefinance.saas.grapserver.common.enums.EBizType;
 import com.treefinance.saas.grapserver.common.enums.ETaskStatus;
@@ -94,6 +95,7 @@ public class TaskService {
             task.setWebSite(website);
         }
         task.setId(id);
+        task.setSaasEnv(Byte.valueOf(Constants.SAAS_ENV_VALUE));
         taskMapper.insertSelective(task);
         if (StringUtils.isNotBlank(extra)) {
             ObjectMapper objectMapper = new ObjectMapper();
