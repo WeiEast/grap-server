@@ -5,15 +5,23 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.google.common.collect.Lists;
+import com.treefinance.saas.grapserver.common.utils.DataConverterUtils;
+import com.treefinance.saas.grapserver.dao.entity.AppBizLicense;
 import com.treefinance.saas.grapserver.dao.entity.AppBizType;
 import com.treefinance.saas.grapserver.dao.entity.AppBizTypeCriteria;
 import com.treefinance.saas.grapserver.dao.mapper.AppBizTypeMapper;
+import com.treefinance.saas.merchant.center.facade.request.grapserver.GetAppBizTypeRequest;
+import com.treefinance.saas.merchant.center.facade.result.console.AppBizLicenseResult;
+import com.treefinance.saas.merchant.center.facade.result.console.AppBizTypeResult;
+import com.treefinance.saas.merchant.center.facade.result.console.MerchantResult;
+import com.treefinance.saas.merchant.center.facade.service.AppBizTypeFacade;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.Resource;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -29,8 +37,10 @@ public class AppBizTypeService implements InitializingBean {
      */
     private static final Logger logger = LoggerFactory.getLogger(AppBizTypeService.class);
 
-    @Autowired
-    private AppBizTypeMapper appBizTypeMapper;
+
+
+    @Resource
+    private AppBizTypeFacade appBizTypeFacade;
 
     /**
      * 本地缓存
@@ -39,10 +49,20 @@ public class AppBizTypeService implements InitializingBean {
             .refreshAfterWrite(5, TimeUnit.MINUTES)
             .expireAfterWrite(5, TimeUnit.MINUTES)
             .build(CacheLoader.from(bizType -> {
-                AppBizTypeCriteria criteria = new AppBizTypeCriteria();
-                criteria.createCriteria().andBizTypeEqualTo(bizType);
-                List<AppBizType> list = appBizTypeMapper.selectByExample(criteria);
-                logger.info("load local cache of appbiztype : appid={},data={}", bizType, JSON.toJSONString(list));
+
+                GetAppBizTypeRequest getAppBizTypeRequest = new GetAppBizTypeRequest();
+                getAppBizTypeRequest.setBizType(bizType);
+                MerchantResult<List<AppBizTypeResult>>  merchantResult = appBizTypeFacade.selectAppBizTypeByBizType(getAppBizTypeRequest);
+                List<AppBizType> list = DataConverterUtils.convert(merchantResult.getData(),AppBizType.class);
+                if(merchantResult.isSuccess())
+                {
+                    logger.info("load local cache of appbiztype : appid={},data={}", bizType, JSON.toJSONString(list));
+
+                }
+                else{
+                    logger.info("load local cache of appbiztype false：error message {}",merchantResult.getRetMsg());
+                }
+
                 return list.get(0);
             }));
 
@@ -72,9 +92,12 @@ public class AppBizTypeService implements InitializingBean {
 
     @Override
     public void afterPropertiesSet() throws Exception {
-        AppBizTypeCriteria criteria = new AppBizTypeCriteria();
-        criteria.createCriteria();
-        List<AppBizType> list = appBizTypeMapper.selectByExample(criteria);
+
+        GetAppBizTypeRequest getAppBizTypeRequest = new GetAppBizTypeRequest();
+
+        MerchantResult<List<AppBizTypeResult>>  merchantResult = appBizTypeFacade.selectAppBizTypeByBizType(getAppBizTypeRequest);
+        List<AppBizType> list = DataConverterUtils.convert(merchantResult.getData(),AppBizType.class);
+
         this.cache.putAll(list.stream().collect(Collectors.toMap(AppBizType::getBizType, appBizType -> appBizType)));
         logger.info("加载业务类型数据：list={}", JSON.toJSONString(list));
     }

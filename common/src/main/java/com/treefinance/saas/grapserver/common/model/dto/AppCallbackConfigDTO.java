@@ -166,4 +166,25 @@ public class AppCallbackConfigDTO extends BaseDTO {
     public void setDataType(Byte dataType) {
         this.dataType = dataType;
     }
+
+    @Override
+    public String toString() {
+        return "AppCallbackConfigDTO{" +
+                "id=" + id +
+                ", appId='" + appId + '\'' +
+                ", bizType=" + bizType +
+                ", receiver='" + receiver + '\'' +
+                ", version=" + version +
+                ", isNewKey=" + isNewKey +
+                ", url='" + url + '\'' +
+                ", retryTimes=" + retryTimes +
+                ", timeOut=" + timeOut +
+                ", remark='" + remark + '\'' +
+                ", isNotifyCancel=" + isNotifyCancel +
+                ", isNotifyFailure=" + isNotifyFailure +
+                ", isNotifySuccess=" + isNotifySuccess +
+                ", notifyModel=" + notifyModel +
+                ", dataType=" + dataType +
+                '}';
+    }
 }

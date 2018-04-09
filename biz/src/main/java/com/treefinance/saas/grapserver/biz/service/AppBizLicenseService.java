@@ -8,9 +8,15 @@ import com.google.common.collect.Lists;
 import com.treefinance.saas.assistant.variable.notify.client.VariableMessageHandler;
 import com.treefinance.saas.assistant.variable.notify.model.VariableMessage;
 import com.treefinance.saas.grapserver.common.enums.EBizType;
+import com.treefinance.saas.grapserver.common.utils.DataConverterUtils;
 import com.treefinance.saas.grapserver.dao.entity.AppBizLicense;
 import com.treefinance.saas.grapserver.dao.entity.AppBizLicenseCriteria;
 import com.treefinance.saas.grapserver.dao.mapper.AppBizLicenseMapper;
+import com.treefinance.saas.merchant.center.facade.request.console.QueryAppBizLicenseByAppIdRequest;
+import com.treefinance.saas.merchant.center.facade.request.grapserver.GetAppLicenseByAppIdRequest;
+import com.treefinance.saas.merchant.center.facade.result.console.AppBizLicenseResult;
+import com.treefinance.saas.merchant.center.facade.result.console.MerchantResult;
+import com.treefinance.saas.merchant.center.facade.service.AppBizLicenseFacade;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,7 +41,7 @@ public class AppBizLicenseService implements InitializingBean, VariableMessageHa
     private static final Logger logger = LoggerFactory.getLogger(AppBizLicenseService.class);
 
     @Autowired
-    private AppBizLicenseMapper appBizLicenseMapper;
+    private AppBizLicenseFacade appBizLicenseFacade;
 
     /**
      * 本地缓存
@@ -44,10 +50,12 @@ public class AppBizLicenseService implements InitializingBean, VariableMessageHa
             .refreshAfterWrite(5, TimeUnit.MINUTES)
             .expireAfterWrite(5, TimeUnit.MINUTES)
             .build(CacheLoader.from(appid -> {
-                AppBizLicenseCriteria appBizLicenseCriteria = new AppBizLicenseCriteria();
-                appBizLicenseCriteria.createCriteria().andAppIdEqualTo(appid);
-                List<AppBizLicense> list = appBizLicenseMapper.selectByExample(appBizLicenseCriteria);
-                if (list == null) {
+                QueryAppBizLicenseByAppIdRequest queryAppBizLicenseByAppIdRequest = new QueryAppBizLicenseByAppIdRequest();
+                queryAppBizLicenseByAppIdRequest.setAppId(appid);
+                MerchantResult<List<AppBizLicenseResult>> listMerchantResult = appBizLicenseFacade.queryAppBizLicenseByAppId(queryAppBizLicenseByAppIdRequest);
+                List<AppBizLicense> list = DataConverterUtils.convert(listMerchantResult.getData(), AppBizLicense.class);
+                if (!listMerchantResult.isSuccess()) {
+                    logger.info("load local cache of applicense  false: error message={}", listMerchantResult.getRetMsg());
                     list = Lists.newArrayList();
                 }
                 logger.info("load local cache of applicense : appid={}, license={}", appid, JSON.toJSONString(list));
@@ -126,14 +134,16 @@ public class AppBizLicenseService implements InitializingBean, VariableMessageHa
 
     @Override
     public void afterPropertiesSet() throws Exception {
-        AppBizLicenseCriteria appBizLicenseCriteria = new AppBizLicenseCriteria();
-        appBizLicenseCriteria.createCriteria();
-        // 加载所有授权信息
-        List<AppBizLicense> licenses = appBizLicenseMapper.selectByExample(appBizLicenseCriteria);
-        logger.info("加载app授权信息: licenses={}", JSON.toJSONString(licenses));
+
+        GetAppLicenseByAppIdRequest getAppLicenseByAppIdRequest = new GetAppLicenseByAppIdRequest();
+        MerchantResult<List<AppBizLicenseResult>> listMerchantResult = appBizLicenseFacade.selectAppBizLicenseByAppId(getAppLicenseByAppIdRequest);
+        List<AppBizLicense> licenses = DataConverterUtils.convert(listMerchantResult.getData(), AppBizLicense.class);
+
         if (CollectionUtils.isEmpty(licenses)) {
+            logger.info("加载app授权信息  false: error message={}", listMerchantResult.getRetMsg());
             return;
         }
+        logger.info("加载app授权信息: licenses={}", JSON.toJSONString(licenses));
         this.cache.putAll(licenses.stream().collect(Collectors.groupingBy(AppBizLicense::getAppId)));
     }
 

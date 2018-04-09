@@ -3,7 +3,13 @@ package com.treefinance.saas.grapserver.biz.service;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Maps;
 import com.treefinance.saas.grapserver.biz.config.DiamondConfig;
+
+import com.treefinance.saas.grapserver.common.utils.DataConverterUtils;
 import com.treefinance.saas.grapserver.dao.entity.AppColorConfig;
+import com.treefinance.saas.merchant.center.facade.request.grapserver.GetAppColorConfigRequest;
+import com.treefinance.saas.merchant.center.facade.result.console.MerchantResult;
+import com.treefinance.saas.merchant.center.facade.result.grapsever.AppColorConfigResult;
+import com.treefinance.saas.merchant.center.facade.service.AppColorConfigFacade;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,14 +26,22 @@ public class MerchantConfigService {
 
     @Autowired
     private DiamondConfig diamondConfig;
+
+
     @Autowired
-    private AppColorConfigService appColorConfigService;
+    private AppColorConfigFacade appColorConfigFacade;
 
     @SuppressWarnings("rawtypes")
     public Map getColorConfig(String appId, String style) {
-        AppColorConfig merchantColorConfig = appColorConfigService.getByAppId(appId, style);
+
+        GetAppColorConfigRequest getAppColorConfigRequest = new GetAppColorConfigRequest();
+        getAppColorConfigRequest.setAppId(appId);
+        getAppColorConfigRequest.setStyle(style);
+        MerchantResult<AppColorConfigResult> merchantColorConfigResult = appColorConfigFacade.queryAppColorConfig(getAppColorConfigRequest);
+
         Map<String, Object> map = Maps.newHashMap();
-        if (merchantColorConfig != null) {
+        if (merchantColorConfigResult.isSuccess()) {
+            AppColorConfig merchantColorConfig = DataConverterUtils.convert(merchantColorConfigResult.getData(), AppColorConfig.class);
             map.put("main", merchantColorConfig.getMain());
             map.put("assist", merchantColorConfig.getAssist());
             map.put("assistError", merchantColorConfig.getAssistError());
@@ -37,7 +51,7 @@ public class MerchantConfigService {
             map.put("scheduleError", merchantColorConfig.getScheduleError());
         } else {
             try {
-                logger.debug("读取默认配色appid={}", appId);
+                logger.debug("{},读取默认配色appid={}，",merchantColorConfigResult.getRetMsg(), appId);
                 ObjectMapper objectMapper = new ObjectMapper();
                 Map cardInfoMap = objectMapper.readValue(diamondConfig.getDefaultMerchantColorConfig(), Map.class);
                 map.put("main", cardInfoMap.get("main"));

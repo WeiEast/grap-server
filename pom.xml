@@ -51,6 +51,7 @@
         <maven.build.timestamp.format>yyyyMMddHHmm</maven.build.timestamp.format>
         <grap-server.version>1.0.0-SNAPSHOT</grap-server.version>
         <assistant.version>1.0.9-SNAPSHOT</assistant.version>
+        <merchant-center.version>1.0-SNAPSHOT</merchant-center.version>
     </properties>
 
     <dependencyManagement>
@@ -211,6 +212,10 @@
                 <version>${assistant.version}</version>
             </dependency>
 
+
+
+
+
             <dependency>
                 <groupId>com.treefinance.saas.processor.thirdparty</groupId>
                 <artifactId>processor-thirdparty-facade</artifactId>
@@ -221,6 +226,15 @@
     </dependencyManagement>
 
     <dependencies>
+
+
+        <dependency>
+            <groupId>com.treefinance.saas</groupId>
+            <artifactId>merchant-center-facade</artifactId>
+            <version>${merchant-center.version}</version>
+        </dependency>
+
+
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
