@@ -44,6 +44,7 @@ public class MonitorPluginService {
     public void sendTaskMonitorMessage(TaskDTO taskDTO) {
         TaskMonitorMessage message = new TaskMonitorMessage();
         try {
+            message.setTaskId(taskDTO.getId());
             message.setAccountNo(taskDTO.getAccountNo());
             message.setAppId(taskDTO.getAppId());
             message.setBizType(taskDTO.getBizType());
