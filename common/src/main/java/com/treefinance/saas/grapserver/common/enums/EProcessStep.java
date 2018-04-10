@@ -6,6 +6,7 @@ package com.treefinance.saas.grapserver.common.enums;
  */
 public enum EProcessStep {
     CREATE("create", "创建任务"),
+    CONFIRM_MOBILE("confirm-mobile", "确认手机号"),
     CONFIRM_LOGIN("confirm-login", "确认登录"),
     LOGIN("login", "登录"),
     CRAWL("crawl", "抓取"),

@@ -1,8 +1,6 @@
 package com.treefinance.saas.grapserver.biz.service.monitor;
 
 import com.alibaba.fastjson.JSON;
-import com.treefinance.saas.grapserver.biz.processor.OperatorMonitorSpecialProcessor;
-import com.treefinance.saas.grapserver.biz.processor.request.OperatorMonitorSpecialRequest;
 import com.treefinance.saas.grapserver.biz.service.TaskService;
 import com.treefinance.saas.grapserver.common.enums.EBizType;
 import com.treefinance.saas.grapserver.common.enums.ETaskStatus;
@@ -27,13 +25,13 @@ public class MonitorService {
     @Autowired
     private TaskService taskService;
     @Autowired
-    private OperatorMonitorSpecialProcessor operatorMonitorSpecialProcessor;
-    @Autowired
     private EcommerceMonitorService ecommerceMonitorService;
     @Autowired
     private EmailMonitorService emailMonitorService;
     @Autowired
     private TaskCallbackMsgMonitorService taskCallbackMsgMonitorService;
+    @Autowired
+    private OperatorMonitorService operatorMonitorService;
 
     /**
      * 发送监控消息
@@ -111,11 +109,8 @@ public class MonitorService {
      * @param taskDTO
      */
     private void sendTaskOperatorMonitorMessage(TaskDTO taskDTO) {
-        OperatorMonitorSpecialRequest request = new OperatorMonitorSpecialRequest();
-        request.setTaskId(taskDTO.getId());
-        request.setTask(taskDTO);
-        operatorMonitorSpecialProcessor.doService(request);
-        logger.info("sendTaskOperatorMonitorMessage: task={},request={}", JSON.toJSONString(taskDTO), JSON.toJSONString(request));
+        operatorMonitorService.sendMessage(taskDTO);
+        logger.info("sendOperatorMonitorMessage: task={}", JSON.toJSONString(taskDTO));
     }
 
 
@@ -126,7 +121,7 @@ public class MonitorService {
      */
     private void sendEcommerceMonitorMessage(TaskDTO taskDTO) {
         ecommerceMonitorService.sendMessage(taskDTO);
-        logger.info("sendEcommerceMonitorMessage: task={},request={}", JSON.toJSONString(taskDTO), JSON.toJSONString(taskDTO));
+        logger.info("sendEcommerceMonitorMessage: task={}", JSON.toJSONString(taskDTO));
     }
 
     /**

@@ -50,8 +50,9 @@
         <mybatis-spring.version>1.3.1</mybatis-spring.version>
         <maven.build.timestamp.format>yyyyMMddHHmm</maven.build.timestamp.format>
         <grap-server.version>1.0.0-SNAPSHOT</grap-server.version>
-        <assistant.version>1.0.9-SNAPSHOT</assistant.version>
+
         <merchant-center.version>1.0-SNAPSHOT</merchant-center.version>
+        <assistant.version>1.0.10-SNAPSHOT</assistant.version>
     </properties>
 
     <dependencyManagement>
@@ -211,10 +212,6 @@
                 <artifactId>assistant-httpinvoker</artifactId>
                 <version>${assistant.version}</version>
             </dependency>
-
-
-
-
 
             <dependency>
                 <groupId>com.treefinance.saas.processor.thirdparty</groupId>

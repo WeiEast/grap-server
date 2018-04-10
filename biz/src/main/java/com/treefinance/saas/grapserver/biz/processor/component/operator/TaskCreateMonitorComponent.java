@@ -39,29 +39,29 @@ public class TaskCreateMonitorComponent extends BaseBusinessComponent<OperatorMo
 
     @Override
     protected void doBusiness(OperatorMonitorSpecialRequest request) {
-        if (request == null || request.getTask() == null) {
-            logger.error("运营商监控,发送任务创建(任务日志)消息到monitor,请求参数为空,request={}", JSON.toJSONString(request));
-            return;
-        }
-        List<TaskLog> list = taskLogService.queryTaskLog(request.getTaskId(), ETaskStep.TASK_CREATE.getText());
-        if (CollectionUtils.isEmpty(list)) {
-            logger.info("运营商监控,发送任务创建(任务日志)消息到monitor,未查询到任务创建日志信息,request={}", JSON.toJSONString(request));
-            return;
-        }
-        request.setOrder(1);
-        TaskOperatorMonitorMessage message = new TaskOperatorMonitorMessage();
-        message.setTaskId(request.getTaskId());
-        message.setAppId(request.getTask().getAppId());
-        message.setUniqueId(request.getTask().getUniqueId());
-        String accountNo = request.getTask().getAccountNo();
-        if (StringUtils.isNotBlank(accountNo)) {
-            message.setAccountNo(iSecurityCryptoService.decrypt(accountNo, EncryptionIntensityEnum.NORMAL));
-        }
-        message.setDataTime(request.getTask().getCreateTime());
-        message.setStatus(ETaskOperatorMonitorStatus.CREATE_TASK.getStatus());
-        logger.info("运营商监控,发送任务创建(任务日志)消息到monitor,request={},message={},status={}",
-                JSON.toJSON(request), JSON.toJSONString(message), ETaskOperatorMonitorStatus.CREATE_TASK);
-        monitorPluginService.sendTaskOperatorMonitorMessage(message);
+//        if (request == null || request.getTask() == null) {
+//            logger.error("运营商监控,发送任务创建(任务日志)消息到monitor,请求参数为空,request={}", JSON.toJSONString(request));
+//            return;
+//        }
+//        List<TaskLog> list = taskLogService.queryTaskLog(request.getTaskId(), ETaskStep.TASK_CREATE.getText());
+//        if (CollectionUtils.isEmpty(list)) {
+//            logger.info("运营商监控,发送任务创建(任务日志)消息到monitor,未查询到任务创建日志信息,request={}", JSON.toJSONString(request));
+//            return;
+//        }
+//        request.setOrder(1);
+//        TaskOperatorMonitorMessage message = new TaskOperatorMonitorMessage();
+//        message.setTaskId(request.getTaskId());
+//        message.setAppId(request.getTask().getAppId());
+//        message.setUniqueId(request.getTask().getUniqueId());
+//        String accountNo = request.getTask().getAccountNo();
+//        if (StringUtils.isNotBlank(accountNo)) {
+//            message.setAccountNo(iSecurityCryptoService.decrypt(accountNo, EncryptionIntensityEnum.NORMAL));
+//        }
+//        message.setDataTime(request.getTask().getCreateTime());
+//        message.setStatus(ETaskOperatorMonitorStatus.CREATE_TASK.getStatus());
+//        logger.info("运营商监控,发送任务创建(任务日志)消息到monitor,request={},message={},status={}",
+//                JSON.toJSON(request), JSON.toJSONString(message), ETaskOperatorMonitorStatus.CREATE_TASK);
+//        monitorPluginService.sendTaskOperatorMonitorMessage(message);
 
     }
 }

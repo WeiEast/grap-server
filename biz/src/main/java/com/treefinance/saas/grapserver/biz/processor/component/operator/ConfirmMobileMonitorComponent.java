@@ -43,54 +43,54 @@ public class ConfirmMobileMonitorComponent extends BaseBusinessComponent<Operato
 
     @Override
     protected void doBusiness(OperatorMonitorSpecialRequest request) {
-        if (request == null || request.getTask() == null) {
-            logger.error("运营商监控,发送确认手机号(任务埋点)消息到monitor,请求参数为空,request={}", JSON.toJSONString(request));
-            return;
-        }
-        if (request.getOrder() == null || request.getOrder() != 1) {
-            logger.error("运营商监控,发送确认手机号(任务埋点)消息到monitor,存在环节遗漏,后续不再执行,request={}", JSON.toJSONString(request));
-            return;
-        }
-        List<TaskBuryPointLog> list = taskBuryPointLogService.queryTaskBuryPointLogByCode(request.getTaskId(), "300502");
-        if (CollectionUtils.isEmpty(list)) {
-            logger.info("运营商监控,发送确认手机号(任务埋点)消息到monitor,未查询到确认手机号埋点信息(300502),request={}", JSON.toJSONString(request));
-            return;
-        }
-
-
-        TaskAttribute groupCodeAttribute = taskAttributeService.findByName(request.getTaskId(), ETaskAttribute.OPERATOR_GROUP_CODE.getAttribute(), false);
-        TaskAttribute groupNameAttribute = taskAttributeService.findByName(request.getTaskId(), ETaskAttribute.OPERATOR_GROUP_NAME.getAttribute(), false);
-
-        if (groupCodeAttribute == null || groupNameAttribute == null) {
-            logger.error("运营商监控,task_attribute表中未查到group_code和group_name信息,request={}", JSON.toJSONString(request));
-            return;
-        }
-        String groupCode = groupCodeAttribute.getValue();
-        String groupName = groupNameAttribute.getValue();
-
-        if (StringUtils.isBlank(groupCode) || StringUtils.isBlank(groupName)) {
-            logger.error("运营商监控,未取到groupCode和groupName字段信息,request={}", JSON.toJSONString(request));
-            return;
-        }
-        request.setGroupCode(groupCode);
-        request.setGroupName(groupName);
-        request.setOrder(2);
-
-        TaskOperatorMonitorMessage message = new TaskOperatorMonitorMessage();
-        message.setTaskId(request.getTaskId());
-        message.setAppId(request.getTask().getAppId());
-        message.setUniqueId(request.getTask().getUniqueId());
-        String accountNo = request.getTask().getAccountNo();
-        if (StringUtils.isNotBlank(accountNo)) {
-            message.setAccountNo(iSecurityCryptoService.decrypt(accountNo, EncryptionIntensityEnum.NORMAL));
-        }
-        message.setGroupCode(groupCode);
-        message.setGroupName(groupName);
-        message.setDataTime(request.getTask().getCreateTime());
-        message.setStatus(ETaskOperatorMonitorStatus.CONFIRM_MOBILE.getStatus());
-        logger.info("运营商监控,发送确认手机号(任务埋点)消息到monitor,request={},message={},status={}",
-                JSON.toJSONString(request), JSON.toJSONString(message), ETaskOperatorMonitorStatus.CONFIRM_MOBILE);
-        monitorPluginService.sendTaskOperatorMonitorMessage(message);
+//        if (request == null || request.getTask() == null) {
+//            logger.error("运营商监控,发送确认手机号(任务埋点)消息到monitor,请求参数为空,request={}", JSON.toJSONString(request));
+//            return;
+//        }
+//        if (request.getOrder() == null || request.getOrder() != 1) {
+//            logger.error("运营商监控,发送确认手机号(任务埋点)消息到monitor,存在环节遗漏,后续不再执行,request={}", JSON.toJSONString(request));
+//            return;
+//        }
+//        List<TaskBuryPointLog> list = taskBuryPointLogService.queryTaskBuryPointLogByCode(request.getTaskId(), "300502");
+//        if (CollectionUtils.isEmpty(list)) {
+//            logger.info("运营商监控,发送确认手机号(任务埋点)消息到monitor,未查询到确认手机号埋点信息(300502),request={}", JSON.toJSONString(request));
+//            return;
+//        }
+//
+//
+//        TaskAttribute groupCodeAttribute = taskAttributeService.findByName(request.getTaskId(), ETaskAttribute.OPERATOR_GROUP_CODE.getAttribute(), false);
+//        TaskAttribute groupNameAttribute = taskAttributeService.findByName(request.getTaskId(), ETaskAttribute.OPERATOR_GROUP_NAME.getAttribute(), false);
+//
+//        if (groupCodeAttribute == null || groupNameAttribute == null) {
+//            logger.error("运营商监控,task_attribute表中未查到group_code和group_name信息,request={}", JSON.toJSONString(request));
+//            return;
+//        }
+//        String groupCode = groupCodeAttribute.getValue();
+//        String groupName = groupNameAttribute.getValue();
+//
+//        if (StringUtils.isBlank(groupCode) || StringUtils.isBlank(groupName)) {
+//            logger.error("运营商监控,未取到groupCode和groupName字段信息,request={}", JSON.toJSONString(request));
+//            return;
+//        }
+//        request.setGroupCode(groupCode);
+//        request.setGroupName(groupName);
+//        request.setOrder(2);
+//
+//        TaskOperatorMonitorMessage message = new TaskOperatorMonitorMessage();
+//        message.setTaskId(request.getTaskId());
+//        message.setAppId(request.getTask().getAppId());
+//        message.setUniqueId(request.getTask().getUniqueId());
+//        String accountNo = request.getTask().getAccountNo();
+//        if (StringUtils.isNotBlank(accountNo)) {
+//            message.setAccountNo(iSecurityCryptoService.decrypt(accountNo, EncryptionIntensityEnum.NORMAL));
+//        }
+//        message.setGroupCode(groupCode);
+//        message.setGroupName(groupName);
+//        message.setDataTime(request.getTask().getCreateTime());
+//        message.setStatus(ETaskOperatorMonitorStatus.CONFIRM_MOBILE.getStatus());
+//        logger.info("运营商监控,发送确认手机号(任务埋点)消息到monitor,request={},message={},status={}",
+//                JSON.toJSONString(request), JSON.toJSONString(message), ETaskOperatorMonitorStatus.CONFIRM_MOBILE);
+//        monitorPluginService.sendTaskOperatorMonitorMessage(message);
 
     }
 }
