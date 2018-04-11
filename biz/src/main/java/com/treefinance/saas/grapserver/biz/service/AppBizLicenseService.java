@@ -50,9 +50,9 @@ public class AppBizLicenseService implements InitializingBean, VariableMessageHa
             .refreshAfterWrite(5, TimeUnit.MINUTES)
             .expireAfterWrite(5, TimeUnit.MINUTES)
             .build(CacheLoader.from(appid -> {
-                QueryAppBizLicenseByAppIdRequest queryAppBizLicenseByAppIdRequest = new QueryAppBizLicenseByAppIdRequest();
-                queryAppBizLicenseByAppIdRequest.setAppId(appid);
-                MerchantResult<List<AppBizLicenseResult>> listMerchantResult = appBizLicenseFacade.queryAppBizLicenseByAppId(queryAppBizLicenseByAppIdRequest);
+                GetAppLicenseByAppIdRequest getAppLicenseByAppIdRequest = new GetAppLicenseByAppIdRequest();
+                getAppLicenseByAppIdRequest.setAppId(appid);
+                MerchantResult<List<AppBizLicenseResult>> listMerchantResult = appBizLicenseFacade.selectAppBizLicenseByAppId(getAppLicenseByAppIdRequest);
                 List<AppBizLicense> list = DataConverterUtils.convert(listMerchantResult.getData(), AppBizLicense.class);
                 if (!listMerchantResult.isSuccess()) {
                     logger.info("load local cache of applicense  false: error message={}", listMerchantResult.getRetMsg());
