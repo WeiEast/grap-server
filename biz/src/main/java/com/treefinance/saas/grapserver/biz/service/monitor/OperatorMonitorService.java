@@ -54,7 +54,7 @@ public class OperatorMonitorService {
         long start = System.currentTimeMillis();
         Long taskId = taskDTO.getId();
         TaskOperatorMonitorMessage message = DataConverterUtils.convert(taskDTO, TaskOperatorMonitorMessage.class);
-
+        message.setTaskId(taskDTO.getId());
         // 1.获取任务属性
         List<TaskAttribute> attributeList = taskAttributeService.findByTaskId(taskId);
         Map<String, String> attributeMap = Maps.newHashMap();

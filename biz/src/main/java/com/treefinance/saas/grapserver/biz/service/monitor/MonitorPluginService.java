@@ -50,7 +50,6 @@ public class MonitorPluginService {
             message.setBizType(taskDTO.getBizType());
             message.setCompleteTime(taskDTO.getCreateTime());
             message.setStatus(taskDTO.getStatus());
-            message.setTaskId(taskDTO.getId());
             message.setWebSite(taskDTO.getWebSite());
             message.setUniqueId(taskDTO.getUniqueId());
             message.setStepCode(taskDTO.getStepCode());
