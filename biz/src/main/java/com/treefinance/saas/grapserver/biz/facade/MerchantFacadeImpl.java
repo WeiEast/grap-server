@@ -2,6 +2,7 @@ package com.treefinance.saas.grapserver.biz.facade;
 
 import com.alibaba.fastjson.JSON;
 import com.treefinance.saas.grapserver.common.utils.BeanUtils;
+import com.treefinance.saas.grapserver.common.utils.DataConverterUtils;
 import com.treefinance.saas.grapserver.dao.entity.MerchantBaseInfo;
 import com.treefinance.saas.grapserver.dao.entity.MerchantBaseInfoCriteria;
 import com.treefinance.saas.grapserver.dao.entity.Task;
@@ -12,6 +13,11 @@ import com.treefinance.saas.grapserver.facade.service.MerchantFacade;
 import com.treefinance.saas.knife.common.CommonStateCode;
 import com.treefinance.saas.knife.result.Results;
 import com.treefinance.saas.knife.result.SaasResult;
+import com.treefinance.saas.merchant.center.facade.request.grapserver.QueryMerchantByTaskIdRequest;
+import com.treefinance.saas.merchant.center.facade.result.console.MerchantBaseInfoResult;
+import com.treefinance.saas.merchant.center.facade.result.console.MerchantBaseResult;
+import com.treefinance.saas.merchant.center.facade.result.console.MerchantResult;
+import com.treefinance.saas.merchant.center.facade.service.MerchantBaseInfoFacade;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,8 +35,10 @@ public class MerchantFacadeImpl implements MerchantFacade {
 
     @Autowired
     private TaskMapper taskMapper;
+
     @Autowired
-    private MerchantBaseInfoMapper merchantBaseInfoMapper;
+    private MerchantBaseInfoFacade merchantBaseInfoFacade;
+
 
     @Override
     public SaasResult<MerchantBaseInfoRO> getMerchantBaseInfoByTaskId(Long taskId) {
@@ -45,7 +53,11 @@ public class MerchantFacadeImpl implements MerchantFacade {
         }
         MerchantBaseInfoCriteria merchantBaseInfoCriteria = new MerchantBaseInfoCriteria();
         merchantBaseInfoCriteria.createCriteria().andAppIdEqualTo(task.getAppId());
-        List<MerchantBaseInfo> infoList = merchantBaseInfoMapper.selectByExample(merchantBaseInfoCriteria);
+
+        QueryMerchantByTaskIdRequest queryMerchantByTaskIdRequest = new QueryMerchantByTaskIdRequest();
+        queryMerchantByTaskIdRequest.setAppId(task.getAppId());
+        MerchantResult<List<MerchantBaseResult>> listMerchantResult = merchantBaseInfoFacade.queryMerchantBaseListByAppId(queryMerchantByTaskIdRequest);
+        List<MerchantBaseInfo> infoList = DataConverterUtils.convert(listMerchantResult.getData(), MerchantBaseInfo.class);
         if (CollectionUtils.isEmpty(infoList)) {
             logger.info("通过taskId查询商户基本信息,未查询到taskId={},appId={}的商户信息", taskId, task.getAppId());
             return Results.newSuccessResult(null);

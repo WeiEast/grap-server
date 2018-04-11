@@ -165,4 +165,22 @@ public class MerchantBaseInfoRO implements Serializable {
     public void setLastUpdateTime(Date lastUpdateTime) {
         this.lastUpdateTime = lastUpdateTime;
     }
+
+    @Override
+    public String toString() {
+        return "MerchantBaseInfoRO{" +
+                "appId='" + appId + '\'' +
+                ", uniqueId='" + uniqueId + '\'' +
+                ", appName='" + appName + '\'' +
+                ", chName='" + chName + '\'' +
+                ", company='" + company + '\'' +
+                ", bussiness='" + bussiness + '\'' +
+                ", bussiness2='" + bussiness2 + '\'' +
+                ", address='" + address + '\'' +
+                ", contactPerson='" + contactPerson + '\'' +
+                ", contactValue='" + contactValue + '\'' +
+                ", createTime=" + createTime +
+                ", lastUpdateTime=" + lastUpdateTime +
+                '}';
+    }
 }

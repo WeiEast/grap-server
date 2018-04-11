@@ -1,14 +1,14 @@
 package com.treefinance.saas.grapserver.biz.service;
 
-import com.alibaba.dubbo.common.utils.CollectionUtils;
+import com.treefinance.saas.grapserver.common.utils.DataConverterUtils;
 import com.treefinance.saas.grapserver.dao.entity.AppColorConfig;
-import com.treefinance.saas.grapserver.dao.entity.AppColorConfigCriteria;
-import com.treefinance.saas.grapserver.dao.mapper.AppColorConfigMapper;
-import org.apache.commons.lang3.StringUtils;
+import com.treefinance.saas.merchant.center.facade.request.grapserver.GetAppColorConfigRequest;
+import com.treefinance.saas.merchant.center.facade.result.console.MerchantResult;
+import com.treefinance.saas.merchant.center.facade.result.grapsever.AppColorConfigResult;
+import com.treefinance.saas.merchant.center.facade.service.AppColorConfigFacade;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
 
 /**
  * Created by luoyihua on 2017/5/2.
@@ -17,21 +17,19 @@ import java.util.List;
 public class AppColorConfigService {
 
     @Autowired
-    private AppColorConfigMapper merchantColorConfigMapper;
+    private AppColorConfigFacade appColorConfigFacade;
 
     public AppColorConfig getByAppId(String appId, String style) {
-        AppColorConfigCriteria example = new AppColorConfigCriteria();
-        AppColorConfigCriteria.Criteria innerCriteria = example.createCriteria();
-        innerCriteria.andAppIdEqualTo(appId).andStatusEqualTo((byte) 1);
-        if (StringUtils.isNotBlank(style)) {
-            innerCriteria.andStyleEqualTo(style);
-        } else {
-            innerCriteria.andStyleEqualTo("DEFAULT");
-        }
-        List<AppColorConfig> list = merchantColorConfigMapper.selectByExample(example);
-        if (CollectionUtils.isEmpty(list)) {
+
+
+        GetAppColorConfigRequest getAppColorConfigRequest = new GetAppColorConfigRequest();
+        getAppColorConfigRequest.setStyle(style);
+        getAppColorConfigRequest.setAppId(appId);
+        MerchantResult<AppColorConfigResult> listMerchantResult = appColorConfigFacade.queryAppColorConfig(getAppColorConfigRequest);
+        AppColorConfig appColorConfig = DataConverterUtils.convert(listMerchantResult.getData(),AppColorConfig.class);
+        if (appColorConfig==null) {
             return null;
         }
-        return list.get(0);
+        return appColorConfig;
     }
 }
