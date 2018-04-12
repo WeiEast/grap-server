@@ -6,15 +6,13 @@ import com.treefinance.saas.grapserver.common.utils.DataConverterUtils;
 import com.treefinance.saas.grapserver.dao.entity.MerchantBaseInfo;
 import com.treefinance.saas.grapserver.dao.entity.MerchantBaseInfoCriteria;
 import com.treefinance.saas.grapserver.dao.entity.Task;
-import com.treefinance.saas.grapserver.dao.mapper.MerchantBaseInfoMapper;
 import com.treefinance.saas.grapserver.dao.mapper.TaskMapper;
 import com.treefinance.saas.grapserver.facade.model.MerchantBaseInfoRO;
 import com.treefinance.saas.grapserver.facade.service.MerchantFacade;
 import com.treefinance.saas.knife.common.CommonStateCode;
 import com.treefinance.saas.knife.result.Results;
 import com.treefinance.saas.knife.result.SaasResult;
-import com.treefinance.saas.merchant.center.facade.request.grapserver.QueryMerchantByTaskIdRequest;
-import com.treefinance.saas.merchant.center.facade.result.console.MerchantBaseInfoResult;
+import com.treefinance.saas.merchant.center.facade.request.grapserver.QueryMerchantByAppIdRequest;
 import com.treefinance.saas.merchant.center.facade.result.console.MerchantBaseResult;
 import com.treefinance.saas.merchant.center.facade.result.console.MerchantResult;
 import com.treefinance.saas.merchant.center.facade.service.MerchantBaseInfoFacade;
@@ -24,6 +22,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -54,8 +53,10 @@ public class MerchantFacadeImpl implements MerchantFacade {
         MerchantBaseInfoCriteria merchantBaseInfoCriteria = new MerchantBaseInfoCriteria();
         merchantBaseInfoCriteria.createCriteria().andAppIdEqualTo(task.getAppId());
 
-        QueryMerchantByTaskIdRequest queryMerchantByTaskIdRequest = new QueryMerchantByTaskIdRequest();
-        queryMerchantByTaskIdRequest.setAppId(task.getAppId());
+        QueryMerchantByAppIdRequest queryMerchantByTaskIdRequest = new QueryMerchantByAppIdRequest();
+        List<String> stringList = new ArrayList<String>();
+        stringList.add(task.getAppId());
+        queryMerchantByTaskIdRequest.setAppIds(stringList);
         MerchantResult<List<MerchantBaseResult>> listMerchantResult = merchantBaseInfoFacade.queryMerchantBaseListByAppId(queryMerchantByTaskIdRequest);
         List<MerchantBaseInfo> infoList = DataConverterUtils.convert(listMerchantResult.getData(), MerchantBaseInfo.class);
         if (CollectionUtils.isEmpty(infoList)) {
