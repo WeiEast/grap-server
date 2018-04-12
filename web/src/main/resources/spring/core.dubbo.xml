@@ -17,6 +17,9 @@
     <dubbo:reference id="crawlerService" interface="com.datatrees.rawdatacentral.api.CrawlerService" timeout="20000"
                      cluster="failfast"/>
 
+    <dubbo:reference id="appLicenseFacade"
+                     interface="com.treefinance.saas.merchant.center.facade.service.AppLicenseFacade" version="1.0.0"/>
+
     <dubbo:reference id="crawlerOperatorService" interface="com.datatrees.rawdatacentral.api.CrawlerOperatorService"
                      timeout="20000"/>
 
