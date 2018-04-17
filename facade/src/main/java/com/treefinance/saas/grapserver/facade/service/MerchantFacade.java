@@ -7,7 +7,6 @@ import com.treefinance.saas.knife.result.SaasResult;
  * Created by haojiahong on 2017/10/20.
  */
 public interface MerchantFacade {
-
     /**
      * 根据taskId查询商户基本信息
      *
