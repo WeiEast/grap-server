@@ -12,6 +12,7 @@ import com.treefinance.saas.grapserver.common.utils.DataConverterUtils;
 import com.treefinance.saas.grapserver.dao.entity.AppBizLicense;
 import com.treefinance.saas.grapserver.dao.entity.AppBizLicenseCriteria;
 import com.treefinance.saas.grapserver.dao.mapper.AppBizLicenseMapper;
+import com.treefinance.saas.merchant.center.facade.request.common.BaseRequest;
 import com.treefinance.saas.merchant.center.facade.request.console.QueryAppBizLicenseByAppIdRequest;
 import com.treefinance.saas.merchant.center.facade.request.grapserver.GetAppLicenseByAppIdRequest;
 import com.treefinance.saas.merchant.center.facade.result.console.AppBizLicenseResult;
@@ -52,7 +53,7 @@ public class AppBizLicenseService implements InitializingBean, VariableMessageHa
             .build(CacheLoader.from(appid -> {
                 GetAppLicenseByAppIdRequest getAppLicenseByAppIdRequest = new GetAppLicenseByAppIdRequest();
                 getAppLicenseByAppIdRequest.setAppId(appid);
-                MerchantResult<List<AppBizLicenseResult>> listMerchantResult = appBizLicenseFacade.selectAppBizLicenseByAppId(getAppLicenseByAppIdRequest);
+                MerchantResult<List<AppBizLicenseResult>> listMerchantResult = appBizLicenseFacade.queryAppBizLicenseByAppId(getAppLicenseByAppIdRequest);
                 List<AppBizLicense> list = DataConverterUtils.convert(listMerchantResult.getData(), AppBizLicense.class);
                 if (!listMerchantResult.isSuccess()) {
                     logger.info("load local cache of applicense  false: error message={}", listMerchantResult.getRetMsg());
@@ -135,8 +136,8 @@ public class AppBizLicenseService implements InitializingBean, VariableMessageHa
     @Override
     public void afterPropertiesSet() throws Exception {
 
-        GetAppLicenseByAppIdRequest getAppLicenseByAppIdRequest = new GetAppLicenseByAppIdRequest();
-        MerchantResult<List<AppBizLicenseResult>> listMerchantResult = appBizLicenseFacade.selectAppBizLicenseByAppId(getAppLicenseByAppIdRequest);
+        BaseRequest request = new BaseRequest();
+        MerchantResult<List<AppBizLicenseResult>> listMerchantResult = appBizLicenseFacade.queryAllAppBizLicense(request);
         List<AppBizLicense> licenses = DataConverterUtils.convert(listMerchantResult.getData(), AppBizLicense.class);
 
         if (CollectionUtils.isEmpty(licenses)) {

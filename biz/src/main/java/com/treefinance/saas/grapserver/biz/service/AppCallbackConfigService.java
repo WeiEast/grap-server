@@ -12,6 +12,7 @@ import com.treefinance.saas.grapserver.common.utils.DataConverterUtils;
 import com.treefinance.saas.grapserver.dao.entity.AppCallbackBiz;
 import com.treefinance.saas.grapserver.dao.entity.AppCallbackConfig;
 import com.treefinance.saas.grapserver.facade.enums.EDataType;
+import com.treefinance.saas.merchant.center.facade.request.common.BaseRequest;
 import com.treefinance.saas.merchant.center.facade.request.grapserver.GetAppCallBackBizByCallbackIdRequest;
 import com.treefinance.saas.merchant.center.facade.request.grapserver.GetAppCallBackConfigByIdRequest;
 import com.treefinance.saas.merchant.center.facade.result.console.MerchantResult;
@@ -205,8 +206,8 @@ public class AppCallbackConfigService implements InitializingBean, VariableMessa
     @Override
     public void afterPropertiesSet() throws Exception {
         // 1. 初始化appCallback
-        GetAppCallBackConfigByIdRequest getAppCallBackConfigByIdRequest = new GetAppCallBackConfigByIdRequest();
-        MerchantResult<List<AppCallbackResult>> listMerchantResult = appCallbackConfigFacade.queryAppCallBackConfigByAppId(getAppCallBackConfigByIdRequest);
+        BaseRequest request = new BaseRequest();
+        MerchantResult<List<AppCallbackResult>> listMerchantResult = appCallbackConfigFacade.queryAllAppCallBackConfig(request);
         List<AppCallbackConfig> list = DataConverterUtils.convert(listMerchantResult.getData(), AppCallbackConfig.class);
 
         logger.info("加载callback信息: callback={}", JSON.toJSONString(list));
@@ -216,8 +217,8 @@ public class AppCallbackConfigService implements InitializingBean, VariableMessa
         this.callbackCache.putAll(list.stream().collect(
                 Collectors.groupingBy(AppCallbackConfig::getAppId)));
         // 2. 初始化callBackType
-        GetAppCallBackBizByCallbackIdRequest getAppCallBackBizByCallbackIdRequest = new GetAppCallBackBizByCallbackIdRequest();
-        MerchantResult<List<AppCallbackBizResult>> listMerchantResult1 = appCallBackBizFacade.queryAppCallBackByCallbackId(getAppCallBackBizByCallbackIdRequest);
+        BaseRequest baseRequest = new BaseRequest();
+        MerchantResult<List<AppCallbackBizResult>> listMerchantResult1 = appCallBackBizFacade.queryAllAppCallBack(baseRequest);
         List<AppCallbackBiz> appCallbackBizList = DataConverterUtils.convert(listMerchantResult1.getData(),AppCallbackBiz.class);
 
         logger.info("加载callbackType信息: callbackType={}", JSON.toJSONString(appCallbackBizList));
