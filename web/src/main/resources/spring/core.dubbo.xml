@@ -17,6 +17,9 @@
     <dubbo:reference id="crawlerService" interface="com.datatrees.rawdatacentral.api.CrawlerService" timeout="20000"
                      cluster="failfast"/>
 
+    <dubbo:reference id="appLicenseFacade"
+                     interface="com.treefinance.saas.merchant.center.facade.service.AppLicenseFacade" version="1.0.0"/>
+
     <dubbo:reference id="crawlerOperatorService" interface="com.datatrees.rawdatacentral.api.CrawlerOperatorService"
                      timeout="20000"/>
 
@@ -64,6 +67,21 @@
 
     <dubbo:reference interface="com.datatrees.rawdatacentral.api.CrawlerTaskService"
                      id="crawlerTaskService"/>
+
+    <dubbo:reference interface="com.treefinance.saas.merchant.center.facade.service.MerchantBaseInfoFacade"
+                     id="merchantBaseInfoFacade" version="1.0.0"/>
+
+    <dubbo:reference interface="com.treefinance.saas.merchant.center.facade.service.AppColorConfigFacade"
+                     id="appColorConfigFacade" version="1.0.0"/>
+
+    <dubbo:reference interface="com.treefinance.saas.merchant.center.facade.service.AppBizLicenseFacade"
+                     id="appBizLicenseFacade" version="1.0.0"/>
+    <dubbo:reference interface="com.treefinance.saas.merchant.center.facade.service.AppBizTypeFacade"
+                     id="appBizTypeFacade" version="1.0.0"/>
+    <dubbo:reference interface="com.treefinance.saas.merchant.center.facade.service.AppCallBackBizFacade"
+                     id="appCallBackBizFacade" version="1.0.0"/>
+    <dubbo:reference interface="com.treefinance.saas.merchant.center.facade.service.AppCallbackConfigFacade"
+                     id="appCallbackConfigFacade" version="1.0.0"/>
 
 
     <!--生产者-->

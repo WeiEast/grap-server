@@ -10,12 +10,15 @@ import com.treefinance.saas.assistant.variable.notify.model.VariableMessage;
 import com.treefinance.saas.grapserver.common.model.dto.AppCallbackConfigDTO;
 import com.treefinance.saas.grapserver.common.utils.DataConverterUtils;
 import com.treefinance.saas.grapserver.dao.entity.AppCallbackBiz;
-import com.treefinance.saas.grapserver.dao.entity.AppCallbackBizCriteria;
 import com.treefinance.saas.grapserver.dao.entity.AppCallbackConfig;
-import com.treefinance.saas.grapserver.dao.entity.AppCallbackConfigCriteria;
-import com.treefinance.saas.grapserver.dao.mapper.AppCallbackBizMapper;
-import com.treefinance.saas.grapserver.dao.mapper.AppCallbackConfigMapper;
 import com.treefinance.saas.grapserver.facade.enums.EDataType;
+import com.treefinance.saas.merchant.center.facade.request.grapserver.GetAppCallBackBizByCallbackIdRequest;
+import com.treefinance.saas.merchant.center.facade.request.grapserver.GetAppCallBackConfigByIdRequest;
+import com.treefinance.saas.merchant.center.facade.result.console.MerchantResult;
+import com.treefinance.saas.merchant.center.facade.result.grapsever.AppCallbackBizResult;
+import com.treefinance.saas.merchant.center.facade.result.grapsever.AppCallbackResult;
+import com.treefinance.saas.merchant.center.facade.service.AppCallBackBizFacade;
+import com.treefinance.saas.merchant.center.facade.service.AppCallbackConfigFacade;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,11 +43,13 @@ public class AppCallbackConfigService implements InitializingBean, VariableMessa
      */
     private static final Logger logger = LoggerFactory.getLogger(AppCallbackConfigService.class);
 
-    @Autowired
-    private AppCallbackConfigMapper appCallbackConfigMapper;
+
 
     @Autowired
-    private AppCallbackBizMapper appCallbackBizMapper;
+    private AppCallbackConfigFacade appCallbackConfigFacade;
+
+    @Autowired
+    private AppCallBackBizFacade appCallBackBizFacade;
 
     /**
      * 本地缓存<appId,callbackConfig>
@@ -53,13 +58,18 @@ public class AppCallbackConfigService implements InitializingBean, VariableMessa
             .refreshAfterWrite(5, TimeUnit.MINUTES)
             .expireAfterAccess(5, TimeUnit.MINUTES)
             .build(CacheLoader.from(appid -> {
-                AppCallbackConfigCriteria appCallbackConfigCriteria = new AppCallbackConfigCriteria();
-                appCallbackConfigCriteria.createCriteria().andAppIdEqualTo(appid);
-                List<AppCallbackConfig> list = appCallbackConfigMapper.selectByExample(appCallbackConfigCriteria);
-                if (list == null) {
+
+
+                GetAppCallBackConfigByIdRequest getAppCallBackConfigByIdRequest = new GetAppCallBackConfigByIdRequest();
+                getAppCallBackConfigByIdRequest.setAppId(appid);
+                MerchantResult<List<AppCallbackResult>> listMerchantResult = appCallbackConfigFacade.queryAppCallBackConfigByAppId(getAppCallBackConfigByIdRequest);
+                List<AppCallbackConfig> list = DataConverterUtils.convert(listMerchantResult.getData(), AppCallbackConfig.class);
+
+                if (!listMerchantResult.isSuccess()) {
+                    logger.info("load local cache of callback-configs  false: error message={}", listMerchantResult.getRetMsg());
                     list = Lists.newArrayList();
                 }
-                logger.info("load local cache of callback-configs : appid={}, configs={}", appid, JSON.toJSONString(list));
+                logger.info("load local cache of callback-configs : appid={}, license={}", appid, JSON.toJSONString(list));
                 // 刷新类型
                 list.forEach(appCallbackConfig -> this.callbackTypeCache.refresh(appCallbackConfig.getId()));
                 return list;
@@ -72,10 +82,12 @@ public class AppCallbackConfigService implements InitializingBean, VariableMessa
             .refreshAfterWrite(5, TimeUnit.MINUTES)
             .expireAfterAccess(5, TimeUnit.MINUTES)
             .build(CacheLoader.from(callbackId -> {
-                AppCallbackBizCriteria bizCriteria = new AppCallbackBizCriteria();
-                bizCriteria.createCriteria().andCallbackIdEqualTo(callbackId);
-                List<AppCallbackBiz> list = appCallbackBizMapper.selectByExample(bizCriteria);
-                if (list == null) {
+                GetAppCallBackBizByCallbackIdRequest getAppCallBackBizByCallbackIdRequest = new GetAppCallBackBizByCallbackIdRequest();
+                getAppCallBackBizByCallbackIdRequest.setCallbackId(callbackId);
+                MerchantResult<List<AppCallbackBizResult>> listMerchantResult = appCallBackBizFacade.queryAppCallBackByCallbackId(getAppCallBackBizByCallbackIdRequest);
+                List<AppCallbackBiz> list = DataConverterUtils.convert(listMerchantResult.getData(),AppCallbackBiz.class);
+                if (!listMerchantResult.isSuccess()) {
+                    logger.info("load local cache of callback-types  false: error message={}", listMerchantResult.getRetMsg());
                     list = Lists.newArrayList();
                 }
                 logger.info("load local cache of callback-types : callbackId={}, callbackType={}", callbackId, JSON.toJSONString(list));
@@ -193,21 +205,22 @@ public class AppCallbackConfigService implements InitializingBean, VariableMessa
     @Override
     public void afterPropertiesSet() throws Exception {
         // 1. 初始化appCallback
-        AppCallbackConfigCriteria appCallbackConfigCriteria = new AppCallbackConfigCriteria();
-        appCallbackConfigCriteria.createCriteria();
-        List<AppCallbackConfig> list = appCallbackConfigMapper.selectByExample(appCallbackConfigCriteria);
+        GetAppCallBackConfigByIdRequest getAppCallBackConfigByIdRequest = new GetAppCallBackConfigByIdRequest();
+        MerchantResult<List<AppCallbackResult>> listMerchantResult = appCallbackConfigFacade.queryAppCallBackConfigByAppId(getAppCallBackConfigByIdRequest);
+        List<AppCallbackConfig> list = DataConverterUtils.convert(listMerchantResult.getData(), AppCallbackConfig.class);
+
         logger.info("加载callback信息: callback={}", JSON.toJSONString(list));
         if (CollectionUtils.isEmpty(list)) {
             return;
         }
         this.callbackCache.putAll(list.stream().collect(
                 Collectors.groupingBy(AppCallbackConfig::getAppId)));
-
         // 2. 初始化callBackType
-        AppCallbackBizCriteria bizCriteria = new AppCallbackBizCriteria();
-        bizCriteria.createCriteria();
-        List<AppCallbackBiz> appCallbackBizList = appCallbackBizMapper.selectByExample(bizCriteria);
-        logger.info("加载callbackType信息: callbackType={}", JSON.toJSONString(list));
+        GetAppCallBackBizByCallbackIdRequest getAppCallBackBizByCallbackIdRequest = new GetAppCallBackBizByCallbackIdRequest();
+        MerchantResult<List<AppCallbackBizResult>> listMerchantResult1 = appCallBackBizFacade.queryAppCallBackByCallbackId(getAppCallBackBizByCallbackIdRequest);
+        List<AppCallbackBiz> appCallbackBizList = DataConverterUtils.convert(listMerchantResult1.getData(),AppCallbackBiz.class);
+
+        logger.info("加载callbackType信息: callbackType={}", JSON.toJSONString(appCallbackBizList));
         if (CollectionUtils.isEmpty(appCallbackBizList)) {
             return;
         }
