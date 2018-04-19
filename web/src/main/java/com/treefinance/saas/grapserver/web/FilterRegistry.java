@@ -63,4 +63,8 @@ public class FilterRegistry {
         return registration;
     }
 
+    public FilterRegistrationBean taskTimeoutFilter() {
+
+    }
+
 }
