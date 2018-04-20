@@ -3,8 +3,8 @@ package com.treefinance.saas.grapserver.biz.service.directive.process.impl;
 import com.datatrees.rawdatacentral.api.CrawlerService;
 import com.google.common.collect.Maps;
 import com.treefinance.saas.grapserver.biz.common.AsycExcutor;
-import com.treefinance.saas.grapserver.biz.service.monitor.MonitorService;
 import com.treefinance.saas.grapserver.biz.service.directive.process.AbstractDirectiveProcessor;
+import com.treefinance.saas.grapserver.biz.service.monitor.MonitorService;
 import com.treefinance.saas.grapserver.common.enums.EDirective;
 import com.treefinance.saas.grapserver.common.enums.ETaskStatus;
 import com.treefinance.saas.grapserver.common.model.dto.DirectiveDTO;
@@ -36,6 +36,8 @@ public class CancelDirectiveProcessor extends AbstractDirectiveProcessor {
         Map<String, String> extMap = Maps.newHashMap();
         extMap.put("reason", "user");
         crawlerService.cancel(taskDTO.getId(), extMap);
+        //任务终态处理
+        doFinalStateProcess(directive, directiveDTO);
 
         // 发送监控消息
         monitorService.sendMonitorMessage(taskDTO);

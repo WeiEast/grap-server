@@ -3,8 +3,8 @@ package com.treefinance.saas.grapserver.biz.service.directive.process.impl;
 import com.alibaba.fastjson.JSON;
 import com.treefinance.saas.gateway.servicefacade.enums.BizTypeEnum;
 import com.treefinance.saas.grapserver.biz.common.AsycExcutor;
-import com.treefinance.saas.grapserver.biz.service.monitor.MonitorService;
 import com.treefinance.saas.grapserver.biz.service.directive.process.AbstractDirectiveProcessor;
+import com.treefinance.saas.grapserver.biz.service.monitor.MonitorService;
 import com.treefinance.saas.grapserver.common.enums.EBizType;
 import com.treefinance.saas.grapserver.common.enums.EDirective;
 import com.treefinance.saas.grapserver.common.enums.ETaskStatus;
@@ -49,6 +49,8 @@ public class FailureDirectiveProcessor extends AbstractDirectiveProcessor {
         precallback(dataMap, appLicense, directiveDTO);
 
         handleTaskFailMsg(directiveDTO, taskDTO);
+        //任务终态处理
+        doFinalStateProcess(directive, directiveDTO);
         // 7.异步触发触发回调
         asycExcutor.runAsyc(directiveDTO, _directiveDTO -> {
             callback(dataMap, appLicense, _directiveDTO);

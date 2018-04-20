@@ -27,16 +27,20 @@ import com.treefinance.saas.grapserver.biz.service.AppLicenseService;
 import com.treefinance.saas.grapserver.biz.service.monitor.MonitorPluginService;
 import com.treefinance.saas.grapserver.common.exception.AppIdUncheckException;
 import com.treefinance.saas.grapserver.common.exception.ForbiddenException;
+import com.treefinance.saas.grapserver.common.exception.TaskTimeOutException;
 import com.treefinance.saas.grapserver.common.model.AppLicenseKey;
 import com.treefinance.saas.grapserver.common.model.Constants;
 import com.treefinance.saas.grapserver.common.model.WebContext;
 import com.treefinance.saas.grapserver.common.utils.IpUtils;
+import com.treefinance.saas.grapserver.common.utils.RedisKeyUtils;
 import com.treefinance.saas.grapserver.dao.entity.AppLicense;
 import com.treefinance.saas.grapserver.web.request.WrappedHttpServletRequest;
 import com.treefinance.saas.knife.result.SimpleResult;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.core.task.TaskTimeoutException;
+import org.springframework.data.redis.core.StringRedisTemplate;
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
@@ -57,12 +61,17 @@ public class WebContextFilter extends AbstractRequestFilter {
     private MonitorPluginService monitorPluginService;
     private DiamondConfig diamondConfig;
     private AppLicenseService appLicenseService;
+    private StringRedisTemplate stringRedisTemplate;
 
 
-    public WebContextFilter(MonitorPluginService monitorPluginService, DiamondConfig diamondConfig, AppLicenseService appLicenseService) {
+    public WebContextFilter(MonitorPluginService monitorPluginService,
+                            DiamondConfig diamondConfig,
+                            AppLicenseService appLicenseService,
+                            StringRedisTemplate stringRedisTemplate) {
         this.monitorPluginService = monitorPluginService;
         this.diamondConfig = diamondConfig;
         this.appLicenseService = appLicenseService;
+        this.stringRedisTemplate = stringRedisTemplate;
     }
 
     @Override
@@ -71,6 +80,7 @@ public class WebContextFilter extends AbstractRequestFilter {
         long start = System.currentTimeMillis();
         try {
             request = WrappedHttpServletRequest.wrap(request, null);
+            //校验appId
             String appId = request.getParameter(Constants.APP_ID);
             if (appId == null) {
                 throw new ForbiddenException("Can not find parameter 'appid' in request.");
@@ -83,8 +93,36 @@ public class WebContextFilter extends AbstractRequestFilter {
             boolean isMatchOld = Pattern.matches(oldPattern, appId);
             boolean isMatch = Pattern.matches(pattern, appId);
             if (!isMatchOld && !isMatch) {
-                throw new AppIdUncheckException("appLicenseKey id is illegal in this environment,appIdEnvironmentPrefix=" + diamondConfig.getAppIdEnvironmentPrefix());
+                throw new AppIdUncheckException("appLicenseKey id is illegal in this environment,appIdEnvironmentPrefix="
+                        + diamondConfig.getAppIdEnvironmentPrefix());
             }
+            //校验任务是否超时取消
+            String taskIdStr = request.getParameter("taskId");
+            String taskidStr = request.getParameter("taskid");
+            long taskId = 0;
+            if (StringUtils.isNotBlank(taskIdStr)) {
+                taskId = Long.parseLong(taskIdStr);
+            }
+            if (StringUtils.isNotBlank(taskidStr)) {
+                taskId = Long.parseLong(taskidStr);
+            }
+            if (taskId > 0) {
+                String key = RedisKeyUtils.genTaskActiveTimeKey(taskId);
+                String lastActiveTimeStr = stringRedisTemplate.opsForValue().get(key);
+                if (StringUtils.isNotBlank(lastActiveTimeStr)) {
+                    Long lastActiveTime = Long.parseLong(lastActiveTimeStr);
+                    Long now = System.currentTimeMillis();
+                    long diff = 10 * 60 * 1000;
+                    if (now - lastActiveTime > diff) {
+                        throw new TaskTimeoutException("task time out taskId=" + taskId
+                                + ",lastActiveTime=" + lastActiveTime
+                                + ",now=" + now);
+                    }
+                } else {
+                    throw new TaskTimeoutException("task finished taskId=" + taskId);
+                }
+            }
+
             String ip = null;
             try {
                 ip = ServletRequestUtils.getIP(request);
@@ -104,11 +142,31 @@ public class WebContextFilter extends AbstractRequestFilter {
             forbidden(request, response, e);
         } catch (AppIdUncheckException e) {
             appIdUncheck(request, response, e);
+        } catch (TaskTimeOutException e) {
+            taskTimeout(request, response, e);
         } finally {
             logger.info("{} of {} : params={}", request.getMethod(), request.getRequestURL(),
                     JSON.toJSONString(request.getParameterMap()));
             monitorRequest(start, request, response);
         }
+    }
+
+    /**
+     * 任务超时取消处理
+     *
+     * @param request
+     * @param response
+     * @param e
+     */
+    private void taskTimeout(HttpServletRequest request, HttpServletResponse response, TaskTimeOutException e) {
+        logger.error(String.format("@[%s;%s;%s] >> %s", request.getRequestURI(), request.getMethod(),
+                ServletRequestUtils.getIP(request), e.getMessage()));
+        Map<String, Integer> map = Maps.newHashMap();
+        map.put("mark", 0);
+        SimpleResult<Map<String, Integer>> result = new SimpleResult<>(map);
+        result.setErrorMsg("任务失效");
+        String responseBody = Jackson.toJSONString(result);
+        ServletResponseUtils.responseJson(response, 400, responseBody);
     }
 
     /**

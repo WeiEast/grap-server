@@ -5,10 +5,8 @@ import com.datatrees.rawdatacentral.api.CrawlerService;
 import com.google.common.collect.Maps;
 import com.treefinance.saas.grapserver.biz.mq.model.DirectiveMessage;
 import com.treefinance.saas.grapserver.biz.service.*;
-import com.treefinance.saas.grapserver.biz.service.directive.DirectiveService;
 import com.treefinance.saas.grapserver.common.enums.EDirective;
 import com.treefinance.saas.grapserver.common.enums.EOperatorCodeType;
-import com.treefinance.saas.grapserver.common.model.dto.DirectiveDTO;
 import com.treefinance.saas.grapserver.common.model.dto.TaskDTO;
 import com.treefinance.saas.grapserver.common.utils.JsonUtils;
 import com.treefinance.saas.grapserver.dao.entity.MerchantBaseInfo;
@@ -48,8 +46,6 @@ public class TaskController {
     private MerchantConfigService merchantConfigService;
     @Autowired
     private MerchantBaseInfoService merchantBaseInfoService;
-    @Autowired
-    private DirectiveService directiveService;
     @Autowired
     private AppBizLicenseService appBizLicenseService;
     @Autowired
@@ -176,15 +172,7 @@ public class TaskController {
      */
     @RequestMapping(value = "/cancel", method = {RequestMethod.POST})
     public Object cancelTask(@RequestParam Long taskid) throws Exception {
-        logger.info("取消任务 : taskId={} ", taskid);
-        if (taskServiceImpl.isDoingTask(taskid)) {
-            logger.info("取消正在执行任务 : taskId={} ", taskid);
-            DirectiveDTO cancelDirective = new DirectiveDTO();
-            cancelDirective.setTaskId(taskid);
-            cancelDirective.setDirective(EDirective.TASK_CANCEL.getText());
-            directiveService.process(cancelDirective);
-//            crawlerService.cancel(taskid, null);
-        }
+        taskServiceImpl.cancelTask(taskid);
         return new SimpleResult<>();
     }
 

@@ -19,6 +19,7 @@ package com.treefinance.saas.grapserver.biz.cache;
 import com.treefinance.saas.grapserver.biz.cache.redis.MoreRedisTemplate;
 import com.treefinance.saas.grapserver.common.model.Constants;
 import org.apache.commons.collections.MapUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -115,12 +116,12 @@ public class RedisDaoImpl implements RedisDao {
             map.put("expireTimeStr", String.valueOf(value));
             return map;
         } else {
-            long oldValue = Long.valueOf(redisTemplate.opsForValue().get(lockKey));
+            String oldValueStr = redisTemplate.opsForValue().get(lockKey);
             //如果其他资源之前获得锁已经超时
-            if (oldValue < System.currentTimeMillis()) {
+            if (StringUtils.isNotBlank(oldValueStr) && Long.parseLong(oldValueStr) < System.currentTimeMillis()) {
                 String getValue = redisTemplate.opsForValue().getAndSet(lockKey, String.valueOf(value));
                 //上一个锁超时后会有很多线程去争夺锁，所以只有拿到oldValue的线程才是获得锁的。
-                if (Long.valueOf(getValue) == oldValue) {
+                if (Long.parseLong(getValue) == Long.parseLong(oldValueStr)) {
                     map.put("isSuccess", true);
                     map.put("expireTimeStr", String.valueOf(value));
                     return map;
@@ -156,6 +157,4 @@ public class RedisDaoImpl implements RedisDao {
         }
 
     }
-
-
 }

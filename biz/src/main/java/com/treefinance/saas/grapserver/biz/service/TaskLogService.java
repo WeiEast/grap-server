@@ -4,20 +4,22 @@ import com.alibaba.fastjson.JSON;
 import com.google.common.collect.Lists;
 import com.treefinance.commonservice.uid.UidGenerator;
 import com.treefinance.saas.grapserver.common.enums.ETaskStep;
+import com.treefinance.saas.grapserver.common.utils.RedisKeyUtils;
 import com.treefinance.saas.grapserver.dao.entity.TaskLog;
 import com.treefinance.saas.grapserver.dao.entity.TaskLogCriteria;
 import com.treefinance.saas.grapserver.dao.mapper.TaskLogMapper;
-import com.treefinance.saas.grapserver.dao.mapper.TaskMapper;
 import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Created by luoyihua on 2017/4/26.
@@ -39,9 +41,8 @@ public class TaskLogService {
 
     @Autowired
     private TaskLogMapper taskLogMapper;
-
     @Autowired
-    private TaskMapper taskMapper;
+    private StringRedisTemplate stringRedisTemplate;
 
     /**
      * 添加一条日志记录
@@ -61,8 +62,23 @@ public class TaskLogService {
         taskLog.setOccurTime(processTime);
         taskLog.setErrorMsg(errorMsg != null && errorMsg.length() > 1000 ? errorMsg.substring(0, 1000) : errorMsg);
         taskLogMapper.insertSelective(taskLog);
+        updateTaskActiveTime(taskId);
         logger.info("记录任务日志: {}", JSON.toJSONString(taskLog));
         return id;
+    }
+
+    /**
+     * 更新任务最近活跃时间
+     *
+     * @param taskId 任务id
+     */
+    private void updateTaskActiveTime(Long taskId) {
+        String key = RedisKeyUtils.genTaskActiveTimeKey(taskId);
+        String value = System.currentTimeMillis() + "";
+        stringRedisTemplate.opsForValue().set(key, value);
+        if (stringRedisTemplate.getExpire(key) == -1) {
+            stringRedisTemplate.expire(key, 30, TimeUnit.MINUTES);
+        }
     }
 
 
