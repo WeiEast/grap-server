@@ -11,6 +11,7 @@ import com.treefinance.saas.grapserver.common.model.dto.TaskDTO;
 import com.treefinance.saas.grapserver.common.utils.CommonUtils;
 import com.treefinance.saas.grapserver.common.utils.DataConverterUtils;
 import com.treefinance.saas.grapserver.common.utils.JsonUtils;
+import com.treefinance.saas.grapserver.common.utils.RedisKeyUtils;
 import com.treefinance.saas.grapserver.dao.entity.AppBizType;
 import com.treefinance.saas.grapserver.dao.entity.Task;
 import com.treefinance.saas.grapserver.dao.entity.TaskCriteria;
@@ -67,6 +68,8 @@ public class TaskTimeService {
 
     @Autowired
     private AsycExcutor asycExcutor;
+    @Autowired
+    private TaskService taskService;
 
     /**
      * 本地任务缓存
@@ -110,6 +113,9 @@ public class TaskTimeService {
     }
 
 
+    /**
+     * 处理登录后抓取任务超时
+     */
     @Scheduled(cron = "0 0/1 * * * ?")
     public void scheduleTaskTimeout() {
         String key = prefix + "scheduling";
@@ -166,6 +172,34 @@ public class TaskTimeService {
         }
         redisTemplate.expire(key, 30, TimeUnit.SECONDS);
         logger.info("scheduleTaskTimeout：task is running in other node : key={}", key);
+    }
+
+
+    /**
+     * 处理任务活跃时间超时(任务10分钟不活跃则取消任务)
+     */
+    @Scheduled(cron = "0 0/1 * * * ?")
+    public void scheduleTaskActiveTimeout() {
+        Date startTime = new Date();
+        Date endTime = DateUtils.addMinutes(startTime, 30);
+        TaskCriteria criteria = new TaskCriteria();
+        criteria.createCriteria().andSaasEnvEqualTo(ETaskStatus.RUNNING.getStatus())
+                .andCreateTimeGreaterThanOrEqualTo(startTime)
+                .andCreateTimeLessThan(endTime);
+
+        List<Task> taskList = taskMapper.selectByExample(criteria);
+        for (Task task : taskList) {
+            String key = RedisKeyUtils.genTaskActiveTimeKey(task.getId());
+            String valueStr = redisTemplate.opsForValue().get(key);
+            if (StringUtils.isNotBlank(valueStr)) {
+                Long lastActiveTime = Long.parseLong(valueStr);
+                long diff = 10 * 60 * 1000;
+                if (startTime.getTime() - lastActiveTime > diff) {
+                    logger.info("任务活跃时间超时,取消任务,taskId={}", task.getId());
+                    taskService.cancelTask(task.getId());
+                }
+            }
+        }
     }
 
     /**
