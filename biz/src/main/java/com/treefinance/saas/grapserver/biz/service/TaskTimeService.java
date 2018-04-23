@@ -5,6 +5,7 @@ import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.google.common.collect.Lists;
 import com.treefinance.saas.grapserver.biz.common.AsycExcutor;
+import com.treefinance.saas.grapserver.biz.config.DiamondConfig;
 import com.treefinance.saas.grapserver.biz.service.task.TaskTimeoutHandler;
 import com.treefinance.saas.grapserver.common.enums.ETaskStatus;
 import com.treefinance.saas.grapserver.common.model.dto.TaskDTO;
@@ -70,6 +71,8 @@ public class TaskTimeService {
     private AsycExcutor asycExcutor;
     @Autowired
     private TaskService taskService;
+    @Autowired
+    private DiamondConfig diamondConfig;
 
     /**
      * 本地任务缓存
@@ -193,7 +196,7 @@ public class TaskTimeService {
             String valueStr = redisTemplate.opsForValue().get(key);
             if (StringUtils.isNotBlank(valueStr)) {
                 Long lastActiveTime = Long.parseLong(valueStr);
-                long diff = 10 * 60 * 1000;
+                long diff = diamondConfig.getTaskMaxAliveTime();
                 if (startTime.getTime() - lastActiveTime > diff) {
                     logger.info("任务活跃时间超时,取消任务,taskId={}", task.getId());
                     taskService.cancelTask(task.getId());

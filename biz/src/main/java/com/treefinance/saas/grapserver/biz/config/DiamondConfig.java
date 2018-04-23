@@ -73,6 +73,9 @@ public class DiamondConfig {
     @DAttribute(key = "moxie.url.fund.get.funds-ex")
     private String moxieUrlFundGetFundsEx;
 
+    @DAttribute(key = "task.max.alive.time")
+    private Integer taskMaxAliveTime;
+
     @BeforeUpdate
     public void before(String key, Object newValue) {
         logger.info(key + " update to " + newValue + " start...");
@@ -227,5 +230,13 @@ public class DiamondConfig {
 
     public void setDemoH5AppIds(String demoH5AppIds) {
         this.demoH5AppIds = demoH5AppIds;
+    }
+
+    public Integer getTaskMaxAliveTime() {
+        return taskMaxAliveTime * 1000;
+    }
+
+    public void setTaskMaxAliveTime(Integer taskMaxAliveTime) {
+        this.taskMaxAliveTime = taskMaxAliveTime;
     }
 }

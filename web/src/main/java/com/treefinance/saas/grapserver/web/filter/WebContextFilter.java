@@ -109,17 +109,16 @@ public class WebContextFilter extends AbstractRequestFilter {
             if (taskId > 0) {
                 String key = RedisKeyUtils.genTaskActiveTimeKey(taskId);
                 String lastActiveTimeStr = stringRedisTemplate.opsForValue().get(key);
-                if (StringUtils.isNotBlank(lastActiveTimeStr)) {
-                    Long lastActiveTime = Long.parseLong(lastActiveTimeStr);
-                    Long now = System.currentTimeMillis();
-                    long diff = 10 * 60 * 1000;
-                    if (now - lastActiveTime > diff) {
-                        throw new TaskTimeoutException("task time out taskId=" + taskId
-                                + ",lastActiveTime=" + lastActiveTime
-                                + ",now=" + now);
-                    }
-                } else {
+                if (StringUtils.isBlank(lastActiveTimeStr)) {
                     throw new TaskTimeoutException("task finished taskId=" + taskId);
+                }
+                Long lastActiveTime = Long.parseLong(lastActiveTimeStr);
+                Long now = System.currentTimeMillis();
+                long diff = diamondConfig.getTaskMaxAliveTime();
+                if (now - lastActiveTime > diff) {
+                    throw new TaskTimeoutException("task time out taskId=" + taskId
+                            + ",lastActiveTime=" + lastActiveTime
+                            + ",now=" + now);
                 }
             }
 
