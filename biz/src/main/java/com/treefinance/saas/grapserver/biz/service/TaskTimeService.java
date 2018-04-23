@@ -192,6 +192,7 @@ public class TaskTimeService {
                 .andCreateTimeLessThan(endTime);
 
         List<Task> taskList = taskMapper.selectByExample(criteria);
+        List<Long> cancelTaskIdList = Lists.newArrayList();
         for (Task task : taskList) {
             String key = RedisKeyUtils.genTaskActiveTimeKey(task.getId());
             String valueStr = redisTemplate.opsForValue().get(key);
@@ -200,11 +201,12 @@ public class TaskTimeService {
                 long diff = diamondConfig.getTaskMaxAliveTime();
                 if (startTime.getTime() - lastActiveTime > diff) {
                     logger.info("任务活跃时间超时,取消任务,taskId={}", task.getId());
+                    cancelTaskIdList.add(task.getId());
                     taskService.cancelTask(task.getId());
                 }
             }
         }
-        logger.info("scheduleTaskActiveTimeout:taskList={}", JSON.toJSONString(taskList));
+        logger.info("scheduleTaskActiveTimeout:taskIdList={}", JSON.toJSONString(cancelTaskIdList));
     }
 
     /**
