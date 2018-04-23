@@ -52,7 +52,7 @@ public class AppBizLicenseService implements InitializingBean, VariableMessageHa
             .build(CacheLoader.from(appid -> {
                 GetAppLicenseByAppIdRequest getAppLicenseByAppIdRequest = new GetAppLicenseByAppIdRequest();
                 getAppLicenseByAppIdRequest.setAppId(appid);
-                MerchantResult<List<AppBizLicenseResult>> listMerchantResult = appBizLicenseFacade.selectAppBizLicenseByAppId(getAppLicenseByAppIdRequest);
+                MerchantResult<List<AppBizLicenseResult>> listMerchantResult = appBizLicenseFacade.queryAppBizLicenseByAppId(getAppLicenseByAppIdRequest);
                 List<AppBizLicense> list = DataConverterUtils.convert(listMerchantResult.getData(), AppBizLicense.class);
                 if (!listMerchantResult.isSuccess()) {
                     logger.info("load local cache of applicense  false: error message={}", listMerchantResult.getRetMsg());
@@ -136,7 +136,7 @@ public class AppBizLicenseService implements InitializingBean, VariableMessageHa
     public void afterPropertiesSet() throws Exception {
 
         GetAppLicenseByAppIdRequest getAppLicenseByAppIdRequest = new GetAppLicenseByAppIdRequest();
-        MerchantResult<List<AppBizLicenseResult>> listMerchantResult = appBizLicenseFacade.selectAppBizLicenseByAppId(getAppLicenseByAppIdRequest);
+        MerchantResult<List<AppBizLicenseResult>> listMerchantResult = appBizLicenseFacade.queryAppBizLicenseByAppId(getAppLicenseByAppIdRequest);
         List<AppBizLicense> licenses = DataConverterUtils.convert(listMerchantResult.getData(), AppBizLicense.class);
 
         if (CollectionUtils.isEmpty(licenses)) {
