@@ -23,8 +23,6 @@ import static com.alibaba.rocketmq.client.consumer.listener.ConsumeConcurrentlyS
 public class DirectiveMessageListener implements MessageListenerConcurrently {
     private static final Logger logger = LoggerFactory.getLogger(DirectiveMessageListener.class);
 
-//    @Autowired
-//    private DirectiveHandler directiveHandler;
     @Autowired
     private DirectiveService directiveService;
 
@@ -34,8 +32,7 @@ public class DirectiveMessageListener implements MessageListenerConcurrently {
         String message = new String(msg.getBody());
         try {
             logger.info("消费指令消息数据==>{}", message);
-//            directiveHandler.handle(message);
-            DirectiveDTO directiveDTO = JSON.parseObject(message,DirectiveDTO.class);
+            DirectiveDTO directiveDTO = JSON.parseObject(message, DirectiveDTO.class);
             directiveService.process(directiveDTO);
         } catch (Throwable cause) {
             if (msg.getReconsumeTimes() > 0) {

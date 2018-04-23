@@ -23,6 +23,7 @@ import com.treefinance.saas.grapserver.web.filter.WebContextFilter;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.filter.CorsFilter;
@@ -51,8 +52,9 @@ public class FilterRegistry {
     @Bean
     public FilterRegistrationBean webContextFilter(MonitorPluginService monitorPluginService,
                                                    DiamondConfig diamondConfig,
-                                                   AppLicenseService appLicenseService) {
-        WebContextFilter contextFilter = new WebContextFilter(monitorPluginService, diamondConfig, appLicenseService);
+                                                   AppLicenseService appLicenseService,
+                                                   StringRedisTemplate stringRedisTemplate) {
+        WebContextFilter contextFilter = new WebContextFilter(monitorPluginService, diamondConfig, appLicenseService, stringRedisTemplate);
         contextFilter.addExcludeUrlPatterns("/moxie/webhook/**");
 
         FilterRegistrationBean registration = new FilterRegistrationBean();

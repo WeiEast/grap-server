@@ -1,5 +1,6 @@
 package com.treefinance.saas.grapserver.biz.service;
 
+import com.alibaba.fastjson.JSON;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Splitter;
 import com.treefinance.basicservice.security.crypto.facade.EncryptionIntensityEnum;
@@ -7,10 +8,12 @@ import com.treefinance.basicservice.security.crypto.facade.ISecurityCryptoServic
 import com.treefinance.commonservice.uid.UidGenerator;
 import com.treefinance.saas.assistant.model.Constants;
 import com.treefinance.saas.grapserver.biz.config.DiamondConfig;
-import com.treefinance.saas.grapserver.common.enums.EBizType;
+import com.treefinance.saas.grapserver.biz.service.directive.DirectiveService;
+import com.treefinance.saas.grapserver.common.enums.EDirective;
 import com.treefinance.saas.grapserver.common.enums.ETaskStatus;
 import com.treefinance.saas.grapserver.common.enums.ETaskStep;
 import com.treefinance.saas.grapserver.common.exception.base.MarkBaseException;
+import com.treefinance.saas.grapserver.common.model.dto.DirectiveDTO;
 import com.treefinance.saas.grapserver.common.model.dto.TaskDTO;
 import com.treefinance.saas.grapserver.common.utils.CommonUtils;
 import com.treefinance.saas.grapserver.common.utils.DataConverterUtils;
@@ -19,8 +22,10 @@ import com.treefinance.saas.grapserver.dao.entity.TaskCriteria;
 import com.treefinance.saas.grapserver.dao.entity.TaskLog;
 import com.treefinance.saas.grapserver.dao.mapper.TaskMapper;
 import com.treefinance.saas.grapserver.facade.enums.ETaskAttribute;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.time.DateUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,6 +36,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.validation.ValidationException;
 import java.io.IOException;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -56,11 +62,11 @@ public class TaskService {
     @Autowired
     private TaskLogService taskLogService;
     @Autowired
-    private TaskDeviceService taskDeviceService;
-    @Autowired
     private TaskAttributeService taskAttributeService;
     @Autowired
     private DiamondConfig diamondConfig;
+    @Autowired
+    private DirectiveService directiveService;
 
     /**
      * 创建任务
@@ -109,7 +115,37 @@ public class TaskService {
         }
         // 记录创建日志
         taskLogService.logCreateTask(id);
+        // 取消该用户正在进行的历史任务
+        cancelUserOldRunningTask(appId, uniqueId, bizType, id);
         return id;
+    }
+
+    /**
+     * 取消用户正在进行的历史任务
+     *
+     * @param appId
+     * @param uniqueId
+     * @param bizType
+     * @param taskId
+     */
+    private void cancelUserOldRunningTask(String appId, String uniqueId, Byte bizType, Long taskId) {
+        Date startTime = new Date();
+        Date endTime = DateUtils.addMinutes(startTime, 30);
+        TaskCriteria criteria = new TaskCriteria();
+        criteria.createCriteria().andBizTypeEqualTo(bizType)
+                .andUniqueIdEqualTo(uniqueId)
+                .andAppIdEqualTo(appId)
+                .andIdNotEqualTo(taskId)
+                .andCreateTimeGreaterThanOrEqualTo(startTime)
+                .andCreateTimeLessThan(endTime);
+        List<Task> taskList = taskMapper.selectByExample(criteria);
+        logger.info("取消用户正在进行的历史任务,appId={},uniqueId={},bizType={},tasks={}",
+                appId, uniqueId, bizType, JSON.toJSONString(taskList));
+        if (CollectionUtils.isNotEmpty(taskList)) {
+            for (Task task : taskList) {
+                this.cancelTask(task.getId());
+            }
+        }
     }
 
     /**
@@ -175,25 +211,6 @@ public class TaskService {
         } else {
             return -1;
         }
-    }
-
-    @Transactional
-    public int cancleTask(Long taskId) {
-        Task task = new Task();
-        task.setId(taskId);
-        task.setStatus((byte) 1);
-        int result = taskMapper.updateByPrimaryKeySelective(task);
-        // 取消任务
-        taskLogService.logCancleTask(taskId);
-        return result;
-    }
-
-    public boolean isDoingTask(Long taskid) {
-        Task existTask = taskMapper.selectByPrimaryKey(taskid);
-        if (existTask != null && existTask.getStatus() == 0) {
-            return true;
-        }
-        return false;
     }
 
     /**
@@ -262,31 +279,6 @@ public class TaskService {
     public String getAppIdById(Long taskId) {
         Task task = taskMapper.selectByPrimaryKey(taskId);
         return task == null ? null : task.getAppId();
-    }
-
-    /**
-     * 开始任务
-     *
-     * @param uniqueId
-     * @param appid
-     * @param type
-     * @param deviceInfo
-     * @param ipAddress
-     * @param coorType
-     * @return
-     */
-    @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
-    public Long startTask(String uniqueId, String appid, EBizType type, String deviceInfo, String ipAddress, String coorType, String extra, String source) throws IOException {
-        Long taskId = this.createTask(uniqueId, appid, type.getCode(), extra, extra, source);
-        if (StringUtils.isNotBlank(extra)) {
-            ObjectMapper objectMapper = new ObjectMapper();
-            Map map = objectMapper.readValue(extra, Map.class);
-            if (MapUtils.isNotEmpty(map)) {
-                setAttribute(taskId, map);
-            }
-        }
-        taskDeviceService.create(deviceInfo, ipAddress, coorType, taskId);
-        return taskId;
     }
 
     private void setAttribute(Long taskId, Map map) {
@@ -389,6 +381,24 @@ public class TaskService {
             return this.failTaskWithStep(taskId);
         }
         return null;
+    }
+
+
+    /**
+     * 正常流程下取消任务
+     *
+     * @param taskId 任务id
+     */
+    public void cancelTask(Long taskId) {
+        logger.info("取消任务 : taskId={} ", taskId);
+        Task existTask = taskMapper.selectByPrimaryKey(taskId);
+        if (existTask != null && existTask.getStatus() == 0) {
+            logger.info("取消正在执行任务 : taskId={} ", taskId);
+            DirectiveDTO cancelDirective = new DirectiveDTO();
+            cancelDirective.setTaskId(taskId);
+            cancelDirective.setDirective(EDirective.TASK_CANCEL.getText());
+            directiveService.process(cancelDirective);
+        }
     }
 
 }
