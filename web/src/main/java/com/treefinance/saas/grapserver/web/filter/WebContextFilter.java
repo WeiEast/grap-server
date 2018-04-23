@@ -162,7 +162,7 @@ public class WebContextFilter extends AbstractRequestFilter {
         logger.error(String.format("@[%s;%s;%s] >> %s", request.getRequestURI(), request.getMethod(),
                 ServletRequestUtils.getIP(request), e.getMessage()));
         Map<String, Integer> map = Maps.newHashMap();
-        map.put("mark", 0);
+        map.put("mark", 2);
         SimpleResult<Map<String, Integer>> result = new SimpleResult<>(map);
         result.setErrorMsg("任务失效");
         String responseBody = Jackson.toJSONString(result);
