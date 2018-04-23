@@ -1,5 +1,6 @@
 package com.treefinance.saas.grapserver.biz.service;
 
+import com.alibaba.fastjson.JSON;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
@@ -203,6 +204,7 @@ public class TaskTimeService {
                 }
             }
         }
+        logger.info("scheduleTaskActiveTimeout:taskList={}", JSON.toJSONString(taskList));
     }
 
     /**

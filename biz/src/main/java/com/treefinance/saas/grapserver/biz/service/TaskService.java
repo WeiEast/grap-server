@@ -1,5 +1,6 @@
 package com.treefinance.saas.grapserver.biz.service;
 
+import com.alibaba.fastjson.JSON;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Splitter;
 import com.treefinance.basicservice.security.crypto.facade.EncryptionIntensityEnum;
@@ -24,6 +25,7 @@ import com.treefinance.saas.grapserver.facade.enums.ETaskAttribute;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.time.DateUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,6 +36,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.validation.ValidationException;
 import java.io.IOException;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -113,7 +116,7 @@ public class TaskService {
         // 记录创建日志
         taskLogService.logCreateTask(id);
         // 取消该用户正在进行的历史任务
-        cancelUserOldRunningTask(appId, uniqueId, bizType);
+        cancelUserOldRunningTask(appId, uniqueId, bizType, id);
         return id;
     }
 
@@ -122,13 +125,22 @@ public class TaskService {
      *
      * @param appId
      * @param uniqueId
+     * @param bizType
+     * @param taskId
      */
-    private void cancelUserOldRunningTask(String appId, String uniqueId, Byte bizType) {
+    private void cancelUserOldRunningTask(String appId, String uniqueId, Byte bizType, Long taskId) {
+        Date startTime = new Date();
+        Date endTime = DateUtils.addMinutes(startTime, 30);
         TaskCriteria criteria = new TaskCriteria();
         criteria.createCriteria().andBizTypeEqualTo(bizType)
                 .andUniqueIdEqualTo(uniqueId)
-                .andAppIdEqualTo(appId);
+                .andAppIdEqualTo(appId)
+                .andIdNotEqualTo(taskId)
+                .andCreateTimeGreaterThanOrEqualTo(startTime)
+                .andCreateTimeLessThan(endTime);
         List<Task> taskList = taskMapper.selectByExample(criteria);
+        logger.info("取消用户正在进行的历史任务,appId={},uniqueId={},bizType={},tasks={}",
+                appId, uniqueId, bizType, JSON.toJSONString(taskList));
         if (CollectionUtils.isNotEmpty(taskList)) {
             for (Task task : taskList) {
                 this.cancelTask(task.getId());

@@ -59,6 +59,10 @@ public class GrapDateUtils {
 
     }
 
+    public static void main(String[] args) {
+        System.out.println(System.currentTimeMillis());
+        System.out.println(GrapDateUtils.getDateStrByDate(new Date(1524474151193L)));
+    }
 
 
 }

@@ -31,6 +31,7 @@ import com.treefinance.saas.grapserver.common.exception.TaskTimeOutException;
 import com.treefinance.saas.grapserver.common.model.AppLicenseKey;
 import com.treefinance.saas.grapserver.common.model.Constants;
 import com.treefinance.saas.grapserver.common.model.WebContext;
+import com.treefinance.saas.grapserver.common.utils.GrapDateUtils;
 import com.treefinance.saas.grapserver.common.utils.IpUtils;
 import com.treefinance.saas.grapserver.common.utils.RedisKeyUtils;
 import com.treefinance.saas.grapserver.dao.entity.AppLicense;
@@ -39,7 +40,6 @@ import com.treefinance.saas.knife.result.SimpleResult;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.core.task.TaskTimeoutException;
 import org.springframework.data.redis.core.StringRedisTemplate;
 
 import javax.servlet.FilterChain;
@@ -110,15 +110,15 @@ public class WebContextFilter extends AbstractRequestFilter {
                 String key = RedisKeyUtils.genTaskActiveTimeKey(taskId);
                 String lastActiveTimeStr = stringRedisTemplate.opsForValue().get(key);
                 if (StringUtils.isBlank(lastActiveTimeStr)) {
-                    throw new TaskTimeoutException("task finished taskId=" + taskId);
+                    throw new TaskTimeOutException("task finished taskId=" + taskId);
                 }
                 Long lastActiveTime = Long.parseLong(lastActiveTimeStr);
                 Long now = System.currentTimeMillis();
                 long diff = diamondConfig.getTaskMaxAliveTime();
                 if (now - lastActiveTime > diff) {
-                    throw new TaskTimeoutException("task time out taskId=" + taskId
-                            + ",lastActiveTime=" + lastActiveTime
-                            + ",now=" + now);
+                    throw new TaskTimeOutException("task time out taskId=" + taskId
+                            + ",lastActiveTime=" + GrapDateUtils.getDateStrByDate(new Date(lastActiveTime))
+                            + ",now=" + GrapDateUtils.getDateStrByDate(new Date(now)));
                 }
             }
 
