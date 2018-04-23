@@ -120,6 +120,7 @@ public class WebContextFilter extends AbstractRequestFilter {
                             + ",lastActiveTime=" + GrapDateUtils.getDateStrByDate(new Date(lastActiveTime))
                             + ",now=" + GrapDateUtils.getDateStrByDate(new Date(now)));
                 }
+                stringRedisTemplate.opsForValue().set(key, now + "");
             }
 
             String ip = null;
