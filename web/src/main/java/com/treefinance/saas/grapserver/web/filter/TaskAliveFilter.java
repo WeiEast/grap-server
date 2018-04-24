@@ -71,7 +71,7 @@ public class TaskAliveFilter extends AbstractRequestFilter {
                 }
                 stringRedisTemplate.opsForValue().set(key, now + "");
             }
-
+            filterChain.doFilter(request, response);
         } catch (TaskTimeOutException e) {
             taskTimeout(request, response, e);
         } finally {
