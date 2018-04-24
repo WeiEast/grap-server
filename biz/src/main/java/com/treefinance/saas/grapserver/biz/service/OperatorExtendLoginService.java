@@ -3,6 +3,8 @@ package com.treefinance.saas.grapserver.biz.service;
 import com.alibaba.fastjson.JSON;
 import com.datatrees.rawdatacentral.api.CrawlerOperatorService;
 import com.datatrees.rawdatacentral.domain.operator.OperatorCatalogue;
+import com.datatrees.rawdatacentral.domain.operator.OperatorGroup;
+import com.datatrees.rawdatacentral.domain.operator.OperatorLoginConfig;
 import com.datatrees.rawdatacentral.domain.operator.OperatorParam;
 import com.datatrees.rawdatacentral.domain.result.HttpResult;
 import com.google.common.collect.Maps;
@@ -222,5 +224,60 @@ public class OperatorExtendLoginService {
             redisDao.releaseLock(RedisKeyUtils.genLoginLockKey(operatorParam.getTaskId()), lockMap, 60 * 1000L);
         }
 
+    }
+
+    /**
+     * 获取商户配置与运营商分组信息
+     *
+     * @param appId
+     * @param taskId
+     * @param style
+     * @return
+     */
+    public Object getConfigAndGroups(String appId, Long taskId, String style) {
+        Map<String, Object> colorMap = merchantConfigService.getColorConfig(appId, style);
+        HttpResult<Map<String, List<OperatorGroup>>> result;
+        try {
+            result = crawlerOperatorService.queryGroups();
+        } catch (Exception e) {
+            logger.error("运营商:调用爬数查询运营商分组信息异常", e);
+            throw e;
+        }
+        if (!result.getStatus()) {
+            logger.info("运营商:调用爬数查询运营商分组信息失败,result={}", JSON.toJSONString(result));
+            throw new CrawlerBizException(result.getMessage());
+        }
+        TaskAttribute taskAttribute = taskAttributeService.findByName(taskId, "mobile", true);
+        Map<String, Object> map = Maps.newHashMap();
+        map.put("groups", result.getData());
+        map.put("color", colorMap);
+        map.put("license", appBizLicenseService.isShowLicense(appId, EBizType.OPERATOR.getText()));
+        map.put("licenseTemplate", appBizLicenseService.getLicenseTemplate(appId, EBizType.OPERATOR.getText()));
+        if (taskAttribute != null) {
+            map.put(taskAttribute.getName(), taskAttribute.getValue());
+        }
+        return map;
+    }
+
+    /**
+     * 获取运营商登陆配置信息
+     *
+     * @param operatorParam
+     * @return
+     */
+    public Object preLoginConfig(OperatorParam operatorParam) {
+        HttpResult<OperatorLoginConfig> result;
+        try {
+            result = crawlerOperatorService.preLogin(operatorParam);
+        } catch (Exception e) {
+            logger.error("运营商:调用爬数获取运营商登陆配置信息异常,operatorParam={}", JSON.toJSONString(operatorParam), e);
+            throw e;
+        }
+        if (!result.getStatus()) {
+            logger.info("运营商:调用爬数获取运营商登陆配置信息失败,operatorParam={},result={}",
+                    JSON.toJSONString(operatorParam), JSON.toJSONString(result));
+            throw new CrawlerBizException(result.getResponseCode(), result.getMessage());
+        }
+        return SimpleResult.successResult(result.getData());
     }
 }

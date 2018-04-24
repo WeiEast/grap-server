@@ -40,6 +40,7 @@ public class OperatorController {
 
     /**
      * 运营商获取配置
+     * 返回商户配置信息,运营商分组信息,以及各运营商登录配置信息
      *
      * @param appid
      * @return
@@ -56,12 +57,38 @@ public class OperatorController {
         return SimpleResult.successResult(map);
     }
 
-    @RequestMapping(value = "/query/groups", method = {RequestMethod.POST})
-    public Object queryGroups() {
-        Object result = operatorExtendLoginService.queryGroups();
-        logger.info("运营商:查询运营商分组信息,返回结果,result={}", JSON.toJSONString(result));
+    /**
+     * 获取商户配置与运营商分组信息
+     *
+     * @return
+     */
+    @RequestMapping(value = "/config/groups", method = {RequestMethod.POST})
+    public Object getConfigAndGroups(@RequestParam String appid,
+                                     @RequestParam("taskid") Long taskId,
+                                     @RequestParam(value = "style", required = false) String style) {
+        if (StringUtils.isBlank(appid) || taskId == null) {
+            logger.error("运营商:获取商户配置与运营商分组信息,参数缺失,appid,taskid必传,appid={},taskId={}", appid, taskId);
+            throw new IllegalArgumentException("运营商:获取配置,参数缺失,appid,taskid必传");
+        }
+        Object result = operatorExtendLoginService.getConfigAndGroups(appid, taskId, style);
+        logger.info("运营商:获取商户配置与运营商分组信息,返回结果,result={}", JSON.toJSONString(result));
         return SimpleResult.successResult(result);
     }
+
+    /**
+     * 获取运营商登陆配置信息
+     *
+     * @param operatorParam
+     * @return
+     */
+    @RequestMapping(value = "/config/prelogin", method = {RequestMethod.POST})
+    public Object preLoginConfig(OperatorParam operatorParam) {
+        logger.info("运营商:获取运营商登陆配置信息,传入参数,operatorParam={}", JSON.toJSONString(operatorParam));
+        Object result = operatorExtendLoginService.preLoginConfig(operatorParam);
+        logger.info("运营商:获取运营商登陆配置信息,返回结果,operatorParam={},result={}", JSON.toJSONString(operatorParam), JSON.toJSONString(result));
+        return SimpleResult.successResult(result);
+    }
+
 
     /**
      * 根据输入号码查找该号码的归属地
@@ -70,6 +97,7 @@ public class OperatorController {
      * @return
      */
     @RequestMapping(value = "/mobile/attribution", method = {RequestMethod.POST})
+
     public Object mobileAttribution(@RequestParam("mobile") String mobile) {
         Map<String, Object> map = operatorExtendLoginService.getMobileAttribution(mobile);
         return SimpleResult.successResult(map);
