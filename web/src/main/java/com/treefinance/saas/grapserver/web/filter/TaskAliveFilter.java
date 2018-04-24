@@ -13,7 +13,7 @@ import com.treefinance.saas.knife.result.SimpleResult;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.data.redis.core.RedisTemplate;
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
@@ -34,12 +34,12 @@ public class TaskAliveFilter extends AbstractRequestFilter {
 
     private static final Logger logger = LoggerFactory.getLogger(TaskAliveFilter.class);
     private DiamondConfig diamondConfig;
-    private StringRedisTemplate stringRedisTemplate;
+    private RedisTemplate<String, String> redisTemplate;
 
     public TaskAliveFilter(DiamondConfig diamondConfig,
-                           StringRedisTemplate stringRedisTemplate) {
+                           RedisTemplate<String, String> redisTemplate) {
         this.diamondConfig = diamondConfig;
-        this.stringRedisTemplate = stringRedisTemplate;
+        this.redisTemplate = redisTemplate;
     }
 
     @Override
@@ -57,7 +57,7 @@ public class TaskAliveFilter extends AbstractRequestFilter {
             }
             if (taskId > 0) {
                 String key = RedisKeyUtils.genTaskActiveTimeKey(taskId);
-                String lastActiveTimeStr = stringRedisTemplate.opsForValue().get(key);
+                String lastActiveTimeStr = redisTemplate.opsForValue().get(key);
                 if (StringUtils.isBlank(lastActiveTimeStr)) {
                     throw new TaskTimeOutException("task finished taskId=" + taskId);
                 }
@@ -69,7 +69,7 @@ public class TaskAliveFilter extends AbstractRequestFilter {
                             + ",lastActiveTime=" + GrapDateUtils.getDateStrByDate(new Date(lastActiveTime))
                             + ",now=" + GrapDateUtils.getDateStrByDate(new Date(now)));
                 }
-                stringRedisTemplate.opsForValue().set(key, now + "");
+                redisTemplate.opsForValue().set(key, now + "");
             }
             filterChain.doFilter(request, response);
         } catch (TaskTimeOutException e) {

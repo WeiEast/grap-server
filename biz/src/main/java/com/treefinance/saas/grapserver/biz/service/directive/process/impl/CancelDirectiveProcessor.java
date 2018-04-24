@@ -11,7 +11,7 @@ import com.treefinance.saas.grapserver.common.model.dto.DirectiveDTO;
 import com.treefinance.saas.grapserver.common.model.dto.TaskDTO;
 import com.treefinance.saas.grapserver.common.utils.RedisKeyUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
 
 import java.util.Map;
@@ -29,7 +29,7 @@ public class CancelDirectiveProcessor extends AbstractDirectiveProcessor {
     @Autowired
     private CrawlerService crawlerService;
     @Autowired
-    private StringRedisTemplate stringRedisTemplate;
+    private RedisTemplate<String, String> redisTemplate;
 
     @Override
     protected void doProcess(EDirective directive, DirectiveDTO directiveDTO) {
@@ -50,7 +50,7 @@ public class CancelDirectiveProcessor extends AbstractDirectiveProcessor {
 
     private void deleteTaskAliveRedisKey(Long taskId) {
         String key = RedisKeyUtils.genTaskActiveTimeKey(taskId);
-        stringRedisTemplate.delete(key);
+        redisTemplate.delete(key);
         logger.info("删除记录任务活跃时间redisKey, taskId={}", taskId);
     }
 
