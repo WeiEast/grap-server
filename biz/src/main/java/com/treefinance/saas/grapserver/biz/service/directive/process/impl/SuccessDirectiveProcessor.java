@@ -67,8 +67,6 @@ public class SuccessDirectiveProcessor extends AbstractDirectiveProcessor {
                 monitorService.sendMonitorMessage(taskDTO);
             }
         });
-        //任务终态处理
-        doFinalStateProcess(directive, directiveDTO);
     }
 
 }

@@ -9,11 +9,9 @@ import com.treefinance.saas.grapserver.common.enums.ETaskStatus;
 import com.treefinance.saas.grapserver.common.model.dto.DirectiveDTO;
 import com.treefinance.saas.grapserver.common.model.dto.TaskDTO;
 import com.treefinance.saas.grapserver.common.utils.JsonUtils;
-import com.treefinance.saas.grapserver.common.utils.RedisKeyUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
@@ -31,8 +29,6 @@ public abstract class AbstractDirectiveProcessor extends CallbackableDirectivePr
     protected TaskNextDirectiveService taskNextDirectiveService;
     @Autowired
     private QRCodeAccountNoLogService qrCodeAccountNoLogService;
-    @Autowired
-    private StringRedisTemplate redisTemplate;
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -87,13 +83,4 @@ public abstract class AbstractDirectiveProcessor extends CallbackableDirectivePr
      */
     protected abstract void doProcess(EDirective directive, DirectiveDTO directiveDTO);
 
-    /**
-     * 任务终态的处理
-     */
-    protected void doFinalStateProcess(EDirective directive, DirectiveDTO directiveDTO) {
-        TaskDTO taskDTO = directiveDTO.getTask();
-        String key = RedisKeyUtils.genTaskActiveTimeKey(taskDTO.getId());
-        redisTemplate.delete(key);
-        logger.info("任务结束,删除记录任务活跃时间redisKey,taskId={}", taskDTO.getId());
-    }
 }

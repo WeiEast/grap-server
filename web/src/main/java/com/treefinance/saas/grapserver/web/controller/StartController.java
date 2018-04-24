@@ -74,14 +74,14 @@ public class StartController {
                         @RequestParam(name = "website", required = false) String website,
                         HttpServletRequest request) throws ForbiddenException, IOException {
 
+        if (StringUtils.isEmpty(bizType)) {
+            bizType = (String) request.getAttribute("bizType");
+        }
         Map<String, Object> lockMap = Maps.newHashMap();
         String key = RedisKeyUtils.genCreateTaskUserLockKey(appid, uniqueId, bizType);
         try {
             lockMap = redisDao.acquireLock(key, 60 * 1000L);
             if (lockMap != null) {
-                if (StringUtils.isEmpty(bizType)) {
-                    bizType = (String) request.getAttribute("bizType");
-                }
                 logger.info("task start : appid={},uniqueId={},coorType={},deviceInfo={},extra={},bizType={},source={}",
                         appid, uniqueId, coorType, deviceInfo, extra, bizType, source);
                 EBizType eBizType = EBizType.of(bizType);
