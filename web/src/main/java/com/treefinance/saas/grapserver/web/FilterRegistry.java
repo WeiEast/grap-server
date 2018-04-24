@@ -71,7 +71,6 @@ public class FilterRegistry {
                                                   StringRedisTemplate stringRedisTemplate) {
         TaskAliveFilter taskAliveFilter = new TaskAliveFilter(diamondConfig, stringRedisTemplate);
         taskAliveFilter.addExcludeUrlPatterns("/moxie/webhook/**", "/**/start/**/");
-
         FilterRegistrationBean registration = new FilterRegistrationBean();
         registration.setFilter(taskAliveFilter);
         registration.setName("taskAliveFilter");

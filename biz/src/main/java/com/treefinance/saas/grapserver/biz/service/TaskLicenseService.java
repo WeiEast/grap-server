@@ -1,6 +1,7 @@
 package com.treefinance.saas.grapserver.biz.service;
 
 import com.alibaba.fastjson.JSON;
+import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 import com.treefinance.saas.grapserver.biz.config.DiamondConfig;
 import com.treefinance.saas.grapserver.common.enums.EBizType;
@@ -91,7 +92,7 @@ public class TaskLicenseService {
 //            throw new ForbiddenException("Can not find app , appId=" + appId);
 //        }
 //        MerchantBaseResult merchantBaseResult = rpcResult.getData().get(0);
-//        if (merchantBaseResult.getIsActive() == 0) {
+//        if (Optional.fromNullable(merchantBaseResult.getIsActive()).or((byte) 0) == 0) {
 //            logger.info("商户被禁用,appId={}", appId);
 //            throw new ForbiddenException("app is forbidden , appId=" + appId);
 //        }

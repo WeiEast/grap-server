@@ -31,6 +31,10 @@ public class RedisKeyUtils {
         return Joiner.on(":").join(PREFIX_REDIS_LOCK_KEY, taskId, s);
     }
 
+    public static String genRedisLockKey(String prefix, String... s) {
+        return Joiner.on(":").join(PREFIX_REDIS_LOCK_KEY, prefix, s);
+    }
+
     /**
      * 获取任务最近活跃时间redis key
      *
@@ -52,5 +56,6 @@ public class RedisKeyUtils {
     public static String genCreateTaskUserLockKey(String appId, String uniqueId, String bizType) {
         return Joiner.on(":").join(PREFIX_CREATE_TASK_USER_LOCK_KEY, appId, uniqueId, bizType);
     }
+
 
 }

@@ -9,7 +9,9 @@ import com.treefinance.saas.grapserver.common.enums.EDirective;
 import com.treefinance.saas.grapserver.common.enums.ETaskStatus;
 import com.treefinance.saas.grapserver.common.model.dto.DirectiveDTO;
 import com.treefinance.saas.grapserver.common.model.dto.TaskDTO;
+import com.treefinance.saas.grapserver.common.utils.RedisKeyUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Component;
 
 import java.util.Map;
@@ -26,6 +28,8 @@ public class CancelDirectiveProcessor extends AbstractDirectiveProcessor {
     private AsycExcutor asycExcutor;
     @Autowired
     private CrawlerService crawlerService;
+    @Autowired
+    private StringRedisTemplate stringRedisTemplate;
 
     @Override
     protected void doProcess(EDirective directive, DirectiveDTO directiveDTO) {
@@ -37,12 +41,17 @@ public class CancelDirectiveProcessor extends AbstractDirectiveProcessor {
         extMap.put("reason", "user");
         crawlerService.cancel(taskDTO.getId(), extMap);
         //删除记录任务活跃时间redisKey
-        taskService.deleteTaskAliveRedisKey(taskDTO.getId());
-        // 发送监控消息
+        deleteTaskAliveRedisKey(taskDTO.getId());
         monitorService.sendMonitorMessage(taskDTO);
 
         // 异步触发触发回调
         asycExcutor.runAsyc(directiveDTO, _directiveDTO -> callback(_directiveDTO));
+    }
+
+    private void deleteTaskAliveRedisKey(Long taskId) {
+        String key = RedisKeyUtils.genTaskActiveTimeKey(taskId);
+        stringRedisTemplate.delete(key);
+        logger.info("删除记录任务活跃时间redisKey, taskId={}", taskId);
     }
 
 

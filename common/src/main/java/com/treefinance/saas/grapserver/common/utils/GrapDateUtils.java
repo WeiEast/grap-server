@@ -59,7 +59,18 @@ public class GrapDateUtils {
 
     }
 
+    public static String getDateStrByDate(Date date, String format) {
+        Instant instant = date.toInstant();
+        ZoneId zone = ZoneId.systemDefault();
+        LocalDateTime localDateTime = LocalDateTime.ofInstant(instant, zone);
+        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern(format);
+        return localDateTime.format(dateTimeFormatter);
+
+    }
+
+
     public static void main(String[] args) {
+        System.out.println(GrapDateUtils.getDateStrByDate(new Date(), "HH:mm"));
         System.out.println(System.currentTimeMillis());
         System.out.println(GrapDateUtils.getDateStrByDate(new Date(1524474151193L)));
     }
