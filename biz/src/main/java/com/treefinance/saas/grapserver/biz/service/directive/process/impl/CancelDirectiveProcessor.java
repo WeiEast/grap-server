@@ -36,14 +36,14 @@ public class CancelDirectiveProcessor extends AbstractDirectiveProcessor {
         Map<String, String> extMap = Maps.newHashMap();
         extMap.put("reason", "user");
         crawlerService.cancel(taskDTO.getId(), extMap);
-        //任务终态处理
-        doFinalStateProcess(directive, directiveDTO);
-
+        //删除记录任务活跃时间redisKey
+        taskService.deleteTaskAliveRedisKey(taskDTO.getId());
         // 发送监控消息
         monitorService.sendMonitorMessage(taskDTO);
 
         // 异步触发触发回调
         asycExcutor.runAsyc(directiveDTO, _directiveDTO -> callback(_directiveDTO));
     }
+
 
 }

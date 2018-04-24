@@ -49,8 +49,6 @@ public class FailureDirectiveProcessor extends AbstractDirectiveProcessor {
         precallback(dataMap, appLicense, directiveDTO);
 
         handleTaskFailMsg(directiveDTO, taskDTO);
-        //任务终态处理
-        doFinalStateProcess(directive, directiveDTO);
         // 7.异步触发触发回调
         asycExcutor.runAsyc(directiveDTO, _directiveDTO -> {
             callback(dataMap, appLicense, _directiveDTO);

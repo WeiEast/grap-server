@@ -17,6 +17,7 @@ import com.treefinance.saas.grapserver.common.model.dto.DirectiveDTO;
 import com.treefinance.saas.grapserver.common.model.dto.TaskDTO;
 import com.treefinance.saas.grapserver.common.utils.CommonUtils;
 import com.treefinance.saas.grapserver.common.utils.DataConverterUtils;
+import com.treefinance.saas.grapserver.common.utils.RedisKeyUtils;
 import com.treefinance.saas.grapserver.dao.entity.Task;
 import com.treefinance.saas.grapserver.dao.entity.TaskCriteria;
 import com.treefinance.saas.grapserver.dao.entity.TaskLog;
@@ -399,6 +400,12 @@ public class TaskService {
             cancelDirective.setDirective(EDirective.TASK_CANCEL.getText());
             directiveService.process(cancelDirective);
         }
+    }
+
+    public void deleteTaskAliveRedisKey(Long taskId) {
+        String key = RedisKeyUtils.genTaskActiveTimeKey(taskId);
+        redisTemplate.delete(key);
+        logger.info("删除记录任务活跃时间redisKey, taskId={}", taskId);
     }
 
 }
