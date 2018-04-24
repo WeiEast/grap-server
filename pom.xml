@@ -105,7 +105,7 @@
             <dependency>
                 <groupId>com.datatrees.rawdatacentral</groupId>
                 <artifactId>rawdatacentral-api</artifactId>
-                <version>3.0.21.2-SNAPSHOT</version>
+                <version>3.1.1-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>com.treefinance.proxy</groupId>

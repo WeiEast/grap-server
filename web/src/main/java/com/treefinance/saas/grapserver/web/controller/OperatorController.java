@@ -2,7 +2,6 @@ package com.treefinance.saas.grapserver.web.controller;
 
 import com.alibaba.fastjson.JSON;
 import com.datatrees.rawdatacentral.domain.operator.OperatorParam;
-import com.google.common.collect.Maps;
 import com.treefinance.saas.grapserver.biz.service.OperatorExtendLoginService;
 import com.treefinance.saas.grapserver.common.enums.EBizType;
 import com.treefinance.saas.knife.result.SimpleResult;
@@ -55,6 +54,13 @@ public class OperatorController {
         }
         Map<String, Object> map = operatorExtendLoginService.getConfig(appid, taskId, style);
         return SimpleResult.successResult(map);
+    }
+
+    @RequestMapping(value = "/query/groups", method = {RequestMethod.POST})
+    public Object queryGroups() {
+        Object result = operatorExtendLoginService.queryGroups();
+        logger.info("运营商:查询运营商分组信息,返回结果,result={}", JSON.toJSONString(result));
+        return SimpleResult.successResult(result);
     }
 
     /**
