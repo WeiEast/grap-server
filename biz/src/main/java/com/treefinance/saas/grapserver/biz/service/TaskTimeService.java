@@ -187,7 +187,7 @@ public class TaskTimeService {
         Date startTime = new Date();
         Date endTime = DateUtils.addMinutes(startTime, 30);
         TaskCriteria criteria = new TaskCriteria();
-        criteria.createCriteria().andSaasEnvEqualTo(ETaskStatus.RUNNING.getStatus())
+        criteria.createCriteria().andStatusEqualTo(ETaskStatus.RUNNING.getStatus())
                 .andCreateTimeGreaterThanOrEqualTo(startTime)
                 .andCreateTimeLessThan(endTime);
 
@@ -300,5 +300,11 @@ public class TaskTimeService {
             }
         });
         return true;
+    }
+
+    public static void main(String[] args) {
+        Date date = new Date();
+        System.out.println(date.getTime());
+        System.out.println(System.currentTimeMillis());
     }
 }
