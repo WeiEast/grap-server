@@ -12,7 +12,7 @@ import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
 import java.util.Arrays;
@@ -42,7 +42,7 @@ public class TaskLogService {
     @Autowired
     private TaskLogMapper taskLogMapper;
     @Autowired
-    private StringRedisTemplate stringRedisTemplate;
+    private RedisTemplate<String, String> redisTemplate;
 
     /**
      * 添加一条日志记录
@@ -75,9 +75,9 @@ public class TaskLogService {
     private void updateTaskActiveTime(Long taskId) {
         String key = RedisKeyUtils.genTaskActiveTimeKey(taskId);
         String value = System.currentTimeMillis() + "";
-        stringRedisTemplate.opsForValue().set(key, value);
-        if (stringRedisTemplate.getExpire(key) == -1) {
-            stringRedisTemplate.expire(key, 30, TimeUnit.MINUTES);
+        redisTemplate.opsForValue().set(key, value);
+        if (redisTemplate.getExpire(key) == -1) {
+            redisTemplate.expire(key, 30, TimeUnit.MINUTES);
         }
     }
 

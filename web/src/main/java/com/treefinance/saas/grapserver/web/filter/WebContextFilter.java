@@ -37,7 +37,6 @@ import com.treefinance.saas.knife.result.SimpleResult;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.data.redis.core.StringRedisTemplate;
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
@@ -58,17 +57,14 @@ public class WebContextFilter extends AbstractRequestFilter {
     private MonitorPluginService monitorPluginService;
     private DiamondConfig diamondConfig;
     private AppLicenseService appLicenseService;
-    private StringRedisTemplate stringRedisTemplate;
 
 
     public WebContextFilter(MonitorPluginService monitorPluginService,
                             DiamondConfig diamondConfig,
-                            AppLicenseService appLicenseService,
-                            StringRedisTemplate stringRedisTemplate) {
+                            AppLicenseService appLicenseService) {
         this.monitorPluginService = monitorPluginService;
         this.diamondConfig = diamondConfig;
         this.appLicenseService = appLicenseService;
-        this.stringRedisTemplate = stringRedisTemplate;
     }
 
     @Override

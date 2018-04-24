@@ -24,7 +24,7 @@ import com.treefinance.saas.grapserver.web.filter.WebContextFilter;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.filter.CorsFilter;
@@ -53,9 +53,8 @@ public class FilterRegistry {
     @Bean
     public FilterRegistrationBean webContextFilter(MonitorPluginService monitorPluginService,
                                                    DiamondConfig diamondConfig,
-                                                   AppLicenseService appLicenseService,
-                                                   StringRedisTemplate stringRedisTemplate) {
-        WebContextFilter contextFilter = new WebContextFilter(monitorPluginService, diamondConfig, appLicenseService, stringRedisTemplate);
+                                                   AppLicenseService appLicenseService) {
+        WebContextFilter contextFilter = new WebContextFilter(monitorPluginService, diamondConfig, appLicenseService);
         contextFilter.addExcludeUrlPatterns("/moxie/webhook/**");
 
         FilterRegistrationBean registration = new FilterRegistrationBean();
@@ -68,8 +67,8 @@ public class FilterRegistry {
 
     @Bean
     public FilterRegistrationBean taskAliveFilter(DiamondConfig diamondConfig,
-                                                  StringRedisTemplate stringRedisTemplate) {
-        TaskAliveFilter taskAliveFilter = new TaskAliveFilter(diamondConfig, stringRedisTemplate);
+                                                  RedisTemplate<String, String> redisTemplate) {
+        TaskAliveFilter taskAliveFilter = new TaskAliveFilter(diamondConfig, redisTemplate);
         taskAliveFilter.addExcludeUrlPatterns("/moxie/webhook/**", "/**/start/**/");
         FilterRegistrationBean registration = new FilterRegistrationBean();
         registration.setFilter(taskAliveFilter);
