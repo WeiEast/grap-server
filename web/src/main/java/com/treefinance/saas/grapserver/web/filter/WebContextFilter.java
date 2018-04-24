@@ -27,13 +27,10 @@ import com.treefinance.saas.grapserver.biz.service.AppLicenseService;
 import com.treefinance.saas.grapserver.biz.service.monitor.MonitorPluginService;
 import com.treefinance.saas.grapserver.common.exception.AppIdUncheckException;
 import com.treefinance.saas.grapserver.common.exception.ForbiddenException;
-import com.treefinance.saas.grapserver.common.exception.TaskTimeOutException;
 import com.treefinance.saas.grapserver.common.model.AppLicenseKey;
 import com.treefinance.saas.grapserver.common.model.Constants;
 import com.treefinance.saas.grapserver.common.model.WebContext;
-import com.treefinance.saas.grapserver.common.utils.GrapDateUtils;
 import com.treefinance.saas.grapserver.common.utils.IpUtils;
-import com.treefinance.saas.grapserver.common.utils.RedisKeyUtils;
 import com.treefinance.saas.grapserver.dao.entity.AppLicense;
 import com.treefinance.saas.grapserver.web.request.WrappedHttpServletRequest;
 import com.treefinance.saas.knife.result.SimpleResult;
@@ -96,32 +93,6 @@ public class WebContextFilter extends AbstractRequestFilter {
                 throw new AppIdUncheckException("appLicenseKey id is illegal in this environment,appIdEnvironmentPrefix="
                         + diamondConfig.getAppIdEnvironmentPrefix());
             }
-            //校验任务是否超时取消
-            String taskIdStr = request.getParameter("taskId");
-            String taskidStr = request.getParameter("taskid");
-            long taskId = 0;
-            if (StringUtils.isNotBlank(taskIdStr)) {
-                taskId = Long.parseLong(taskIdStr);
-            }
-            if (StringUtils.isNotBlank(taskidStr)) {
-                taskId = Long.parseLong(taskidStr);
-            }
-            if (taskId > 0) {
-                String key = RedisKeyUtils.genTaskActiveTimeKey(taskId);
-                String lastActiveTimeStr = stringRedisTemplate.opsForValue().get(key);
-                if (StringUtils.isBlank(lastActiveTimeStr)) {
-                    throw new TaskTimeOutException("task finished taskId=" + taskId);
-                }
-                Long lastActiveTime = Long.parseLong(lastActiveTimeStr);
-                Long now = System.currentTimeMillis();
-                long diff = diamondConfig.getTaskMaxAliveTime();
-                if (now - lastActiveTime > diff) {
-                    throw new TaskTimeOutException("task time out taskId=" + taskId
-                            + ",lastActiveTime=" + GrapDateUtils.getDateStrByDate(new Date(lastActiveTime))
-                            + ",now=" + GrapDateUtils.getDateStrByDate(new Date(now)));
-                }
-                stringRedisTemplate.opsForValue().set(key, now + "");
-            }
 
             String ip = null;
             try {
@@ -142,8 +113,6 @@ public class WebContextFilter extends AbstractRequestFilter {
             forbidden(request, response, e);
         } catch (AppIdUncheckException e) {
             appIdUncheck(request, response, e);
-        } catch (TaskTimeOutException e) {
-            taskTimeout(request, response, e);
         } finally {
             logger.info("{} of {} : params={}", request.getMethod(), request.getRequestURL(),
                     JSON.toJSONString(request.getParameterMap()));
@@ -151,23 +120,6 @@ public class WebContextFilter extends AbstractRequestFilter {
         }
     }
 
-    /**
-     * 任务超时取消处理
-     *
-     * @param request
-     * @param response
-     * @param e
-     */
-    private void taskTimeout(HttpServletRequest request, HttpServletResponse response, TaskTimeOutException e) {
-        logger.error(String.format("@[%s;%s;%s] >> %s", request.getRequestURI(), request.getMethod(),
-                ServletRequestUtils.getIP(request), e.getMessage()));
-        Map<String, Integer> map = Maps.newHashMap();
-        map.put("mark", 2);
-        SimpleResult<Map<String, Integer>> result = new SimpleResult<>(map);
-        result.setErrorMsg("任务失效");
-        String responseBody = Jackson.toJSONString(result);
-        ServletResponseUtils.responseJson(response, 400, responseBody);
-    }
 
     /**
      * appId uncheck
