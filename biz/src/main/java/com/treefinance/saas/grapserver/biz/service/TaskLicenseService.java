@@ -77,24 +77,24 @@ public class TaskLicenseService {
         }
 
         //商户是否禁用状态
-//        QueryMerchantByAppIdRequest request = new QueryMerchantByAppIdRequest();
-//        request.setAppIds(Lists.newArrayList(appId));
-//        MerchantResult<List<MerchantBaseResult>> rpcResult;
-//        try {
-//            rpcResult = merchantBaseInfoFacade.queryMerchantBaseListByAppId(request);
-//        } catch (Exception e) {
-//            logger.error("校验商户是否禁用时,调用商户中心异常,request={}", JSON.toJSONString(request), e);
-//            throw e;
-//        }
-//
-//        if (CollectionUtils.isEmpty(rpcResult.getData())) {
-//            logger.info("校验商户是否禁用时,调用商户中心未查到商户信息,request={}", JSON.toJSONString(request));
-//            throw new ForbiddenException("Can not find app , appId=" + appId);
-//        }
-//        MerchantBaseResult merchantBaseResult = rpcResult.getData().get(0);
-//        if (Optional.fromNullable(merchantBaseResult.getIsActive()).or((byte) 0) == 0) {
-//            logger.info("商户被禁用,appId={}", appId);
-//            throw new ForbiddenException("app is forbidden , appId=" + appId);
-//        }
+        QueryMerchantByAppIdRequest request = new QueryMerchantByAppIdRequest();
+        request.setAppIds(Lists.newArrayList(appId));
+        MerchantResult<List<MerchantBaseResult>> rpcResult;
+        try {
+            rpcResult = merchantBaseInfoFacade.queryMerchantBaseListByAppId(request);
+        } catch (Exception e) {
+            logger.error("校验商户是否禁用时,调用商户中心异常,request={}", JSON.toJSONString(request), e);
+            throw e;
+        }
+
+        if (CollectionUtils.isEmpty(rpcResult.getData())) {
+            logger.info("校验商户是否禁用时,调用商户中心未查到商户信息,request={}", JSON.toJSONString(request));
+            throw new ForbiddenException("Can not find app , appId=" + appId);
+        }
+        MerchantBaseResult merchantBaseResult = rpcResult.getData().get(0);
+        if (Optional.fromNullable(merchantBaseResult.getIsActive()).or((byte) 0) == 0) {
+            logger.info("商户被禁用,appId={},merchantBaseResult={}", appId, JSON.toJSONString(merchantBaseResult));
+            throw new ForbiddenException("app is forbidden , appId=" + appId);
+        }
     }
 }
