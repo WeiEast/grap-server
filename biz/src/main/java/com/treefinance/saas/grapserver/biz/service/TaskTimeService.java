@@ -298,7 +298,7 @@ public class TaskTimeService {
         Date timeoutDate = DateUtils.addSeconds(loginTime, timeout);
         logger.info("handleTaskTimeout: taskid={}，loginTime={},current={},timeout={}",
                 taskId, CommonUtils.date2Str(loginTime), CommonUtils.date2Str(currentTime), timeout);
-        if (timeoutDate.before(currentTime)) {
+        if (timeoutDate.after(currentTime)) {
             return false;
         }
         taskTimeoutHandlers.forEach(handler -> {
