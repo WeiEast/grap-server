@@ -31,8 +31,6 @@ import com.treefinance.saas.merchant.center.facade.service.AppLicenseFacade;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
@@ -49,9 +47,6 @@ public class AppLicenseService {
 
     private static final Logger logger = LoggerFactory.getLogger(AppBizLicenseService.class);
 
-
-    @Autowired
-    private StringRedisTemplate stringRedisTemplate;
     /**
      * APP密钥
      */
@@ -69,17 +64,17 @@ public class AppLicenseService {
         try {
             result = appLicenseFacade.getAppLicense(request);
         } catch (RpcException e) {
-            logger.error("获取appLicense失败，错误信息：{}",e.getMessage());
+            logger.error("获取appLicense失败，错误信息：{}", e.getMessage());
             return null;
         }
-        if(!result.isSuccess()){
+        if (!result.isSuccess()) {
             return null;
         }
 
         AppLicenseResult appLicenseResult = result.getData();
         AppLicense appLicense = new AppLicense();
 
-        BeanUtils.copyProperties(appLicenseResult,appLicense);
+        BeanUtils.copyProperties(appLicenseResult, appLicense);
 
         logger.info(JSON.toJSONString(appLicense));
 
@@ -147,7 +142,7 @@ public class AppLicenseService {
 
 
         CallBackLicenseDTO dto = new CallBackLicenseDTO();
-        BeanUtils.copyProperties(appLicenseResult,dto);
+        BeanUtils.copyProperties(appLicenseResult, dto);
 
         logger.info(JSON.toJSONString(dto));
 

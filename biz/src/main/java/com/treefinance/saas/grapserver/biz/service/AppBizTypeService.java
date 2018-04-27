@@ -10,6 +10,7 @@ import com.treefinance.saas.grapserver.dao.entity.AppBizLicense;
 import com.treefinance.saas.grapserver.dao.entity.AppBizType;
 import com.treefinance.saas.grapserver.dao.entity.AppBizTypeCriteria;
 import com.treefinance.saas.grapserver.dao.mapper.AppBizTypeMapper;
+import com.treefinance.saas.merchant.center.facade.request.common.BaseRequest;
 import com.treefinance.saas.merchant.center.facade.request.grapserver.GetAppBizTypeRequest;
 import com.treefinance.saas.merchant.center.facade.result.console.AppBizLicenseResult;
 import com.treefinance.saas.merchant.center.facade.result.console.AppBizTypeResult;
@@ -52,7 +53,7 @@ public class AppBizTypeService implements InitializingBean {
 
                 GetAppBizTypeRequest getAppBizTypeRequest = new GetAppBizTypeRequest();
                 getAppBizTypeRequest.setBizType(bizType);
-                MerchantResult<List<AppBizTypeResult>>  merchantResult = appBizTypeFacade.selectAppBizTypeByBizType(getAppBizTypeRequest);
+                MerchantResult<List<AppBizTypeResult>>  merchantResult = appBizTypeFacade.queryAppBizTypeByBizType(getAppBizTypeRequest);
                 List<AppBizType> list = DataConverterUtils.convert(merchantResult.getData(),AppBizType.class);
                 if(merchantResult.isSuccess())
                 {
@@ -93,9 +94,9 @@ public class AppBizTypeService implements InitializingBean {
     @Override
     public void afterPropertiesSet() throws Exception {
 
-        GetAppBizTypeRequest getAppBizTypeRequest = new GetAppBizTypeRequest();
+        BaseRequest getAppBizTypeRequest = new BaseRequest();
 
-        MerchantResult<List<AppBizTypeResult>>  merchantResult = appBizTypeFacade.selectAppBizTypeByBizType(getAppBizTypeRequest);
+        MerchantResult<List<AppBizTypeResult>>  merchantResult = appBizTypeFacade.queryAllAppBizType(getAppBizTypeRequest);
         List<AppBizType> list = DataConverterUtils.convert(merchantResult.getData(),AppBizType.class);
 
         this.cache.putAll(list.stream().collect(Collectors.toMap(AppBizType::getBizType, appBizType -> appBizType)));

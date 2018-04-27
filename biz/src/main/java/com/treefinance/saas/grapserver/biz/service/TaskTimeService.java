@@ -1,21 +1,24 @@
 package com.treefinance.saas.grapserver.biz.service;
 
+import com.alibaba.fastjson.JSON;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import com.treefinance.saas.grapserver.biz.cache.RedisDao;
 import com.treefinance.saas.grapserver.biz.common.AsycExcutor;
+import com.treefinance.saas.grapserver.biz.config.DiamondConfig;
 import com.treefinance.saas.grapserver.biz.service.task.TaskTimeoutHandler;
 import com.treefinance.saas.grapserver.common.enums.ETaskStatus;
 import com.treefinance.saas.grapserver.common.model.dto.TaskDTO;
-import com.treefinance.saas.grapserver.common.utils.CommonUtils;
-import com.treefinance.saas.grapserver.common.utils.DataConverterUtils;
-import com.treefinance.saas.grapserver.common.utils.JsonUtils;
+import com.treefinance.saas.grapserver.common.utils.*;
 import com.treefinance.saas.grapserver.dao.entity.AppBizType;
 import com.treefinance.saas.grapserver.dao.entity.Task;
 import com.treefinance.saas.grapserver.dao.entity.TaskCriteria;
 import com.treefinance.saas.grapserver.dao.mapper.TaskMapper;
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateFormatUtils;
 import org.apache.commons.lang3.time.DateUtils;
@@ -67,6 +70,12 @@ public class TaskTimeService {
 
     @Autowired
     private AsycExcutor asycExcutor;
+    @Autowired
+    private TaskService taskService;
+    @Autowired
+    private DiamondConfig diamondConfig;
+    @Autowired
+    private RedisDao redisDao;
 
     /**
      * 本地任务缓存
@@ -110,6 +119,9 @@ public class TaskTimeService {
     }
 
 
+    /**
+     * 处理登录后抓取任务超时
+     */
     @Scheduled(cron = "0 0/1 * * * ?")
     public void scheduleTaskTimeout() {
         String key = prefix + "scheduling";
@@ -166,6 +178,47 @@ public class TaskTimeService {
         }
         redisTemplate.expire(key, 30, TimeUnit.SECONDS);
         logger.info("scheduleTaskTimeout：task is running in other node : key={}", key);
+    }
+
+
+    /**
+     * 处理任务活跃时间超时(任务10分钟不活跃则取消任务)
+     */
+    @Scheduled(cron = "0 0/1 * * * ?")
+    public void scheduleTaskActiveTimeout() {
+        Date startTime = new Date();
+        Map<String, Object> lockMap = Maps.newHashMap();
+        String lockKey = RedisKeyUtils.genRedisLockKey("task-alive-time-job", GrapDateUtils.getDateStrByDate(startTime, "HH:mm"));
+        try {
+            lockMap = redisDao.acquireLock(lockKey, 60 * 1000L);
+            if (MapUtils.isEmpty(lockMap)) {
+                return;
+            }
+            Date endTime = DateUtils.addMinutes(startTime, -30);
+            TaskCriteria criteria = new TaskCriteria();
+            criteria.createCriteria().andStatusEqualTo(ETaskStatus.RUNNING.getStatus())
+                    .andCreateTimeGreaterThanOrEqualTo(endTime)
+                    .andCreateTimeLessThan(startTime);
+
+            List<Task> taskList = taskMapper.selectByExample(criteria);
+            List<Long> cancelTaskIdList = Lists.newArrayList();
+            for (Task task : taskList) {
+                String key = RedisKeyUtils.genTaskActiveTimeKey(task.getId());
+                String valueStr = redisTemplate.opsForValue().get(key);
+                if (StringUtils.isNotBlank(valueStr)) {
+                    Long lastActiveTime = Long.parseLong(valueStr);
+                    long diff = diamondConfig.getTaskMaxAliveTime();
+                    if (startTime.getTime() - lastActiveTime > diff) {
+                        logger.info("任务活跃时间超时,取消任务,taskId={}", task.getId());
+                        cancelTaskIdList.add(task.getId());
+                        taskService.cancelTask(task.getId());
+                    }
+                }
+            }
+            logger.info("scheduleTaskActiveTimeout:taskIdList={}", JSON.toJSONString(cancelTaskIdList));
+        } finally {
+            redisDao.releaseLock(lockKey, lockMap, 60 * 1000L);
+        }
     }
 
     /**
@@ -260,4 +313,5 @@ public class TaskTimeService {
         });
         return true;
     }
+
 }

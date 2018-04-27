@@ -19,10 +19,12 @@ package com.treefinance.saas.grapserver.web;
 import com.treefinance.saas.grapserver.biz.config.DiamondConfig;
 import com.treefinance.saas.grapserver.biz.service.AppLicenseService;
 import com.treefinance.saas.grapserver.biz.service.monitor.MonitorPluginService;
+import com.treefinance.saas.grapserver.web.filter.TaskAliveFilter;
 import com.treefinance.saas.grapserver.web.filter.WebContextFilter;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.filter.CorsFilter;
@@ -60,6 +62,19 @@ public class FilterRegistry {
         registration.setName("webContextFilter");
         registration.addUrlPatterns("/*");
         registration.setOrder(1);
+        return registration;
+    }
+
+    @Bean
+    public FilterRegistrationBean taskAliveFilter(DiamondConfig diamondConfig,
+                                                  RedisTemplate<String, String> redisTemplate) {
+        TaskAliveFilter taskAliveFilter = new TaskAliveFilter(diamondConfig, redisTemplate);
+        taskAliveFilter.addExcludeUrlPatterns("/moxie/webhook/**", "/**/start/**/");
+        FilterRegistrationBean registration = new FilterRegistrationBean();
+        registration.setFilter(taskAliveFilter);
+        registration.setName("taskAliveFilter");
+        registration.addUrlPatterns("/*");
+        registration.setOrder(2);
         return registration;
     }
 

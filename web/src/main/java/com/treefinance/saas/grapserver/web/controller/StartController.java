@@ -1,14 +1,18 @@
 package com.treefinance.saas.grapserver.web.controller;
 
 import com.google.common.collect.Maps;
+import com.treefinance.saas.grapserver.biz.cache.RedisDao;
 import com.treefinance.saas.grapserver.biz.config.DiamondConfig;
 import com.treefinance.saas.grapserver.biz.service.MerchantConfigService;
 import com.treefinance.saas.grapserver.biz.service.TaskDeviceService;
 import com.treefinance.saas.grapserver.biz.service.TaskLicenseService;
 import com.treefinance.saas.grapserver.biz.service.TaskService;
 import com.treefinance.saas.grapserver.common.enums.EBizType;
+import com.treefinance.saas.grapserver.common.exception.CrawlerBizException;
 import com.treefinance.saas.grapserver.common.exception.ForbiddenException;
+import com.treefinance.saas.grapserver.common.model.Constants;
 import com.treefinance.saas.grapserver.common.utils.IpUtils;
+import com.treefinance.saas.grapserver.common.utils.RedisKeyUtils;
 import com.treefinance.saas.knife.result.SimpleResult;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -32,7 +36,7 @@ import java.util.Map;
 public class StartController {
     private static final Logger logger = LoggerFactory.getLogger(EcommerceController.class);
     @Autowired
-    private TaskService taskServiceImpl;
+    private TaskService taskService;
     @Autowired
     private TaskDeviceService taskDeviceService;
     @Autowired
@@ -41,6 +45,8 @@ public class StartController {
     private TaskLicenseService taskLicenseService;
     @Autowired
     private DiamondConfig diamondConfig;
+    @Autowired
+    private RedisDao redisDao;
 
     /**
      * 创建任务接口
@@ -71,17 +77,28 @@ public class StartController {
         if (StringUtils.isEmpty(bizType)) {
             bizType = (String) request.getAttribute("bizType");
         }
-        logger.info("task start : appid={},uniqueId={},coorType={},deviceInfo={},extra={},bizType={},source={}",
-                appid, uniqueId, coorType, deviceInfo, extra, bizType, source);
-        EBizType eBizType = EBizType.of(bizType);
-        taskLicenseService.verifyCreateTask(appid, uniqueId, eBizType);
-        Long taskId = taskServiceImpl.createTask(uniqueId, appid, eBizType.getCode(), extra, website, source);
-        Map<String, Object> map = Maps.newHashMap();
-        map.put("taskid", String.valueOf(taskId));
-        map.put("color", merchantConfigService.getColorConfig(appid, style));
-        map.put("title", diamondConfig.getSdkTitle(eBizType));
-        String ipAddress = IpUtils.getIpAddress(request);
-        taskDeviceService.create(deviceInfo, ipAddress, coorType, taskId);
-        return new SimpleResult<>(map);
+        Map<String, Object> lockMap = Maps.newHashMap();
+        String key = RedisKeyUtils.genCreateTaskUserLockKey(appid, uniqueId, bizType);
+        try {
+            lockMap = redisDao.acquireLock(key, 60 * 1000L);
+            if (lockMap != null) {
+                logger.info("task start : appid={},uniqueId={},coorType={},deviceInfo={},extra={},bizType={},source={}",
+                        appid, uniqueId, coorType, deviceInfo, extra, bizType, source);
+                EBizType eBizType = EBizType.of(bizType);
+                taskLicenseService.verifyCreateTask(appid, uniqueId, eBizType);
+                Long taskId = taskService.createTask(uniqueId, appid, eBizType.getCode(), extra, website, source);
+                Map<String, Object> map = Maps.newHashMap();
+                map.put("taskid", String.valueOf(taskId));
+                map.put("color", merchantConfigService.getColorConfig(appid, style));
+                map.put("title", diamondConfig.getSdkTitle(eBizType));
+                String ipAddress = IpUtils.getIpAddress(request);
+                taskDeviceService.create(deviceInfo, ipAddress, coorType, taskId);
+                return new SimpleResult<>(map);
+            }
+            throw new CrawlerBizException(Constants.REDIS_LOCK_ERROR_MSG);
+
+        } finally {
+            redisDao.releaseLock(key, lockMap, 60 * 1000L);
+        }
     }
 }

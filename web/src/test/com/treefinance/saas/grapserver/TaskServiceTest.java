@@ -21,12 +21,13 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Created by chenjh on 2017/6/26.
@@ -55,7 +56,7 @@ public class TaskServiceTest {
     @Autowired
     private RedisDao redisDao;
     @Autowired
-    private StringRedisTemplate redisTemplate;
+    private RedisTemplate<String, String> redisTemplate;
 
     @Test
     public void testUpdateAccountNo() {
@@ -134,6 +135,18 @@ public class TaskServiceTest {
                 redisDao.releaseLock(lockKey, lockMap, expire);
             }
         }
+    }
+
+    @Test
+    public void testRediskey() throws InterruptedException {
+        String key = "aaa-test:123456";
+        redisTemplate.opsForValue().set(key, 2 + "");
+        if (redisTemplate.getExpire(key) == -1) {
+            redisTemplate.expire(key, 30, TimeUnit.MINUTES);
+        }
+        Thread.sleep(10 * 1000);
+        redisTemplate.delete(key);
+        System.out.println("haodone ========");
     }
 
 

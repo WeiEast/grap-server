@@ -454,7 +454,21 @@ public class MoxieBusinessService implements InitializingBean {
         List<MoxieCityInfoVO> result = Lists.newArrayList();
         List<MoxieCityInfoDTO> list = fundMoxieService.queryCityListEx();
         //<province,list>
-        Map<String, List<MoxieCityInfoDTO>> map = list.stream().collect(Collectors.groupingBy(MoxieCityInfoDTO::getProvince));
+        Map<String, List<MoxieCityInfoDTO>> map = Maps.newHashMap();
+        for (MoxieCityInfoDTO moxieCityInfoDTO : list) {
+            if (StringUtils.isBlank(moxieCityInfoDTO.getProvince())) {
+                logger.error("魔蝎接口异常,存在null,moxieCityInfoDTO={}", JSON.toJSONString(moxieCityInfoDTO));
+                continue;
+            }
+            List<MoxieCityInfoDTO> items = map.get(moxieCityInfoDTO.getProvince());
+            if (CollectionUtils.isEmpty(items)) {
+                items = Lists.newArrayList(moxieCityInfoDTO);
+            } else {
+                items.add(moxieCityInfoDTO);
+            }
+            map.put(moxieCityInfoDTO.getProvince(), items);
+        }
+//        Map<String, List<MoxieCityInfoDTO>> map = list.stream().collect(Collectors.groupingBy(MoxieCityInfoDTO::getProvince));
         for (Map.Entry<String, List<MoxieCityInfoDTO>> entry : map.entrySet()) {
             MoxieCityInfoVO vo = new MoxieCityInfoVO();
             vo.setLabel(entry.getKey());

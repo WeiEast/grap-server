@@ -59,7 +59,9 @@ public class WebContextFilter extends AbstractRequestFilter {
     private AppLicenseService appLicenseService;
 
 
-    public WebContextFilter(MonitorPluginService monitorPluginService, DiamondConfig diamondConfig, AppLicenseService appLicenseService) {
+    public WebContextFilter(MonitorPluginService monitorPluginService,
+                            DiamondConfig diamondConfig,
+                            AppLicenseService appLicenseService) {
         this.monitorPluginService = monitorPluginService;
         this.diamondConfig = diamondConfig;
         this.appLicenseService = appLicenseService;
@@ -71,6 +73,7 @@ public class WebContextFilter extends AbstractRequestFilter {
         long start = System.currentTimeMillis();
         try {
             request = WrappedHttpServletRequest.wrap(request, null);
+            //校验appId
             String appId = request.getParameter(Constants.APP_ID);
             if (appId == null) {
                 throw new ForbiddenException("Can not find parameter 'appid' in request.");
@@ -83,8 +86,10 @@ public class WebContextFilter extends AbstractRequestFilter {
             boolean isMatchOld = Pattern.matches(oldPattern, appId);
             boolean isMatch = Pattern.matches(pattern, appId);
             if (!isMatchOld && !isMatch) {
-                throw new AppIdUncheckException("appLicenseKey id is illegal in this environment,appIdEnvironmentPrefix=" + diamondConfig.getAppIdEnvironmentPrefix());
+                throw new AppIdUncheckException("appLicenseKey id is illegal in this environment,appIdEnvironmentPrefix="
+                        + diamondConfig.getAppIdEnvironmentPrefix());
             }
+
             String ip = null;
             try {
                 ip = ServletRequestUtils.getIP(request);
@@ -110,6 +115,7 @@ public class WebContextFilter extends AbstractRequestFilter {
             monitorRequest(start, request, response);
         }
     }
+
 
     /**
      * appId uncheck

@@ -1,5 +1,8 @@
 package com.treefinance.saas.grapserver.biz.service;
 
+import com.alibaba.fastjson.JSON;
+import com.google.common.base.Optional;
+import com.google.common.collect.Lists;
 import com.treefinance.saas.grapserver.biz.config.DiamondConfig;
 import com.treefinance.saas.grapserver.common.enums.EBizType;
 import com.treefinance.saas.grapserver.common.exception.AppIdUncheckException;
@@ -7,6 +10,11 @@ import com.treefinance.saas.grapserver.common.exception.ForbiddenException;
 import com.treefinance.saas.grapserver.common.exception.base.MarkBaseException;
 import com.treefinance.saas.grapserver.dao.entity.AppBizLicense;
 import com.treefinance.saas.grapserver.dao.entity.AppLicense;
+import com.treefinance.saas.merchant.center.facade.request.grapserver.QueryMerchantByAppIdRequest;
+import com.treefinance.saas.merchant.center.facade.result.console.MerchantBaseResult;
+import com.treefinance.saas.merchant.center.facade.result.console.MerchantResult;
+import com.treefinance.saas.merchant.center.facade.service.MerchantBaseInfoFacade;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,6 +37,8 @@ public class TaskLicenseService {
     private AppBizLicenseService appBizLicenseService;
     @Autowired
     private DiamondConfig diamondConfig;
+    @Autowired
+    private MerchantBaseInfoFacade merchantBaseInfoFacade;
 
     public void verifyCreateTask(String appId, String uniqueId, EBizType bizType) throws ForbiddenException {
 
@@ -55,7 +65,7 @@ public class TaskLicenseService {
                     if (!Byte.valueOf("1").equals(appBizLicense.getIsValid())) {
                         continue;
                     }
-                    if (appBizLicense.getBizType() == bizType.getCode()) {
+                    if (appBizLicense.getBizType().equals(bizType.getCode())) {
                         hasCreateTaskAuth = true;
                         break;
                     }
@@ -64,6 +74,27 @@ public class TaskLicenseService {
         }
         if (!hasCreateTaskAuth) {
             throw new ForbiddenException("Can not find license for app '" + appId + "' bizType '" + bizType + "'.");
+        }
+
+        //商户是否禁用状态
+        QueryMerchantByAppIdRequest request = new QueryMerchantByAppIdRequest();
+        request.setAppIds(Lists.newArrayList(appId));
+        MerchantResult<List<MerchantBaseResult>> rpcResult;
+        try {
+            rpcResult = merchantBaseInfoFacade.queryMerchantBaseListByAppId(request);
+        } catch (Exception e) {
+            logger.error("校验商户是否禁用时,调用商户中心异常,request={}", JSON.toJSONString(request), e);
+            throw e;
+        }
+
+        if (CollectionUtils.isEmpty(rpcResult.getData())) {
+            logger.info("校验商户是否禁用时,调用商户中心未查到商户信息,request={}", JSON.toJSONString(request));
+            throw new ForbiddenException("Can not find app , appId=" + appId);
+        }
+        MerchantBaseResult merchantBaseResult = rpcResult.getData().get(0);
+        if (Optional.fromNullable(merchantBaseResult.getIsActive()).or((byte) 0) == 0) {
+            logger.info("商户被禁用,appId={},merchantBaseResult={}", appId, JSON.toJSONString(merchantBaseResult));
+            throw new ForbiddenException("app is forbidden , appId=" + appId);
         }
     }
 }

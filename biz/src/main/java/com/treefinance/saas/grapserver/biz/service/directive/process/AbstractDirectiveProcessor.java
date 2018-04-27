@@ -82,4 +82,5 @@ public abstract class AbstractDirectiveProcessor extends CallbackableDirectivePr
      * @param directiveDTO
      */
     protected abstract void doProcess(EDirective directive, DirectiveDTO directiveDTO);
+
 }

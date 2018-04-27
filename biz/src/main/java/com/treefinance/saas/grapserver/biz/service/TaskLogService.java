@@ -7,7 +7,6 @@ import com.treefinance.saas.grapserver.common.enums.ETaskStep;
 import com.treefinance.saas.grapserver.dao.entity.TaskLog;
 import com.treefinance.saas.grapserver.dao.entity.TaskLogCriteria;
 import com.treefinance.saas.grapserver.dao.mapper.TaskLogMapper;
-import com.treefinance.saas.grapserver.dao.mapper.TaskMapper;
 import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,9 +38,9 @@ public class TaskLogService {
 
     @Autowired
     private TaskLogMapper taskLogMapper;
-
     @Autowired
-    private TaskMapper taskMapper;
+    private TaskAliveService taskAliveService;
+
 
     /**
      * 添加一条日志记录
@@ -61,6 +60,7 @@ public class TaskLogService {
         taskLog.setOccurTime(processTime);
         taskLog.setErrorMsg(errorMsg != null && errorMsg.length() > 1000 ? errorMsg.substring(0, 1000) : errorMsg);
         taskLogMapper.insertSelective(taskLog);
+        taskAliveService.updateTaskActiveTime(taskId);
         logger.info("记录任务日志: {}", JSON.toJSONString(taskLog));
         return id;
     }
