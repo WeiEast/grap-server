@@ -60,6 +60,9 @@ public class OperatorController {
     /**
      * 获取商户配置与运营商分组信息
      *
+     * @param appid  商户id
+     * @param taskId 任务id
+     * @param style  颜色风格配置
      * @return
      */
     @RequestMapping(value = "/config/groups", method = {RequestMethod.POST})
