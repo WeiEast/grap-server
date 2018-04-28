@@ -75,7 +75,7 @@ public class OperatorController {
         }
         Object result = operatorExtendLoginService.getConfigAndGroups(appid, taskId, style);
         logger.info("运营商:获取商户配置与运营商分组信息,返回结果,result={}", JSON.toJSONString(result));
-        return SimpleResult.successResult(result);
+        return result;
     }
 
     /**
@@ -89,7 +89,7 @@ public class OperatorController {
         logger.info("运营商:获取运营商登陆配置信息,传入参数,operatorParam={}", JSON.toJSONString(operatorParam));
         Object result = operatorExtendLoginService.preLoginConfig(operatorParam);
         logger.info("运营商:获取运营商登陆配置信息,返回结果,operatorParam={},result={}", JSON.toJSONString(operatorParam), JSON.toJSONString(result));
-        return SimpleResult.successResult(result);
+        return result;
     }
 
 

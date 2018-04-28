@@ -256,7 +256,7 @@ public class OperatorExtendLoginService {
         if (taskAttribute != null) {
             map.put(taskAttribute.getName(), taskAttribute.getValue());
         }
-        return map;
+        return SimpleResult.successResult(map);
     }
 
     /**
