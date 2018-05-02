@@ -236,7 +236,7 @@ public class OperatorExtendLoginService {
      */
     public Object getConfigAndGroups(String appId, Long taskId, String style) {
         Map<String, Object> colorMap = merchantConfigService.getColorConfig(appId, style);
-        HttpResult<Map<String, List<OperatorGroup>>> result;
+        HttpResult<List<Map<String, List<OperatorGroup>>>> result;
         try {
             result = crawlerOperatorService.queryGroups();
         } catch (Exception e) {
