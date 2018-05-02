@@ -120,7 +120,7 @@ public class TaskTimeService {
     }
 
     /**
-     * 处理登录后抓取任务超时
+     * 处理登录后抓取任务超时(注意区分环境)
      */
     @Scheduled(cron = "0 0/1 * * * ?")
     public void scheduleTaskTimeout() {
@@ -173,6 +173,7 @@ public class TaskTimeService {
 
     /**
      * 处理任务活跃时间超时(任务10分钟不活跃则取消任务)
+     * (注意区分环境)
      */
     @Scheduled(cron = "0 0/1 * * * ?")
     public void scheduleTaskActiveTimeout() {
