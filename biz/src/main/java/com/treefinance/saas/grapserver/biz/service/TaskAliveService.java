@@ -45,9 +45,19 @@ public class TaskAliveService {
         String key = RedisKeyUtils.genTaskActiveTimeKey(taskId);
         String value = System.currentTimeMillis() + "";
         redisTemplate.opsForValue().set(key, value);
-        if (redisTemplate.getExpire(key) == -1) {
-            redisTemplate.expire(key, 30, TimeUnit.MINUTES);
-        }
+        redisTemplate.expire(key, 30, TimeUnit.MINUTES);
+    }
+
+    /**
+     * 获取任务最近活跃时间
+     *
+     * @param taskId
+     * @return
+     */
+    public String getTaskAliveTime(Long taskId) {
+        String key = RedisKeyUtils.genTaskActiveTimeKey(taskId);
+        String lastActiveTimeStr = redisTemplate.opsForValue().get(key);
+        return lastActiveTimeStr;
     }
 
     /**

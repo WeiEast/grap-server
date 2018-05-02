@@ -77,6 +77,8 @@ public class TaskTimeService {
     private DiamondConfig diamondConfig;
     @Autowired
     private RedisDao redisDao;
+    @Autowired
+    private TaskAliveService taskAliveService;
 
     /**
      * 本地任务缓存
@@ -175,7 +177,7 @@ public class TaskTimeService {
      * 处理任务活跃时间超时(任务10分钟不活跃则取消任务)
      * (注意区分环境)
      */
-    @Scheduled(cron = "0 0/1 * * * ?")
+    @Scheduled(cron = "0 0/2 * * * ?")
     public void scheduleTaskActiveTimeout() {
         Date startTime = new Date();
         Map<String, Object> lockMap = Maps.newHashMap();
@@ -185,7 +187,7 @@ public class TaskTimeService {
             if (MapUtils.isEmpty(lockMap)) {
                 return;
             }
-            Date endTime = DateUtils.addMinutes(startTime, -30);
+            Date endTime = DateUtils.addMinutes(startTime, -60);
             TaskCriteria criteria = new TaskCriteria();
             criteria.createCriteria().andStatusEqualTo(ETaskStatus.RUNNING.getStatus())
                     .andSaasEnvEqualTo(Byte.parseByte(Constants.SAAS_ENV_VALUE))
@@ -195,8 +197,7 @@ public class TaskTimeService {
             List<Task> taskList = taskMapper.selectByExample(criteria);
             List<Long> cancelTaskIdList = Lists.newArrayList();
             for (Task task : taskList) {
-                String key = RedisKeyUtils.genTaskActiveTimeKey(task.getId());
-                String valueStr = redisTemplate.opsForValue().get(key);
+                String valueStr = taskAliveService.getTaskAliveTime(task.getId());
                 if (StringUtils.isNotBlank(valueStr)) {
                     Long lastActiveTime = Long.parseLong(valueStr);
                     long diff = diamondConfig.getTaskMaxAliveTime();
