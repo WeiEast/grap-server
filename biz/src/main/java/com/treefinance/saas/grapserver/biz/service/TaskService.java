@@ -130,14 +130,14 @@ public class TaskService {
      */
     private void cancelUserOldRunningTask(String appId, String uniqueId, Byte bizType, Long taskId) {
         Date startTime = new Date();
-        Date endTime = DateUtils.addMinutes(startTime, 30);
+        Date endTime = DateUtils.addMinutes(startTime, -30);
         TaskCriteria criteria = new TaskCriteria();
         criteria.createCriteria().andBizTypeEqualTo(bizType)
                 .andUniqueIdEqualTo(uniqueId)
                 .andAppIdEqualTo(appId)
                 .andIdNotEqualTo(taskId)
-                .andCreateTimeGreaterThanOrEqualTo(startTime)
-                .andCreateTimeLessThan(endTime);
+                .andCreateTimeGreaterThanOrEqualTo(endTime)
+                .andCreateTimeLessThan(startTime);
         List<Task> taskList = taskMapper.selectByExample(criteria);
         logger.info("取消用户正在进行的历史任务,appId={},uniqueId={},bizType={},tasks={}",
                 appId, uniqueId, bizType, JSON.toJSONString(taskList));
