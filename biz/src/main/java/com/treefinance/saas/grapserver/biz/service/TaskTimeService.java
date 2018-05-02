@@ -125,7 +125,7 @@ public class TaskTimeService {
     @Scheduled(cron = "0 0/1 * * * ?")
     public void scheduleTaskTimeout() {
         Map<String, Object> lockMap = Maps.newHashMap();
-        String lockKey = RedisKeyUtils.genRedisLockKey(prefix + "scheduling", Constants.SAAS_ENV);
+        String lockKey = RedisKeyUtils.genRedisLockKey("task-crawler-time-job", Constants.SAAS_ENV);
         try {
             Set<String> taskIdSet = redisTemplate.opsForSet().members(taskSetKey);
             logger.info("scheduleTaskTimeout：running ：lock-key={}, taskid-key={}，taskIds={}", lockKey, taskSetKey, JSON.toJSONString(taskIdSet));
@@ -135,7 +135,7 @@ public class TaskTimeService {
             }
             // 处理超时任务
             List<Long> taskIds = taskIdSet.stream().map(id -> Long.valueOf(id)).collect(Collectors.toList());
-            for (List<Long> _taskIds : Lists.partition(taskIds, 200)) {
+            for (List<Long> _taskIds : Lists.partition(taskIds, 100)) {
                 TaskCriteria criteria = new TaskCriteria();
                 criteria.createCriteria().andIdIn(_taskIds).andSaasEnvEqualTo(Byte.parseByte(Constants.SAAS_ENV_VALUE));
                 List<Task> tasks = taskMapper.selectByExample(criteria);
