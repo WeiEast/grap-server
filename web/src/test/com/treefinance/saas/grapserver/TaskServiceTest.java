@@ -24,6 +24,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -147,6 +148,34 @@ public class TaskServiceTest {
         Thread.sleep(10 * 1000);
         redisTemplate.delete(key);
         System.out.println("haodone ========");
+    }
+
+    @Test
+    public void testTaskCancel() throws IOException, InterruptedException {
+        TaskCancelTask task1 = new TaskCancelTask(taskService, 176376746986205184L);
+        TaskCancelTask task2 = new TaskCancelTask(taskService, 176377199962648576L);
+        Thread thread1 = new Thread(task1);
+        Thread thread2 = new Thread(task2);
+        thread1.start();
+        thread2.start();
+        thread1.join();
+        thread2.join();
+        System.out.println("done=======");
+    }
+
+    public class TaskCancelTask implements Runnable {
+        private TaskService taskService;
+        private Long taskId;
+
+        TaskCancelTask(TaskService taskService, Long taskId) {
+            this.taskService = taskService;
+            this.taskId = taskId;
+        }
+
+        @Override
+        public void run() {
+            taskService.cancelTask(taskId);
+        }
     }
 
 

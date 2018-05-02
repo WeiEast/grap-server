@@ -127,7 +127,7 @@ public class TaskTimeService {
     @Scheduled(cron = "0 0/1 * * * ?")
     public void scheduleTaskTimeout() {
         Map<String, Object> lockMap = Maps.newHashMap();
-        String lockKey = RedisKeyUtils.genRedisLockKey("task-crawler-time-job", Constants.SAAS_ENV);
+        String lockKey = RedisKeyUtils.genRedisLockKey("task-crawler-time-job", Constants.SAAS_ENV_VALUE);
         try {
             Set<String> taskIdSet = redisTemplate.opsForSet().members(taskSetKey);
             logger.info("scheduleTaskTimeout：running ：lock-key={}, taskid-key={}，taskIds={}", lockKey, taskSetKey, JSON.toJSONString(taskIdSet));
@@ -181,7 +181,7 @@ public class TaskTimeService {
     public void scheduleTaskActiveTimeout() {
         Date startTime = new Date();
         Map<String, Object> lockMap = Maps.newHashMap();
-        String lockKey = RedisKeyUtils.genRedisLockKey("task-alive-time-job", Constants.SAAS_ENV, GrapDateUtils.getDateStrByDate(startTime, "HH:mm"));
+        String lockKey = RedisKeyUtils.genRedisLockKey("task-alive-time-job", Constants.SAAS_ENV_VALUE, GrapDateUtils.getDateStrByDate(startTime, "HH:mm"));
         try {
             lockMap = redisDao.acquireLock(lockKey, 60 * 1000L);
             if (MapUtils.isEmpty(lockMap)) {
