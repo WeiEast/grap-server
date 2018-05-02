@@ -6,6 +6,7 @@ import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.treefinance.saas.assistant.model.Constants;
 import com.treefinance.saas.grapserver.biz.cache.RedisDao;
 import com.treefinance.saas.grapserver.biz.common.AsycExcutor;
 import com.treefinance.saas.grapserver.biz.config.DiamondConfig;
@@ -188,7 +189,7 @@ public class TaskTimeService {
     public void scheduleTaskActiveTimeout() {
         Date startTime = new Date();
         Map<String, Object> lockMap = Maps.newHashMap();
-        String lockKey = RedisKeyUtils.genRedisLockKey("task-alive-time-job", GrapDateUtils.getDateStrByDate(startTime, "HH:mm"));
+        String lockKey = RedisKeyUtils.genRedisLockKey("task-alive-time-job", Constants.SAAS_ENV, GrapDateUtils.getDateStrByDate(startTime, "HH:mm"));
         try {
             lockMap = redisDao.acquireLock(lockKey, 60 * 1000L);
             if (MapUtils.isEmpty(lockMap)) {
@@ -197,6 +198,7 @@ public class TaskTimeService {
             Date endTime = DateUtils.addMinutes(startTime, -30);
             TaskCriteria criteria = new TaskCriteria();
             criteria.createCriteria().andStatusEqualTo(ETaskStatus.RUNNING.getStatus())
+                    .andSaasEnvEqualTo(Byte.parseByte(Constants.SAAS_ENV_VALUE))
                     .andCreateTimeGreaterThanOrEqualTo(endTime)
                     .andCreateTimeLessThan(startTime);
 
@@ -298,7 +300,7 @@ public class TaskTimeService {
         Date timeoutDate = DateUtils.addSeconds(loginTime, timeout);
         logger.info("handleTaskTimeout: taskid={}，loginTime={},current={},timeout={}",
                 taskId, CommonUtils.date2Str(loginTime), CommonUtils.date2Str(currentTime), timeout);
-        if (timeoutDate.before(currentTime)) {
+        if (timeoutDate.after(currentTime)) {
             return false;
         }
         taskTimeoutHandlers.forEach(handler -> {
