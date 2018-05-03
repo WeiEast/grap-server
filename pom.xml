@@ -52,6 +52,7 @@
         <grap-server.version>1.0.0-SNAPSHOT</grap-server.version>
         <assistant.version>1.0.10</assistant.version>
         <merchant-center.version>1.0.2-SNAPSHOT</merchant-center.version>
+        <rawdatacentral-api.version>3.1.2-SNAPSHOT</rawdatacentral-api.version>
     </properties>
 
     <dependencyManagement>
@@ -105,7 +106,7 @@
             <dependency>
                 <groupId>com.datatrees.rawdatacentral</groupId>
                 <artifactId>rawdatacentral-api</artifactId>
-                <version>3.0.21.2-SNAPSHOT</version>
+                <version>${rawdatacentral-api.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.treefinance.proxy</groupId>
