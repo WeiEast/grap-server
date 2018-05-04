@@ -145,7 +145,7 @@ public class TaskService {
                 appId, uniqueId, bizType, JSON.toJSONString(taskList));
         if (CollectionUtils.isNotEmpty(taskList)) {
             for (Task task : taskList) {
-                taskAliveService.deleteTaskAliveRedisKey(task.getId());
+                taskAliveService.updateTaskActiveTime(task.getId(), 0L);
             }
         }
     }
