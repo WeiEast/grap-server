@@ -117,8 +117,6 @@ public class TaskService {
         }
         // 记录创建日志
         taskLogService.logCreateTask(id);
-        // 取消该用户正在进行的历史任务
-        cancelUserOldRunningTask(appId, uniqueId, bizType, id);
         return id;
     }
 
