@@ -278,6 +278,20 @@ public class OperatorExtendLoginService {
                     JSON.toJSONString(operatorParam), JSON.toJSONString(result));
             throw new CrawlerBizException(result.getResponseCode(), result.getMessage());
         }
+        Long taskId = operatorParam.getTaskId();
+        if (result.getData() != null && result.getData().getMobile() > 0
+                && StringUtils.isNotBlank(result.getData().getWebsiteName())) {
+            String accountNo = String.valueOf(result.getData().getMobile());
+            String websiteName = result.getData().getWebsiteName();
+            taskService.updateTask(taskId, accountNo, websiteName);
+        } else {
+            logger.info("运营商:调用爬数获取运营商accountNo,websiteName为空,taskId={},operatorParam={},result={}",
+                    taskId, JSON.toJSONString(operatorParam), JSON.toJSONString(result));
+        }
+        String groupCode = operatorParam.getGroupCode();
+        String groupName = operatorParam.getGroupName();
+        taskAttributeService.insertOrUpdateSelective(taskId, ETaskAttribute.OPERATOR_GROUP_CODE.getAttribute(), groupCode);
+        taskAttributeService.insertOrUpdateSelective(taskId, ETaskAttribute.OPERATOR_GROUP_NAME.getAttribute(), groupName);
         return SimpleResult.successResult(result.getData());
     }
 }
