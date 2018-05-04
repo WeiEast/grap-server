@@ -151,31 +151,15 @@ public class TaskServiceTest {
     }
 
     @Test
-    public void testTaskCancel() throws IOException, InterruptedException {
-        TaskCancelTask task1 = new TaskCancelTask(taskService, 176376746986205184L);
-        TaskCancelTask task2 = new TaskCancelTask(taskService, 176377199962648576L);
-        Thread thread1 = new Thread(task1);
-        Thread thread2 = new Thread(task2);
-        thread1.start();
-        thread2.start();
-        thread1.join();
-        thread2.join();
-        System.out.println("done=======");
-    }
-
-    public class TaskCancelTask implements Runnable {
-        private TaskService taskService;
-        private Long taskId;
-
-        TaskCancelTask(TaskService taskService, Long taskId) {
-            this.taskService = taskService;
-            this.taskId = taskId;
+    public void testStartTask() {
+        String appId = "QATestabcdefghQA";
+        String uniqueId = "test666";
+        try {
+            taskService.createTask(uniqueId, appId, (byte) 3, null, null, null);
+        } catch (IOException e) {
+            e.printStackTrace();
         }
-
-        @Override
-        public void run() {
-            taskService.cancelTask(taskId);
-        }
+        System.out.println("done===");
     }
 
 

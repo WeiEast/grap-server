@@ -67,6 +67,8 @@ public class TaskService {
     private DiamondConfig diamondConfig;
     @Autowired
     private DirectiveService directiveService;
+    @Autowired
+    private TaskAliveService taskAliveService;
 
     /**
      * 创建任务
@@ -143,7 +145,7 @@ public class TaskService {
                 appId, uniqueId, bizType, JSON.toJSONString(taskList));
         if (CollectionUtils.isNotEmpty(taskList)) {
             for (Task task : taskList) {
-                this.cancelTask(task.getId());
+                taskAliveService.deleteTaskAliveRedisKey(task.getId());
             }
         }
     }
