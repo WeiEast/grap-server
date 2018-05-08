@@ -45,9 +45,40 @@ public class TaskAliveService {
         String key = RedisKeyUtils.genTaskActiveTimeKey(taskId);
         String value = System.currentTimeMillis() + "";
         redisTemplate.opsForValue().set(key, value);
-        if (redisTemplate.getExpire(key) == -1) {
-            redisTemplate.expire(key, 30, TimeUnit.MINUTES);
+        redisTemplate.expire(key, 30, TimeUnit.MINUTES);
+    }
+
+    /**
+     * 更新任务最近活跃时间
+     *
+     * @param taskId 任务id
+     * @param time   需要设置的活跃时间
+     */
+    public void updateTaskActiveTime(Long taskId, Long time) {
+        Task task = taskMapper.selectByPrimaryKey(taskId);
+        if (task == null) {
+            return;
         }
+        if (!ETaskStatus.RUNNING.getStatus().equals(task.getStatus())) {
+            logger.info("任务已结束,无需更新任务活跃时间,taskId={}", taskId);
+            return;
+        }
+        String key = RedisKeyUtils.genTaskActiveTimeKey(taskId);
+        String value = time + "";
+        redisTemplate.opsForValue().set(key, value);
+        redisTemplate.expire(key, 30, TimeUnit.MINUTES);
+    }
+
+    /**
+     * 获取任务最近活跃时间
+     *
+     * @param taskId
+     * @return
+     */
+    public String getTaskAliveTime(Long taskId) {
+        String key = RedisKeyUtils.genTaskActiveTimeKey(taskId);
+        String lastActiveTimeStr = redisTemplate.opsForValue().get(key);
+        return lastActiveTimeStr;
     }
 
     /**

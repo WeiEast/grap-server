@@ -24,6 +24,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -147,6 +148,18 @@ public class TaskServiceTest {
         Thread.sleep(10 * 1000);
         redisTemplate.delete(key);
         System.out.println("haodone ========");
+    }
+
+    @Test
+    public void testStartTask() {
+        String appId = "QATestabcdefghQA";
+        String uniqueId = "test666";
+        try {
+            taskService.createTask(uniqueId, appId, (byte) 3, null, null, null);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        System.out.println("done===");
     }
 
 

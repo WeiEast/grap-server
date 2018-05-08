@@ -6,14 +6,13 @@ import com.datatrees.toolkits.util.http.servlet.ServletResponseUtils;
 import com.datatrees.toolkits.util.json.Jackson;
 import com.google.common.collect.Maps;
 import com.treefinance.saas.grapserver.biz.config.DiamondConfig;
+import com.treefinance.saas.grapserver.biz.service.TaskAliveService;
 import com.treefinance.saas.grapserver.common.exception.TaskTimeOutException;
 import com.treefinance.saas.grapserver.common.utils.GrapDateUtils;
-import com.treefinance.saas.grapserver.common.utils.RedisKeyUtils;
 import com.treefinance.saas.knife.result.SimpleResult;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.data.redis.core.RedisTemplate;
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
@@ -34,12 +33,11 @@ public class TaskAliveFilter extends AbstractRequestFilter {
 
     private static final Logger logger = LoggerFactory.getLogger(TaskAliveFilter.class);
     private DiamondConfig diamondConfig;
-    private RedisTemplate<String, String> redisTemplate;
+    private TaskAliveService taskAliveService;
 
-    public TaskAliveFilter(DiamondConfig diamondConfig,
-                           RedisTemplate<String, String> redisTemplate) {
+    public TaskAliveFilter(DiamondConfig diamondConfig, TaskAliveService taskAliveService) {
         this.diamondConfig = diamondConfig;
-        this.redisTemplate = redisTemplate;
+        this.taskAliveService = taskAliveService;
     }
 
     @Override
@@ -56,8 +54,7 @@ public class TaskAliveFilter extends AbstractRequestFilter {
                 taskId = Long.parseLong(taskidStr);
             }
             if (taskId > 0) {
-                String key = RedisKeyUtils.genTaskActiveTimeKey(taskId);
-                String lastActiveTimeStr = redisTemplate.opsForValue().get(key);
+                String lastActiveTimeStr = taskAliveService.getTaskAliveTime(taskId);
                 if (StringUtils.isBlank(lastActiveTimeStr)) {
                     throw new TaskTimeOutException("task finished taskId=" + taskId);
                 }
@@ -69,7 +66,7 @@ public class TaskAliveFilter extends AbstractRequestFilter {
                             + ",lastActiveTime=" + GrapDateUtils.getDateStrByDate(new Date(lastActiveTime))
                             + ",now=" + GrapDateUtils.getDateStrByDate(new Date(now)));
                 }
-                redisTemplate.opsForValue().set(key, now + "");
+                taskAliveService.updateTaskActiveTime(taskId);
             }
             filterChain.doFilter(request, response);
         } catch (TaskTimeOutException e) {

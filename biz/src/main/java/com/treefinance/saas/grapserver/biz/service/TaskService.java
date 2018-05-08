@@ -67,6 +67,8 @@ public class TaskService {
     private DiamondConfig diamondConfig;
     @Autowired
     private DirectiveService directiveService;
+    @Autowired
+    private TaskAliveService taskAliveService;
 
     /**
      * 创建任务
@@ -115,8 +117,6 @@ public class TaskService {
         }
         // 记录创建日志
         taskLogService.logCreateTask(id);
-        // 取消该用户正在进行的历史任务
-        cancelUserOldRunningTask(appId, uniqueId, bizType, id);
         return id;
     }
 
@@ -129,21 +129,21 @@ public class TaskService {
      * @param taskId
      */
     private void cancelUserOldRunningTask(String appId, String uniqueId, Byte bizType, Long taskId) {
-        Date now = new Date();
-        Date before = DateUtils.addMinutes(now, -30);
+        Date startTime = new Date();
+        Date endTime = DateUtils.addMinutes(startTime, -30);
         TaskCriteria criteria = new TaskCriteria();
         criteria.createCriteria().andBizTypeEqualTo(bizType)
                 .andUniqueIdEqualTo(uniqueId)
                 .andAppIdEqualTo(appId)
                 .andIdNotEqualTo(taskId)
-                .andCreateTimeGreaterThanOrEqualTo(before)
-                .andCreateTimeLessThan(now);
+                .andCreateTimeGreaterThanOrEqualTo(endTime)
+                .andCreateTimeLessThan(startTime);
         List<Task> taskList = taskMapper.selectByExample(criteria);
         logger.info("取消用户正在进行的历史任务,appId={},uniqueId={},bizType={},tasks={}",
                 appId, uniqueId, bizType, JSON.toJSONString(taskList));
         if (CollectionUtils.isNotEmpty(taskList)) {
             for (Task task : taskList) {
-                this.cancelTask(task.getId());
+                taskAliveService.updateTaskActiveTime(task.getId(), 0L);
             }
         }
     }

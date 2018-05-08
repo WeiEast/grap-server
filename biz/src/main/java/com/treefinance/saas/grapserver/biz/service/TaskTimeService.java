@@ -6,6 +6,7 @@ import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.treefinance.saas.assistant.model.Constants;
 import com.treefinance.saas.grapserver.biz.cache.RedisDao;
 import com.treefinance.saas.grapserver.biz.common.AsycExcutor;
 import com.treefinance.saas.grapserver.biz.config.DiamondConfig;
@@ -76,6 +77,8 @@ public class TaskTimeService {
     private DiamondConfig diamondConfig;
     @Autowired
     private RedisDao redisDao;
+    @Autowired
+    private TaskAliveService taskAliveService;
 
     /**
      * 本地任务缓存
@@ -118,93 +121,83 @@ public class TaskTimeService {
         return new Date(Long.valueOf(dateTime));
     }
 
-
     /**
-     * 处理登录后抓取任务超时
+     * 处理登录后抓取任务超时(注意区分环境)
      */
     @Scheduled(cron = "0 0/1 * * * ?")
     public void scheduleTaskTimeout() {
-        String key = prefix + "scheduling";
-        if (redisTemplate.opsForValue().setIfAbsent(key, "1")) {
-            try {
-                redisTemplate.expire(key, 1, TimeUnit.MINUTES);
-                Set<String> taskIdSet = redisTemplate.opsForSet().members(taskSetKey);
-                logger.info("scheduleTaskTimeout：running ：lock-key={}, taskid-key={}，taskIds={}", key, taskSetKey, taskIdSet);
-                if (CollectionUtils.isEmpty(taskIdSet)) {
-                    logger.info("scheduleTaskTimeout：taskIds is empty, key={}", taskSetKey);
-                    return;
-                }
-                List<AppBizType> types = appBizTypeService.getAllAppBizType();
-                Map<Byte, Integer> timeoutMap = types.stream().collect(Collectors.toMap(AppBizType::getBizType, AppBizType::getTimeout));
-
-                // 处理超时任务
-                List<Long> taskIds = taskIdSet.stream().map(id -> Long.valueOf(id)).collect(Collectors.toList());
-                for (List<Long> _taskIds : Lists.partition(taskIds, 200)) {
-
-                    TaskCriteria criteria = new TaskCriteria();
-                    criteria.createCriteria().andIdIn(_taskIds);
-                    List<Task> tasks = taskMapper.selectByExample(criteria);
-                    if (CollectionUtils.isEmpty(tasks)) {
-                        continue;
-                    }
-                    // 清除已经完成任务
-                    List<String> completedTaskIds = tasks.stream().filter(task -> !ETaskStatus.RUNNING.getStatus().equals(task.getStatus()))
-                            .map(task -> task.getId().toString()).collect(Collectors.toList());
-                    if (CollectionUtils.isNotEmpty(completedTaskIds)) {
-                        redisTemplate.opsForSet().remove(taskSetKey, completedTaskIds.toArray(new String[]{}));
-                        logger.info("scheduleTaskTimeout : task is completed : completedTaskIds={}", completedTaskIds);
-                    }
-
-                    List<String> timeoutTaskIds = Lists.newArrayList();
-                    // 计算正在运行任务是否有超时
-                    tasks.stream().filter(task -> ETaskStatus.RUNNING.getStatus().equals(task.getStatus()))
-                            .forEach(task -> {
-                                Long taskId = task.getId();
-                                if (handleTaskTimeout(task)) {
-                                    timeoutTaskIds.add(taskId.toString());
-                                }
-                            });
-                    // 清除已经处理的超时任务
-                    if (CollectionUtils.isNotEmpty(timeoutTaskIds)) {
-                        redisTemplate.opsForSet().remove(taskSetKey, timeoutTaskIds.toArray(new String[]{}));
-                        logger.info("scheduleTaskTimeout : task is timeout : timeoutTaskIds={}", timeoutTaskIds);
-                    }
-                }
-
-            } finally {
-                redisTemplate.delete(key);
+        Map<String, Object> lockMap = Maps.newHashMap();
+        String lockKey = RedisKeyUtils.genRedisLockKey("task-crawler-time-job", Constants.SAAS_ENV_VALUE);
+        try {
+            Set<String> taskIdSet = redisTemplate.opsForSet().members(taskSetKey);
+            logger.info("scheduleTaskTimeout：running ：lock-key={}, taskid-key={}，taskIds={}", lockKey, taskSetKey, JSON.toJSONString(taskIdSet));
+            if (CollectionUtils.isEmpty(taskIdSet)) {
+                logger.info("scheduleTaskTimeout：taskIds is empty, key={}", taskSetKey);
+                return;
             }
-            return;
+            // 处理超时任务
+            List<Long> taskIds = taskIdSet.stream().map(id -> Long.valueOf(id)).collect(Collectors.toList());
+            for (List<Long> _taskIds : Lists.partition(taskIds, 100)) {
+                TaskCriteria criteria = new TaskCriteria();
+                criteria.createCriteria().andIdIn(_taskIds).andSaasEnvEqualTo(Byte.parseByte(Constants.SAAS_ENV_VALUE));
+                List<Task> tasks = taskMapper.selectByExample(criteria);
+                if (CollectionUtils.isEmpty(tasks)) {
+                    continue;
+                }
+                // 清除已经完成任务
+                List<String> completedTaskIds = tasks.stream().filter(task -> !ETaskStatus.RUNNING.getStatus().equals(task.getStatus()))
+                        .map(task -> task.getId().toString()).collect(Collectors.toList());
+                if (CollectionUtils.isNotEmpty(completedTaskIds)) {
+                    redisTemplate.opsForSet().remove(taskSetKey, completedTaskIds.toArray(new String[completedTaskIds.size()]));
+                    logger.info("scheduleTaskTimeout : task is completed : completedTaskIds={}", JSON.toJSONString(completedTaskIds));
+                }
+
+                List<String> timeoutTaskIds = Lists.newArrayList();
+                // 计算正在运行任务是否有超时
+                tasks.stream().filter(task -> ETaskStatus.RUNNING.getStatus().equals(task.getStatus()))
+                        .forEach(task -> {
+                            Long taskId = task.getId();
+                            if (handleTaskTimeout(task)) {
+                                timeoutTaskIds.add(taskId.toString());
+                            }
+                        });
+                // 清除已经处理的超时任务
+                if (CollectionUtils.isNotEmpty(timeoutTaskIds)) {
+                    redisTemplate.opsForSet().remove(taskSetKey, timeoutTaskIds.toArray(new String[timeoutTaskIds.size()]));
+                    logger.info("scheduleTaskTimeout : task is timeout : timeoutTaskIds={}", JSON.toJSONString(timeoutTaskIds));
+                }
+            }
+        } finally {
+            redisDao.releaseLock(lockKey, lockMap, 60 * 1000L);
         }
-        redisTemplate.expire(key, 30, TimeUnit.SECONDS);
-        logger.info("scheduleTaskTimeout：task is running in other node : key={}", key);
     }
 
 
     /**
      * 处理任务活跃时间超时(任务10分钟不活跃则取消任务)
+     * (注意区分环境)
      */
     @Scheduled(cron = "0 0/1 * * * ?")
     public void scheduleTaskActiveTimeout() {
         Date startTime = new Date();
         Map<String, Object> lockMap = Maps.newHashMap();
-        String lockKey = RedisKeyUtils.genRedisLockKey("task-alive-time-job", GrapDateUtils.getDateStrByDate(startTime, "HH:mm"));
+        String lockKey = RedisKeyUtils.genRedisLockKey("task-alive-time-job", Constants.SAAS_ENV_VALUE, GrapDateUtils.getDateStrByDate(startTime, "HH:mm"));
         try {
             lockMap = redisDao.acquireLock(lockKey, 60 * 1000L);
             if (MapUtils.isEmpty(lockMap)) {
                 return;
             }
-            Date endTime = DateUtils.addMinutes(startTime, -30);
+            Date endTime = DateUtils.addMinutes(startTime, -60);
             TaskCriteria criteria = new TaskCriteria();
             criteria.createCriteria().andStatusEqualTo(ETaskStatus.RUNNING.getStatus())
+                    .andSaasEnvEqualTo(Byte.parseByte(Constants.SAAS_ENV_VALUE))
                     .andCreateTimeGreaterThanOrEqualTo(endTime)
                     .andCreateTimeLessThan(startTime);
 
             List<Task> taskList = taskMapper.selectByExample(criteria);
             List<Long> cancelTaskIdList = Lists.newArrayList();
             for (Task task : taskList) {
-                String key = RedisKeyUtils.genTaskActiveTimeKey(task.getId());
-                String valueStr = redisTemplate.opsForValue().get(key);
+                String valueStr = taskAliveService.getTaskAliveTime(task.getId());
                 if (StringUtils.isNotBlank(valueStr)) {
                     Long lastActiveTime = Long.parseLong(valueStr);
                     long diff = diamondConfig.getTaskMaxAliveTime();
@@ -296,11 +289,11 @@ public class TaskTimeService {
         // 任务超时: 当前时间-登录时间>超时时间
         Date currentTime = new Date();
         Date timeoutDate = DateUtils.addSeconds(loginTime, timeout);
-        logger.info("handleTaskTimeout: taskid={}，loginTime={},current={},timeout={}",
-                taskId, CommonUtils.date2Str(loginTime), CommonUtils.date2Str(currentTime), timeout);
         if (timeoutDate.after(currentTime)) {
             return false;
         }
+        logger.info("handleTaskTimeout: taskid={}，loginTime={},current={},timeout={}",
+                taskId, CommonUtils.date2Str(loginTime), CommonUtils.date2Str(currentTime), timeout);
         taskTimeoutHandlers.forEach(handler -> {
             try {
                 handler.handleTaskTimeout(taskDTO, timeout, loginTime);
