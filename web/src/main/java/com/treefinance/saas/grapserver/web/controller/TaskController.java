@@ -5,6 +5,7 @@ import com.datatrees.rawdatacentral.api.CrawlerService;
 import com.google.common.collect.Maps;
 import com.treefinance.saas.grapserver.biz.mq.model.DirectiveMessage;
 import com.treefinance.saas.grapserver.biz.service.*;
+import com.treefinance.saas.grapserver.common.enums.EBizType;
 import com.treefinance.saas.grapserver.common.enums.EDirective;
 import com.treefinance.saas.grapserver.common.enums.EOperatorCodeType;
 import com.treefinance.saas.grapserver.common.model.dto.TaskDTO;
@@ -82,6 +83,23 @@ public class TaskController {
         return new SimpleResult<>(map);
     }
 
+    /**
+     * 获取滚动消息提示或其他类型消息提示
+     *
+     * @param appId 商户appId
+     * @param type  业务类型
+     * @return
+     */
+    @RequestMapping(value = "/tips", method = {RequestMethod.POST})
+    public Object getAgreement(@RequestParam("appid") String appId, @RequestParam String type) {
+        if (StringUtils.isBlank(type)) {
+            throw new IllegalArgumentException("Parameter 'type' is incorrect.");
+        }
+        EBizType bizType = EBizType.of(type);
+        Object result = merchantConfigService.getTips(appId, bizType.getCode());
+        return new SimpleResult<>(result);
+    }
+
     @RequestMapping(value = "/agreement", method = {RequestMethod.GET, RequestMethod.POST})
     public Object getAgreement(@RequestParam String appid, @RequestParam Long taskid) {
         if (StringUtils.isBlank(appid)) {
@@ -101,6 +119,7 @@ public class TaskController {
         }
         return new SimpleResult<>(map);
     }
+
 
     /**
      * 轮询任务执行指令
@@ -176,11 +195,20 @@ public class TaskController {
         return new SimpleResult<>();
     }
 
+    /**
+     * 埋点记录
+     *
+     * @param taskId
+     * @param appId
+     * @param code
+     * @param extra
+     * @return
+     */
     @RequestMapping(value = "/bury/point/log", method = {RequestMethod.POST})
     public Object buryPointLog(@RequestParam("taskid") Long taskId,
                                @RequestParam("appid") String appId,
                                @RequestParam("code") String code,
-                               @RequestParam(value = "extra", required = false) String extra) throws Exception {
+                               @RequestParam(value = "extra", required = false) String extra) {
         logger.info("记录埋点:taskid={},appid={},code={},extra={}", taskId, appId, code, extra);
         if (taskId == null) {
             throw new ValidationException("参数taskid为空");
