@@ -80,14 +80,6 @@ public class GrapDataCallbackService {
             logger.info("{} callback failed :taskId={}, callbackConfigs of {} is null, message={}...", dataType.name(), taskId, appId, JSON.toJSONString(asycGrapDTO));
             return;
         }
-        // 2.记录日志
-        taskLogService.insert(taskId, dataType.getName() + "爬取完成", new Date(), "");
-        if (taskTimeService.isTaskTimeout(taskId)) {
-            logger.info("{} callback failed : task {} is timeout, message={}...", dataType.name(), taskId, JSON.toJSONString(asycGrapDTO));
-            taskLogService.insert(taskId, dataType.getName() + "回调通知失败", new Date(), "任务超时");
-            return;
-        }
-
         Map<String, Object> dataMap = Maps.newHashMap();
         // 填充uniqueId、taskId、taskStatus
         dataMap.put("taskId", taskDTO.getId());
