@@ -129,6 +129,10 @@ public class TaskTimeService {
         Map<String, Object> lockMap = Maps.newHashMap();
         String lockKey = RedisKeyUtils.genRedisLockKey("task-crawler-time-job", Constants.SAAS_ENV_VALUE);
         try {
+            lockMap = redisDao.acquireLock(lockKey, 60 * 1000L);
+            if (MapUtils.isEmpty(lockMap)) {
+                return;
+            }
             Set<String> taskIdSet = redisTemplate.opsForSet().members(taskSetKey);
             logger.info("scheduleTaskTimeout：running ：lock-key={}, taskid-key={}，taskIds={}", lockKey, taskSetKey, JSON.toJSONString(taskIdSet));
             if (CollectionUtils.isEmpty(taskIdSet)) {
