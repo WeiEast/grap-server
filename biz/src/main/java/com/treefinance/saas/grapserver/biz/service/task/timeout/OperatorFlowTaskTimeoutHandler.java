@@ -2,10 +2,10 @@ package com.treefinance.saas.grapserver.biz.service.task.timeout;
 
 import com.treefinance.saas.grapserver.biz.service.GrapDataCallbackService;
 import com.treefinance.saas.grapserver.biz.service.TaskCallbackLogService;
-import com.treefinance.saas.grapserver.biz.service.TaskLogService;
 import com.treefinance.saas.grapserver.biz.service.task.TaskTimeoutHandler;
 import com.treefinance.saas.grapserver.common.enums.EBizType;
 import com.treefinance.saas.grapserver.common.model.dto.AppCallbackConfigDTO;
+import com.treefinance.saas.grapserver.common.model.dto.AsycGrapDTO;
 import com.treefinance.saas.grapserver.common.model.dto.TaskDTO;
 import com.treefinance.saas.grapserver.common.utils.CommonUtils;
 import com.treefinance.saas.grapserver.dao.entity.TaskCallbackLog;
@@ -34,8 +34,6 @@ public class OperatorFlowTaskTimeoutHandler implements TaskTimeoutHandler {
     private GrapDataCallbackService grapDataCallbackService;
     @Autowired
     private TaskCallbackLogService taskCallbackLogService;
-    @Autowired
-    private TaskLogService taskLogService;
 
     @Override
     public void handleTaskTimeout(TaskDTO task, Integer timeout, Date loginTime) {
@@ -64,12 +62,18 @@ public class OperatorFlowTaskTimeoutHandler implements TaskTimeoutHandler {
         List<Long> configIds = callbackConfigs.stream().map(config -> config.getId().longValue()).collect(Collectors.toList());
         List<TaskCallbackLog> taskCallbackLogs = taskCallbackLogService.getTaskCallbackLogs(taskId, configIds);
         if (CollectionUtils.isNotEmpty(taskCallbackLogs)) {
-            logger.info("handle operator flow task timeout, has beean callback already: taskId={},timeout={},loginTime={}", taskId,
+            logger.info("handle operator flow task timeout, has been callback already: taskId={},timeout={},loginTime={}", taskId,
                     timeout, DateFormatUtils.format(loginTime, "yyyyMMdd HH:mm:ss"));
             return;
         }
-        // 4.记录超时回调日志
-        taskLogService.insert(taskId, EDataType.OPERATOR_FLOW.getName() + "回调通知失败", new Date(), "任务超时");
-
+        // 4.构建数据,发起超时回调
+        AsycGrapDTO asycGrapDTO = new AsycGrapDTO();
+        asycGrapDTO.setTaskId(taskId);
+        asycGrapDTO.setUniqueId(task.getUniqueId());
+        asycGrapDTO.setStatus(0);
+        asycGrapDTO.setErrorMsg("任务超时");
+        asycGrapDTO.setDataType(EDataType.OPERATOR_FLOW.getType().intValue());
+        asycGrapDTO.setTimestamp(new Date().getTime());
+        grapDataCallbackService.handleAyscData(asycGrapDTO);
     }
 }
