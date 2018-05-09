@@ -2,7 +2,6 @@ package com.treefinance.saas.grapserver.web.controller;
 
 import com.alibaba.fastjson.JSON;
 import com.datatrees.rawdatacentral.domain.operator.OperatorParam;
-import com.google.common.collect.Maps;
 import com.treefinance.saas.grapserver.biz.service.OperatorExtendLoginService;
 import com.treefinance.saas.grapserver.common.enums.EBizType;
 import com.treefinance.saas.knife.result.SimpleResult;
@@ -41,6 +40,7 @@ public class OperatorController {
 
     /**
      * 运营商获取配置
+     * 返回商户配置信息,运营商分组信息,以及各运营商登录配置信息
      *
      * @param appid
      * @return
@@ -58,12 +58,49 @@ public class OperatorController {
     }
 
     /**
+     * 获取商户配置与运营商分组信息
+     *
+     * @param appid  商户id
+     * @param taskId 任务id
+     * @param style  颜色风格配置
+     * @return
+     */
+    @RequestMapping(value = "/config/groups", method = {RequestMethod.POST})
+    public Object getConfigAndGroups(@RequestParam String appid,
+                                     @RequestParam("taskid") Long taskId,
+                                     @RequestParam(value = "style", required = false) String style) {
+        if (StringUtils.isBlank(appid) || taskId == null) {
+            logger.error("运营商:获取商户配置与运营商分组信息,参数缺失,appid,taskid必传,appid={},taskId={}", appid, taskId);
+            throw new IllegalArgumentException("运营商:获取配置,参数缺失,appid,taskid必传");
+        }
+        Object result = operatorExtendLoginService.getConfigAndGroups(appid, taskId, style);
+        logger.info("运营商:获取商户配置与运营商分组信息,返回结果,result={}", JSON.toJSONString(result));
+        return result;
+    }
+
+    /**
+     * 获取运营商登陆配置信息
+     *
+     * @param operatorParam
+     * @return
+     */
+    @RequestMapping(value = "/config/prelogin", method = {RequestMethod.POST})
+    public Object preLoginConfig(OperatorParam operatorParam) {
+        logger.info("运营商:获取运营商登陆配置信息,传入参数,operatorParam={}", JSON.toJSONString(operatorParam));
+        Object result = operatorExtendLoginService.preLoginConfig(operatorParam);
+        logger.info("运营商:获取运营商登陆配置信息,返回结果,operatorParam={},result={}", JSON.toJSONString(operatorParam), JSON.toJSONString(result));
+        return result;
+    }
+
+
+    /**
      * 根据输入号码查找该号码的归属地
      *
      * @param mobile
      * @return
      */
     @RequestMapping(value = "/mobile/attribution", method = {RequestMethod.POST})
+
     public Object mobileAttribution(@RequestParam("mobile") String mobile) {
         Map<String, Object> map = operatorExtendLoginService.getMobileAttribution(mobile);
         return SimpleResult.successResult(map);

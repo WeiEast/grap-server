@@ -5,7 +5,6 @@ import com.treefinance.saas.grapserver.biz.service.TaskCallbackLogService;
 import com.treefinance.saas.grapserver.biz.service.task.TaskTimeoutHandler;
 import com.treefinance.saas.grapserver.common.enums.EBizType;
 import com.treefinance.saas.grapserver.common.model.dto.AppCallbackConfigDTO;
-import com.treefinance.saas.grapserver.common.model.dto.AsycGrapDTO;
 import com.treefinance.saas.grapserver.common.model.dto.TaskDTO;
 import com.treefinance.saas.grapserver.common.utils.CommonUtils;
 import com.treefinance.saas.grapserver.dao.entity.TaskCallbackLog;

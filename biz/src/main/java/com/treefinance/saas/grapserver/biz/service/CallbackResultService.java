@@ -45,6 +45,7 @@ public class CallbackResultService {
             messageMap.put("appId", task.getAppId());
             messageMap.put("uniqueId", task.getUniqueId());
             messageMap.put("httpCode", httpCode);
+            messageMap.put("result", result);
             result = result.trim();
             if (!StringUtil.isNullOrEmpty(result) && result.startsWith("{") && result.endsWith("}")) {
                 SimpleResult simpleResult = JSON.parseObject(result, SimpleResult.class);
