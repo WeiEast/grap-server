@@ -25,7 +25,6 @@ import com.treefinance.saas.grapserver.web.filter.WebContextFilter;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.filter.CorsFilter;
@@ -70,7 +69,7 @@ public class FilterRegistry {
     public FilterRegistrationBean taskAliveFilter(DiamondConfig diamondConfig,
                                                   TaskAliveService taskAliveService) {
         TaskAliveFilter taskAliveFilter = new TaskAliveFilter(diamondConfig, taskAliveService);
-        taskAliveFilter.addExcludeUrlPatterns("/moxie/webhook/**", "/**/start/**/");
+        taskAliveFilter.addExcludeUrlPatterns("/moxie/webhook/**", "/**/start/**/", "/grap/*/data");
         FilterRegistrationBean registration = new FilterRegistrationBean();
         registration.setFilter(taskAliveFilter);
         registration.setName("taskAliveFilter");
