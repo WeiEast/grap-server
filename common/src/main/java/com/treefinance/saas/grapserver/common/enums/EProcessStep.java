@@ -7,6 +7,8 @@ package com.treefinance.saas.grapserver.common.enums;
 public enum EProcessStep {
     CREATE("create", "创建任务"),
     CONFIRM_MOBILE("confirm-mobile", "确认手机号"),
+    //淘宝h5的一键登录按钮,sdk没有这个按钮
+    ONE_CLICK_LOGIN("one-click-login", "一键登录"),
     CONFIRM_LOGIN("confirm-login", "确认登录"),
     LOGIN("login", "登录"),
     CRAWL("crawl", "抓取"),
