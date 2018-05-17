@@ -14,8 +14,10 @@ import com.treefinance.saas.grapserver.common.enums.ETaskStep;
 import com.treefinance.saas.grapserver.common.model.dto.TaskDTO;
 import com.treefinance.saas.grapserver.common.utils.DataConverterUtils;
 import com.treefinance.saas.grapserver.dao.entity.TaskAttribute;
+import com.treefinance.saas.grapserver.dao.entity.TaskBuryPointLog;
 import com.treefinance.saas.grapserver.dao.entity.TaskLog;
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -71,29 +73,51 @@ public class EcommerceMonitorService {
         if (taskLogMsgs.contains(ETaskStep.TASK_CREATE.getText())) {
             taskStepMap.put(1, new TaskStep(1, EProcessStep.CREATE.getCode(), EProcessStep.CREATE.getName()));
         }
+        //一键登录
+        String sourceType = attributeMap.get("sourceType");
+
+        if (StringUtils.equalsIgnoreCase("1", sourceType)) {
+            //来源sdk
+            //sdk没有一键登录按钮,设置一键登录按钮数量与创建任务数量一致
+            if (taskLogMsgs.contains(ETaskStep.TASK_CREATE.getText())) {
+                taskStepMap.put(2, new TaskStep(2, EProcessStep.ONE_CLICK_LOGIN.getCode(), EProcessStep.ONE_CLICK_LOGIN.getName()));
+            }
+        } else if (StringUtils.equalsIgnoreCase("2", sourceType)) {
+            //来源h5
+            // H5版本基于埋点数据，判断是否一键登录
+            List<TaskBuryPointLog> taskBuryPointLogs = taskBuryPointLogService.queryTaskBuryPointLogByCode(taskId, "100803");
+            if (CollectionUtils.isNotEmpty(taskBuryPointLogs)) {
+                taskSteps.add(new TaskStep(2, EProcessStep.ONE_CLICK_LOGIN.getCode(), EProcessStep.ONE_CLICK_LOGIN.getName()));
+            }
+        } else {
+            //其他来源
+            logger.info("send task ecommerce message to saas-monitor,存在未知任务来源sourceType={},task={}", sourceType, JSON.toJSONString(taskDTO));
+        }
+
+
         // 确认登录
         if (taskLogMsgs.contains(ETaskStep.LOGIN_SUCCESS.getText()) || taskLogMsgs.contains(ETaskStep.LOGIN_FAIL.getText())) {
-            taskStepMap.put(2, new TaskStep(2, EProcessStep.CONFIRM_LOGIN.getCode(), EProcessStep.CONFIRM_LOGIN.getName()));
+            taskStepMap.put(3, new TaskStep(3, EProcessStep.CONFIRM_LOGIN.getCode(), EProcessStep.CONFIRM_LOGIN.getName()));
         }
         //登录成功
         if (taskLogMsgs.contains(ETaskStep.LOGIN_SUCCESS.getText())) {
-            taskStepMap.put(3, new TaskStep(3, EProcessStep.LOGIN.getCode(), EProcessStep.LOGIN.getName()));
+            taskStepMap.put(4, new TaskStep(4, EProcessStep.LOGIN.getCode(), EProcessStep.LOGIN.getName()));
         }
         // 爬取成功
         if (taskLogMsgs.contains(ETaskStep.CRAWL_SUCCESS.getText())) {
-            taskStepMap.put(4, new TaskStep(4, EProcessStep.CRAWL.getCode(), EProcessStep.CRAWL.getName()));
+            taskStepMap.put(5, new TaskStep(5, EProcessStep.CRAWL.getCode(), EProcessStep.CRAWL.getName()));
         }
         // 数据保存成功
         if (taskLogMsgs.contains(ETaskStep.DATA_SAVE_SUCCESS.getText())) {
-            taskStepMap.put(5, new TaskStep(5, EProcessStep.PROCESS.getCode(), EProcessStep.PROCESS.getName()));
+            taskStepMap.put(6, new TaskStep(6, EProcessStep.PROCESS.getCode(), EProcessStep.PROCESS.getName()));
         }
         // 回调成功
         if (taskLogMsgs.contains(ETaskStep.CALLBACK_SUCCESS.getText())) {
-            taskStepMap.put(6, new TaskStep(6, EProcessStep.CALLBACK.getCode(), EProcessStep.CALLBACK.getName()));
+            taskStepMap.put(7, new TaskStep(7, EProcessStep.CALLBACK.getCode(), EProcessStep.CALLBACK.getName()));
         }
 
         //判断任务步骤是否正确或有遗漏
-        for (int i = 1; i <= 6; i++) {
+        for (int i = 1; i <= 7; i++) {
             if (!taskStepMap.keySet().contains(i)) {
                 break;
             }

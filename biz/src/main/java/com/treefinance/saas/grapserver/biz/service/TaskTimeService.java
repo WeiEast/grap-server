@@ -237,7 +237,7 @@ public class TaskTimeService {
     public void handleTaskTimeout(Long taskId) {
         Task task = taskMapper.selectByPrimaryKey(taskId);
         logger.info("handleTaskTimeout async : taskId={}, task={}", taskId, JsonUtils.toJsonString(task));
-        if (task != null) {
+        if (task != null && ETaskStatus.RUNNING.getStatus().equals(task.getStatus())) {
             asycExcutor.runAsyc(task, _task -> {
                 this.handleTaskTimeout(task);
             });

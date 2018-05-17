@@ -56,7 +56,7 @@ public class TaskAliveFilter extends AbstractRequestFilter {
             if (taskId > 0) {
                 String lastActiveTimeStr = taskAliveService.getTaskAliveTime(taskId);
                 if (StringUtils.isBlank(lastActiveTimeStr)) {
-                    throw new TaskTimeOutException("task finished taskId=" + taskId);
+                    throw new TaskTimeOutException("task canceled taskId=" + taskId);
                 }
                 Long lastActiveTime = Long.parseLong(lastActiveTimeStr);
                 Long now = System.currentTimeMillis();
