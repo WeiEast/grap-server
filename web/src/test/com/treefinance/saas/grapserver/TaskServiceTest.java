@@ -8,7 +8,9 @@ import com.treefinance.saas.grapserver.biz.common.SpringUtils;
 import com.treefinance.saas.grapserver.biz.service.AppCallbackConfigService;
 import com.treefinance.saas.grapserver.biz.service.TaskService;
 import com.treefinance.saas.grapserver.biz.service.TaskTimeService;
+import com.treefinance.saas.grapserver.biz.service.monitor.EcommerceMonitorService;
 import com.treefinance.saas.grapserver.common.model.dto.AppCallbackConfigDTO;
+import com.treefinance.saas.grapserver.common.model.dto.TaskDTO;
 import com.treefinance.saas.grapserver.facade.enums.EDataType;
 import com.treefinance.saas.grapserver.facade.model.MerchantBaseInfoRO;
 import com.treefinance.saas.grapserver.facade.model.TaskRO;
@@ -58,6 +60,8 @@ public class TaskServiceTest {
     private RedisDao redisDao;
     @Autowired
     private RedisTemplate<String, String> redisTemplate;
+    @Autowired
+    private EcommerceMonitorService ecommerceMonitorService;
 
     @Test
     public void testUpdateAccountNo() {
@@ -160,6 +164,16 @@ public class TaskServiceTest {
             e.printStackTrace();
         }
         System.out.println("done===");
+    }
+
+
+    @Test
+    public void testEcommerceMonitorService() {
+        Long taskId = 182086540305248256L;
+        TaskDTO taskDTO = new TaskDTO();
+        taskDTO.setId(taskId);
+        ecommerceMonitorService.sendMessage(taskDTO);
+        System.out.println("done====");
     }
 
 

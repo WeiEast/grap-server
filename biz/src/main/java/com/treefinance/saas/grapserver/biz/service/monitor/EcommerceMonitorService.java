@@ -87,7 +87,7 @@ public class EcommerceMonitorService {
             // H5版本基于埋点数据，判断是否一键登录
             List<TaskBuryPointLog> taskBuryPointLogs = taskBuryPointLogService.queryTaskBuryPointLogByCode(taskId, "100803");
             if (CollectionUtils.isNotEmpty(taskBuryPointLogs)) {
-                taskSteps.add(new TaskStep(2, EProcessStep.ONE_CLICK_LOGIN.getCode(), EProcessStep.ONE_CLICK_LOGIN.getName()));
+                taskStepMap.put(2, new TaskStep(2, EProcessStep.ONE_CLICK_LOGIN.getCode(), EProcessStep.ONE_CLICK_LOGIN.getName()));
             }
         } else {
             //其他来源
