@@ -97,10 +97,16 @@ public class EcommerceMonitorService {
 
         // 确认登录
         if (taskLogMsgs.contains(ETaskStep.LOGIN_SUCCESS.getText()) || taskLogMsgs.contains(ETaskStep.LOGIN_FAIL.getText())) {
+            if (StringUtils.equalsIgnoreCase("2", sourceType) && taskStepMap.get(2) == null) {//h5可能不点击一键登录按钮,直接截图通过app扫描二维码
+                taskStepMap.put(2, new TaskStep(2, EProcessStep.ONE_CLICK_LOGIN.getCode(), EProcessStep.ONE_CLICK_LOGIN.getName()));
+            }
             taskStepMap.put(3, new TaskStep(3, EProcessStep.CONFIRM_LOGIN.getCode(), EProcessStep.CONFIRM_LOGIN.getName()));
         }
         //登录成功
         if (taskLogMsgs.contains(ETaskStep.LOGIN_SUCCESS.getText())) {
+            if (StringUtils.equalsIgnoreCase("2", sourceType) && taskStepMap.get(2) == null) {//h5可能不点击一键登录按钮,直接截图通过app扫描二维码
+                taskStepMap.put(2, new TaskStep(2, EProcessStep.ONE_CLICK_LOGIN.getCode(), EProcessStep.ONE_CLICK_LOGIN.getName()));
+            }
             taskStepMap.put(4, new TaskStep(4, EProcessStep.LOGIN.getCode(), EProcessStep.LOGIN.getName()));
         }
         // 爬取成功
