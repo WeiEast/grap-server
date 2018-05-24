@@ -51,7 +51,7 @@
         <maven.build.timestamp.format>yyyyMMddHHmm</maven.build.timestamp.format>
         <grap-server.version>1.0.0-SNAPSHOT</grap-server.version>
         <assistant.version>1.0.10</assistant.version>
-        <merchant-center.version>1.0.4-SNAPSHOT</merchant-center.version>
+        <merchant-center.version>1.0.5</merchant-center.version>
         <rawdatacentral-api.version>3.1.2-SNAPSHOT</rawdatacentral-api.version>
     </properties>
 
