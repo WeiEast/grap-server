@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:reg="http://www.dangdang.com/schema/ddframe/reg"
+       xmlns:job="http://www.dangdang.com/schema/ddframe/job"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+                        http://www.springframework.org/schema/beans/spring-beans.xsd
+                        http://www.dangdang.com/schema/ddframe/reg
+                        http://www.dangdang.com/schema/ddframe/reg/reg.xsd
+                        http://www.dangdang.com/schema/ddframe/job
+                        http://www.dangdang.com/schema/ddframe/job/job.xsd
+                        ">
+    <!--配置作业注册中心 -->
+    <reg:zookeeper id="regCenter" server-lists="${dubbo.zookeeper.address}" namespace="grap-server-job"
+                   base-sleep-time-milliseconds="1000"
+                   max-sleep-time-milliseconds="3000" max-retries="3"/>
+
+
+    <job:simple id="taskActiveTimeoutJob"
+                class="com.treefinance.saas.grapserver.biz.service.elasticjob.TaskActiveTimeoutJob"
+                registry-center-ref="regCenter" cron="0 0/2 * * * ?"
+                sharding-total-count="1" overwrite="true"/>
+
+</beans>

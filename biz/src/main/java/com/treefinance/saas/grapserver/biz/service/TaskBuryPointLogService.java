@@ -33,25 +33,34 @@ public class TaskBuryPointLogService {
 
     @Scheduled(fixedRate = 1000)
     public void insert() {
-        List<TaskBuryPointLog> list = Lists.newArrayList();
-        while (!logQueue.isEmpty()) {
-            TaskBuryPointLog log = logQueue.poll();
-            if (log != null) {
-                list.add(log);
-            }
-        }
-        if (CollectionUtils.isEmpty(list)) {
-            return;
-        }
         try {
-            for (List<TaskBuryPointLog> logList : Lists.partition(list, 100)) {
-                taskBuryPointLogMapper.batchInsert(logList);
+            List<TaskBuryPointLog> list = Lists.newArrayList();
+            int i = 1;
+            while (!logQueue.isEmpty() && i <= 20) {
+                TaskBuryPointLog log = logQueue.poll();
+                if (log != null) {
+                    list.add(log);
+                }
+                i++;
             }
-            logger.info("batchInsert taskBuryPointLog: list={}", JSON.toJSONString(list));
-        } catch (Exception e) {
-            logger.error("batchInsert taskBuryPointLog error: list={}", JSON.toJSONString(list), e);
-            // 失败重新放入队列,埋点信息并不是很重要,去掉重试.
-//            logQueue.addAll(list);
+            logger.debug("batchInsert taskBuryPointLog: list={}", JSON.toJSONString(list));
+            try {
+                Thread.sleep(2 * 1000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            if (CollectionUtils.isEmpty(list)) {
+                return;
+            }
+            try {
+                taskBuryPointLogMapper.batchInsert(list);
+            } catch (Exception e) {
+                logger.error("batchInsert taskBuryPointLog error: list={}", JSON.toJSONString(list), e);
+                // 失败重新放入队列,埋点信息并不是很重要,去掉重试.
+                //            logQueue.addAll(list);
+            }
+        } finally {
+            logger.info("batchInsert taskBuryPointLog finished");
         }
 
     }

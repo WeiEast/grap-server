@@ -13,7 +13,10 @@ import com.treefinance.saas.grapserver.biz.config.DiamondConfig;
 import com.treefinance.saas.grapserver.biz.service.task.TaskTimeoutHandler;
 import com.treefinance.saas.grapserver.common.enums.ETaskStatus;
 import com.treefinance.saas.grapserver.common.model.dto.TaskDTO;
-import com.treefinance.saas.grapserver.common.utils.*;
+import com.treefinance.saas.grapserver.common.utils.CommonUtils;
+import com.treefinance.saas.grapserver.common.utils.DataConverterUtils;
+import com.treefinance.saas.grapserver.common.utils.JsonUtils;
+import com.treefinance.saas.grapserver.common.utils.RedisKeyUtils;
 import com.treefinance.saas.grapserver.dao.entity.AppBizType;
 import com.treefinance.saas.grapserver.dao.entity.Task;
 import com.treefinance.saas.grapserver.dao.entity.TaskCriteria;
@@ -176,47 +179,6 @@ public class TaskTimeService {
         }
     }
 
-
-    /**
-     * 处理任务活跃时间超时(任务10分钟不活跃则取消任务)
-     * (注意区分环境)
-     */
-    @Scheduled(cron = "0 0/1 * * * ?")
-    public void scheduleTaskActiveTimeout() {
-        Date startTime = new Date();
-        Map<String, Object> lockMap = Maps.newHashMap();
-        String lockKey = RedisKeyUtils.genRedisLockKey("task-alive-time-job", Constants.SAAS_ENV_VALUE, GrapDateUtils.getDateStrByDate(startTime, "HH:mm"));
-        try {
-            lockMap = redisDao.acquireLock(lockKey, 60 * 1000L);
-            if (MapUtils.isEmpty(lockMap)) {
-                return;
-            }
-            Date endTime = DateUtils.addMinutes(startTime, -60);
-            TaskCriteria criteria = new TaskCriteria();
-            criteria.createCriteria().andStatusEqualTo(ETaskStatus.RUNNING.getStatus())
-                    .andSaasEnvEqualTo(Byte.parseByte(Constants.SAAS_ENV_VALUE))
-                    .andCreateTimeGreaterThanOrEqualTo(endTime)
-                    .andCreateTimeLessThan(startTime);
-
-            List<Task> taskList = taskMapper.selectByExample(criteria);
-            List<Long> cancelTaskIdList = Lists.newArrayList();
-            for (Task task : taskList) {
-                String valueStr = taskAliveService.getTaskAliveTime(task.getId());
-                if (StringUtils.isNotBlank(valueStr)) {
-                    Long lastActiveTime = Long.parseLong(valueStr);
-                    long diff = diamondConfig.getTaskMaxAliveTime();
-                    if (startTime.getTime() - lastActiveTime > diff) {
-                        logger.info("任务活跃时间超时,取消任务,taskId={}", task.getId());
-                        cancelTaskIdList.add(task.getId());
-                        taskService.cancelTask(task.getId());
-                    }
-                }
-            }
-            logger.info("scheduleTaskActiveTimeout:taskIdList={}", JSON.toJSONString(cancelTaskIdList));
-        } finally {
-            redisDao.releaseLock(lockKey, lockMap, 60 * 1000L);
-        }
-    }
 
     /**
      * 获取超时时间
