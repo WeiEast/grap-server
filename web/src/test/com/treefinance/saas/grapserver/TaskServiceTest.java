@@ -3,6 +3,7 @@ package com.treefinance.saas.grapserver; /**
  */
 
 import com.alibaba.fastjson.JSON;
+import com.google.common.collect.Lists;
 import com.treefinance.saas.grapserver.biz.cache.RedisDao;
 import com.treefinance.saas.grapserver.biz.common.SpringUtils;
 import com.treefinance.saas.grapserver.biz.service.AppCallbackConfigService;
@@ -11,6 +12,7 @@ import com.treefinance.saas.grapserver.biz.service.TaskTimeService;
 import com.treefinance.saas.grapserver.biz.service.monitor.EcommerceMonitorService;
 import com.treefinance.saas.grapserver.common.model.dto.AppCallbackConfigDTO;
 import com.treefinance.saas.grapserver.common.model.dto.TaskDTO;
+import com.treefinance.saas.grapserver.dao.entity.TaskBuryPointLog;
 import com.treefinance.saas.grapserver.facade.enums.EDataType;
 import com.treefinance.saas.grapserver.facade.model.MerchantBaseInfoRO;
 import com.treefinance.saas.grapserver.facade.model.TaskRO;
@@ -30,6 +32,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -40,6 +43,9 @@ import java.util.concurrent.TimeUnit;
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringBootTest(classes = GrapServerApplication.class, webEnvironment = SpringBootTest.WebEnvironment.NONE)
 public class TaskServiceTest {
+
+    private static ConcurrentLinkedDeque<TaskBuryPointLog> staticLogQueue = new ConcurrentLinkedDeque<>();
+
     @BeforeClass
     public static void before() {
         System.out.println("start test");
@@ -174,6 +180,53 @@ public class TaskServiceTest {
         taskDTO.setId(taskId);
         ecommerceMonitorService.sendMessage(taskDTO);
         System.out.println("done====");
+    }
+
+    @Test
+    public void testCLQueue() {
+        Thread thread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                for (int i = 0; i < 1000; i++) {
+                    TaskBuryPointLog log = new TaskBuryPointLog();
+                    log.setId((long) i);
+                    staticLogQueue.offer(log);
+                    try {
+                        Thread.sleep(300);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        });
+        thread.start();
+//        ConcurrentLinkedDeque<TaskBuryPointLog> queque = new ConcurrentLinkedDeque<>();
+//        long startTime = System.currentTimeMillis();
+//        for (int i = 0; i < 600; i++) {
+//            TaskBuryPointLog log = new TaskBuryPointLog();
+//            log.setId((long) i);
+//            queque.offer(log);
+//        }
+//        System.out.println("插入耗时:time=" + (System.currentTimeMillis() - startTime));
+        try {
+            Thread.sleep(10 * 1000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        List<TaskBuryPointLog> logList = Lists.newArrayList();
+        long startTime1 = System.currentTimeMillis();
+        while (!staticLogQueue.isEmpty()) {
+            TaskBuryPointLog log = staticLogQueue.poll();
+            logList.add(log);
+        }
+        System.out.println("循环耗时:time=" + (System.currentTimeMillis() - startTime1));
+        System.out.println(JSON.toJSONString(logList));
+        try {
+            System.in.read();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
 

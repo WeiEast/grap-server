@@ -11,6 +11,8 @@
     <import resource="classpath*:spring/core.datasource.xml"/>
     <import resource="classpath*:spring/core.jedis.xml"/>
     <import resource="classpath*:spring/core.processor.xml"/>
+    <import resource="classpath*:spring/core.tools.xml"/>
+    <import resource="classpath*:spring/elastic-job.xml"/>
     <import resource="classpath*:spring/uid-worker.xml"/>
     <context:component-scan base-package="com.treefinance.saas.grapserver"/>
 

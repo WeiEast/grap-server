@@ -19,7 +19,7 @@ import java.util.concurrent.TimeUnit;
  * @author haojiahong
  * @date 2018/4/24
  */
-@Service
+@Service("taskAliveService")
 public class TaskAliveService {
     private static final Logger logger = LoggerFactory.getLogger(TaskAliveService.class);
 

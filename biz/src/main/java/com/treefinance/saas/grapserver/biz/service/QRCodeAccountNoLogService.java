@@ -30,7 +30,7 @@ public class QRCodeAccountNoLogService {
         String accountNo = null;
         try {
             accountNo = crawlerTaskService.getTaskAccountNo(taskId);
-            logger.info("记录任务accountNo:调用爬数查询任务账号信息,taskId={},accountNo={}", taskDTO, accountNo);
+            logger.info("记录任务accountNo:调用爬数查询任务账号信息,taskId={},accountNo={}", taskId, accountNo);
         } catch (Exception e) {
             logger.error("记录任务accountNo:调用爬数查询任务账号信息异常,taskId={}", taskId, e);
         }
