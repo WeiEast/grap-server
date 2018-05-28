@@ -12,7 +12,8 @@ import java.math.BigDecimal;
 import java.util.List;
 
 /**
- * Created by haojiahong on 2017/10/23.
+ * @author haojiahong
+ * @date 2017/10/23
  */
 @Configuration
 public class WebConfig extends WebMvcConfigurerAdapter {

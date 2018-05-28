@@ -30,7 +30,7 @@ public class TaskActiveTimeoutJob implements SimpleJob {
     @Autowired
     private TaskMapper taskMapper;
     @Autowired
-    private ThreadPoolTaskExecutor taskExecutor;
+    private ThreadPoolTaskExecutor threadPoolExecutor;
 
     @Override
     public void execute(ShardingContext shardingContext) {
@@ -46,7 +46,7 @@ public class TaskActiveTimeoutJob implements SimpleJob {
 
             List<Task> taskList = taskMapper.selectByExample(criteria);
             for (Task task : taskList) {
-                taskExecutor.execute(new TaskActiveTimeoutThread(task, startTime));
+                threadPoolExecutor.execute(new TaskActiveTimeoutThread(task, startTime));
             }
         } finally {
             logger.info("任务活跃时间超时定时任务执行耗时{}ms", System.currentTimeMillis() - start);
