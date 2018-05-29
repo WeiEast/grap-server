@@ -210,6 +210,7 @@ public class TaskTimeService {
             for (Task task : taskList) {
                 threadPoolExecutor.execute(new TaskActiveTimeoutThread(task, startTime));
             }
+            logger.info("处理任务活跃时间超时,taskList={}", JSON.toJSONString(taskList));
         } finally {
             redisDao.releaseLock(lockKey, lockMap, 60 * 1000L);
             logger.info("处理任务活跃时间超时,耗时{}ms", System.currentTimeMillis() - start);
