@@ -23,7 +23,7 @@ public class ThreadPoolConfig {
         //缓存队列
         int queueCapacity = 200;
         //允许的空闲时间
-        int keepAliveSeconds = 30000;
+        int keepAliveSeconds = 30;
 
         ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
         executor.setCorePoolSize(corePoolSize);

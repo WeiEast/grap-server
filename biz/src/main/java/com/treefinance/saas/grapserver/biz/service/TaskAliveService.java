@@ -83,6 +83,7 @@ public class TaskAliveService {
 
     /**
      * 删除记录任务活跃时间redisKey
+     * 注意:任务成功或者失败时不能使用此方法,因为前端轮询指令接口有可能还未获取到成功失败指令
      *
      * @param taskId
      */

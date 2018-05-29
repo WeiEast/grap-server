@@ -11,6 +11,7 @@ import com.treefinance.saas.grapserver.biz.cache.RedisDao;
 import com.treefinance.saas.grapserver.biz.common.AsycExcutor;
 import com.treefinance.saas.grapserver.biz.config.DiamondConfig;
 import com.treefinance.saas.grapserver.biz.service.task.TaskTimeoutHandler;
+import com.treefinance.saas.grapserver.biz.service.thread.TaskActiveTimeoutThread;
 import com.treefinance.saas.grapserver.common.enums.ETaskStatus;
 import com.treefinance.saas.grapserver.common.model.dto.TaskDTO;
 import com.treefinance.saas.grapserver.common.utils.CommonUtils;
@@ -31,6 +32,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
@@ -82,6 +84,8 @@ public class TaskTimeService {
     private RedisDao redisDao;
     @Autowired
     private TaskAliveService taskAliveService;
+    @Autowired
+    private ThreadPoolTaskExecutor threadPoolExecutor;
 
     /**
      * 本地任务缓存
@@ -176,6 +180,39 @@ public class TaskTimeService {
             }
         } finally {
             redisDao.releaseLock(lockKey, lockMap, 60 * 1000L);
+        }
+    }
+
+
+    /**
+     * 处理任务活跃时间超时(任务10分钟不活跃则取消任务)
+     * (注意区分环境)
+     */
+    @Scheduled(cron = "0 0/1 * * * ?")
+    public void scheduleTaskActiveTimeout() {
+        Map<String, Object> lockMap = Maps.newHashMap();
+        String lockKey = RedisKeyUtils.genRedisLockKey("task-alive-time-job", Constants.SAAS_ENV_VALUE);
+        long start = System.currentTimeMillis();
+        try {
+            Date startTime = new Date();
+            lockMap = redisDao.acquireLock(lockKey, 60 * 1000L);
+            if (MapUtils.isEmpty(lockMap)) {
+                return;
+            }
+            Date endTime = DateUtils.addMinutes(startTime, -60);
+            TaskCriteria criteria = new TaskCriteria();
+            criteria.createCriteria().andStatusEqualTo(ETaskStatus.RUNNING.getStatus())
+                    .andSaasEnvEqualTo(Byte.parseByte(Constants.SAAS_ENV_VALUE))
+                    .andCreateTimeGreaterThanOrEqualTo(endTime)
+                    .andCreateTimeLessThan(startTime);
+
+            List<Task> taskList = taskMapper.selectByExample(criteria);
+            for (Task task : taskList) {
+                threadPoolExecutor.execute(new TaskActiveTimeoutThread(task, startTime));
+            }
+        } finally {
+            redisDao.releaseLock(lockKey, lockMap, 60 * 1000L);
+            logger.info("处理任务活跃时间超时,耗时{}ms", System.currentTimeMillis() - start);
         }
     }
 

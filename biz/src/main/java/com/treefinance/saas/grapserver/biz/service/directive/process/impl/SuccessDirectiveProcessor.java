@@ -10,8 +10,6 @@ import com.treefinance.saas.grapserver.common.model.dto.TaskDTO;
 import com.treefinance.saas.grapserver.dao.entity.AppLicense;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.support.TransactionSynchronizationAdapter;
-import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import java.util.Date;
 import java.util.Map;
@@ -61,12 +59,7 @@ public class SuccessDirectiveProcessor extends AbstractDirectiveProcessor {
         String stepCode = taskService.updateTaskStatusWithStep(taskId, taskDTO.getStatus());
         taskDTO.setStepCode(stepCode);
         // 7.发送监控消息
-        TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronizationAdapter() {
-            @Override
-            public void afterCommit() {
-                monitorService.sendMonitorMessage(taskDTO);
-            }
-        });
+        monitorService.sendMonitorMessage(taskDTO);
     }
 
 }
