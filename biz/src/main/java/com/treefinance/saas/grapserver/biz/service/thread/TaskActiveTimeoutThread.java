@@ -45,17 +45,7 @@ public class TaskActiveTimeoutThread implements Runnable {
 
     @Override
     public void run() {
-        String valueStr = taskAliveService.getTaskAliveTime(task.getId());
-        if (StringUtils.isNotBlank(valueStr)) {
-            Long lastActiveTime = Long.parseLong(valueStr);
-            long diff = diamondConfig.getTaskMaxAliveTime();
-            if (startTime.getTime() - lastActiveTime > diff) {
-                this.cancelTask(task);
-            }
-        }
-    }
-
-    private void cancelTask(Task task) {
+        //保证取消任务只会执行一次
         Map<String, Object> lockMap = Maps.newHashMap();
         String lockKey = RedisKeyUtils.genRedisLockKey("task-alive-time-job-task", Constants.SAAS_ENV_VALUE, String.valueOf(task.getId()));
         try {
@@ -63,8 +53,15 @@ public class TaskActiveTimeoutThread implements Runnable {
             if (MapUtils.isEmpty(lockMap)) {
                 return;
             }
-            logger.info("任务活跃时间超时,取消任务,taskId={}", task.getId());
-            taskService.cancelTask(task.getId());
+            String valueStr = taskAliveService.getTaskAliveTime(task.getId());
+            if (StringUtils.isNotBlank(valueStr)) {
+                Long lastActiveTime = Long.parseLong(valueStr);
+                long diff = diamondConfig.getTaskMaxAliveTime();
+                if (startTime.getTime() - lastActiveTime > diff) {
+                    logger.info("任务活跃时间超时,取消任务,taskId={}", task.getId());
+                    taskService.cancelTask(task.getId());
+                }
+            }
         } finally {
             redisDao.releaseLock(lockKey, lockMap, 3 * 60 * 1000L);
         }
