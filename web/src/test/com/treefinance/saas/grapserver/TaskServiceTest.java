@@ -229,5 +229,12 @@ public class TaskServiceTest {
         }
     }
 
+    @Test
+    public void testCancelTaskTime() {
+        long start = System.currentTimeMillis();
+        taskService.cancelTask(191486227730493441L);
+        System.out.println("耗时=" + (System.currentTimeMillis() - start));
+    }
+
 
 }
