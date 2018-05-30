@@ -9,7 +9,6 @@ import com.google.common.collect.Maps;
 import com.treefinance.saas.assistant.model.Constants;
 import com.treefinance.saas.grapserver.biz.cache.RedisDao;
 import com.treefinance.saas.grapserver.biz.common.AsycExcutor;
-import com.treefinance.saas.grapserver.biz.config.DiamondConfig;
 import com.treefinance.saas.grapserver.biz.service.task.TaskTimeoutHandler;
 import com.treefinance.saas.grapserver.biz.service.thread.TaskActiveTimeoutThread;
 import com.treefinance.saas.grapserver.common.enums.ETaskStatus;
@@ -64,26 +63,16 @@ public class TaskTimeService {
 
     @Autowired
     private RedisTemplate<String, String> redisTemplate;
-
     @Autowired
     private TaskMapper taskMapper;
-
     @Autowired
     private AppBizTypeService appBizTypeService;
-
     @Autowired
     private List<TaskTimeoutHandler> taskTimeoutHandlers;
-
     @Autowired
     private AsycExcutor asycExcutor;
     @Autowired
-    private TaskService taskService;
-    @Autowired
-    private DiamondConfig diamondConfig;
-    @Autowired
     private RedisDao redisDao;
-    @Autowired
-    private TaskAliveService taskAliveService;
     @Autowired
     private ThreadPoolTaskExecutor threadPoolExecutor;
 
@@ -286,6 +275,11 @@ public class TaskTimeService {
     public boolean handleTaskTimeout(Task task) {
         Long taskId = task.getId();
         Date loginTime = getLoginTime(taskId);
+        if (loginTime == null) {
+            logger.error("handleTaskTimeout:未获取到redis中记录的登录时间,请查看具体任务情况.taskId={}", task.getId());
+            redisTemplate.opsForSet().remove(taskSetKey, task.getId().toString());
+            return false;
+        }
         Integer timeout = getTimeout(task.getBizType());
         TaskDTO taskDTO = DataConverterUtils.convert(task, TaskDTO.class);
 
