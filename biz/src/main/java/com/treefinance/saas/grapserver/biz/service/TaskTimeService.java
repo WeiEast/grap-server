@@ -200,7 +200,7 @@ public class TaskTimeService {
                 logger.info("scheduleTaskTimeout：taskIds is empty, key={}", taskSetKey);
                 return;
             }
-            // 处理超时任务
+            //得到记录的已登录成功的任务id集合
             List<Long> taskIds = taskIdSet.stream().map(id -> Long.valueOf(id)).collect(Collectors.toList());
             for (List<Long> _taskIds : Lists.partition(taskIds, 100)) {
                 TaskCriteria criteria = new TaskCriteria();
@@ -216,14 +216,16 @@ public class TaskTimeService {
                     redisTemplate.opsForSet().remove(taskSetKey, completedTaskIds.toArray(new String[completedTaskIds.size()]));
                     logger.info("scheduleTaskTimeout : task is completed : completedTaskIds={}", JSON.toJSONString(completedTaskIds));
                 }
-                // 计算正在运行任务是否有超时
-                tasks.stream().filter(task -> ETaskStatus.RUNNING.getStatus().equals(task.getStatus()))
-                        .forEach(task -> {
-                            Long taskId = task.getId();
-                            if (this.isTaskTimeout(taskId)) {
-                                this.handleTaskTimeout(taskId);
-                            }
-                        });
+                // 处理进行中任务
+                List<String> runningTaskIds = tasks.stream().filter(task -> ETaskStatus.RUNNING.getStatus().equals(task.getStatus()))
+                        .map(task -> task.getId().toString()).collect(Collectors.toList());
+                for (String taskIdStr : runningTaskIds) {
+                    Long taskId = Long.valueOf(taskIdStr);
+                    if (this.isTaskTimeout(taskId)) {
+                        //处理抓取超时任务
+                        this.handleTaskTimeout(taskId);
+                    }
+                }
             }
         } finally {
             redisDao.releaseLock(lockKey, lockMap, 60 * 1000L);
