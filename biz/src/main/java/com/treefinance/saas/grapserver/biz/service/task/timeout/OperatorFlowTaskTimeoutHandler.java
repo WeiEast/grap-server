@@ -12,7 +12,6 @@ import com.treefinance.saas.grapserver.dao.entity.TaskCallbackLog;
 import com.treefinance.saas.grapserver.facade.enums.EDataType;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.time.DateFormatUtils;
-import org.apache.commons.lang3.time.DateUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,10 +43,6 @@ public class OperatorFlowTaskTimeoutHandler implements TaskTimeoutHandler {
         Long taskId = task.getId();
         // 任务超时: 当前时间-登录时间>超时时间
         Date currentTime = new Date();
-        Date timeoutDate = DateUtils.addSeconds(loginTime, timeout);
-        if (!timeoutDate.before(currentTime)) {
-            return;
-        }
         logger.info("运营商流量：isTaskTimeout: taskid={}，loginTime={},current={},timeout={}",
                 taskId, CommonUtils.date2Str(loginTime), CommonUtils.date2Str(currentTime), timeout);
         // 2.判断此商户是否配置了运营商流量数据的回调
