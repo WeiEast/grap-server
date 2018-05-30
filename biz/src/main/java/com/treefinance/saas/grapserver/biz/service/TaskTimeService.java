@@ -241,7 +241,6 @@ public class TaskTimeService {
     public void scheduleTaskActiveTimeout() {
         Map<String, Object> lockMap = Maps.newHashMap();
         String lockKey = RedisKeyUtils.genRedisLockKey("task-alive-time-job", Constants.SAAS_ENV_VALUE);
-        long start = System.currentTimeMillis();
         try {
             Date startTime = new Date();
             lockMap = redisDao.acquireLock(lockKey, 60 * 1000L);
@@ -261,7 +260,6 @@ public class TaskTimeService {
             }
         } finally {
             redisDao.releaseLock(lockKey, lockMap, 60 * 1000L);
-            logger.info("处理任务活跃时间超时,耗时{}ms", System.currentTimeMillis() - start);
         }
     }
 

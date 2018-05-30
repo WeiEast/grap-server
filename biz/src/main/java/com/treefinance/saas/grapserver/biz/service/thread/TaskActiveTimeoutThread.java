@@ -54,14 +54,19 @@ public class TaskActiveTimeoutThread implements Runnable {
                 return;
             }
             String valueStr = taskAliveService.getTaskAliveTime(task.getId());
-            if (StringUtils.isNotBlank(valueStr)) {
-                Long lastActiveTime = Long.parseLong(valueStr);
-                long diff = diamondConfig.getTaskMaxAliveTime();
-                if (startTime.getTime() - lastActiveTime > diff) {
-                    logger.info("任务活跃时间超时,取消任务,taskId={}", task.getId());
-                    taskService.cancelTask(task.getId());
-                }
+            if (StringUtils.isBlank(valueStr)) {
+                logger.info("任务已经被取消了taskId={}", task.getId());
+                return;
             }
+
+            Long lastActiveTime = Long.parseLong(valueStr);
+            long diff = diamondConfig.getTaskMaxAliveTime();
+            if (startTime.getTime() - lastActiveTime > diff) {
+                logger.info("任务活跃时间超时,取消任务,taskId={}", task.getId());
+                taskService.cancelTask(task.getId());
+            }
+            //删除记录任务活跃时间redisKey
+            taskAliveService.deleteTaskAliveRedisKey(task.getId());
         } finally {
             redisDao.releaseLock(lockKey, lockMap, 3 * 60 * 1000L);
         }

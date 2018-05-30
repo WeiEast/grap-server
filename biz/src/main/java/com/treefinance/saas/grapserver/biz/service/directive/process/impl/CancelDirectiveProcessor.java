@@ -39,8 +39,6 @@ public class CancelDirectiveProcessor extends AbstractDirectiveProcessor {
         Map<String, String> extMap = Maps.newHashMap();
         extMap.put("reason", "user");
         crawlerService.cancel(taskDTO.getId(), extMap);
-        //删除记录任务活跃时间redisKey
-        taskAliveService.deleteTaskAliveRedisKey(taskDTO.getId());
         monitorService.sendMonitorMessage(taskDTO);
 
         // 异步触发触发回调
