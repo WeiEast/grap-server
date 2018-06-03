@@ -23,26 +23,26 @@ public class MonitorMessageSendThread implements Runnable {
 
     private static final Logger logger = LoggerFactory.getLogger(MonitorMessageSendThread.class);
 
-    private TaskDTO taskDTO;
+    private Long taskId;
     private TaskService taskService;
     private MonitorPluginService monitorPluginService;
     private OperatorMonitorService operatorMonitorService;
     private EcommerceMonitorService ecommerceMonitorService;
     private EmailMonitorService emailMonitorService;
 
-    public MonitorMessageSendThread(TaskDTO taskDTO) {
+    public MonitorMessageSendThread(Long taskId) {
         this.taskService = (TaskService) SpringUtils.getBean("taskService");
         this.monitorPluginService = (MonitorPluginService) SpringUtils.getBean("monitorPluginService");
         this.operatorMonitorService = (OperatorMonitorService) SpringUtils.getBean("operatorMonitorService");
         this.ecommerceMonitorService = (EcommerceMonitorService) SpringUtils.getBean("ecommerceMonitorService");
         this.emailMonitorService = (EmailMonitorService) SpringUtils.getBean("emailMonitorService");
-        this.taskDTO = taskDTO;
+        this.taskId = taskId;
     }
 
 
     @Override
     public void run() {
-        taskDTO = taskService.getById(taskDTO.getId());
+        TaskDTO taskDTO = taskService.getById(taskId);
         Byte status = taskDTO.getStatus();
         // 仅成功、失败、取消发送任务
         if (!ETaskStatus.SUCCESS.getStatus().equals(status)

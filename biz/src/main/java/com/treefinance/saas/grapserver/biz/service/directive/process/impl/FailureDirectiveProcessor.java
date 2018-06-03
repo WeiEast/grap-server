@@ -39,7 +39,7 @@ public class FailureDirectiveProcessor extends AbstractDirectiveProcessor {
         String errorCode = taskService.failTaskWithStep(taskDTO.getId());
         taskDTO.setStepCode(errorCode);
         // 3.发送监控消息
-        monitorService.sendMonitorMessage(taskDTO);
+        monitorService.sendMonitorMessage(taskDTO.getId());
 
         // 4.获取商户密钥
         AppLicense appLicense = appLicenseService.getAppLicense(appId);

@@ -57,7 +57,7 @@ public class MoxieSuccessDirectiveProcessor extends MoxieAbstractDirectiveProces
         taskDTO.setStepCode(stepCode);
 
         //发送监控消息
-        monitorService.sendMonitorMessage(taskDTO);
+        monitorService.sendMonitorMessage(taskDTO.getId());
 
     }
 

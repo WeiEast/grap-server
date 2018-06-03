@@ -40,7 +40,7 @@ public class TaskLicenseService {
     @Autowired
     private MerchantBaseInfoFacade merchantBaseInfoFacade;
 
-    public void verifyCreateTask(String appId, String uniqueId, EBizType bizType) throws ForbiddenException {
+    public void verifyCreateTask(String appId, String uniqueId, EBizType bizType) {
 
         String pattern = "^" + diamondConfig.getAppIdEnvironmentPrefix() + "_" + "[0-9a-zA-Z]{16}";
         String oldPattern = "[0-9a-zA-Z]{16}";//老商户是16位字符的appId

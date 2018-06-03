@@ -15,15 +15,15 @@ public class ThreadPoolConfig {
 
     @Bean
     public ThreadPoolTaskExecutor threadPoolExecutor() {
-
+        int processNumber = Runtime.getRuntime().availableProcessors();
         //线程池维护线程的最少数量
-        int corePoolSize = 10;
+        int corePoolSize = processNumber * 2;
         //线程池维护线程的最大数量
-        int maxPoolSize = 1000;
+        int maxPoolSize = processNumber * 10;
         //缓存队列
-        int queueCapacity = 200;
+        int queueCapacity = processNumber * 50;
         //允许的空闲时间
-        int keepAliveSeconds = 30;
+        int keepAliveSeconds = 60;
 
         ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
         executor.setCorePoolSize(corePoolSize);

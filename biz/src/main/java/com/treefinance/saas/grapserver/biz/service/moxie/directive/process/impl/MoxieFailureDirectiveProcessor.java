@@ -36,7 +36,7 @@ public class MoxieFailureDirectiveProcessor extends MoxieAbstractDirectiveProces
         taskDTO.setStepCode(stepCode);
 
         //发送监控消息
-        monitorService.sendMonitorMessage(taskDTO);
+        monitorService.sendMonitorMessage(taskDTO.getId());
 
         //获取商户秘钥,包装数据:任务失败后返回失败信息加密后通过指令传递给前端
         AppLicense appLicense = appLicenseService.getAppLicense(appId);

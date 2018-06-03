@@ -1,7 +1,6 @@
 package com.treefinance.saas.grapserver.web.controller;
 
 import com.treefinance.saas.grapserver.biz.service.GrapDataDowloadService;
-import com.treefinance.saas.grapserver.common.exception.ForbiddenException;
 import com.treefinance.saas.grapserver.common.model.vo.GrapDataVO;
 import com.treefinance.saas.knife.result.SimpleResult;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,7 +18,7 @@ public class GrapDataController {
     private GrapDataDowloadService grapDataDowloadService;
 
     @RequestMapping(value = {"/grap/{bizType}/data"}, method = {RequestMethod.GET})
-    public Object getData(@PathVariable("bizType") String bizType, GrapDataVO grapDataVO) throws ForbiddenException {
+    public Object getData(@PathVariable("bizType") String bizType, GrapDataVO grapDataVO) {
         return SimpleResult.successResult(grapDataDowloadService.getEncryptGrapData(grapDataVO.getAppid(), bizType, grapDataVO.getTaskId()));
     }
 }

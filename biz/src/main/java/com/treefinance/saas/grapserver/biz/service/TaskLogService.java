@@ -122,6 +122,10 @@ public class TaskLogService {
         return insert(taskId, TASK_FAIL_LOG, new Date(), null);
     }
 
+    public Long logFailTask(Long taskId, String errorMsg) {
+        return insert(taskId, TASK_FAIL_LOG, new Date(), errorMsg);
+    }
+
     public Long logSuccessTask(Long taskId) {
         return insert(taskId, TASK_SUCCESS_LOG, new Date(), null);
     }

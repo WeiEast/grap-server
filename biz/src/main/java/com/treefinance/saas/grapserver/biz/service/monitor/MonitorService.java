@@ -1,8 +1,6 @@
 package com.treefinance.saas.grapserver.biz.service.monitor;
 
-import com.alibaba.fastjson.JSON;
 import com.treefinance.saas.grapserver.biz.service.thread.MonitorMessageSendThread;
-import com.treefinance.saas.grapserver.common.model.dto.TaskDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,15 +26,15 @@ public class MonitorService {
     /**
      * 发送监控消息
      *
-     * @param taskDTO
+     * @param taskId 任务id
      */
-    public void sendMonitorMessage(TaskDTO taskDTO) {
+    public void sendMonitorMessage(Long taskId) {
         // 事务提交之后，发送消息(如果事务回滚,任务可能未更新为完成状态,不需要发送监控消息)
         TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronizationAdapter() {
             @Override
             public void afterCommit() {
-                logger.info("TransactionSynchronizationManager: afterCommit task={}", JSON.toJSONString(taskDTO));
-                threadPoolExecutor.execute(new MonitorMessageSendThread(taskDTO));
+                logger.info("TransactionSynchronizationManager: afterCommit taskId={}", taskId);
+                threadPoolExecutor.execute(new MonitorMessageSendThread(taskId));
             }
         });
     }

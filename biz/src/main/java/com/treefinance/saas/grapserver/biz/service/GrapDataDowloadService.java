@@ -6,7 +6,6 @@ import com.google.common.collect.Maps;
 import com.treefinance.saas.grapserver.biz.common.CallbackSecureHandler;
 import com.treefinance.saas.grapserver.common.enums.EBizType;
 import com.treefinance.saas.grapserver.common.enums.ETaskStatus;
-import com.treefinance.saas.grapserver.common.exception.ForbiddenException;
 import com.treefinance.saas.grapserver.common.exception.ParamsCheckException;
 import com.treefinance.saas.grapserver.common.model.dto.AppCallbackConfigDTO;
 import com.treefinance.saas.grapserver.common.model.dto.TaskDTO;
@@ -62,7 +61,7 @@ public class GrapDataDowloadService {
      * @param taskId
      * @return
      */
-    public String getEncryptGrapData(String appId, String bizType, Long taskId) throws ForbiddenException {
+    public String getEncryptGrapData(String appId, String bizType, Long taskId) {
         TaskDTO taskDTO = taskService.getById(taskId);
         if (taskDTO == null) {
             throw new ParamsCheckException("taskId不存在");
