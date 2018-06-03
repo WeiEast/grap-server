@@ -82,16 +82,54 @@ public class CarInfoService {
             return SimpleResult.failResult("车辆信息采集失败");
         }
         JSONObject result = JSON.parseObject(httpResult);
-        if (result.get("resultLog") != null && StringUtils.isNotBlank(result.get("resultLog").toString())) {
+        if (result.get("resultLog") != null
+                && StringUtils.isNotBlank(result.get("resultLog").toString())
+                && checkResultLog(result.get("resultLog").toString())) {
             processSuccessCollectTask(taskId, result.get("resultLog").toString());
             result.remove("resultLog");
             return SimpleResult.successResult(result);
+
         } else {
             logger.error("调用爬数处理车辆信息采集任务返回值中任务日志信息存在问题:taskId={},modelNum={},httpResult={},result={}",
                     taskId, modelNum, httpResult, JSON.toJSONString(result));
             processFailCollectTask(taskId, "调用爬数处理车辆信息采集任务返回值中任务日志信息存在问题");
             return SimpleResult.failResult("车辆信息采集失败");
         }
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    public void updateCollectTaskStatusAndTaskLogAndSendMonitor(Long taskId, List<CarInfoCollectTaskLogDTO> logList) {
+        for (CarInfoCollectTaskLogDTO log : logList) {
+            taskLogService.insert(taskId, log.getMsg(), log.getOccurTime(), log.getErrorMsg());
+            //任务成功
+            if (StringUtils.equalsIgnoreCase(log.getMsg(), ETaskStep.TASK_SUCCESS.getText())) {
+                taskService.updateTaskStatus(taskId, ETaskStatus.SUCCESS.getStatus());
+            }
+            //任务失败
+            if (StringUtils.equalsIgnoreCase(log.getMsg(), ETaskStep.TASK_FAIL.getText())) {
+                taskService.updateTaskStatus(taskId, ETaskStatus.FAIL.getStatus());
+            }
+        }
+        monitorService.sendMonitorMessage(taskId);
+    }
+
+
+    /**
+     * 校验调用爬数处理车辆信息采集任务返回值中任务日志信息是否存在问题
+     * 若日志列表中,没有表明任务结束的日志,则存在问题
+     *
+     * @param resultLog
+     * @return
+     */
+    private boolean checkResultLog(String resultLog) {
+        List<CarInfoCollectTaskLogDTO> logList = JSON.parseArray(resultLog, CarInfoCollectTaskLogDTO.class);
+        for (CarInfoCollectTaskLogDTO log : logList) {
+            if (StringUtils.equalsIgnoreCase(log.getMsg(), ETaskStep.TASK_SUCCESS.getText())
+                    || StringUtils.equalsIgnoreCase(log.getMsg(), ETaskStep.TASK_FAIL.getText())) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private void processFailCollectTask(Long taskId, String failMsg) {
@@ -112,21 +150,6 @@ public class CarInfoService {
         return false;
     }
 
-    @Transactional(rollbackFor = Exception.class)
-    public void updateCollectTaskStatusAndTaskLogAndSendMonitor(Long taskId, List<CarInfoCollectTaskLogDTO> logList) {
-        for (CarInfoCollectTaskLogDTO log : logList) {
-            taskLogService.insert(taskId, log.getMsg(), log.getOccurTime(), log.getErrorMsg());
-            //任务成功
-            if (StringUtils.equalsIgnoreCase(log.getMsg(), ETaskStep.TASK_SUCCESS.getText())) {
-                taskService.updateTaskStatus(taskId, ETaskStatus.SUCCESS.getStatus());
-            }
-            //任务失败
-            if (StringUtils.equalsIgnoreCase(log.getMsg(), ETaskStep.TASK_FAIL.getText())) {
-                taskService.updateTaskStatus(taskId, ETaskStatus.FAIL.getStatus());
-            }
-        }
-        monitorService.sendMonitorMessage(taskId);
-    }
 
     private class CarInfoCollectFinishThread implements Runnable {
         private Long taskId;
