@@ -26,7 +26,7 @@ public class CarInfoServiceTest {
     @Test
     public void test() throws InterruptedException {
         Long taskId = taskService.createTask("223344", "QATestabcdefghQA", (byte) 8, null, null, null);
-        carInfoService.processCollectTask(taskId, "223344");
+        carInfoService.processCollectTask(taskId, "223344", null);
         Thread.sleep(10000);
     }
 

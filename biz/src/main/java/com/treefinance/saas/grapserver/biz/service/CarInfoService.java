@@ -4,19 +4,18 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.treefinance.saas.grapserver.biz.common.SpringUtils;
 import com.treefinance.saas.grapserver.biz.service.monitor.MonitorService;
 import com.treefinance.saas.grapserver.common.enums.EBizType;
 import com.treefinance.saas.grapserver.common.enums.ETaskStatus;
 import com.treefinance.saas.grapserver.common.enums.ETaskStep;
 import com.treefinance.saas.grapserver.common.model.dto.carinfo.CarInfoCollectTaskLogDTO;
 import com.treefinance.saas.grapserver.common.utils.HttpClientUtils;
+import com.treefinance.saas.grapserver.dao.entity.AppLicense;
 import com.treefinance.saas.knife.result.SimpleResult;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -43,9 +42,9 @@ public class CarInfoService {
     @Autowired
     private TaskLogService taskLogService;
     @Autowired
-    private ThreadPoolTaskExecutor threadPoolExecutor;
-    @Autowired
     private MonitorService monitorService;
+    @Autowired
+    private AppLicenseService appLicenseService;
 
     /**
      * 创建车辆信息采集任务
@@ -64,11 +63,12 @@ public class CarInfoService {
     /**
      * 调用爬数处理车辆信息采集任务,并更新任务状态记录任务日志,并发送任务监控信息
      *
-     * @param taskId
-     * @param modelNum
+     * @param taskId   任务id
+     * @param appId    商户id
+     * @param modelNum 车型编码
      * @return
      */
-    public Object processCollectTask(Long taskId, String modelNum) {
+    public Object processCollectTask(Long taskId, String appId, String modelNum) {
         String url = "";
         logger.info("调用爬数处理车辆信息采集任务传入参数:taskId={},modelNum={}", taskId, modelNum);
         Map<String, Object> map = Maps.newHashMap();
@@ -87,7 +87,8 @@ public class CarInfoService {
                 && checkResultLog(result.get("resultLog").toString())) {
             processSuccessCollectTask(taskId, result.get("resultLog").toString());
             result.remove("resultLog");
-            return SimpleResult.successResult(result);
+            AppLicense license = appLicenseService.getAppLicense(appId);
+            return SimpleResult.successEncryptByRSAResult(result, license.getServerPublicKey());
 
         } else {
             logger.error("调用爬数处理车辆信息采集任务返回值中任务日志信息存在问题:taskId={},modelNum={},httpResult={},result={}",
@@ -136,12 +137,12 @@ public class CarInfoService {
         List<CarInfoCollectTaskLogDTO> carInfoCollectTaskLogDTOList = Lists.newArrayList();
         carInfoCollectTaskLogDTOList.add(new CarInfoCollectTaskLogDTO(ETaskStep.CRAWL_FAIL.getText(), failMsg, new Date()));
         carInfoCollectTaskLogDTOList.add(new CarInfoCollectTaskLogDTO(ETaskStep.TASK_FAIL.getText(), null, new Date()));
-        threadPoolExecutor.execute(new CarInfoCollectFinishThread(taskId, carInfoCollectTaskLogDTOList));
+        this.updateCollectTaskStatusAndTaskLogAndSendMonitor(taskId, carInfoCollectTaskLogDTOList);
     }
 
     private Boolean processSuccessCollectTask(Long taskId, String resultLog) {
         List<CarInfoCollectTaskLogDTO> logList = JSON.parseArray(resultLog, CarInfoCollectTaskLogDTO.class);
-        threadPoolExecutor.execute(new CarInfoCollectFinishThread(taskId, logList));
+        this.updateCollectTaskStatusAndTaskLogAndSendMonitor(taskId, logList);
         for (CarInfoCollectTaskLogDTO log : logList) {
             if (StringUtils.equalsIgnoreCase(log.getMsg(), ETaskStep.TASK_SUCCESS.getText())) {
                 return true;
@@ -150,22 +151,5 @@ public class CarInfoService {
         return false;
     }
 
-
-    private class CarInfoCollectFinishThread implements Runnable {
-        private Long taskId;
-        private List<CarInfoCollectTaskLogDTO> logList;
-        private CarInfoService carInfoService;
-
-        public CarInfoCollectFinishThread(Long taskId, List<CarInfoCollectTaskLogDTO> logList) {
-            this.carInfoService = (CarInfoService) SpringUtils.getBean("carInfoService");
-            this.taskId = taskId;
-            this.logList = logList;
-        }
-
-        @Override
-        public void run() {
-            carInfoService.updateCollectTaskStatusAndTaskLogAndSendMonitor(taskId, logList);
-        }
-    }
 
 }

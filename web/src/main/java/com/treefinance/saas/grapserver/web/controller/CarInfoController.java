@@ -42,7 +42,7 @@ public class CarInfoController {
             throw new BizException("车型编码不能为空");
         }
         Long taskId = carInfoService.startCollectTask(appId, modelNum);
-        Object result = carInfoService.processCollectTask(taskId, modelNum);
+        Object result = carInfoService.processCollectTask(taskId, appId, modelNum);
         logger.info("车辆信息采集,返回结果:result={},taskId={},appid={},modelNum={}",
                 JSON.toJSONString(result), taskId, appId, modelNum);
         return result;
