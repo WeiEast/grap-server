@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
  * @date 2018/5/31
  */
 @RestController
-@RequestMapping(value = {"/car_info", "/h5/car_info", "/grap/h5/car_info", "/grap/car_info"})
+@RequestMapping(value = {"/car_info", "/grap/car_info"})
 public class CarInfoController {
 
     private static final Logger logger = LoggerFactory.getLogger(CarInfoController.class);
