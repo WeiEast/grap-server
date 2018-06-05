@@ -18,7 +18,6 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 @EnableAsync
 @EnableMonitorPlugin
 @EnableVariableNotifyListener
-@EnableTransactionManagement(mode = AdviceMode.ASPECTJ)
 public class GrapServerApplication {
 
     public static void main(String[] args) {
