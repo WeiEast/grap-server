@@ -129,6 +129,7 @@ public class GlobalExceptionAdvice extends ResponseEntityExceptionHandler {
     private Object buildBody(Exception ex) {
         logger.error("系统异常", ex);
         SimpleResult result = new SimpleResult();
+        result.setSuccess(false);
         if (ex instanceof ForbiddenException) {
             Map map = Maps.newHashMap();
             map.put("mark", 0);

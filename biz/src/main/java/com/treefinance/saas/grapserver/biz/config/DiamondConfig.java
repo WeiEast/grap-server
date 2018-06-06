@@ -76,6 +76,10 @@ public class DiamondConfig {
     @DAttribute(key = "task.max.alive.time")
     private Integer taskMaxAliveTime;
 
+    @DAttribute(key = "crawler.url.car.info.collect")
+    private String crawlerUrlCarInfoCollect;
+
+
     @BeforeUpdate
     public void before(String key, Object newValue) {
         logger.info(key + " update to " + newValue + " start...");
@@ -238,5 +242,13 @@ public class DiamondConfig {
 
     public void setTaskMaxAliveTime(Integer taskMaxAliveTime) {
         this.taskMaxAliveTime = taskMaxAliveTime;
+    }
+
+    public String getCrawlerUrlCarInfoCollect() {
+        return crawlerUrlCarInfoCollect;
+    }
+
+    public void setCrawlerUrlCarInfoCollect(String crawlerUrlCarInfoCollect) {
+        this.crawlerUrlCarInfoCollect = crawlerUrlCarInfoCollect;
     }
 }

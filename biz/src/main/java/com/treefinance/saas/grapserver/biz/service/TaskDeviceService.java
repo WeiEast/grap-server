@@ -14,14 +14,12 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
 
 /**
  * Created by luoyihua on 2017/5/2.
@@ -32,25 +30,24 @@ public class TaskDeviceService {
 
     @Autowired
     private TaskDeviceMapper taskDeviceMapper;
-    private ThreadPoolExecutor executor;
     @Autowired
     private GeocodeService geocodeService;
     @Autowired
     private IpLocationService ipLocationService;
+    @Autowired
+    private ThreadPoolTaskExecutor threadPoolExecutor;
     private Map<String, String> geoCoordSysTypeMap = Maps.newHashMap();
+
 
     @PostConstruct
     public void init() {
-        int processNumber = Runtime.getRuntime().availableProcessors();
-        executor = new ThreadPoolExecutor(processNumber * 2, processNumber * 10, 60, TimeUnit.SECONDS,
-                new ArrayBlockingQueue(processNumber * 50), new ThreadPoolExecutor.CallerRunsPolicy());
         geoCoordSysTypeMap.put("bd09ll", "BD_09_LL");
         geoCoordSysTypeMap.put("gcj02ll", "GCJ_02_LL");
         geoCoordSysTypeMap.put("wgs84ll", "WGS_84_LL");
     }
 
     public void create(String deviceInfo, String ipAddress, String coorType, Long taskId) {
-        executor.execute(new Runnable() {
+        threadPoolExecutor.execute(new Runnable() {
             @Override
             public void run() {
                 logger.info("taskId={}, ipAddress={}, coorType={}, deviceInfo==>{}", taskId, ipAddress, coorType, deviceInfo);

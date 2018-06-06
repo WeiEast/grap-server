@@ -59,7 +59,7 @@ public class SuccessDirectiveProcessor extends AbstractDirectiveProcessor {
         String stepCode = taskService.updateTaskStatusWithStep(taskId, taskDTO.getStatus());
         taskDTO.setStepCode(stepCode);
         // 7.发送监控消息
-        monitorService.sendMonitorMessage(taskDTO);
+        monitorService.sendMonitorMessage(taskDTO.getId());
     }
 
 }

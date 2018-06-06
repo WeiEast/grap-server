@@ -160,18 +160,6 @@ public class TaskServiceTest {
         System.out.println("haodone ========");
     }
 
-    @Test
-    public void testStartTask() {
-        String appId = "QATestabcdefghQA";
-        String uniqueId = "test666";
-        try {
-            taskService.createTask(uniqueId, appId, (byte) 3, null, null, null);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        System.out.println("done===");
-    }
-
 
     @Test
     public void testEcommerceMonitorService() {

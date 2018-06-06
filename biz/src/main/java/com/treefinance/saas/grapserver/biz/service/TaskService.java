@@ -1,7 +1,7 @@
 package com.treefinance.saas.grapserver.biz.service;
 
 import com.alibaba.fastjson.JSON;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.alibaba.fastjson.JSONObject;
 import com.google.common.base.Splitter;
 import com.treefinance.basicservice.security.crypto.facade.EncryptionIntensityEnum;
 import com.treefinance.basicservice.security.crypto.facade.ISecurityCryptoService;
@@ -12,6 +12,8 @@ import com.treefinance.saas.grapserver.biz.service.directive.DirectiveService;
 import com.treefinance.saas.grapserver.common.enums.EDirective;
 import com.treefinance.saas.grapserver.common.enums.ETaskStatus;
 import com.treefinance.saas.grapserver.common.enums.ETaskStep;
+import com.treefinance.saas.grapserver.common.exception.AppIdUncheckException;
+import com.treefinance.saas.grapserver.common.exception.ForbiddenException;
 import com.treefinance.saas.grapserver.common.exception.base.MarkBaseException;
 import com.treefinance.saas.grapserver.common.model.dto.DirectiveDTO;
 import com.treefinance.saas.grapserver.common.model.dto.TaskDTO;
@@ -22,10 +24,8 @@ import com.treefinance.saas.grapserver.dao.entity.TaskCriteria;
 import com.treefinance.saas.grapserver.dao.entity.TaskLog;
 import com.treefinance.saas.grapserver.dao.mapper.TaskMapper;
 import com.treefinance.saas.grapserver.facade.enums.ETaskAttribute;
-import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.time.DateUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,7 +36,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.validation.ValidationException;
 import java.io.IOException;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -67,8 +66,6 @@ public class TaskService {
     private DiamondConfig diamondConfig;
     @Autowired
     private DirectiveService directiveService;
-    @Autowired
-    private TaskAliveService taskAliveService;
 
     /**
      * 创建任务
@@ -76,13 +73,21 @@ public class TaskService {
      * @param uniqueId
      * @param appId
      * @param bizType
-     * @param extra    @return
+     * @param extra
      * @param website
+     * @param source
      * @return
      * @throws IOException
      */
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
-    public Long createTask(String uniqueId, String appId, Byte bizType, String extra, String website, String source) throws IOException {
+    public Long createTask(String uniqueId, String appId, Byte bizType, String extra, String website, String source) {
+        if (StringUtils.isBlank(appId)) {
+            throw new AppIdUncheckException("appId非法");
+        }
+        if (bizType == null) {
+            logger.error("创建任务时传入的bizType为null");
+            throw new ForbiddenException("无操作权限");
+        }
         // 校验uniqueId
         String excludeAppId = diamondConfig.getExcludeAppId();
         if (StringUtils.isNotEmpty(excludeAppId)) {
@@ -93,6 +98,7 @@ public class TaskService {
         } else {
             checkUniqueId(uniqueId, appId, bizType);
         }
+
         long id = UidGenerator.getId();
         Task task = new Task();
         task.setUniqueId(uniqueId);
@@ -106,10 +112,9 @@ public class TaskService {
         task.setSaasEnv(Byte.valueOf(Constants.SAAS_ENV_VALUE));
         taskMapper.insertSelective(task);
         if (StringUtils.isNotBlank(extra)) {
-            ObjectMapper objectMapper = new ObjectMapper();
-            Map map = objectMapper.readValue(extra, Map.class);
-            if (MapUtils.isNotEmpty(map)) {
-                setAttribute(id, map);
+            JSONObject jsonObject = JSON.parseObject(extra);
+            if (MapUtils.isNotEmpty(jsonObject)) {
+                setAttribute(id, jsonObject);
             }
         }
         if (StringUtils.isNotEmpty(source)) {
@@ -118,34 +123,6 @@ public class TaskService {
         // 记录创建日志
         taskLogService.logCreateTask(id);
         return id;
-    }
-
-    /**
-     * 取消用户正在进行的历史任务
-     *
-     * @param appId
-     * @param uniqueId
-     * @param bizType
-     * @param taskId
-     */
-    private void cancelUserOldRunningTask(String appId, String uniqueId, Byte bizType, Long taskId) {
-        Date startTime = new Date();
-        Date endTime = DateUtils.addMinutes(startTime, -30);
-        TaskCriteria criteria = new TaskCriteria();
-        criteria.createCriteria().andBizTypeEqualTo(bizType)
-                .andUniqueIdEqualTo(uniqueId)
-                .andAppIdEqualTo(appId)
-                .andIdNotEqualTo(taskId)
-                .andCreateTimeGreaterThanOrEqualTo(endTime)
-                .andCreateTimeLessThan(startTime);
-        List<Task> taskList = taskMapper.selectByExample(criteria);
-        logger.info("取消用户正在进行的历史任务,appId={},uniqueId={},bizType={},tasks={}",
-                appId, uniqueId, bizType, JSON.toJSONString(taskList));
-        if (CollectionUtils.isNotEmpty(taskList)) {
-            for (Task task : taskList) {
-                taskAliveService.updateTaskActiveTime(task.getId(), 0L);
-            }
-        }
     }
 
     /**

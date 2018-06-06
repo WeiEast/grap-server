@@ -41,7 +41,7 @@ public class CancelDirectiveProcessor extends AbstractDirectiveProcessor {
         crawlerService.cancel(taskDTO.getId(), extMap);
         //删除记录任务活跃时间redisKey
         taskAliveService.deleteTaskAliveRedisKey(taskDTO.getId());
-        monitorService.sendMonitorMessage(taskDTO);
+        monitorService.sendMonitorMessage(taskDTO.getId());
 
         // 异步触发触发回调
         asycExcutor.runAsyc(directiveDTO, _directiveDTO -> callback(_directiveDTO));

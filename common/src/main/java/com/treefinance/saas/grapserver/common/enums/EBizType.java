@@ -11,7 +11,8 @@ public enum EBizType {
     ECOMMERCE("ECOMMERCE", (byte) 2),
     OPERATOR("OPERATOR", (byte) 3),
     FUND("FUND", (byte) 4),
-    DIPLOMA("DIPLOMA", (byte) 7);
+    DIPLOMA("DIPLOMA", (byte) 7),
+    CAR_INFO("CAR_INFO", (byte) 9),;
 
     private String text;
     private Byte code;
@@ -52,8 +53,7 @@ public enum EBizType {
         if (Objects.nonNull(code)) {
             for (EBizType item : EBizType.values()) {
                 if (code.equals(item.getCode())) {
-                    return
-                            item.getText();
+                    return item.getText();
                 }
             }
         }
@@ -86,18 +86,4 @@ public enum EBizType {
         return null;
     }
 
-    /**
-     * 根据编码获取
-     *
-     * @param code
-     * @return
-     */
-    public static EBizType getByCode(Byte code) {
-        for (EBizType item : EBizType.values()) {
-            if (item != EMAIL_H5 && item.code.equals(code)) {
-                return item;
-            }
-        }
-        return null;
-    }
 }

@@ -8,8 +8,7 @@ import com.treefinance.saas.grapserver.biz.service.TaskDeviceService;
 import com.treefinance.saas.grapserver.biz.service.TaskLicenseService;
 import com.treefinance.saas.grapserver.biz.service.TaskService;
 import com.treefinance.saas.grapserver.common.enums.EBizType;
-import com.treefinance.saas.grapserver.common.exception.CrawlerBizException;
-import com.treefinance.saas.grapserver.common.exception.ForbiddenException;
+import com.treefinance.saas.grapserver.common.exception.BizException;
 import com.treefinance.saas.grapserver.common.model.Constants;
 import com.treefinance.saas.grapserver.common.utils.IpUtils;
 import com.treefinance.saas.grapserver.common.utils.RedisKeyUtils;
@@ -24,7 +23,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
-import java.io.IOException;
 import java.util.Map;
 
 /**
@@ -58,9 +56,10 @@ public class StartController {
      * @param extra
      * @param source
      * @param bizType
+     * @param style
+     * @param website
      * @param request
      * @return
-     * @throws ForbiddenException
      */
     @RequestMapping(value = "/start", method = {RequestMethod.POST})
     public Object start(@RequestParam("appid") String appid,
@@ -72,8 +71,7 @@ public class StartController {
                         @RequestParam(name = "bizType", required = false) String bizType,
                         @RequestParam(name = "style", required = false) String style,
                         @RequestParam(name = "website", required = false) String website,
-                        HttpServletRequest request) throws ForbiddenException, IOException {
-
+                        HttpServletRequest request) {
         if (StringUtils.isEmpty(bizType)) {
             bizType = (String) request.getAttribute("bizType");
         }
@@ -95,7 +93,7 @@ public class StartController {
                 taskDeviceService.create(deviceInfo, ipAddress, coorType, taskId);
                 return new SimpleResult<>(map);
             }
-            throw new CrawlerBizException(Constants.REDIS_LOCK_ERROR_MSG);
+            throw new BizException(Constants.REDIS_LOCK_ERROR_MSG);
 
         } finally {
             redisDao.releaseLock(key, lockMap, 60 * 1000L);
