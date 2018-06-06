@@ -78,21 +78,25 @@ public class CarInfoService {
         map.put("modelNum", modelNum);
         String httpResult;
         try {
-            httpResult = HttpClientUtils.doPost(url, map);
+            httpResult = HttpClientUtils.doPostWithTimoutAndRetryTimes(url, (byte) 60, (byte) 0, map);
         } catch (Exception e) {
             logger.error("调用爬数处理车辆信息采集任务异常:taskId={},modelNum={}", taskId, modelNum, e);
             processFailCollectTask(taskId, "调用爬数处理车辆信息采集任务异常");
             return SimpleResult.failResult("车辆信息采集失败");
         }
         JSONObject result = JSON.parseObject(httpResult);
-        if (result.get("resultLog") != null
-                && StringUtils.isNotBlank(result.get("resultLog").toString())
-                && checkResultLog(result.get("resultLog").toString())) {
-            processSuccessCollectTask(taskId, result.get("resultLog").toString());
-            result.remove("resultLog");
-            AppLicense license = appLicenseService.getAppLicense(appId);
-            return SimpleResult.successEncryptByRSAResult(result, license.getServerPublicKey());
-
+        JSONObject resultData = JSON.parseObject(result.get("data").toString());
+        if (resultData.get("resultLog") != null
+                && StringUtils.isNotBlank(resultData.get("resultLog").toString())
+                && checkResultLog(resultData.get("resultLog").toString())) {
+            boolean flag = processSuccessCollectTask(taskId, resultData.get("resultLog").toString());
+            if (flag) {
+                resultData.remove("resultLog");
+                AppLicense license = appLicenseService.getAppLicense(appId);
+                return SimpleResult.successEncryptByRSAResult(resultData, license.getServerPublicKey());
+            } else {
+                return SimpleResult.failResult("车辆信息采集失败");
+            }
         } else {
             logger.error("调用爬数处理车辆信息采集任务返回值中任务日志信息存在问题:taskId={},modelNum={},httpResult={},result={}",
                     taskId, modelNum, httpResult, JSON.toJSONString(result));

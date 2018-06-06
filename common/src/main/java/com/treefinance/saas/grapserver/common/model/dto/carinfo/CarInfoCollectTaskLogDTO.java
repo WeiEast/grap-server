@@ -16,6 +16,10 @@ public class CarInfoCollectTaskLogDTO implements Serializable {
     private String errorMsg;
 
 
+    public CarInfoCollectTaskLogDTO() {
+
+    }
+
     public CarInfoCollectTaskLogDTO(String msg, String errorMsg, Date occurTime) {
         this.msg = msg;
         this.errorMsg = errorMsg;

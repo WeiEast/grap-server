@@ -375,15 +375,6 @@ public class HttpClientUtils {
         }
         try {
             httpPost.setConfig(getConfigWithTimeOut(timeOut * 1000));
-//            List<NameValuePair> pairList = new ArrayList<>(params.size());
-//            for (Map.Entry<String, Object> entry : params.entrySet()) {
-//                NameValuePair pair = new BasicNameValuePair(entry.getKey(), entry
-//                        .getValue().toString());
-//                pairList.add(pair);
-//            }
-//            httpPost.setEntity(new UrlEncodedFormEntity(pairList, Charset.forName("UTF-8")));
-
-
             StringEntity stringEntity = new StringEntity(paramsBf.toString(), "UTF-8");
             stringEntity.setContentType("application/x-www-form-urlencoded");
 
@@ -399,12 +390,13 @@ public class HttpClientUtils {
                 throw new RequestFailedException(url, statusCode, result);
             }
         } catch (IOException e) {
-            logger.error("doPost exception: url={}, statusCode={} ,result={}", url, statusCode, result, e);
+            logger.error("doPostWithTimoutAndRetryTimes exception: url={},timeout={}s,retryTimes={},params={},statusCode={},result={}",
+                    url, timeOut, retryTimes, JSON.toJSONString(params), statusCode, result, e);
             throw new RequestFailedException(url, statusCode, result, e);
         } finally {
             if (logger.isInfoEnabled()) {
-                logger.info(" doPost completed: url={}, statusCode={} ,result={}, cost {} ms ",
-                        url, statusCode, result, (System.currentTimeMillis() - start));
+                logger.info(" doPostWithTimoutAndRetryTimes completed: url={},timeout={}s,retryTimes={},params={},statusCode={},result={},cost {} ms ",
+                        url, timeOut, retryTimes, JSON.toJSONString(params), statusCode, result, (System.currentTimeMillis() - start));
             }
             closeResponse(response);
         }
