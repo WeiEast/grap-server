@@ -177,7 +177,7 @@ public class TaskTimeService {
      * @param taskId
      */
     public void handleTaskTimeout(Long taskId) {
-        logger.info("任务抓取超时异步处理:taskId={},taskTimeoutHandlers={}", taskId, JSON.toJSONString(taskTimeoutHandlers));
+        logger.info("任务抓取超时异步处理:taskId={}", taskId);
         threadPoolExecutor.execute(new TaskCrawlerTimeoutThread(taskId, taskTimeoutHandlers));
     }
 
