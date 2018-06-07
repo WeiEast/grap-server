@@ -3,7 +3,6 @@ package com.treefinance.saas.grapserver.biz.service.directive.process.impl;
 import com.datatrees.rawdatacentral.api.CrawlerService;
 import com.google.common.collect.Maps;
 import com.treefinance.saas.grapserver.biz.common.AsycExcutor;
-import com.treefinance.saas.grapserver.biz.service.TaskAliveService;
 import com.treefinance.saas.grapserver.biz.service.directive.process.AbstractDirectiveProcessor;
 import com.treefinance.saas.grapserver.biz.service.monitor.MonitorService;
 import com.treefinance.saas.grapserver.common.enums.EDirective;
@@ -27,8 +26,6 @@ public class CancelDirectiveProcessor extends AbstractDirectiveProcessor {
     private AsycExcutor asycExcutor;
     @Autowired
     private CrawlerService crawlerService;
-    @Autowired
-    private TaskAliveService taskAliveService;
 
     @Override
     protected void doProcess(EDirective directive, DirectiveDTO directiveDTO) {
@@ -39,7 +36,7 @@ public class CancelDirectiveProcessor extends AbstractDirectiveProcessor {
         Map<String, String> extMap = Maps.newHashMap();
         extMap.put("reason", "user");
         crawlerService.cancel(taskDTO.getId(), extMap);
-        monitorService.sendMonitorMessage(taskDTO);
+        monitorService.sendMonitorMessage(taskDTO.getId());
 
         // 异步触发触发回调
         asycExcutor.runAsyc(directiveDTO, _directiveDTO -> callback(_directiveDTO));

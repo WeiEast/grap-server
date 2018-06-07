@@ -2,6 +2,7 @@ package com.treefinance.saas.grapserver.biz.service;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson.serializer.SerializerFeature;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.treefinance.saas.grapserver.biz.config.DiamondConfig;
@@ -85,10 +86,11 @@ public class CarInfoService {
             return SimpleResult.failResult("车辆信息采集失败");
         }
         JSONObject result = JSON.parseObject(httpResult);
-        JSONObject resultData = JSON.parseObject(result.get("data").toString());
+        JSONObject resultData = JSON.parseObject(JSON.toJSONString(result.get("data"), SerializerFeature.WriteMapNullValue));
         if (resultData.get("resultLog") != null
                 && StringUtils.isNotBlank(resultData.get("resultLog").toString())
                 && checkResultLog(resultData.get("resultLog").toString())) {
+            processSuccessCollectTask(taskId, resultData.get("resultLog").toString());
             resultData.remove("resultLog");
             AppLicense license = appLicenseService.getAppLicense(appId);
             return SimpleResult.successEncryptByRSAResult(resultData, license.getServerPublicKey());
