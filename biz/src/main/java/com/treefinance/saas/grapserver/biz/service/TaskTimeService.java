@@ -8,15 +8,12 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.treefinance.saas.assistant.model.Constants;
 import com.treefinance.saas.grapserver.biz.cache.RedisDao;
-import com.treefinance.saas.grapserver.biz.common.AsycExcutor;
-import com.treefinance.saas.grapserver.biz.config.DiamondConfig;
 import com.treefinance.saas.grapserver.biz.service.task.TaskTimeoutHandler;
 import com.treefinance.saas.grapserver.biz.service.thread.TaskActiveTimeoutThread;
+import com.treefinance.saas.grapserver.biz.service.thread.TaskCrawlerTimeoutThread;
 import com.treefinance.saas.grapserver.common.enums.ETaskStatus;
-import com.treefinance.saas.grapserver.common.model.dto.TaskDTO;
 import com.treefinance.saas.grapserver.common.utils.CommonUtils;
-import com.treefinance.saas.grapserver.common.utils.DataConverterUtils;
-import com.treefinance.saas.grapserver.common.utils.JsonUtils;
+import com.treefinance.saas.grapserver.common.utils.GrapDateUtils;
 import com.treefinance.saas.grapserver.common.utils.RedisKeyUtils;
 import com.treefinance.saas.grapserver.dao.entity.AppBizType;
 import com.treefinance.saas.grapserver.dao.entity.Task;
@@ -25,7 +22,6 @@ import com.treefinance.saas.grapserver.dao.mapper.TaskMapper;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.time.DateFormatUtils;
 import org.apache.commons.lang3.time.DateUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -53,37 +49,17 @@ public class TaskTimeService {
      * logger
      */
     private static final Logger logger = LoggerFactory.getLogger(TaskTimeService.class);
-    /**
-     * prefix
-     */
-    private final String prefix = "saas_gateway_task_time:";
-    /**
-     * taskIds
-     */
-    private final String taskSetKey = prefix + "login-taskids";
 
     @Autowired
     private RedisTemplate<String, String> redisTemplate;
-
     @Autowired
     private TaskMapper taskMapper;
-
     @Autowired
     private AppBizTypeService appBizTypeService;
-
     @Autowired
     private List<TaskTimeoutHandler> taskTimeoutHandlers;
-
-    @Autowired
-    private AsycExcutor asycExcutor;
-    @Autowired
-    private TaskService taskService;
-    @Autowired
-    private DiamondConfig diamondConfig;
     @Autowired
     private RedisDao redisDao;
-    @Autowired
-    private TaskAliveService taskAliveService;
     @Autowired
     private ThreadPoolTaskExecutor threadPoolExecutor;
 
@@ -106,11 +82,11 @@ public class TaskTimeService {
         if (taskId == null || date == null) {
             return;
         }
-        String key = prefix + taskId;
+        String key = RedisKeyUtils.genTaskLoginTimeKey(taskId);
         redisTemplate.opsForValue().set(key, String.valueOf(date.getTime()), 1, TimeUnit.HOURS);
-
-        redisTemplate.opsForSet().add(taskSetKey, taskId + "");
-        logger.info("updateLoginTime : taskId={}  key={}, value={}", taskId, key, DateFormatUtils.format(date, DateFormatUtils.ISO_DATETIME_FORMAT.getPattern()));
+        redisTemplate.opsForSet().add(RedisKeyUtils.genLoginedTaskSetKey(), taskId + "");
+        logger.info("记录任务登录时间:taskId={},key={},value={}", taskId, key,
+                GrapDateUtils.getDateStrByDate(date));
     }
 
     /**
@@ -120,12 +96,89 @@ public class TaskTimeService {
      * @return
      */
     public Date getLoginTime(Long taskId) {
-        String key = prefix + taskId;
+        String key = RedisKeyUtils.genTaskLoginTimeKey(taskId);
         String dateTime = redisTemplate.opsForValue().get(key);
         if (StringUtils.isEmpty(dateTime)) {
+            logger.error("获取登录时间时,在redis中未查询到任务登录时间taskId={}", taskId);
+            //如果未获取到任务登录时间,则将任务从"记录登录成功的任务集合"中删除
+            redisDao.getRedisTemplate().opsForSet().remove(RedisKeyUtils.genLoginedTaskSetKey(), taskId.toString());
             return null;
         }
         return new Date(Long.valueOf(dateTime));
+    }
+
+    /**
+     * 获取任务抓取超时时间
+     *
+     * @param taskId
+     * @return
+     */
+    public Date getCrawlerTimeoutTime(Long taskId) {
+        Date loginTime = this.getLoginTime(taskId);
+        if (loginTime == null) {
+            return null;
+        }
+        Integer timeoutSeconds = this.getCrawlerTimeoutSeconds(taskId);
+        if (timeoutSeconds == null) {
+            return null;
+        }
+        Date timeoutDate = DateUtils.addSeconds(loginTime, timeoutSeconds);
+        return timeoutDate;
+    }
+
+    /**
+     * 获取设置的任务抓取超时时长
+     *
+     * @param taskId
+     * @return
+     */
+    public Integer getCrawlerTimeoutSeconds(Long taskId) {
+        Task task = null;
+        try {
+            task = cache.get(taskId);
+        } catch (ExecutionException e) {
+            logger.error("获取设置的任务抓取超时时长时,未查询到任务信息taskId={}", taskId);
+        }
+        if (task == null) {
+            return null;
+        }
+        AppBizType bizType = appBizTypeService.getAppBizType(task.getBizType());
+        if (bizType == null || bizType.getTimeout() == null) {
+            logger.error("获取设置的任务抓取超时时长时,未查询到任务相关的bizType信息,taskId={}", taskId);
+            return null;
+        }
+        return bizType.getTimeout();
+    }
+
+
+    /**
+     * 任务抓取是否超时
+     *
+     * @param taskId
+     * @return
+     */
+    public boolean isTaskTimeout(Long taskId) {
+        Date current = new Date();
+        Date timeoutTime = this.getCrawlerTimeoutTime(taskId);
+        if (timeoutTime == null) {
+            return false;
+        }
+        if (timeoutTime.after(current)) {
+            return false;
+        }
+        logger.info("任务抓取超时:taskId={},currentTime={},timeoutTime={}",
+                taskId, CommonUtils.date2Str(current), CommonUtils.date2Str(timeoutTime));
+        return true;
+    }
+
+    /**
+     * 处理任务抓取超时
+     *
+     * @param taskId
+     */
+    public void handleTaskTimeout(Long taskId) {
+        logger.info("任务抓取超时异步处理:taskId={},taskTimeoutHandlers={}", taskId, JSON.toJSONString(taskTimeoutHandlers));
+        threadPoolExecutor.execute(new TaskCrawlerTimeoutThread(taskId, taskTimeoutHandlers));
     }
 
     /**
@@ -134,6 +187,7 @@ public class TaskTimeService {
     @Scheduled(cron = "0 0/1 * * * ?")
     public void scheduleTaskTimeout() {
         Map<String, Object> lockMap = Maps.newHashMap();
+        String taskSetKey = RedisKeyUtils.genLoginedTaskSetKey();
         String lockKey = RedisKeyUtils.genRedisLockKey("task-crawler-time-job", Constants.SAAS_ENV_VALUE);
         try {
             lockMap = redisDao.acquireLock(lockKey, 60 * 1000L);
@@ -146,7 +200,7 @@ public class TaskTimeService {
                 logger.info("scheduleTaskTimeout：taskIds is empty, key={}", taskSetKey);
                 return;
             }
-            // 处理超时任务
+            //得到记录的已登录成功的任务id集合
             List<Long> taskIds = taskIdSet.stream().map(id -> Long.valueOf(id)).collect(Collectors.toList());
             for (List<Long> _taskIds : Lists.partition(taskIds, 100)) {
                 TaskCriteria criteria = new TaskCriteria();
@@ -162,20 +216,15 @@ public class TaskTimeService {
                     redisTemplate.opsForSet().remove(taskSetKey, completedTaskIds.toArray(new String[completedTaskIds.size()]));
                     logger.info("scheduleTaskTimeout : task is completed : completedTaskIds={}", JSON.toJSONString(completedTaskIds));
                 }
-
-                List<String> timeoutTaskIds = Lists.newArrayList();
-                // 计算正在运行任务是否有超时
-                tasks.stream().filter(task -> ETaskStatus.RUNNING.getStatus().equals(task.getStatus()))
-                        .forEach(task -> {
-                            Long taskId = task.getId();
-                            if (handleTaskTimeout(task)) {
-                                timeoutTaskIds.add(taskId.toString());
-                            }
-                        });
-                // 清除已经处理的超时任务
-                if (CollectionUtils.isNotEmpty(timeoutTaskIds)) {
-                    redisTemplate.opsForSet().remove(taskSetKey, timeoutTaskIds.toArray(new String[timeoutTaskIds.size()]));
-                    logger.info("scheduleTaskTimeout : task is timeout : timeoutTaskIds={}", JSON.toJSONString(timeoutTaskIds));
+                // 处理进行中任务
+                List<String> runningTaskIds = tasks.stream().filter(task -> ETaskStatus.RUNNING.getStatus().equals(task.getStatus()))
+                        .map(task -> task.getId().toString()).collect(Collectors.toList());
+                for (String taskIdStr : runningTaskIds) {
+                    Long taskId = Long.valueOf(taskIdStr);
+                    if (this.isTaskTimeout(taskId)) {
+                        //处理抓取超时任务
+                        this.handleTaskTimeout(taskId);
+                    }
                 }
             }
         } finally {
@@ -192,7 +241,6 @@ public class TaskTimeService {
     public void scheduleTaskActiveTimeout() {
         Map<String, Object> lockMap = Maps.newHashMap();
         String lockKey = RedisKeyUtils.genRedisLockKey("task-alive-time-job", Constants.SAAS_ENV_VALUE);
-        long start = System.currentTimeMillis();
         try {
             Date startTime = new Date();
             lockMap = redisDao.acquireLock(lockKey, 60 * 1000L);
@@ -212,102 +260,8 @@ public class TaskTimeService {
             }
         } finally {
             redisDao.releaseLock(lockKey, lockMap, 60 * 1000L);
-            logger.info("处理任务活跃时间超时,耗时{}ms", System.currentTimeMillis() - start);
         }
     }
 
-
-    /**
-     * 获取超时时间
-     *
-     * @param bizType
-     * @return
-     */
-    private Integer getTimeout(Byte bizType) {
-        AppBizType appBizType = appBizTypeService.getAppBizType(bizType);
-        return appBizType.getTimeout();
-    }
-
-    /**
-     * 处理超时任务
-     *
-     * @param taskId
-     */
-    public void handleTaskTimeout(Long taskId) {
-        Task task = taskMapper.selectByPrimaryKey(taskId);
-        logger.info("handleTaskTimeout async : taskId={}, task={}", taskId, JsonUtils.toJsonString(task));
-        if (task != null && ETaskStatus.RUNNING.getStatus().equals(task.getStatus())) {
-            asycExcutor.runAsyc(task, _task -> {
-                this.handleTaskTimeout(task);
-            });
-        }
-    }
-
-    /**
-     * 任务是否超时
-     *
-     * @param taskid
-     * @return
-     */
-    public boolean isTaskTimeout(Long taskid) {
-        try {
-            Task task = cache.get(taskid);
-            AppBizType bizType = appBizTypeService.getAppBizType(task.getBizType());
-            if (bizType == null || bizType.getTimeout() == null) {
-                return false;
-            }
-            // 超时时间秒
-            int timeout = bizType.getTimeout();
-            Date loginTime = this.getLoginTime(taskid);
-            if (loginTime == null) {
-                return false;
-            }
-            // 未超时: 登录时间+超时时间 < 当前时间
-            Date timeoutDate = DateUtils.addSeconds(loginTime, timeout);
-            Date current = new Date();
-            logger.info("isTaskTimeout: taskid={}，loginTime={},current={},timeout={}",
-                    taskid, CommonUtils.date2Str(loginTime), CommonUtils.date2Str(current), timeout);
-            if (timeoutDate.after(current)) {
-                return false;
-            }
-        } catch (ExecutionException e) {
-            logger.error("task id=" + taskid + "is not exists...", e);
-        }
-        return true;
-    }
-
-
-    /**
-     * 处理任务超时
-     *
-     * @param task
-     * @return
-     */
-    public boolean handleTaskTimeout(Task task) {
-        Long taskId = task.getId();
-        Date loginTime = getLoginTime(taskId);
-        Integer timeout = getTimeout(task.getBizType());
-        TaskDTO taskDTO = DataConverterUtils.convert(task, TaskDTO.class);
-
-        // 任务超时: 当前时间-登录时间>超时时间
-        Date currentTime = new Date();
-        Date timeoutDate = DateUtils.addSeconds(loginTime, timeout);
-        if (timeoutDate.after(currentTime)) {
-            return false;
-        }
-        logger.info("handleTaskTimeout: taskid={}，loginTime={},current={},timeout={}",
-                taskId, CommonUtils.date2Str(loginTime), CommonUtils.date2Str(currentTime), timeout);
-        taskTimeoutHandlers.forEach(handler -> {
-            try {
-                handler.handleTaskTimeout(taskDTO, timeout, loginTime);
-                logger.info("handle timeout task: handler={},task={},loginTime={},timeout={}",
-                        handler.getClass(), taskId, DateFormatUtils.format(loginTime, "yyyyMMdd HH:mm:ss"), timeout);
-            } catch (Exception e) {
-                logger.error("handle timeout task error: handler={},task={},loginTime={},timeout={}",
-                        handler.getClass(), taskId, DateFormatUtils.format(loginTime, "yyyyMMdd HH:mm:ss"), timeout, e);
-            }
-        });
-        return true;
-    }
 
 }
