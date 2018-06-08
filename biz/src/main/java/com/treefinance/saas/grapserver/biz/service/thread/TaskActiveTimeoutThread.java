@@ -64,9 +64,9 @@ public class TaskActiveTimeoutThread implements Runnable {
             if (startTime.getTime() - lastActiveTime > diff) {
                 logger.info("任务活跃时间超时,取消任务,taskId={}", task.getId());
                 taskService.cancelTask(task.getId());
+                //删除记录任务活跃时间redisKey
+                taskAliveService.deleteTaskAliveRedisKey(task.getId());
             }
-            //删除记录任务活跃时间redisKey
-            taskAliveService.deleteTaskAliveRedisKey(task.getId());
         } finally {
             redisDao.releaseLock(lockKey, lockMap, 3 * 60 * 1000L);
         }
