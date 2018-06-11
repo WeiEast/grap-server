@@ -14,8 +14,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -31,7 +29,6 @@ public class TaskCallbackLogService {
     @Autowired
     private TaskCallbackLogUpdateMapper taskCallbackLogUpdateMapper;
 
-    @Transactional(propagation = Propagation.REQUIRES_NEW, rollbackFor = Exception.class)
     public void insert(AppCallbackConfigDTO config, Long taskId, Byte type, String params, String result,
                        long consumeTime, int httpCode) {
         TaskCallbackLog taskCallbackLog = new TaskCallbackLog();

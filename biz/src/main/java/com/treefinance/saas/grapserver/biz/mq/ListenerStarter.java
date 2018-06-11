@@ -25,6 +25,7 @@ public class ListenerStarter {
     private DefaultMQPushConsumer taskLogConsumer;
     private DefaultMQPushConsumer deliveryAddressConsumer;
     private DefaultMQPushConsumer asyncGrapDataConsumer;
+    private DefaultMQPushConsumer callbackFailureReasonConsumer;
 
     @Autowired
     private DirectiveMessageListener directiveMessageListener;
@@ -34,6 +35,9 @@ public class ListenerStarter {
     private DeliveryAddressMessageListener deliveryAddressMessageListener;
     @Autowired
     private AsyncGrapDataMessageListener asyncGrapDataMessageListener;
+    @Autowired
+    private CallbackFailureReasonMessageListener callbackFailureReasonMessageListener;
+
 
     @PostConstruct
     public void init() throws MQClientException {
@@ -41,6 +45,7 @@ public class ListenerStarter {
         initTaskLogMessageMQ();
         initDeliveryAddressMessageMQ();
         initAsyncGrapDataMessageMQ();
+        initCallbackFailureReasonMessageMQ();
     }
 
     @PreDestroy
@@ -56,6 +61,10 @@ public class ListenerStarter {
 
         asyncGrapDataConsumer.shutdown();
         logger.info("关闭异步数据抓取的消费者");
+
+        callbackFailureReasonConsumer.shutdown();
+        logger.info("关闭处理爬数指明的回调失败具体原因的消费者");
+
     }
 
     private void initDirectiveMessageMQ() throws MQClientException {
@@ -116,5 +125,19 @@ public class ListenerStarter {
         asyncGrapDataConsumer.start();
         logger.info("启动异步数据抓取的消费者.nameserver:{},topic:{},tag:{}",
                 mqConfig.getNamesrvAddr(), topic, tag);
+    }
+
+    private void initCallbackFailureReasonMessageMQ() throws MQClientException {
+        String group = "callback_failure_reason";
+        callbackFailureReasonConsumer = new DefaultMQPushConsumer(group);
+        callbackFailureReasonConsumer.setNamesrvAddr(mqConfig.getNamesrvAddr());
+        String topic = "task-callback";
+        String tag = "callback";
+        callbackFailureReasonConsumer.subscribe(topic, tag);
+        callbackFailureReasonConsumer.setMessageModel(CLUSTERING);
+        callbackFailureReasonConsumer.registerMessageListener(callbackFailureReasonMessageListener);
+        callbackFailureReasonConsumer.start();
+        logger.info("启动处理爬数指明的回调失败具体原因消费者.nameserver:{},group:{},topic:{},tag:{}",
+                mqConfig.getNamesrvAddr(), group, topic, tag);
     }
 }

@@ -450,7 +450,7 @@ public abstract class CallbackableDirectiveProcessor {
             // 处理返回结果
             handleRequestResult(directiveDTO, result);
             // 回调处理
-            callbackResultService.handleResult(directiveDTO.getTask(), result, httpCode);
+            callbackResultService.handleResult(directiveDTO.getTask(), result, config, httpCode);
         }
         return true;
     }

@@ -29,6 +29,10 @@
             <groupId>com.github.diamond</groupId>
             <artifactId>super-diamond-client</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.treefinance.saas</groupId>
+            <artifactId>assistant-monitor</artifactId>
+        </dependency>
     </dependencies>
 
     <build>
