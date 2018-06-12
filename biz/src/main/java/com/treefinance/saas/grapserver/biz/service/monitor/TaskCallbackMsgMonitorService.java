@@ -48,7 +48,7 @@ public class TaskCallbackMsgMonitorService {
         message.setAccountNo(taskDTO.getAccountNo());
         message.setAppId(taskDTO.getAppId());
         message.setBizType(taskDTO.getBizType());
-        message.setCompleteTime(taskDTO.getCreateTime());
+        message.setCompleteTime(taskDTO.getLastUpdateTime());
         message.setWebSite(taskDTO.getWebSite());
         message.setUniqueId(taskDTO.getUniqueId());
         //有回调
