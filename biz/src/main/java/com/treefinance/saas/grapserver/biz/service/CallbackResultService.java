@@ -5,6 +5,7 @@ import com.alibaba.rocketmq.shade.io.netty.util.internal.StringUtil;
 import com.google.common.collect.Maps;
 import com.treefinance.saas.grapserver.biz.mq.MessageProducer;
 import com.treefinance.saas.grapserver.common.model.Constants;
+import com.treefinance.saas.grapserver.common.model.dto.AppCallbackConfigDTO;
 import com.treefinance.saas.grapserver.common.model.dto.TaskDTO;
 import com.treefinance.saas.knife.result.SimpleResult;
 import org.apache.commons.lang3.StringUtils;
@@ -37,11 +38,12 @@ public class CallbackResultService {
     @Autowired
     private MessageProducer messageProducer;
 
-    public void handleResult(TaskDTO task, String result, int httpCode) {
+    public void handleResult(TaskDTO task, String result, AppCallbackConfigDTO config, int httpCode) {
         Map<String, Object> messageMap = Maps.newHashMap();
         try {
             messageMap.put("taskId", task.getId());
             messageMap.put("taskid", task.getId());
+            messageMap.put("callbackConfigId", config.getId());
             messageMap.put("appId", task.getAppId());
             messageMap.put("uniqueId", task.getUniqueId());
             messageMap.put("httpCode", httpCode);
