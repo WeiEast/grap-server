@@ -3,6 +3,7 @@ package com.treefinance.saas.grapserver.biz.service;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.base.Splitter;
+import com.google.common.collect.Lists;
 import com.treefinance.basicservice.security.crypto.facade.EncryptionIntensityEnum;
 import com.treefinance.basicservice.security.crypto.facade.ISecurityCryptoService;
 import com.treefinance.commonservice.uid.UidGenerator;
@@ -158,21 +159,30 @@ public class TaskService {
         Task task = new Task();
         task.setId(taskId);
         task.setStatus(status);
-        return taskMapper.updateByPrimaryKeySelective(task);
+
+        return updateUnfinishedTask(task);
+    }
+
+    /**
+     * 更新未完成任务
+     *
+     * @param task
+     * @return
+     */
+    private int updateUnfinishedTask(Task task) {
+        TaskCriteria taskCriteria = new TaskCriteria();
+        taskCriteria.createCriteria().andIdEqualTo(task.getId())
+                .andStatusNotIn(Lists.newArrayList(ETaskStatus.CANCEL.getStatus(),
+                        ETaskStatus.SUCCESS.getStatus(), ETaskStatus.FAIL.getStatus()));
+        return taskMapper.updateByExampleSelective(task, taskCriteria);
     }
 
     public int updateWebSite(Long taskId, String webSite) {
         Task task = new Task();
         task.setId(taskId);
         task.setWebSite(webSite);
-        return taskMapper.updateByPrimaryKeySelective(task);
-    }
 
-    public int updateTaskAction(Long taskId, String webSite) {
-        Task task = new Task();
-        task.setId(taskId);
-        task.setWebSite(webSite);
-        return taskMapper.updateByPrimaryKeySelective(task);
+        return updateUnfinishedTask(task);
     }
 
     public int setAccountNo(Long taskId, String accountNo) {
@@ -184,7 +194,7 @@ public class TaskService {
 
             String key = keyOfUniqueId(existTask.getUniqueId(), existTask.getAppId(), existTask.getBizType());
             redisTemplate.opsForSet().add(key, accountNo);
-            return taskMapper.updateByPrimaryKeySelective(task);
+            return updateUnfinishedTask(task);
         } else {
             return -1;
         }
@@ -299,7 +309,7 @@ public class TaskService {
         task.setId(taskId);
         task.setAccountNo(_accountNo);
         task.setWebSite(webSite);
-        taskMapper.updateByPrimaryKeySelective(task);
+        updateUnfinishedTask(task);
     }
 
     @Transactional
@@ -314,7 +324,7 @@ public class TaskService {
         } else {
             logger.error("更新任务状态为取消时,未查询到取消任务日志信息 taskId={}", taskId);
         }
-        taskMapper.updateByPrimaryKeySelective(task);
+        updateUnfinishedTask(task);
         // 取消任务
         taskLogService.logCancleTask(taskId);
         return task.getStepCode();
@@ -325,7 +335,10 @@ public class TaskService {
     @Transactional
     public String failTaskWithStep(Long taskId) {
         TaskCriteria taskCriteria = new TaskCriteria();
-        taskCriteria.createCriteria().andIdEqualTo(taskId).andStatusNotEqualTo(ETaskStatus.FAIL.getStatus());
+        taskCriteria.createCriteria().andIdEqualTo(taskId).
+                andStatusNotIn(Lists.newArrayList(ETaskStatus.CANCEL.getStatus(),
+                        ETaskStatus.SUCCESS.getStatus(), ETaskStatus.FAIL.getStatus()));
+        ;
         Task task = new Task();
         task.setId(taskId);
         task.setStatus(ETaskStatus.FAIL.getStatus());
@@ -350,7 +363,7 @@ public class TaskService {
             Task task = new Task();
             task.setId(taskId);
             task.setStatus(status);
-            taskMapper.updateByPrimaryKeySelective(task);
+            updateUnfinishedTask(task);
             taskLogService.logSuccessTask(taskId);
             return null;
         }
