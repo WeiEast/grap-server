@@ -3,6 +3,7 @@ package com.treefinance.saas.grapserver.biz.service;
 import com.alibaba.fastjson.JSON;
 import com.google.common.collect.Lists;
 import com.treefinance.commonservice.uid.UidGenerator;
+import com.treefinance.saas.grapserver.biz.service.monitor.TaskRealTimeStatMonitorService;
 import com.treefinance.saas.grapserver.common.enums.ETaskStep;
 import com.treefinance.saas.grapserver.dao.entity.TaskLog;
 import com.treefinance.saas.grapserver.dao.entity.TaskLogCriteria;
@@ -40,6 +41,8 @@ public class TaskLogService {
     private TaskLogMapper taskLogMapper;
     @Autowired
     private TaskAliveService taskAliveService;
+    @Autowired
+    private TaskRealTimeStatMonitorService taskRealTimeStatMonitorService;
 
 
     /**
@@ -52,6 +55,7 @@ public class TaskLogService {
      */
     public Long insert(Long taskId, String msg, Date processTime, String errorMsg) {
         long id = UidGenerator.getId();
+        Date dataTime = new Date();
         TaskLog taskLog = new TaskLog();
         taskLog.setId(id);
         taskLog.setTaskId(taskId);
@@ -59,8 +63,10 @@ public class TaskLogService {
         taskLog.setStepCode(ETaskStep.getStepCodeByText(msg));
         taskLog.setOccurTime(processTime);
         taskLog.setErrorMsg(errorMsg != null && errorMsg.length() > 1000 ? errorMsg.substring(0, 1000) : errorMsg);
+        taskLog.setCreateTime(dataTime);
         taskLogMapper.insertSelective(taskLog);
         taskAliveService.updateTaskActiveTime(taskId);
+        taskRealTimeStatMonitorService.handleTaskLog(taskId, msg, dataTime);
         logger.info("记录任务日志: {}", JSON.toJSONString(taskLog));
         return id;
     }

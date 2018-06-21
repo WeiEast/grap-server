@@ -15,6 +15,7 @@ public class TaskDTO implements Serializable {
     private String appId;
     private String accountNo;
     private Byte bizType;
+    private Byte saasEnv;
     private Byte status;
     private String webSite;
     private String stepCode;
@@ -110,5 +111,13 @@ public class TaskDTO implements Serializable {
 
     public void setAttributes(Map<String, Object> attributes) {
         this.attributes = attributes;
+    }
+
+    public Byte getSaasEnv() {
+        return saasEnv;
+    }
+
+    public void setSaasEnv(Byte saasEnv) {
+        this.saasEnv = saasEnv;
     }
 }
