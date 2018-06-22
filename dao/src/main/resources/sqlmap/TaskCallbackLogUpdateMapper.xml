@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.treefinance.saas.grapserver.dao.mapper.TaskCallbackLogUpdateMapper">
-    <!-- 总计数据 -->
+
     <insert id="insertOrUpdateSelective" parameterType="com.treefinance.saas.grapserver.dao.entity.TaskCallbackLog">
         insert into task_callback_log
         <trim prefix="(" suffix=")" suffixOverrides=",">
@@ -37,6 +37,9 @@
             </if>
             <if test="callbackMsg != null">
                 callbackMsg,
+            </if>
+            <if test="failureReason != null">
+                failureReason,
             </if>
             <if test="createTime != null">
                 createTime,
@@ -79,6 +82,9 @@
             <if test="callbackMsg != null">
                 #{callbackMsg,jdbcType=VARCHAR},
             </if>
+            <if test="failureReason != null">
+                #{failureReason,jdbcType=TINYINT},
+            </if>
             <if test="createTime != null">
                 #{createTime,jdbcType=TIMESTAMP},
             </if>
@@ -120,6 +126,9 @@
             </if>
             <if test="callbackMsg != null">
                 callbackMsg = #{callbackMsg,jdbcType=VARCHAR},
+            </if>
+            <if test="failureReason != null">
+                failureReason = #{failureReason,jdbcType=TINYINT},
             </if>
             <if test="createTime != null">
                 createTime = #{createTime,jdbcType=TIMESTAMP},

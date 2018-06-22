@@ -337,45 +337,52 @@
                     <groupId>org.codehaus.mojo</groupId>
                     <artifactId>aspectj-maven-plugin</artifactId>
                     <version>1.8</version>
+                    <configuration>
+                        <includes>
+                            <include>**/*.java</include>
+                            <include>**/*.aj</include>
+                        </includes>
+                        <complianceLevel>${java.version}</complianceLevel>
+                        <encoding>UTF-8</encoding>
+                        <showWeaveInfo>true</showWeaveInfo>
+                        <forceAjcCompile>true</forceAjcCompile>
+                        <sources/>
+                        <aspectDirectory>src/main/aspect</aspectDirectory>
+                        <weaveDirectories>
+                            <weaveDirectory>${project.build.directory}/classes</weaveDirectory>
+                        </weaveDirectories>
+                        <source>${java.version}</source>
+                        <target>${java.version}</target>
+                        <aspectLibraries>
+                            <aspectLibrary>
+                                <groupId>org.springframework</groupId>
+                                <artifactId>spring-aspects</artifactId>
+                            </aspectLibrary>
+                        </aspectLibraries>
+                    </configuration>
+                    <executions>
+                        <execution>
+                            <id>process-classes</id>
+                            <phase>process-classes</phase>
+                            <goals>
+                                <goal>compile</goal>
+                            </goals>
+                        </execution>
+                        <execution>
+                            <id>process-test-classes</id>
+                            <phase>process-test-classes</phase>
+                            <goals>
+                                <goal>compile</goal>
+                            </goals>
+                        </execution>
+                    </executions>
                     <dependencies>
-                        <dependency>
-                            <groupId>org.aspectj</groupId>
-                            <artifactId>aspectjrt</artifactId>
-                            <version>${aspectj.version}</version>
-                        </dependency>
                         <dependency>
                             <groupId>org.aspectj</groupId>
                             <artifactId>aspectjtools</artifactId>
                             <version>${aspectj.version}</version>
                         </dependency>
                     </dependencies>
-                    <configuration>
-                        <source>${java.version}</source>
-                        <target>${java.version}</target>
-                        <complianceLevel>${java.version}</complianceLevel>
-                        <encoding>${project.build.sourceEncoding}</encoding>
-                        <verbose>true</verbose>
-                        <privateScope>true</privateScope>
-                        <showWeaveInfo>true</showWeaveInfo>
-                        <outxml>true</outxml>
-                    </configuration>
-                    <executions>
-                        <execution>
-                            <phase>compile</phase>
-                            <goals>
-                                <goal>compile</goal>
-                                <goal>test-compile</goal>
-                            </goals>
-                            <configuration>
-                                <aspectLibraries combine.self="override">
-                                    <aspectLibrary>
-                                        <groupId>org.springframework</groupId>
-                                        <artifactId>spring-aspects</artifactId>
-                                    </aspectLibrary>
-                                </aspectLibraries>
-                            </configuration>
-                        </execution>
-                    </executions>
                 </plugin>
             </plugins>
         </pluginManagement>

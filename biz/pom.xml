@@ -142,10 +142,6 @@
 
         <dependency>
             <groupId>com.treefinance.saas</groupId>
-            <artifactId>assistant-monitor</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.treefinance.saas</groupId>
             <artifactId>assistant-variable-notify</artifactId>
         </dependency>
         <dependency>
