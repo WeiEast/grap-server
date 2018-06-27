@@ -14,7 +14,6 @@ import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
@@ -44,7 +43,6 @@ public class TaskRealTimeStatMonitorService {
      */
     private static List<String> logLinkList = ETaskStatLink.getStepCodeListBySource("task_log");
 
-    @Async
     public void handleTaskLog(Long taskId, String code, Date dataTime) {
         logger.info("任务实时监控日志环节处理,taskId={},code={},dataTime={}", taskId, code, GrapDateUtils.getDateStrByDate(dataTime));
         if (!logLinkList.contains(code)) {
