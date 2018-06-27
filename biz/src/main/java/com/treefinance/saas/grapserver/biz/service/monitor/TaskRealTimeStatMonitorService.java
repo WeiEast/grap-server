@@ -7,6 +7,7 @@ import com.treefinance.saas.assistant.plugin.rocketmq.producer.MonitorMessagePro
 import com.treefinance.saas.grapserver.biz.service.TaskAttributeService;
 import com.treefinance.saas.grapserver.biz.service.TaskService;
 import com.treefinance.saas.grapserver.common.model.dto.TaskDTO;
+import com.treefinance.saas.grapserver.common.utils.GrapDateUtils;
 import com.treefinance.saas.grapserver.dao.entity.TaskAttribute;
 import com.treefinance.saas.grapserver.facade.enums.ETaskStatLink;
 import org.apache.commons.collections.CollectionUtils;
@@ -45,10 +46,10 @@ public class TaskRealTimeStatMonitorService {
 
     @Async
     public void handleTaskLog(Long taskId, String code, Date dataTime) {
+        logger.info("任务实时监控日志环节处理,taskId={},code={},dataTime={}", taskId, code, GrapDateUtils.getDateStrByDate(dataTime));
         if (!logLinkList.contains(code)) {
             return;
         }
-        logger.info("任务实时监控日志环节处理,taskId={},code={}", taskId, code);
         ETaskStatLink taskStatLink = ETaskStatLink.getItemByStepCode(code);
         if (taskStatLink == null) {
             logger.error("任务实时监控日志环节处理,需统计的任务环节未在枚举定义中找到,taskId={},code={}", taskId, code);
