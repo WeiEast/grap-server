@@ -14,30 +14,70 @@ import java.util.List;
  */
 public enum ETaskStatLink {
 
-    TASK_CREATE("任务创建", "任务创建", "task_log"),
-    LOGIN_SUCCESS("登陆成功", "登陆成功", "task_log"),
-    CRAWL_SUCCESS("抓取成功", "抓取成功", "task_log"),
-    DATA_SAVE_SUCCESS("数据保存成功", "洗数成功", "task_log"),
-    CALLBACK_SUCCESS("回调通知成功", "回调通知成功", "task_log"),
-    TASK_SUCCESS("任务成功", "任务成功", "task_log");
+    TASK_CREATE("任务创建", "taskCreate", "任务创建", "task_log"),
+    LOGIN_SUCCESS("登陆成功", "loginSuccess", "登陆成功", "task_log"),
+    CRAWL_SUCCESS("抓取成功", "crawlSuccess", "抓取成功", "task_log"),
+    DATA_SAVE_SUCCESS("数据保存成功", "dataSaveSuccess", "洗数成功", "task_log"),
+    CALLBACK_SUCCESS("回调通知成功", "callbackSuccess", "回调通知成功", "task_log"),
+    TASK_SUCCESS("任务成功", "taskSuccess", "任务成功", "task_log"),
+
+    NO_DATA("无数据", "noData", "无数据", "self-define");
 
 
-    private String code;
+    private String stepCode;
+    private String statCode;
     private String desc;
     private String source;
 
-    ETaskStatLink(String code, String desc, String source) {
-        this.code = code;
+    ETaskStatLink(String stepCode, String statCode, String desc, String source) {
+        this.stepCode = stepCode;
+        this.statCode = statCode;
         this.desc = desc;
         this.source = source;
     }
 
-    public static ETaskStatLink getItemByCode(String code) {
+    public static String getStepCodeByStatCode(String statCode) {
+        if (StringUtils.isBlank(statCode)) {
+            return null;
+        }
+        for (ETaskStatLink item : ETaskStatLink.values()) {
+            if (StringUtils.equals(item.getStatCode(), statCode)) {
+                return item.getStepCode();
+            }
+        }
+        return null;
+    }
+
+    public static String getDescByStatCode(String statCode) {
+        if (StringUtils.isBlank(statCode)) {
+            return null;
+        }
+        for (ETaskStatLink item : ETaskStatLink.values()) {
+            if (StringUtils.equals(item.getStatCode(), statCode)) {
+                return item.getDesc();
+            }
+        }
+        return null;
+    }
+
+    public static List<String> getStatCodeListNotSelfDefine() {
+        List<String> result = new ArrayList<>();
+        for (ETaskStatLink item : ETaskStatLink.values()) {
+            if ("self-define".equals(item.getSource())) {
+                continue;
+            }
+            result.add(item.getStatCode());
+        }
+        return result;
+    }
+
+
+    public static ETaskStatLink getItemByStepCode(String code) {
         if (StringUtils.isBlank(code)) {
             return null;
         }
         for (ETaskStatLink item : ETaskStatLink.values()) {
-            if (StringUtils.equalsIgnoreCase(item.getCode(), code)) {
+            if (StringUtils.equalsIgnoreCase(item.getStepCode(), code)) {
                 return item;
             }
         }
@@ -45,25 +85,33 @@ public enum ETaskStatLink {
     }
 
 
-    public static List<String> getCodeListBySource(String source) {
+    public static List<String> getStepCodeListBySource(String source) {
         if (StringUtils.isBlank(source)) {
             return null;
         }
         List<String> codeList = new ArrayList<>();
         for (ETaskStatLink item : ETaskStatLink.values()) {
             if (StringUtils.equalsIgnoreCase(item.getSource(), source)) {
-                codeList.add(item.getCode());
+                codeList.add(item.getStepCode());
             }
         }
         return codeList;
     }
 
-    public String getCode() {
-        return code;
+    public String getStepCode() {
+        return stepCode;
     }
 
-    public void setCode(String code) {
-        this.code = code;
+    public void setStepCode(String stepCode) {
+        this.stepCode = stepCode;
+    }
+
+    public String getStatCode() {
+        return statCode;
+    }
+
+    public void setStatCode(String statCode) {
+        this.statCode = statCode;
     }
 
     public String getDesc() {

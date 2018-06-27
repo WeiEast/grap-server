@@ -7,7 +7,6 @@ import com.treefinance.saas.assistant.plugin.rocketmq.producer.MonitorMessagePro
 import com.treefinance.saas.grapserver.biz.service.TaskAttributeService;
 import com.treefinance.saas.grapserver.biz.service.TaskService;
 import com.treefinance.saas.grapserver.common.model.dto.TaskDTO;
-import com.treefinance.saas.grapserver.common.utils.CommonUtils;
 import com.treefinance.saas.grapserver.dao.entity.TaskAttribute;
 import com.treefinance.saas.grapserver.facade.enums.ETaskStatLink;
 import org.apache.commons.collections.CollectionUtils;
@@ -42,7 +41,7 @@ public class TaskRealTimeStatMonitorService {
     /**
      * 需要监控的日志环节
      */
-    private static List<String> logLinkList = ETaskStatLink.getCodeListBySource("task_log");
+    private static List<String> logLinkList = ETaskStatLink.getStepCodeListBySource("task_log");
 
     @Async
     public void handleTaskLog(Long taskId, String code, Date dataTime) {
@@ -50,7 +49,7 @@ public class TaskRealTimeStatMonitorService {
             return;
         }
         logger.info("任务实时监控日志环节处理,taskId={},code={}", taskId, code);
-        ETaskStatLink taskStatLink = ETaskStatLink.getItemByCode(code);
+        ETaskStatLink taskStatLink = ETaskStatLink.getItemByStepCode(code);
         if (taskStatLink == null) {
             logger.error("任务实时监控日志环节处理,需统计的任务环节未在枚举定义中找到,taskId={},code={}", taskId, code);
             return;
@@ -59,8 +58,8 @@ public class TaskRealTimeStatMonitorService {
         if (taskDTO == null) {
             return;
         }
-        String taskLinkCode = CommonUtils.underlineToHump(taskStatLink.name());
-        String taskLinkName = taskStatLink.getDesc();
+        String taskLinkStatCode = taskStatLink.getStatCode();
+        String taskLinkStatName = taskStatLink.getDesc();
 
         TaskRealTimeMonitorMessage message = new TaskRealTimeMonitorMessage();
         message.setTaskId(taskDTO.getId());
@@ -72,8 +71,8 @@ public class TaskRealTimeStatMonitorService {
         message.setStatus(taskDTO.getStatus());
         message.setUniqueId(taskDTO.getUniqueId());
         message.setWebSite(taskDTO.getWebSite());
-        message.setStatCode(taskLinkCode);
-        message.setStatName(taskLinkName);
+        message.setStatCode(taskLinkStatCode);
+        message.setStatName(taskLinkStatName);
 
         //获取任务属性
         List<TaskAttribute> attributeList = taskAttributeService.findByTaskId(taskId);
