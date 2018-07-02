@@ -55,6 +55,7 @@ public class OperatorMonitorService {
         Long taskId = taskDTO.getId();
         TaskOperatorMonitorMessage message = DataConverterUtils.convert(taskDTO, TaskOperatorMonitorMessage.class);
         message.setTaskId(taskDTO.getId());
+        message.setSaasEnv(String.valueOf(taskDTO.getSaasEnv()));
         // 1.获取任务属性
         List<TaskAttribute> attributeList = taskAttributeService.findByTaskId(taskId);
         Map<String, String> attributeMap = Maps.newHashMap();

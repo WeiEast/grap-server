@@ -51,6 +51,7 @@ public class TaskCallbackMsgMonitorService {
         message.setCompleteTime(taskDTO.getLastUpdateTime());
         message.setWebSite(taskDTO.getWebSite());
         message.setUniqueId(taskDTO.getUniqueId());
+        message.setSaasEnv(String.valueOf(taskDTO.getSaasEnv()));
         //有回调
         if (isCallback) {
             Map<String, Object> attributeMap = Maps.newHashMap();

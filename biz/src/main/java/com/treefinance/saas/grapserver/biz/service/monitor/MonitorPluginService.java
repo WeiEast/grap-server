@@ -4,10 +4,8 @@ import com.alibaba.fastjson.JSON;
 import com.google.common.collect.Lists;
 import com.treefinance.saas.assistant.model.HttpMonitorMessage;
 import com.treefinance.saas.assistant.model.TaskMonitorMessage;
-import com.treefinance.saas.assistant.model.TaskOperatorMonitorMessage;
 import com.treefinance.saas.assistant.plugin.HttpMonitorPlugin;
 import com.treefinance.saas.assistant.plugin.TaskMonitorPlugin;
-import com.treefinance.saas.assistant.plugin.TaskOperatorMonitorPlugin;
 import com.treefinance.saas.grapserver.common.model.dto.TaskDTO;
 import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
@@ -32,8 +30,6 @@ public class MonitorPluginService {
     private TaskMonitorPlugin taskMonitorPlugin;
     @Autowired
     private HttpMonitorPlugin httpMonitorPlugin;
-    @Autowired
-    private TaskOperatorMonitorPlugin taskOperatorMonitorPlugin;
 
 
     /**
@@ -53,6 +49,7 @@ public class MonitorPluginService {
             message.setWebSite(taskDTO.getWebSite());
             message.setUniqueId(taskDTO.getUniqueId());
             message.setStepCode(taskDTO.getStepCode());
+            message.setSaasEnv(String.valueOf(taskDTO.getSaasEnv()));
             taskMonitorPlugin.sendMessage(message);
             logger.info("send message to monitor : message={}", JSON.toJSONString(taskDTO));
 
@@ -97,21 +94,6 @@ public class MonitorPluginService {
             // 失败重新放入队列
             httpQueue.addAll(list);
         }
-    }
-
-    /**
-     * 发送运营商监控消息
-     *
-     * @param message
-     */
-    public void sendTaskOperatorMonitorMessage(TaskOperatorMonitorMessage message) {
-        try {
-            taskOperatorMonitorPlugin.sendMessage(message);
-            logger.info("运营商监控,send message to monitor : message={}", JSON.toJSONString(message));
-        } catch (Exception e) {
-            logger.error("运营商监控,send message to monitor failed : body={}", JSON.toJSONString(message), e);
-        }
-
     }
 
 }

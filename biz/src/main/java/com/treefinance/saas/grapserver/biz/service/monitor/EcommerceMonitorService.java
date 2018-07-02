@@ -53,7 +53,7 @@ public class EcommerceMonitorService {
         long start = System.currentTimeMillis();
         Long taskId = taskDTO.getId();
         TaskEcommeceMonitorMessage message = DataConverterUtils.convert(taskDTO, TaskEcommeceMonitorMessage.class);
-
+        message.setSaasEnv(String.valueOf(taskDTO.getSaasEnv()));
         // 1.获取任务属性
         List<TaskAttribute> attributeList = taskAttributeService.findByTaskId(taskId);
         Map<String, String> attributeMap = Maps.newHashMap();

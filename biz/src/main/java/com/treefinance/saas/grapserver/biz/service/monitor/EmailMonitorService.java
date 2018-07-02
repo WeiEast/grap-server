@@ -51,7 +51,7 @@ public class EmailMonitorService {
         long start = System.currentTimeMillis();
         Long taskId = taskDTO.getId();
         TaskEmailMonitorMessage message = DataConverterUtils.convert(taskDTO, TaskEmailMonitorMessage.class);
-
+        message.setSaasEnv(String.valueOf(taskDTO.getSaasEnv()));
         // 1.获取任务属性
         List<TaskAttribute> attributeList = taskAttributeService.findByTaskId(taskId);
         Map<String, String> attributeMap = Maps.newHashMap();
