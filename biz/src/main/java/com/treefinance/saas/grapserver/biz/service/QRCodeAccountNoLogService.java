@@ -2,6 +2,8 @@ package com.treefinance.saas.grapserver.biz.service;
 
 import com.datatrees.rawdatacentral.api.CrawlerTaskService;
 import com.treefinance.saas.grapserver.common.model.dto.TaskDTO;
+import com.treefinance.saas.grapserver.dao.entity.Task;
+import com.treefinance.saas.grapserver.dao.mapper.TaskMapper;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,6 +22,8 @@ public class QRCodeAccountNoLogService {
     @Autowired
     private TaskService taskService;
     @Autowired
+    private TaskMapper taskMapper;
+    @Autowired
     private CrawlerTaskService crawlerTaskService;
 
     public void logQRCodeAccountNo(Long taskId) {
@@ -36,7 +40,10 @@ public class QRCodeAccountNoLogService {
         }
         if (StringUtils.isNotBlank(accountNo)) {
             logger.info("记录任务accountNo:taskId={},accountNo={}", taskId, accountNo);
-            taskService.setAccountNo(taskId, accountNo);
+            Task task = new Task();
+            task.setId(taskId);
+            task.setAccountNo(accountNo);
+            taskMapper.updateByPrimaryKeySelective(task);
         }
     }
 }
