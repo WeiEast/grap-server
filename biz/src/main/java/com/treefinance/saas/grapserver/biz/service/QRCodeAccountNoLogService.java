@@ -1,6 +1,8 @@
 package com.treefinance.saas.grapserver.biz.service;
 
 import com.datatrees.rawdatacentral.api.CrawlerTaskService;
+import com.treefinance.basicservice.security.crypto.facade.EncryptionIntensityEnum;
+import com.treefinance.basicservice.security.crypto.facade.ISecurityCryptoService;
 import com.treefinance.saas.grapserver.common.model.dto.TaskDTO;
 import com.treefinance.saas.grapserver.dao.entity.Task;
 import com.treefinance.saas.grapserver.dao.mapper.TaskMapper;
@@ -25,6 +27,8 @@ public class QRCodeAccountNoLogService {
     private TaskMapper taskMapper;
     @Autowired
     private CrawlerTaskService crawlerTaskService;
+    @Autowired
+    private ISecurityCryptoService securityCryptoService;
 
     public void logQRCodeAccountNo(Long taskId) {
         TaskDTO taskDTO = taskService.getById(taskId);
@@ -42,7 +46,8 @@ public class QRCodeAccountNoLogService {
             logger.info("记录任务accountNo:taskId={},accountNo={}", taskId, accountNo);
             Task task = new Task();
             task.setId(taskId);
-            task.setAccountNo(accountNo);
+            String cryptoAccountNo = securityCryptoService.encrypt(accountNo, EncryptionIntensityEnum.NORMAL);
+            task.setAccountNo(cryptoAccountNo);
             taskMapper.updateByPrimaryKeySelective(task);
         }
     }
