@@ -1,11 +1,8 @@
 package com.treefinance.saas.grapserver.web.controller;
 
-import com.google.common.collect.Maps;
 import com.treefinance.saas.grapserver.biz.config.DiamondConfig;
 import com.treefinance.saas.grapserver.biz.service.*;
 import com.treefinance.saas.grapserver.common.enums.EBizType;
-import com.treefinance.saas.grapserver.common.exception.ForbiddenException;
-import com.treefinance.saas.grapserver.common.utils.IpUtils;
 import com.treefinance.saas.knife.result.SimpleResult;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -16,9 +13,6 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.ModelAndView;
-
-import javax.servlet.http.HttpServletRequest;
-import java.util.Map;
 
 /**
  * Created by luoyihua on 2017/4/27.
@@ -40,30 +34,6 @@ public class EcommerceController {
     private TaskLicenseService taskLicenseService;
     @Autowired
     private DiamondConfig diamondConfig;
-
-//    /**
-//     * 通知服务端生成taskId
-//     *
-//     * @param appid
-//     * @param uniqueId
-//     * @return
-//     */
-//    @RequestMapping(value = "/start", method = {RequestMethod.POST})
-//    public Object createTask(@RequestParam("appid") String appid, @RequestParam("uniqueId") String uniqueId,
-//                             @RequestParam(name = "coorType", required = false) String coorType, @RequestParam("deviceInfo") String deviceInfo,
-//                             @RequestParam(name = "extra", required = false) String extra,
-//                             HttpServletRequest request) throws ForbiddenException {
-//        logger.info("createTask : appid={},uniqueId={},coorType={},deviceInfo={},extra={}", appid, uniqueId, coorType, deviceInfo, extra);
-//        taskLicenseService.verifyCreateTask(appid, EBizType.ECOMMERCE);
-//        Long taskId = taskServiceImpl.createTask(uniqueId, appid, EBizType.ECOMMERCE.getCode());
-//        Map<String, Object> map = Maps.newHashMap();
-//        map.put("taskid", taskId);
-//        map.put("color", merchantConfigService.getColorConfig(appid));
-//        map.put("title", diamondConfig.getSdkTitle(EBizType.ECOMMERCE));
-//        String ipAddress = IpUtils.getIpAddress(request);
-//        taskDeviceService.create(deviceInfo, ipAddress, coorType, taskId);
-//        return new SimpleResult<>(map);
-//    }
 
 
     @RequestMapping(value = "/start", method = {RequestMethod.POST})
