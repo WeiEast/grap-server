@@ -19,6 +19,7 @@ import com.treefinance.saas.merchant.center.facade.result.console.AppBizLicenseR
 import com.treefinance.saas.merchant.center.facade.result.console.MerchantResult;
 import com.treefinance.saas.merchant.center.facade.service.AppBizLicenseFacade;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.RandomUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
@@ -27,6 +28,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
 import java.util.List;
+import java.util.Optional;
+import java.util.Random;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
@@ -81,9 +84,6 @@ public class AppBizLicenseService implements InitializingBean, VariableMessageHa
             logger.error("获取appId={}授权信息失败", appId, e);
         }
         return list;
-//        AppBizLicenseCriteria appBizLicenseCriteria = new AppBizLicenseCriteria();
-//        appBizLicenseCriteria.createCriteria().andAppIdEqualTo(appId);
-//        return appBizLicenseMapper.selectByExample(appBizLicenseCriteria);
     }
 
     /**
@@ -117,21 +117,41 @@ public class AppBizLicenseService implements InitializingBean, VariableMessageHa
         long count = list.stream().filter(appBizLicense -> Byte.valueOf("1").equals(appBizLicense.getIsShowLicense())
                 && bizType.equals(appBizLicense.getBizType())).count();
         return count > 0;
-//
-//        AppBizLicenseCriteria appBizLicenseCriteria = new AppBizLicenseCriteria();
-//        appBizLicenseCriteria.createCriteria()
-//                .andAppIdEqualTo(appId)
-//                .andBizTypeEqualTo(bizType);
-//        List<AppBizLicense> list = appBizLicenseMapper.selectByExample(appBizLicenseCriteria);
-//        if (CollectionUtils.isEmpty(list)) {
-//            return false;
-//        }
-//        AppBizLicense license = list.get(0);
-//        if (license != null && Byte.valueOf("1").equals(license.getIsShowLicense())) {
-//            return true;
-//        }
-//        return false;
     }
+
+    /**
+     * 是否显示问卷调查表
+     *
+     * @param appId
+     * @param type
+     * @return
+     */
+    public boolean isShowQuestionaire(String appId, String type) {
+        Byte bizType = EBizType.getCode(type);
+        if (bizType == null) {
+            return false;
+        }
+
+        List<AppBizLicense> list = getByAppId(appId);
+        if (CollectionUtils.isEmpty(list)) {
+            return false;
+        }
+        Optional<AppBizLicense> optional = list.stream()
+                .filter(appBizLicense -> bizType.equals(appBizLicense.getBizType()))
+                .filter(appBizLicense -> appBizLicense.getQuestionaireRate() > 0)
+                .findFirst();
+        if (optional == null || !optional.isPresent()) {
+            return false;
+        }
+        AppBizLicense appBizLicense = optional.get();
+        int questionaireRate = appBizLicense.getQuestionaireRate();
+        if (questionaireRate >= 100) {
+            return true;
+        }
+        int random = RandomUtils.nextInt(0,101);
+        return questionaireRate >= random;
+    }
+
 
     @Override
     public void afterPropertiesSet() throws Exception {

@@ -85,6 +85,8 @@
     <dubbo:reference interface="com.treefinance.saas.merchant.center.facade.service.AppH5TipsFacade"
                      id="appH5TipsFacade" version="1.0.0"/>
 
+    <dubbo:reference id="appQuestionnaireFacade" interface="com.treefinance.saas.merchant.center.facade.service.AppQuestionnaireFacade"
+                     version="1.0.0"/>
 
     <!--生产者-->
     <dubbo:service interface="com.treefinance.saas.grapserver.facade.service.TaskFacade" ref="taskFacade"/>
