@@ -29,12 +29,13 @@ public class EcommerceH5Controller {
      * @return
      */
     @RequestMapping(value = "/refresh/qr_code", method = {RequestMethod.POST})
-    public Object refreshQRCode(CommonPluginParam param) {
-        logger.info("电商:获取二维码,传入参数,param={}", JSON.toJSONString(param));
+    public Object refreshQRCode(CommonPluginParam param, String userIp) {
+        logger.info("电商:获取二维码,传入参数,param={},userIp={}", JSON.toJSONString(param), userIp);
         if (param == null || param.getTaskId() == null) {
             logger.error("电商:获取二维码,参数缺失,taskId必传,param={}", JSON.toJSONString(param));
             throw new IllegalArgumentException("电商:获取二维码,参数缺失,taskId必传");
         }
+        param.setUserIp(userIp);
         Object result = ecommerceLoginSimulationService.refreshQRCode(param);
         logger.info("电商:获取二维码,返回结果,param={},result={}", JSON.toJSONString(param), JSON.toJSONString(result));
         return result;
