@@ -13,6 +13,7 @@ import com.treefinance.saas.grapserver.common.model.dto.moxie.MoxieDirectiveDTO;
 import com.treefinance.saas.grapserver.common.model.dto.moxie.MoxieLoginParamsDTO;
 import com.treefinance.saas.grapserver.common.model.vo.moxie.MoxieCityInfoVO;
 import com.treefinance.saas.grapserver.dao.entity.TaskAttribute;
+import com.treefinance.saas.grapserver.facade.enums.ETaskAttribute;
 import com.treefinance.saas.knife.result.SimpleResult;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -213,7 +214,7 @@ public class FundController {
             logger.info("taskId={}公积金输入验证码输入参数为空,input={}", input);
             throw new IllegalArgumentException("Parameter is incorrect.");
         }
-        TaskAttribute attribute = taskAttributeService.findByName(taskId, "moxie-taskId", false);
+        TaskAttribute attribute = taskAttributeService.findByName(taskId, ETaskAttribute.FUND_MOXIE_TASKID.getAttribute(), false);
         if (attribute == null) {
             logger.info("taskId={}在任务属性表中未找到对应的魔蝎任务id", taskId);
             return SimpleResult.failResult("任务查询失败");

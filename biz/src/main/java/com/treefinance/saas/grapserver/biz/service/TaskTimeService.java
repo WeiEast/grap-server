@@ -1,10 +1,8 @@
 package com.treefinance.saas.grapserver.biz.service;
 
-import com.alibaba.fastjson.JSON;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
-import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.treefinance.saas.assistant.model.Constants;
 import com.treefinance.saas.grapserver.biz.cache.RedisDao;
@@ -17,16 +15,16 @@ import com.treefinance.saas.grapserver.common.utils.GrapDateUtils;
 import com.treefinance.saas.grapserver.common.utils.RedisKeyUtils;
 import com.treefinance.saas.grapserver.dao.entity.AppBizType;
 import com.treefinance.saas.grapserver.dao.entity.Task;
+import com.treefinance.saas.grapserver.dao.entity.TaskAttribute;
 import com.treefinance.saas.grapserver.dao.entity.TaskCriteria;
 import com.treefinance.saas.grapserver.dao.mapper.TaskMapper;
-import org.apache.commons.collections.CollectionUtils;
+import com.treefinance.saas.grapserver.facade.enums.ETaskAttribute;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Service;
@@ -34,10 +32,8 @@ import org.springframework.stereotype.Service;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 
 /**
  * 任务时间Service
@@ -51,8 +47,6 @@ public class TaskTimeService {
     private static final Logger logger = LoggerFactory.getLogger(TaskTimeService.class);
 
     @Autowired
-    private RedisTemplate<String, String> redisTemplate;
-    @Autowired
     private TaskMapper taskMapper;
     @Autowired
     private AppBizTypeService appBizTypeService;
@@ -61,7 +55,10 @@ public class TaskTimeService {
     @Autowired
     private RedisDao redisDao;
     @Autowired
+    private TaskAttributeService taskAttributeService;
+    @Autowired
     private ThreadPoolTaskExecutor threadPoolExecutor;
+
 
     /**
      * 本地任务缓存
@@ -82,11 +79,11 @@ public class TaskTimeService {
         if (taskId == null || date == null) {
             return;
         }
+        taskAttributeService.insertOrUpdateSelective(taskId, ETaskAttribute.LOGIN_TIME.getAttribute(), GrapDateUtils.getDateStrByDate(date));
+
         String key = RedisKeyUtils.genTaskLoginTimeKey(taskId);
-        redisTemplate.opsForValue().set(key, String.valueOf(date.getTime()), 1, TimeUnit.HOURS);
-        redisTemplate.opsForSet().add(RedisKeyUtils.genLoginedTaskSetKey(), taskId + "");
-        logger.info("记录任务登录时间:taskId={},key={},value={}", taskId, key,
-                GrapDateUtils.getDateStrByDate(date));
+        redisDao.setEx(key, String.valueOf(date.getTime()), 1, TimeUnit.HOURS);
+        logger.info("记录任务登录时间:taskId={},key={},value={}", taskId, key, GrapDateUtils.getDateStrByDate(date));
     }
 
     /**
@@ -97,14 +94,19 @@ public class TaskTimeService {
      */
     public Date getLoginTime(Long taskId) {
         String key = RedisKeyUtils.genTaskLoginTimeKey(taskId);
-        String dateTime = redisTemplate.opsForValue().get(key);
-        if (StringUtils.isEmpty(dateTime)) {
-            logger.error("获取登录时间时,在redis中未查询到任务登录时间taskId={}", taskId);
-            //如果未获取到任务登录时间,则将任务从"记录登录成功的任务集合"中删除
-            redisDao.getRedisTemplate().opsForSet().remove(RedisKeyUtils.genLoginedTaskSetKey(), taskId.toString());
-            return null;
+        String dateTime = redisDao.get(key);
+        if (StringUtils.isNotBlank(dateTime)) {
+            return new Date(Long.valueOf(dateTime));
+        } else {
+            TaskAttribute taskAttribute = taskAttributeService.findByName(taskId, ETaskAttribute.LOGIN_TIME.getAttribute(), false);
+            if (taskAttribute == null) {
+                logger.info("获取登录时间时,未查询到任务登录时间,任务未登录.taskId={}", taskId);
+                return null;
+            }
+            Date date = GrapDateUtils.getDateByStr(taskAttribute.getValue());
+            this.updateLoginTime(taskId, date);
+            return date;
         }
-        return new Date(Long.valueOf(dateTime));
     }
 
     /**
@@ -187,46 +189,23 @@ public class TaskTimeService {
     @Scheduled(cron = "0 0/1 * * * ?")
     public void scheduleTaskTimeout() {
         Map<String, Object> lockMap = Maps.newHashMap();
-        String taskSetKey = RedisKeyUtils.genLoginedTaskSetKey();
         String lockKey = RedisKeyUtils.genRedisLockKey("task-crawler-time-job", Constants.SAAS_ENV_VALUE);
         try {
             lockMap = redisDao.acquireLock(lockKey, 60 * 1000L);
             if (MapUtils.isEmpty(lockMap)) {
                 return;
             }
-            Set<String> taskIdSet = redisTemplate.opsForSet().members(taskSetKey);
-            logger.info("scheduleTaskTimeout：running ：lock-key={}, taskid-key={}，taskIds={}", lockKey, taskSetKey, JSON.toJSONString(taskIdSet));
-            if (CollectionUtils.isEmpty(taskIdSet)) {
-                logger.info("scheduleTaskTimeout：taskIds is empty, key={}", taskSetKey);
-                return;
-            }
-            //得到记录的已登录成功的任务id集合
-            List<Long> taskIds = taskIdSet.stream().map(id -> Long.valueOf(id)).collect(Collectors.toList());
-            for (List<Long> _taskIds : Lists.partition(taskIds, 100)) {
-                TaskCriteria criteria = new TaskCriteria();
-                criteria.createCriteria().andIdIn(_taskIds).andSaasEnvEqualTo(Byte.parseByte(Constants.SAAS_ENV_VALUE));
-                List<Task> tasks = taskMapper.selectByExample(criteria);
-                if (CollectionUtils.isEmpty(tasks)) {
-                    continue;
-                }
-                // 清除已经完成任务
-                List<String> completedTaskIds = tasks.stream().filter(task -> !ETaskStatus.RUNNING.getStatus().equals(task.getStatus()))
-                        .map(task -> task.getId().toString()).collect(Collectors.toList());
-                if (CollectionUtils.isNotEmpty(completedTaskIds)) {
-                    redisTemplate.opsForSet().remove(taskSetKey, completedTaskIds.toArray(new String[completedTaskIds.size()]));
-                    logger.info("scheduleTaskTimeout : task is completed : completedTaskIds={}", JSON.toJSONString(completedTaskIds));
-                }
-                // 处理进行中任务
-                List<String> runningTaskIds = tasks.stream().filter(task -> ETaskStatus.RUNNING.getStatus().equals(task.getStatus()))
-                        .map(task -> task.getId().toString()).collect(Collectors.toList());
-                for (String taskIdStr : runningTaskIds) {
-                    Long taskId = Long.valueOf(taskIdStr);
-                    if (this.isTaskTimeout(taskId)) {
-                        //处理抓取超时任务
-                        this.handleTaskTimeout(taskId);
-                    }
+            TaskCriteria criteria = new TaskCriteria();
+            criteria.createCriteria().andStatusEqualTo(ETaskStatus.RUNNING.getStatus())
+                    .andSaasEnvEqualTo(Byte.parseByte(Constants.SAAS_ENV_VALUE));
+            List<Task> tasks = taskMapper.selectByExample(criteria);
+            for (Task task : tasks) {
+                if (this.isTaskTimeout(task.getId())) {
+                    //处理抓取超时任务
+                    this.handleTaskTimeout(task.getId());
                 }
             }
+
         } finally {
             redisDao.releaseLock(lockKey, lockMap, 60 * 1000L);
         }

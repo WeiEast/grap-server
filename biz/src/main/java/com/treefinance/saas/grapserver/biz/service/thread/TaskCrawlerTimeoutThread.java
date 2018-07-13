@@ -75,7 +75,6 @@ public class TaskCrawlerTimeoutThread implements Runnable {
                             handler.getClass(), taskId, DateFormatUtils.format(loginTime, "yyyyMMdd HH:mm:ss"), timeout, e);
                 }
             });
-            redisDao.getRedisTemplate().opsForSet().remove(RedisKeyUtils.genLoginedTaskSetKey(), taskId);
         } finally {
             redisDao.releaseLock(lockKey, lockMap, 3 * 60 * 1000L);
         }

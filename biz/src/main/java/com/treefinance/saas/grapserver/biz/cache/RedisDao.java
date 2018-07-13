@@ -20,24 +20,90 @@ import org.springframework.data.redis.core.RedisTemplate;
 
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 public interface RedisDao {
 
+    /**
+     * 获取redisTemplate
+     *
+     * @return
+     */
+    RedisTemplate<String, String> getRedisTemplate();
+
+    /**
+     * 删除key
+     *
+     * @param key
+     */
+    void deleteKey(String key);
+
+
+    /**
+     * String操作:获取指定key的值
+     *
+     * @param key
+     * @return
+     */
+    String get(String key);
+
+
+    /**
+     * String操作:设置指定key的值,并设置过期时间
+     *
+     * @param key
+     * @param value
+     * @param timeout
+     * @param unit
+     */
+    Boolean setEx(String key, String value, long timeout, TimeUnit unit);
+
+
+    /**
+     * String操作:增加,负数则为自减,并设置过期时间
+     *
+     * @param key
+     * @param increment
+     * @param timeout
+     * @param unit
+     * @return
+     */
+    Long incrBy(String key, long increment, long timeout, TimeUnit unit);
+
+
+    /**
+     * List操作:存储值列表在list尾部
+     *
+     * @param key       键
+     * @param valueList 值列表
+     * @return
+     */
     boolean saveListString(final String key, final List<String> valueList);
 
+
+    /**
+     * List操作:存储值在list尾部
+     *
+     * @param key   键
+     * @param value 值
+     * @return
+     */
     boolean saveString2List(final String key, final String value);
 
+    /**
+     * List操作:移除并获取list最后一个元素
+     *
+     * @param key
+     * @return
+     */
     String getStringFromList(final String key);
+
 
     boolean pushMessage(String submitRedisKey, String messageType);
 
     boolean pushMessage(String submitRedisKey, String messageType, int ttlSeconds);
 
     String pullResult(String obtainRedisKey);
-
-    RedisTemplate<String, String> getRedisTemplate();
-
-    void deleteKey(String key);
 
     /**
      * 分布式锁,获取锁

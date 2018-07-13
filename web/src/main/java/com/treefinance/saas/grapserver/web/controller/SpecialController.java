@@ -4,9 +4,9 @@ import com.alibaba.fastjson.JSON;
 import com.datatrees.rawdatacentral.api.CrawlerService;
 import com.datatrees.rawdatacentral.domain.result.HttpResult;
 import com.google.common.collect.Maps;
-import com.treefinance.saas.knife.result.SimpleResult;
-import com.treefinance.saas.grapserver.common.enums.EQRResult;
 import com.treefinance.saas.grapserver.biz.service.TaskNextDirectiveService;
+import com.treefinance.saas.grapserver.common.enums.EQRResult;
+import com.treefinance.saas.knife.result.SimpleResult;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,18 +32,19 @@ public class SpecialController {
     @Autowired
     private TaskNextDirectiveService taskNextDirectiveService;
 
+    //这个应该没人调用了吧,路由都没有标注grap
     @RequestMapping(value = "/qrscan/checking", method = {RequestMethod.POST})
     public Object qrCheck(
             @RequestParam() String directiveId,
             @RequestParam("taskid") Long taskid) throws Exception {
-        HttpResult<String> result = crawlerService.verifyQr(directiveId,taskid, null);
-        logger.info("taskId={},directiveId={}, 二维码验证结果={}", taskid,directiveId, JSON.toJSONString(result));
+        HttpResult<String> result = crawlerService.verifyQr(directiveId, taskid, null);
+        logger.info("taskId={},directiveId={}, 二维码验证结果={}", taskid, directiveId, JSON.toJSONString(result));
         if (StringUtils.isNotEmpty(result.getData()) && (result.getData().equals(EQRResult.FAILED.toString()) ||
                 result.getData().equals(EQRResult.SUCCESS.toString()) ||
                 result.getData().equals(EQRResult.SKIP.toString()))) {
-            if (!taskNextDirectiveService.isTaskCompleted(taskid)){
-                taskNextDirectiveService.deleteNextDirective(taskid, null);
-            }
+//            if (!taskNextDirectiveService.isTaskCompleted(taskid)){
+//                taskNextDirectiveService.deleteNextDirective(taskid, null);
+//            }
         }
         Map<String, Object> map = Maps.newHashMap();
         map.put("result", result.getData());

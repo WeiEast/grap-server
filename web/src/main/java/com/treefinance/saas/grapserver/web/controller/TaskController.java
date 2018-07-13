@@ -133,6 +133,7 @@ public class TaskController {
     public Object nextDirective(@RequestParam("taskid") Long taskid) throws Exception {
         String content = taskNextDirectiveService.getNextDirective(taskid);
         Map<String, Object> map = Maps.newHashMap();
+        //刚登陆成功,未收到任何指令
         if (StringUtils.isEmpty(content)) {
             // 轮询过程中，判断任务是否超时
             if (taskTimeService.isTaskTimeout(taskid)) {
@@ -143,6 +144,14 @@ public class TaskController {
             map.put("information", "请等待");
         } else {
             DirectiveMessage directiveMessage = JSON.parseObject(content, DirectiveMessage.class);
+            //登陆成功后,已收到指令并指令操作已处理完毕,如输入短信验证码
+            if (StringUtils.equalsIgnoreCase(directiveMessage.getDirective(), "waiting")) {
+                // 轮询过程中，判断任务是否超时
+                if (taskTimeService.isTaskTimeout(taskid)) {
+                    // 异步处理任务超时
+                    taskTimeService.handleTaskTimeout(taskid);
+                }
+            }
             map.put("directive", directiveMessage.getDirective());
             map.put("directiveId", directiveMessage.getDirectiveId());
 
@@ -178,7 +187,7 @@ public class TaskController {
                              @RequestParam(value = "extra", required = false) String extra) throws Exception {
         logger.info("taskId={}输入验证信息,directiveId={},type={},code={},extra={}",
                 taskid, directiveId, type, code, extra);
-        taskNextDirectiveService.deleteNextDirective(taskid, null);
+        taskNextDirectiveService.deleteNextDirective(taskid);
         crawlerService.importCrawlCode(directiveId, taskid, EOperatorCodeType.getCode(type), code, JsonUtils.toMap(extra, String.class, String.class));
         return new SimpleResult<>();
     }

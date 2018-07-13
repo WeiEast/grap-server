@@ -143,6 +143,7 @@ public class TaskAttributeService {
 
     /**
      * 根据taskId查询所有属性
+     *
      * @param taskId
      * @return
      */
@@ -151,5 +152,18 @@ public class TaskAttributeService {
         criteria.createCriteria().andTaskIdEqualTo(taskId);
         List<TaskAttribute> attributeList = taskAttributeMapper.selectByExample(criteria);
         return attributeList;
+    }
+
+    /**
+     * 根据任务id和name删除属性
+     *
+     * @param taskId
+     * @param name
+     */
+    public void deleteByTaskIdAndName(Long taskId, String name) {
+        TaskAttributeCriteria taskAttributeCriteria = new TaskAttributeCriteria();
+        taskAttributeCriteria.createCriteria().andTaskIdEqualTo(taskId)
+                .andNameEqualTo(name);
+        taskAttributeMapper.deleteByExample(taskAttributeCriteria);
     }
 }

@@ -16,7 +16,6 @@
 
 package com.treefinance.saas.grapserver.biz.cache;
 
-import com.treefinance.saas.grapserver.biz.cache.redis.MoreRedisTemplate;
 import com.treefinance.saas.grapserver.common.model.Constants;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -40,8 +39,45 @@ public class RedisDaoImpl implements RedisDao {
 
     @Autowired
     RedisTemplate<String, String> redisTemplate;
-    @Autowired
-    MoreRedisTemplate moreRedisTemplate;
+
+    @Override
+    public RedisTemplate<String, String> getRedisTemplate() {
+        return redisTemplate;
+    }
+
+
+    @Override
+    public String get(String key) {
+        try {
+            return redisTemplate.opsForValue().get(key);
+        } catch (Exception e) {
+            logger.error(e.getMessage(), e);
+            return null;
+        }
+    }
+
+    @Override
+    public Boolean setEx(String key, String value, long timeout, TimeUnit unit) {
+        try {
+            redisTemplate.opsForValue().set(key, value, timeout, unit);
+        } catch (Exception e) {
+            logger.error(e.getMessage(), e);
+            return false;
+        }
+        return true;
+    }
+
+    @Override
+    public Long incrBy(String key, long increment, long timeout, TimeUnit unit) {
+        try {
+            Long count = redisTemplate.opsForValue().increment(key, increment);
+            redisTemplate.expire(key, timeout, unit);
+            return count;
+        } catch (Exception e) {
+            logger.error(e.getMessage(), e);
+            return null;
+        }
+    }
 
     @Override
     public boolean saveString2List(final String key, final String value) {
@@ -88,19 +124,6 @@ public class RedisDaoImpl implements RedisDao {
         return true;
     }
 
-    /**
-     * @return the redisTemplate
-     */
-    @Override
-    public RedisTemplate<String, String> getRedisTemplate() {
-        return redisTemplate;
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.datatrees.rawdata.core.dao.RedisDao#deleteKey(java.lang.String)
-     */
     @Override
     public void deleteKey(String key) {
         redisTemplate.delete(key);

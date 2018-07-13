@@ -62,14 +62,14 @@
         <!--</table>-->
 
 
-        <table tableName="app_biz_license" domainObjectName="AppBizLicense"
-               enableSelectPaginationByExample="true"
-               enableInsertOrUpdateBySelective="true"
-               enableBatchInsert="true"
-               enableBatchUpdateByPrimaryKey="true"
-               enableBatchUpdateByPrimaryKeySelective="true">
-            <property name="useActualColumnNames" value="true"/>
-        </table>
+        <!--<table tableName="app_biz_license" domainObjectName="AppBizLicense"-->
+               <!--enableSelectPaginationByExample="true"-->
+               <!--enableInsertOrUpdateBySelective="true"-->
+               <!--enableBatchInsert="true"-->
+               <!--enableBatchUpdateByPrimaryKey="true"-->
+               <!--enableBatchUpdateByPrimaryKeySelective="true">-->
+            <!--<property name="useActualColumnNames" value="true"/>-->
+        <!--</table>-->
 
         <!--<table tableName="task_bury_point_log" domainObjectName="TaskBuryPointLog"-->
         <!--enableSelectPaginationByExample="true"-->
@@ -104,9 +104,9 @@
         <!--<property name="useActualColumnNames" value="true"/>-->
         <!--</table>-->
 
-        <!--<table tableName="task_next_directive" domainObjectName="TaskNextDirective">-->
-        <!--<property name="useActualColumnNames" value="true"/>-->
-        <!--</table>-->
+        <table tableName="task_next_directive" domainObjectName="TaskNextDirective">
+        <property name="useActualColumnNames" value="true"/>
+        </table>
 
         <!--<table tableName="task_support" domainObjectName="TaskSupport">-->
         <!--<property name="useActualColumnNames" value="true"/>-->

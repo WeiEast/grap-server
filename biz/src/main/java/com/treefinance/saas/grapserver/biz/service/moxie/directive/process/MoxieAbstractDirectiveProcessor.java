@@ -1,11 +1,6 @@
 package com.treefinance.saas.grapserver.biz.service.moxie.directive.process;
 
 import com.alibaba.fastjson.JSON;
-import com.datatrees.toolkits.util.crypto.RSA;
-import com.datatrees.toolkits.util.crypto.core.Decryptor;
-import com.datatrees.toolkits.util.crypto.core.Encryptor;
-import com.datatrees.toolkits.util.json.Jackson;
-import com.google.common.collect.Maps;
 import com.treefinance.saas.grapserver.biz.service.AppLicenseService;
 import com.treefinance.saas.grapserver.biz.service.TaskAttributeService;
 import com.treefinance.saas.grapserver.biz.service.TaskNextDirectiveService;
@@ -13,22 +8,16 @@ import com.treefinance.saas.grapserver.biz.service.TaskService;
 import com.treefinance.saas.grapserver.biz.service.directive.process.CallbackableDirectiveProcessor;
 import com.treefinance.saas.grapserver.common.enums.ETaskStatus;
 import com.treefinance.saas.grapserver.common.enums.moxie.EMoxieDirective;
-import com.treefinance.saas.grapserver.common.exception.CallbackEncryptException;
-import com.treefinance.saas.grapserver.common.exception.CryptorException;
 import com.treefinance.saas.grapserver.common.model.dto.TaskDTO;
 import com.treefinance.saas.grapserver.common.model.dto.moxie.MoxieDirectiveDTO;
 import com.treefinance.saas.grapserver.common.utils.JsonUtils;
-import com.treefinance.saas.grapserver.dao.entity.AppLicense;
 import com.treefinance.saas.grapserver.dao.entity.TaskAttribute;
+import com.treefinance.saas.grapserver.facade.enums.ETaskAttribute;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
-import java.util.Map;
 
 public abstract class MoxieAbstractDirectiveProcessor extends CallbackableDirectiveProcessor implements MoxieDirectiveProcessor {
 
@@ -66,7 +55,7 @@ public abstract class MoxieAbstractDirectiveProcessor extends CallbackableDirect
         Long taskId = directiveDTO.getTaskId();
         if (taskId == null) {
             String moxieTaskId = directiveDTO.getMoxieTaskId();
-            TaskAttribute taskAttribute = taskAttributeService.findByNameAndValue("moxie-taskId", moxieTaskId, false);
+            TaskAttribute taskAttribute = taskAttributeService.findByNameAndValue(ETaskAttribute.FUND_MOXIE_TASKID.getAttribute(), moxieTaskId, false);
             if (taskAttribute == null) {
                 logger.error("handle moxie directive error : moxieTaskId={} doesn't have taskId matched in task_attribute", moxieTaskId);
                 return;
@@ -94,12 +83,10 @@ public abstract class MoxieAbstractDirectiveProcessor extends CallbackableDirect
         try {
             this.doProcess(directive, directiveDTO);
         } finally {
-            taskNextDirectiveService.insert(taskId, directiveDTO.getDirective());
-            taskNextDirectiveService.putNextDirectiveToRedis(taskId, JsonUtils.toJsonString(directiveDTO, "task"));
+            taskNextDirectiveService.insertAndCacheNextDirective(taskId, directiveDTO);
             logger.info("handle moxie directive completed  cost {} ms : directive={}", System.currentTimeMillis() - start, JSON.toJSONString(directiveDTO));
         }
     }
-
 
 
     protected <T> T ifNull(T value, T defaultValue) {

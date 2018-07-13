@@ -69,8 +69,7 @@ public abstract class AbstractDirectiveProcessor extends CallbackableDirectivePr
             this.doProcess(directive, directiveDTO);
         } finally {
             qrCodeAccountNoLogService.logQRCodeAccountNo(taskId);
-            taskNextDirectiveService.insert(taskId, directiveDTO.getDirective());
-            taskNextDirectiveService.putNextDirectiveToRedis(taskId, JsonUtils.toJsonString(directiveDTO, "task"));
+            taskNextDirectiveService.insertAndCacheNextDirective(taskId, directiveDTO);
             logger.info("process directive completed  cost {} ms : directive={}", System.currentTimeMillis() - start, JSON.toJSONString(directiveDTO));
         }
     }

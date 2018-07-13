@@ -14,7 +14,7 @@ import com.google.common.collect.Maps;
 import com.treefinance.commonservice.facade.location.GeoCoordSysType;
 import com.treefinance.commonservice.facade.location.GeoPosition;
 import com.treefinance.commonservice.facade.location.GeocodeService;
-import com.treefinance.saas.grapserver.biz.config.DiamondConfig;
+import com.treefinance.saas.grapserver.biz.cache.RedisDao;
 import com.treefinance.saas.grapserver.biz.service.TaskAttributeService;
 import com.treefinance.saas.grapserver.biz.service.TaskLogService;
 import com.treefinance.saas.grapserver.biz.service.TaskNextDirectiveService;
@@ -30,6 +30,7 @@ import com.treefinance.saas.grapserver.common.model.vo.moxie.MoxieCityInfoVO;
 import com.treefinance.saas.grapserver.common.utils.JsonUtils;
 import com.treefinance.saas.grapserver.dao.entity.TaskAttribute;
 import com.treefinance.saas.grapserver.dao.entity.TaskLog;
+import com.treefinance.saas.grapserver.facade.enums.ETaskAttribute;
 import com.treefinance.saas.processor.thirdparty.facade.fund.FundService;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
@@ -38,13 +39,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
@@ -72,11 +73,9 @@ public class MoxieBusinessService implements InitializingBean {
     @Autowired
     private TaskService taskService;
     @Autowired
-    private DiamondConfig diamondConfig;
-    @Autowired
     private MoxieTimeoutService moxieTimeoutService;
     @Autowired
-    private RedisTemplate<String, String> redisTemplate;
+    private RedisDao redisDao;
     @Autowired
     private GeocodeService geocodeService;
 
@@ -119,7 +118,7 @@ public class MoxieBusinessService implements InitializingBean {
             logger.error("handle moxie business error: moxieTaskId={} is null", moxieTaskId);
             return;
         }
-        TaskAttribute taskAttribute = taskAttributeService.findByNameAndValue("moxie-taskId", moxieTaskId, false);
+        TaskAttribute taskAttribute = taskAttributeService.findByNameAndValue(ETaskAttribute.FUND_MOXIE_TASKID.getAttribute(), moxieTaskId, false);
         if (taskAttribute == null) {
             logger.error("handle moxie business error: moxieTaskId={} doesn't have taskId matched in task_attribute", moxieTaskId);
             return;
@@ -178,7 +177,7 @@ public class MoxieBusinessService implements InitializingBean {
             logger.error("handle moxie business error: moxieTaskId={} is null", moxieTaskId);
             return;
         }
-        TaskAttribute taskAttribute = taskAttributeService.findByNameAndValue("moxie-taskId", moxieTaskId, false);
+        TaskAttribute taskAttribute = taskAttributeService.findByNameAndValue(ETaskAttribute.FUND_MOXIE_TASKID.getAttribute(), moxieTaskId, false);
         if (taskAttribute == null) {
             logger.error("handle moxie business error: moxieTaskId={} doesn't have taskId matched in task_attribute", moxieTaskId);
             return;
@@ -256,7 +255,7 @@ public class MoxieBusinessService implements InitializingBean {
      */
     private Map<String, Object> requireCaptcha(Long taskId) {
         Map<String, Object> map = Maps.newHashMap();
-        TaskAttribute taskAttribute = taskAttributeService.findByName(taskId, "moxie-taskId", false);
+        TaskAttribute taskAttribute = taskAttributeService.findByName(taskId, ETaskAttribute.FUND_MOXIE_TASKID.getAttribute(), false);
         if (taskAttribute == null) {
             logger.error("handle moxie business error : taskId={} doesn't have moxieTaskId matched in task_attribute", taskId);
             return map;
@@ -278,13 +277,9 @@ public class MoxieBusinessService implements InitializingBean {
                 moxieCaptchaDTO.setValue(value);
                 moxieCaptchaDTO.setWaitSeconds(waitSeconds);
                 //短信验证码需要自定义一个不同的value值,区分是两次不同的验证码请求,供前端轮询比较
-                String key = Joiner.on(":").useForNull("null").join(VERIFY_CODE_SMS_COUNT_PREFIX, taskId);
-                int inputCount = 0;
-                if (StringUtils.isNotBlank(redisTemplate.opsForValue().get(key))) {
-                    inputCount = Integer.valueOf(redisTemplate.opsForValue().get(key));
-                }
+                int inputCount = Optional.ofNullable(this.getVerifyCodeCount(taskId)).orElse(0);
                 if (StringUtils.equalsIgnoreCase(type, "sms")) {//需要短信验证码
-                    moxieCaptchaDTO.setValue(redisTemplate.opsForValue().get(key));
+                    moxieCaptchaDTO.setValue(inputCount + "");
                     map.put("directive", "require_sms");
                     map.put("information", moxieCaptchaDTO);
                     logger.info("魔蝎公积金任务需要短信验证码,moxieCaptchaDTO={},taskId={}", JSON.toJSONString(moxieCaptchaDTO), taskId);
@@ -352,7 +347,7 @@ public class MoxieBusinessService implements InitializingBean {
 
         //1.轮询指令,已经提交过登录,获取魔蝎异步回调登录状态
         Map<String, Object> map = Maps.newHashMap();
-        TaskAttribute attribute = taskAttributeService.findByName(taskId, "moxie-taskId", false);
+        TaskAttribute attribute = taskAttributeService.findByName(taskId, ETaskAttribute.FUND_MOXIE_TASKID.getAttribute(), false);
         if (attribute != null && StringUtils.isNotBlank(attribute.getValue())) {
             logger.info("taskId={}已生成魔蝎任务moxieTaskId={},执行查询指令(验证登录是否超时,判断登录是否需要验证码,等待回调登录成功失败状态),等待魔蝎异步回调登录状态...",
                     taskId, attribute.getValue());
@@ -379,7 +374,7 @@ public class MoxieBusinessService implements InitializingBean {
 
         }
         //3.魔蝎任务创建成功,写入task_attribute,开始轮询此接口,等待魔蝎回调登录状态信息
-        taskAttributeService.insertOrUpdateSelective(taskId, "moxie-taskId", moxieId);
+        taskAttributeService.insertOrUpdateSelective(taskId, ETaskAttribute.FUND_MOXIE_TASKID.getAttribute(), moxieId);
         //魔蝎任务创建成功,记录登录account,登录失败重试会更新accountNo
         taskService.updateTask(taskId, params.getAccount(), null);
         //魔蝎任务创建成功,记录任务创建时间,查询登录状态时判断登录是否超时.
@@ -433,7 +428,7 @@ public class MoxieBusinessService implements InitializingBean {
                     taskNextDirectiveService.deleteNextDirective(taskId, directiveMessage.getDirective());
                     if (StringUtils.equals(directiveMessage.getDirective(), EMoxieDirective.LOGIN_FAIL.getText())) {
                         // 登录失败(如用户名密码错误),需删除task_attribute中此taskId对应的moxieTaskId,重新登录时,可正常轮询/login/submit接口
-                        taskAttributeService.insertOrUpdateSelective(taskId, "moxie-taskId", "");
+                        taskAttributeService.insertOrUpdateSelective(taskId, ETaskAttribute.FUND_MOXIE_TASKID.getAttribute(), "");
                     }
                 }
                 if (directive.getStepCode() > 1) {
@@ -508,12 +503,39 @@ public class MoxieBusinessService implements InitializingBean {
     public void verifyCodeInput(Long taskId, String moxieTaskId, String input) {
         fundMoxieService.submitTaskInput(moxieTaskId, input);
         logger.info("taskId={}公积金输入验证码moxieTaskId={},input={}", taskId, moxieTaskId, input);
-        String key = Joiner.on(":").useForNull("null").join(VERIFY_CODE_SMS_COUNT_PREFIX, taskId);
-        Long count = redisTemplate.opsForValue().increment(key, 1);
-        redisTemplate.opsForValue().getOperations().expire(key, 5, TimeUnit.MINUTES);
+        Integer count = this.incrVerifyCodeCount(taskId);
         logger.info("公积金taskId={}输入验证码次数+1,count={}", taskId, count);
 
 
+    }
+
+    @Transactional
+    private Integer incrVerifyCodeCount(Long taskId) {
+        int count = 1;
+        TaskAttribute taskAttribute = taskAttributeService.findByName(taskId, ETaskAttribute.FUND_MOXIE_VERIFY_CODE_COUNT.getAttribute(), false);
+        if (taskAttribute != null) {
+            count = Integer.parseInt(taskAttribute.getValue()) + 1;
+        }
+        taskAttributeService.insertOrUpdateSelective(taskId, ETaskAttribute.FUND_MOXIE_VERIFY_CODE_COUNT.getAttribute(), count + "");
+        String key = Joiner.on(":").useForNull("null").join(VERIFY_CODE_SMS_COUNT_PREFIX, taskId);
+        redisDao.incrBy(key, 1, 5, TimeUnit.MINUTES);
+        return count;
+    }
+
+    private Integer getVerifyCodeCount(Long taskId) {
+        String key = Joiner.on(":").useForNull("null").join(VERIFY_CODE_SMS_COUNT_PREFIX, taskId);
+        String value = redisDao.get(key);
+        if (StringUtils.isNotBlank(value)) {
+            return Integer.parseInt(value);
+        } else {
+            TaskAttribute taskAttribute = taskAttributeService.findByName(taskId, ETaskAttribute.FUND_MOXIE_VERIFY_CODE_COUNT.getAttribute(), false);
+            if (taskAttribute == null) {
+                return null;
+            }
+            value = taskAttribute.getValue();
+            redisDao.setEx(key, value, 5, TimeUnit.MINUTES);
+            return Integer.parseInt(value);
+        }
     }
 
     public Object getCurrentProvince(Double latitude, Double longitude) {
@@ -539,4 +561,5 @@ public class MoxieBusinessService implements InitializingBean {
         map.put("list", currentList.get(0).getList());
         return map;
     }
+
 }

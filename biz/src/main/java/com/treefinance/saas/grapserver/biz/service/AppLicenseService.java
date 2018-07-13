@@ -101,10 +101,6 @@ public class AppLicenseService {
         SetAppLicenseResult appLicenseResult = result.getData();
 
         return appLicenseResult.getKey();
-//
-//        String key = APPID_SUFFIX + appLicense.getAppId();
-//        stringRedisTemplate.opsForValue().set(key, JSON.toJSONString(appLicense));
-//        return key;
     }
 
     public String getDataKey(String appId) {

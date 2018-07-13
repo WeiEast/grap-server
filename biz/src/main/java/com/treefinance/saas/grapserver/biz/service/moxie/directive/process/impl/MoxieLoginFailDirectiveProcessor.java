@@ -8,6 +8,7 @@ import com.treefinance.saas.grapserver.common.model.dto.TaskDTO;
 import com.treefinance.saas.grapserver.common.model.dto.moxie.MoxieDirectiveDTO;
 import com.treefinance.saas.grapserver.common.utils.JsonUtils;
 import com.treefinance.saas.grapserver.dao.entity.TaskAttribute;
+import com.treefinance.saas.grapserver.facade.enums.ETaskAttribute;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -24,7 +25,7 @@ public class MoxieLoginFailDirectiveProcessor extends MoxieAbstractDirectiveProc
     @Transactional
     protected void doProcess(EMoxieDirective directive, MoxieDirectiveDTO directiveDTO) {
         TaskDTO taskDTO = directiveDTO.getTask();
-        TaskAttribute taskAttribute = taskAttributeService.findByName(taskDTO.getId(), "moxie-taskId", false);
+        TaskAttribute taskAttribute = taskAttributeService.findByName(taskDTO.getId(), ETaskAttribute.FUND_MOXIE_TASKID.getAttribute(), false);
         String moxieTaskId = "";
         if (taskAttribute != null) {
             moxieTaskId = taskAttribute.getValue();

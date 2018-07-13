@@ -4,6 +4,7 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.google.common.collect.Maps;
+import com.treefinance.saas.grapserver.biz.cache.RedisDao;
 import com.treefinance.saas.grapserver.biz.service.AppBizTypeService;
 import com.treefinance.saas.grapserver.biz.service.TaskAttributeService;
 import com.treefinance.saas.grapserver.biz.service.TaskLogService;
@@ -17,14 +18,15 @@ import com.treefinance.saas.grapserver.common.utils.GrapDateUtils;
 import com.treefinance.saas.grapserver.common.utils.JsonUtils;
 import com.treefinance.saas.grapserver.dao.entity.AppBizType;
 import com.treefinance.saas.grapserver.dao.entity.Task;
+import com.treefinance.saas.grapserver.dao.entity.TaskAttribute;
 import com.treefinance.saas.grapserver.dao.mapper.TaskMapper;
+import com.treefinance.saas.grapserver.facade.enums.ETaskAttribute;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateFormatUtils;
 import org.apache.commons.lang3.time.DateUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -47,8 +49,6 @@ public class MoxieTimeoutService {
     private static int LOGIN_TIME_TIMEOUT = 90;//登录超时时间90s
 
     @Autowired
-    private RedisTemplate<String, String> redisTemplate;
-    @Autowired
     private TaskMapper taskMapper;
     @Autowired
     private AppBizTypeService appBizTypeService;
@@ -58,6 +58,8 @@ public class MoxieTimeoutService {
     private MoxieDirectiveService moxieDirectiveService;
     @Autowired
     private TaskAttributeService taskAttributeService;
+    @Autowired
+    private RedisDao redisDao;
 
     /**
      * 本地任务缓存
@@ -75,18 +77,16 @@ public class MoxieTimeoutService {
      * @return
      */
     public boolean isLoginTaskTimeout(Long taskId) {
-        String key = LOGIN_TIME_PREFIX + taskId;
-        String value = redisTemplate.opsForValue().get(key);
-        if (StringUtils.isBlank(value)) {
-            logger.info("公积金登录超时,taskId={}登录时间记录key={}已失效,需检查魔蝎登录状态回调接口是否异常", taskId, key);
+        Date date = this.getLoginTime(taskId);
+        if (date == null) {
+            logger.info("公积金登录超时,taskId={}未查询到登录时间,需检查魔蝎登录状态回调接口是否异常", taskId);
             return true;
         }
-        Date date = GrapDateUtils.getDateByStr(value);
         Date timeoutDate = DateUtils.addSeconds(date, LOGIN_TIME_TIMEOUT);
         Date nowDate = GrapDateUtils.nowDateTime();
         if (nowDate.after(timeoutDate)) {
-            logger.info("公积金登录超时,taskId={}登录时间超过{}s,登录时间记录key={},value={},需检查魔蝎登录状态回调接口是否异常",
-                    taskId, LOGIN_TIME_TIMEOUT, key, value);
+            logger.info("公积金登录超时,taskId={}登录时间超过{}s,登录时间为value={},需检查魔蝎登录状态回调接口是否异常",
+                    taskId, LOGIN_TIME_TIMEOUT, GrapDateUtils.getDateStrByDate(date));
             return true;
         }
         return false;
@@ -98,8 +98,42 @@ public class MoxieTimeoutService {
      * @param taskId
      */
     public void logLoginTime(Long taskId) {
+        taskAttributeService.insertOrUpdateSelective(taskId, ETaskAttribute.LOGIN_TIME.getAttribute(), GrapDateUtils.nowDateTimeStr());
+
         String key = LOGIN_TIME_PREFIX + taskId;
-        redisTemplate.opsForValue().set(key, GrapDateUtils.nowDateTimeStr(), 10, TimeUnit.MINUTES);
+        redisDao.setEx(key, GrapDateUtils.nowDateTimeStr(), 10, TimeUnit.MINUTES);
+    }
+
+    public void logLoginTime(Long taskId, Date date) {
+        taskAttributeService.insertOrUpdateSelective(taskId, ETaskAttribute.LOGIN_TIME.getAttribute(), GrapDateUtils.getDateStrByDate(date));
+
+        String key = LOGIN_TIME_PREFIX + taskId;
+        redisDao.setEx(key, GrapDateUtils.getDateStrByDate(date), 10, TimeUnit.MINUTES);
+    }
+
+    /**
+     * 获取登录时间
+     *
+     * @param taskId
+     * @return
+     */
+    public Date getLoginTime(Long taskId) {
+        String key = LOGIN_TIME_PREFIX + taskId;
+        String value = redisDao.get(key);
+        if (StringUtils.isNotBlank(value)) {
+            return GrapDateUtils.getDateByStr(value);
+        } else {
+            TaskAttribute taskAttribute = taskAttributeService.findByName(taskId, ETaskAttribute.LOGIN_TIME.getAttribute(), false);
+            if (taskAttribute == null) {
+                logger.info("公积金登录超时,taskId={}登录时间记录key={}已失效,需检查魔蝎登录状态回调接口是否异常", taskId, key);
+                return null;
+            }
+            value = taskAttribute.getValue();
+            Date date = GrapDateUtils.getDateByStr(value);
+            //重新set redis
+            this.logLoginTime(taskId, date);
+            return date;
+        }
     }
 
     /**
@@ -108,18 +142,7 @@ public class MoxieTimeoutService {
      * @param taskId
      */
     public void resetLoginTaskTimeOut(Long taskId) {
-        String key = LOGIN_TIME_PREFIX + taskId;
-        redisTemplate.opsForValue().set(key, GrapDateUtils.nowDateTimeStr(), 10, TimeUnit.MINUTES);
-    }
-
-    public Date getLoginTime(Long taskId) {
-        String key = LOGIN_TIME_PREFIX + taskId;
-        String value = redisTemplate.opsForValue().get(key);
-        if (StringUtils.isBlank(value)) {
-            logger.info("公积金登录超时,taskId={}登录时间记录key={}已失效,需检查魔蝎登录状态回调接口是否异常", taskId, key);
-            return null;
-        }
-        return GrapDateUtils.getDateByStr(value);
+        this.logLoginTime(taskId);
     }
 
 
@@ -203,7 +226,7 @@ public class MoxieTimeoutService {
         this.resetLoginTaskTimeOut(taskId);
 
         // 登录失败(如用户名密码错误),需删除task_attribute中此taskId对应的moxieTaskId,重新登录时,可正常轮询/login/submit接口
-        taskAttributeService.insertOrUpdateSelective(taskId, "moxie-taskId", "");
+        taskAttributeService.insertOrUpdateSelective(taskId, ETaskAttribute.FUND_MOXIE_TASKID.getAttribute(), "");
 
         //记录登录超时日志
         Map<String, Object> map = Maps.newHashMap();

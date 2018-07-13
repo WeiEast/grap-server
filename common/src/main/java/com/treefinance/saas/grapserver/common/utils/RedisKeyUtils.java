@@ -75,9 +75,9 @@ public class RedisKeyUtils {
      *
      * @return
      */
-    public static String genLoginedTaskSetKey() {
-        return PREFIX_LOGIN_TASK_SET_KEY;
-    }
+//    public static String genLoginedTaskSetKey() {
+//        return PREFIX_LOGIN_TASK_SET_KEY;
+//    }
 
 
 }
