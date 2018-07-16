@@ -149,11 +149,4 @@ public class TaskNextDirectiveService {
             logger.info("taskId={},下一指令信息已删除", taskId);
         }
     }
-
-    public static void main(String[] args) {
-        DirectiveDTO directiveDTO = new DirectiveDTO();
-        directiveDTO.setTaskId(directiveDTO.getTaskId());
-        directiveDTO.setDirective(directiveDTO.getDirective());
-        directiveDTO.setRemark(directiveDTO.getRemark());
-    }
 }
