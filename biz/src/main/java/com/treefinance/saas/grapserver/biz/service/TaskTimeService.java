@@ -191,13 +191,17 @@ public class TaskTimeService {
         Map<String, Object> lockMap = Maps.newHashMap();
         String lockKey = RedisKeyUtils.genRedisLockKey("task-crawler-time-job", Constants.SAAS_ENV_VALUE);
         try {
+            Date startTime = new Date();
             lockMap = redisDao.acquireLock(lockKey, 60 * 1000L);
             if (MapUtils.isEmpty(lockMap)) {
                 return;
             }
+            Date endTime = DateUtils.addMinutes(startTime, -60);
             TaskCriteria criteria = new TaskCriteria();
             criteria.createCriteria().andStatusEqualTo(ETaskStatus.RUNNING.getStatus())
-                    .andSaasEnvEqualTo(Byte.parseByte(Constants.SAAS_ENV_VALUE));
+                    .andSaasEnvEqualTo(Byte.parseByte(Constants.SAAS_ENV_VALUE))
+                    .andCreateTimeGreaterThanOrEqualTo(endTime)
+                    .andCreateTimeLessThan(startTime);
             List<Task> tasks = taskMapper.selectByExample(criteria);
             for (Task task : tasks) {
                 if (this.isTaskTimeout(task.getId())) {
