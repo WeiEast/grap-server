@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.Map;
 
 /**
+ * 前端提交扫描二维码
  * Created by luyuan on 2017/5/2.
  */
 
@@ -32,7 +33,6 @@ public class SpecialController {
     @Autowired
     private TaskNextDirectiveService taskNextDirectiveService;
 
-    //这个应该没人调用了吧,路由都没有标注grap
     @RequestMapping(value = "/qrscan/checking", method = {RequestMethod.POST})
     public Object qrCheck(
             @RequestParam() String directiveId,
@@ -42,9 +42,7 @@ public class SpecialController {
         if (StringUtils.isNotEmpty(result.getData()) && (result.getData().equals(EQRResult.FAILED.toString()) ||
                 result.getData().equals(EQRResult.SUCCESS.toString()) ||
                 result.getData().equals(EQRResult.SKIP.toString()))) {
-//            if (!taskNextDirectiveService.isTaskCompleted(taskid)){
-//                taskNextDirectiveService.deleteNextDirective(taskid, null);
-//            }
+            taskNextDirectiveService.deleteNextDirective(taskid);
         }
         Map<String, Object> map = Maps.newHashMap();
         map.put("result", result.getData());
