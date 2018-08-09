@@ -24,6 +24,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.util.List;
 import java.util.Map;
 
+@Deprecated
 //@RestController
 //@RequestMapping(value = {"/operator", "/h5/operator", "/grap/h5/operator", "/grap/operator"})
 public class BakOperatorController {

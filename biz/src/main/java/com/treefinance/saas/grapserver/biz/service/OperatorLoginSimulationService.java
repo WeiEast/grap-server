@@ -27,6 +27,7 @@ import java.util.Map;
 /**
  * Created by luoyihua on 2017/5/5.
  */
+@Deprecated
 @Service
 public class OperatorLoginSimulationService {
     private static final Logger logger = LoggerFactory.getLogger(OperatorLoginSimulationService.class);

@@ -1,8 +1,8 @@
 package com.treefinance.saas.grapserver.web.controller;
 
 import com.alibaba.fastjson.JSON;
-import com.datatrees.spider.operator.domain.OperatorParam;
-import com.treefinance.saas.grapserver.biz.service.OperatorExtendLoginService;
+import com.datatrees.rawdatacentral.domain.operator.OperatorParam;
+import com.treefinance.saas.grapserver.biz.service.BakOperatorExtendLoginService;
 import com.treefinance.saas.grapserver.common.enums.EBizType;
 import com.treefinance.saas.knife.result.SimpleResult;
 import org.apache.commons.lang3.StringUtils;
@@ -17,13 +17,14 @@ import org.springframework.web.servlet.ModelAndView;
 
 import java.util.Map;
 
+@Deprecated
 @RestController
-@RequestMapping(value = {"/operator", "/h5/operator", "/grap/h5/operator", "/grap/operator"})
-public class OperatorController {
-    private static final Logger logger = LoggerFactory.getLogger(OperatorController.class);
+@RequestMapping(value = {"/bak2/operator", "/bak2/h5/operator", "/bak2/grap/h5/operator", "/bak2/grap/operator"})
+public class Bak2OperatorController {
+    private static final Logger logger = LoggerFactory.getLogger(Bak2OperatorController.class);
 
     @Autowired
-    private OperatorExtendLoginService operatorExtendLoginService;
+    private BakOperatorExtendLoginService bakOperatorExtendLoginService;
 
 
     /**
@@ -36,6 +37,25 @@ public class OperatorController {
         ModelAndView modelAndView = new ModelAndView("forward:/start");
         modelAndView.addObject("bizType", EBizType.OPERATOR.getText());
         return modelAndView;
+    }
+
+    /**
+     * 运营商获取配置
+     * 返回商户配置信息,运营商分组信息,以及各运营商登录配置信息
+     *
+     * @param appid
+     * @return
+     */
+    @RequestMapping(value = "/config", method = {RequestMethod.POST})
+    public Object getConfig(@RequestParam String appid,
+                            @RequestParam("taskid") Long taskId,
+                            @RequestParam(value = "style", required = false) String style) {
+        if (StringUtils.isBlank(appid) || taskId == null) {
+            logger.error("运营商:获取配置,参数缺失,appid,taskid必传,appid={},taskId={}", appid, taskId);
+            throw new IllegalArgumentException("运营商:获取配置,参数缺失,appid,taskid必传");
+        }
+        Map<String, Object> map = bakOperatorExtendLoginService.getConfig(appid, taskId, style);
+        return SimpleResult.successResult(map);
     }
 
     /**
@@ -54,7 +74,7 @@ public class OperatorController {
             logger.error("运营商:获取商户配置与运营商分组信息,参数缺失,appid,taskid必传,appid={},taskId={}", appid, taskId);
             throw new IllegalArgumentException("运营商:获取配置,参数缺失,appid,taskid必传");
         }
-        Object result = operatorExtendLoginService.getConfigAndGroups(appid, taskId, style);
+        Object result = bakOperatorExtendLoginService.getConfigAndGroups(appid, taskId, style);
         logger.info("运营商:获取商户配置与运营商分组信息,返回结果,result={}", JSON.toJSONString(result));
         return result;
     }
@@ -68,7 +88,7 @@ public class OperatorController {
     @RequestMapping(value = "/config/prelogin", method = {RequestMethod.POST})
     public Object preLoginConfig(OperatorParam operatorParam) {
         logger.info("运营商:获取运营商登陆配置信息,传入参数,operatorParam={}", JSON.toJSONString(operatorParam));
-        Object result = operatorExtendLoginService.preLoginConfig(operatorParam);
+        Object result = bakOperatorExtendLoginService.preLoginConfig(operatorParam);
         logger.info("运营商:获取运营商登陆配置信息,返回结果,operatorParam={},result={}", JSON.toJSONString(operatorParam), JSON.toJSONString(result));
         return result;
     }
@@ -81,8 +101,9 @@ public class OperatorController {
      * @return
      */
     @RequestMapping(value = "/mobile/attribution", method = {RequestMethod.POST})
+
     public Object mobileAttribution(@RequestParam("mobile") String mobile) {
-        Map<String, Object> map = operatorExtendLoginService.getMobileAttribution(mobile);
+        Map<String, Object> map = bakOperatorExtendLoginService.getMobileAttribution(mobile);
         return SimpleResult.successResult(map);
     }
 
@@ -102,7 +123,7 @@ public class OperatorController {
                     JSON.toJSONString(operatorParam));
             throw new IllegalArgumentException("运营商:准备登陆(登陆初始化),获取基本信息,参数缺失,taskId,websiteName,mobile,groupCode,groupName必传");
         }
-        Object result = operatorExtendLoginService.prepare(operatorParam);
+        Object result = bakOperatorExtendLoginService.prepare(operatorParam);
         logger.info("运营商:准备登陆(登陆初始化),获取基本信息,返回结果,operatorParam={},result={}", JSON.toJSONString(operatorParam), JSON.toJSONString(result));
         return result;
     }
@@ -116,7 +137,7 @@ public class OperatorController {
     @RequestMapping(value = "/loginpage/pic/captcha", method = {RequestMethod.POST})
     public Object picCaptcha(OperatorParam operatorParam) {
         logger.info("运营商:刷新图片验证码,传入参数,operatorParam={}", JSON.toJSONString(operatorParam));
-        Object result = operatorExtendLoginService.refreshPicCode(operatorParam);
+        Object result = bakOperatorExtendLoginService.refreshPicCode(operatorParam);
         logger.info("运营商:刷新图片验证码,返回结果,operatorParam={},result={}", JSON.toJSONString(operatorParam), JSON.toJSONString(result));
         return result;
     }
@@ -130,7 +151,7 @@ public class OperatorController {
     @RequestMapping(value = "/loginpage/sms/captcha", method = {RequestMethod.POST})
     public Object smsCaptcha(OperatorParam operatorParam) {
         logger.info("运营商:刷新短信验证码,传入参数,operatorParam={}", JSON.toJSONString(operatorParam));
-        Object result = operatorExtendLoginService.refreshSmsCode(operatorParam);
+        Object result = bakOperatorExtendLoginService.refreshSmsCode(operatorParam);
         logger.info("运营商:刷新短信验证码,返回结果,operatorParam={},result={}", JSON.toJSONString(operatorParam), JSON.toJSONString(result));
         return result;
     }
@@ -149,7 +170,7 @@ public class OperatorController {
             logger.error("运营商:登陆,参数缺失,taskId必传,operatorParam={}", JSON.toJSONString(operatorParam));
             throw new IllegalArgumentException("运营商:登陆,参数缺失,taskId必传");
         }
-        Object result = operatorExtendLoginService.login(operatorParam);
+        Object result = bakOperatorExtendLoginService.login(operatorParam);
         logger.info("运营商:登陆,返回结果,operatorParam={},result={}", JSON.toJSONString(operatorParam), JSON.toJSONString(result));
         return result;
     }

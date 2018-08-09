@@ -4,10 +4,9 @@ package com.treefinance.saas.merchantcenter;
 import com.treefinance.saas.grapserver.biz.service.AppBizTypeService;
 import com.treefinance.saas.grapserver.biz.service.AppCallbackConfigService;
 import com.treefinance.saas.grapserver.biz.service.AppColorConfigService;
-import com.treefinance.saas.grapserver.biz.service.OperatorExtendLoginService;
+import com.treefinance.saas.grapserver.biz.service.BakOperatorExtendLoginService;
 import com.treefinance.saas.grapserver.common.model.dto.AppCallbackConfigDTO;
 import com.treefinance.saas.grapserver.dao.entity.AppBizType;
-import com.treefinance.saas.grapserver.dao.entity.AppCallbackConfig;
 import com.treefinance.saas.grapserver.dao.entity.AppColorConfig;
 import com.treefinance.saas.grapserver.facade.model.MerchantBaseInfoRO;
 import com.treefinance.saas.grapserver.facade.service.MerchantFacade;
@@ -35,7 +34,7 @@ public class MerchantCenterTest {
 
     private static final Logger logger = LoggerFactory.getLogger(MerchantCenterTest.class);
     @Autowired
-    OperatorExtendLoginService operatorExtendLoginService;
+    BakOperatorExtendLoginService bakOperatorExtendLoginService;
 
     @Autowired
     MerchantFacade merchantFacade;
@@ -54,7 +53,7 @@ public class MerchantCenterTest {
     @Test
     public void TestGetConfig() {
         long taskId = new Long(2100000146);
-        Map<String, Object> map = operatorExtendLoginService.getConfig("97a6fbf3c25e1daf", taskId, "DEFAULT");
+        Map<String, Object> map = bakOperatorExtendLoginService.getConfig("97a6fbf3c25e1daf", taskId, "DEFAULT");
         logger.info("map为{}", map.toString());
 
     }
