@@ -92,6 +92,8 @@
     <dubbo:reference id="operatorApi" interface="com.datatrees.spider.operator.api.OperatorApi" timeout="20000"
                      cluster="failfast"/>
 
+    <dubbo:reference id="spiderTaskApi" interface="com.datatrees.spider.share.api.SpiderTaskApi"/>
+
     <!--生产者-->
     <dubbo:service interface="com.treefinance.saas.grapserver.facade.service.TaskFacade" ref="taskFacade"/>
 

@@ -1,6 +1,6 @@
 package com.treefinance.saas.grapserver.biz.service.directive.process.impl;
 
-import com.datatrees.rawdatacentral.api.CrawlerService;
+import com.datatrees.spider.share.api.SpiderTaskApi;
 import com.google.common.collect.Maps;
 import com.treefinance.saas.grapserver.biz.common.AsycExcutor;
 import com.treefinance.saas.grapserver.biz.service.directive.process.AbstractDirectiveProcessor;
@@ -25,7 +25,7 @@ public class CancelDirectiveProcessor extends AbstractDirectiveProcessor {
     @Autowired
     private AsycExcutor asycExcutor;
     @Autowired
-    private CrawlerService crawlerService;
+    private SpiderTaskApi spiderTaskApi;
 
     @Override
     protected void doProcess(EDirective directive, DirectiveDTO directiveDTO) {
@@ -35,7 +35,7 @@ public class CancelDirectiveProcessor extends AbstractDirectiveProcessor {
         taskService.cancelTaskWithStep(taskDTO.getId());
         Map<String, String> extMap = Maps.newHashMap();
         extMap.put("reason", "user");
-        crawlerService.cancel(taskDTO.getId(), extMap);
+        spiderTaskApi.cancel(taskDTO.getId(), extMap);
         monitorService.sendMonitorMessage(taskDTO.getId());
 
         // 异步触发触发回调
