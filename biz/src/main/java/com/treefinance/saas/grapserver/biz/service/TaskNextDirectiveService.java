@@ -66,7 +66,7 @@ public class TaskNextDirectiveService {
      */
     public TaskNextDirective queryRecentDirective(Long taskId) {
         TaskNextDirectiveCriteria criteria = new TaskNextDirectiveCriteria();
-        criteria.setOrderByClause("createTime desc");
+        criteria.setOrderByClause("createTime desc,id desc");
         TaskNextDirectiveCriteria.Criteria innerCriteria = criteria.createCriteria();
         innerCriteria.andTaskIdEqualTo(taskId);
         List<TaskNextDirective> taskNextDirectiveList = taskNextDirectiveMapper.selectByExample(criteria);
