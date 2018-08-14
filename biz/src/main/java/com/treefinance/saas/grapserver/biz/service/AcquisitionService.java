@@ -5,10 +5,10 @@ import com.datatrees.common.util.GsonUtils;
 import com.datatrees.rawdatacentral.api.CrawlerService;
 import com.datatrees.rawdatacentral.domain.result.HttpResult;
 import com.google.gson.reflect.TypeToken;
-import com.treefinance.saas.grapserver.common.enums.EDirective;
 import com.treefinance.saas.grapserver.biz.mq.MessageProducer;
 import com.treefinance.saas.grapserver.biz.mq.MqConfig;
 import com.treefinance.saas.grapserver.biz.mq.model.LoginMessage;
+import com.treefinance.saas.grapserver.common.enums.EDirective;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -69,6 +69,8 @@ public class AcquisitionService {
         taskTimeService.updateLoginTime(taskid, new Date());
     }
 
+    @Deprecated
+    //兴海:这个已经不用了
     public void loginProcess(String directiveId, Long taskid, String html, String cookie) {
         HttpResult<Boolean> res = crawlerService.importAppCrawlResult(directiveId, taskid, html, cookie, null);
         taskNextDirectiveService.deleteNextDirective(taskid, EDirective.GRAB_URL.getText());

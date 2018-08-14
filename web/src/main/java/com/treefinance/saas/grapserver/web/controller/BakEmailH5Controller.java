@@ -2,7 +2,7 @@ package com.treefinance.saas.grapserver.web.controller;
 
 import com.alibaba.fastjson.JSON;
 import com.datatrees.rawdatacentral.domain.plugin.CommonPluginParam;
-import com.treefinance.saas.grapserver.biz.service.EmailLoginSimulationService;
+import com.treefinance.saas.grapserver.biz.service.BakEmailLoginSimulationService;
 import com.treefinance.saas.knife.result.Results;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -16,13 +16,14 @@ import org.springframework.web.bind.annotation.RestController;
 /**
  * Created by haojiahong on 2017/12/26.
  */
+@Deprecated
 @RestController
-@RequestMapping(value = {"/h5/email", "/grap/h5/email",})
-public class EmailH5Controller {
-    private static final Logger logger = LoggerFactory.getLogger(EmailH5Controller.class);
+@RequestMapping(value = {"/bak/h5/email", "/bak/grap/h5/email",})
+public class BakEmailH5Controller {
+    private static final Logger logger = LoggerFactory.getLogger(BakEmailH5Controller.class);
 
     @Autowired
-    private EmailLoginSimulationService emailLoginSimulationService;
+    private BakEmailLoginSimulationService bakEmailLoginSimulationService;
 
 
     //========QQ邮箱==========
@@ -41,7 +42,7 @@ public class EmailH5Controller {
             throw new IllegalArgumentException("邮箱账单:登陆,参数缺失,taskId必传");
         }
         param.setUserIp(userIp);
-        Object result = emailLoginSimulationService.login(param);
+        Object result = bakEmailLoginSimulationService.login(param);
         logger.info("邮箱账单:登陆,返回结果,param={},result={}", JSON.toJSONString(param), JSON.toJSONString(result));
         return result;
     }
@@ -59,7 +60,7 @@ public class EmailH5Controller {
             logger.error("邮箱账单:刷新二维码,参数缺失,taskId必传,param={}", JSON.toJSONString(param));
             throw new IllegalArgumentException("邮箱账单:刷新二维码,参数缺失,taskId必传");
         }
-        Object result = emailLoginSimulationService.refreshQRCode(param);
+        Object result = bakEmailLoginSimulationService.refreshQRCode(param);
         logger.info("邮箱账单:刷新二维码,返回结果,param={},result={}", JSON.toJSONString(param), JSON.toJSONString(result));
         return result;
     }
@@ -78,7 +79,7 @@ public class EmailH5Controller {
             logger.error("邮箱账单:查询二维码状态,参数缺失,taskId必传,param={}", JSON.toJSONString(param));
             throw new IllegalArgumentException("邮箱账单:查询二维码状态,参数缺失,taskId必传");
         }
-        Object result = emailLoginSimulationService.queryQRStatus(param);
+        Object result = bakEmailLoginSimulationService.queryQRStatus(param);
         logger.info("邮箱账单:查询二维码状态,返回结果,param={},result={}", JSON.toJSONString(param), JSON.toJSONString(result));
         return result;
     }
@@ -99,7 +100,7 @@ public class EmailH5Controller {
             throw new IllegalArgumentException("邮箱账单:登陆,参数缺失,taskId必传");
         }
         param.setUserIp(userIp);
-        Object result = emailLoginSimulationService.loginForQQExMail(param);
+        Object result = bakEmailLoginSimulationService.loginForQQExMail(param);
         logger.info("邮箱账单:登陆,返回结果,param={},result={}", JSON.toJSONString(param), JSON.toJSONString(result));
         return result;
     }
@@ -113,7 +114,7 @@ public class EmailH5Controller {
     @RequestMapping(value = "/qq/exmail/login/init", method = {RequestMethod.POST})
     public Object loginInitForQQExMail(CommonPluginParam param) {
         logger.info("邮箱账单:登陆初始化,传入参数,param={}", JSON.toJSONString(param));
-        Object result = emailLoginSimulationService.loginInitForQQExMail(param);
+        Object result = bakEmailLoginSimulationService.loginInitForQQExMail(param);
         logger.info("邮箱账单:登陆初始化,返回结果,param={},result={}", JSON.toJSONString(param), JSON.toJSONString(result));
         return result;
     }
@@ -134,7 +135,7 @@ public class EmailH5Controller {
         }
         param.setUserIp(userIp);
         logger.info("邮箱账单:登陆,传入参数,param={},userIp={}", JSON.toJSONString(param), userIp);
-        Object result = emailLoginSimulationService.loginFor163(param);
+        Object result = bakEmailLoginSimulationService.loginFor163(param);
         logger.info("邮箱账单:登陆,返回结果,param={},result={}", JSON.toJSONString(param), JSON.toJSONString(result));
         return result;
     }
@@ -152,7 +153,7 @@ public class EmailH5Controller {
             logger.error("邮箱账单:刷新二维码,参数缺失,taskId必传,param={}", JSON.toJSONString(param));
             throw new IllegalArgumentException("邮箱账单:刷新二维码,参数缺失,taskId必传");
         }
-        Object result = emailLoginSimulationService.refreshQRCodeFor163(param);
+        Object result = bakEmailLoginSimulationService.refreshQRCodeFor163(param);
         logger.info("邮箱账单:刷新二维码,返回结果,param={},result={}", JSON.toJSONString(param), JSON.toJSONString(result));
         return result;
     }
@@ -171,7 +172,7 @@ public class EmailH5Controller {
             logger.error("邮箱账单:查询二维码状态,参数缺失,taskId必传,param={}", JSON.toJSONString(param));
             throw new IllegalArgumentException("邮箱账单:查询二维码状态,参数缺失,taskId必传");
         }
-        Object result = emailLoginSimulationService.queryQRStatusFor163(param);
+        Object result = bakEmailLoginSimulationService.queryQRStatusFor163(param);
         logger.info("邮箱账单:查询二维码状态,返回结果,param={},result={}", JSON.toJSONString(param), JSON.toJSONString(result));
         return result;
     }
@@ -192,7 +193,7 @@ public class EmailH5Controller {
         }
         param.setUserIp(userIp);
         logger.info("邮箱账单:登陆,传入参数,param={},userIp={}", JSON.toJSONString(param), userIp);
-        Object result = emailLoginSimulationService.loginFor126(param);
+        Object result = bakEmailLoginSimulationService.loginFor126(param);
         logger.info("邮箱账单:登陆,返回结果,param={},result={}", JSON.toJSONString(param), JSON.toJSONString(result));
         return result;
     }
@@ -210,7 +211,7 @@ public class EmailH5Controller {
             logger.error("邮箱账单:刷新二维码,参数缺失,taskId必传,param={}", JSON.toJSONString(param));
             throw new IllegalArgumentException("邮箱账单:刷新二维码,参数缺失,taskId必传");
         }
-        Object result = emailLoginSimulationService.refreshQRCodeFor126(param);
+        Object result = bakEmailLoginSimulationService.refreshQRCodeFor126(param);
         logger.info("邮箱账单:刷新二维码,返回结果,param={},result={}", JSON.toJSONString(param), JSON.toJSONString(result));
         return result;
     }
@@ -229,7 +230,7 @@ public class EmailH5Controller {
             logger.error("邮箱账单:查询二维码状态,参数缺失,taskId必传,param={}", JSON.toJSONString(param));
             throw new IllegalArgumentException("邮箱账单:查询二维码状态,参数缺失,taskId必传");
         }
-        Object result = emailLoginSimulationService.queryQRStatusFor126(param);
+        Object result = bakEmailLoginSimulationService.queryQRStatusFor126(param);
         logger.info("邮箱账单:查询二维码状态,返回结果,param={},result={}", JSON.toJSONString(param), JSON.toJSONString(result));
         return result;
     }
@@ -245,7 +246,7 @@ public class EmailH5Controller {
     @RequestMapping(value = "/sina/login/init", method = {RequestMethod.POST})
     public Object loginInitForSina(CommonPluginParam param) {
         logger.info("邮箱账单:登陆初始化,传入参数,param={}", JSON.toJSONString(param));
-        Object result = emailLoginSimulationService.loginInitForSina(param);
+        Object result = bakEmailLoginSimulationService.loginInitForSina(param);
         logger.info("邮箱账单:登陆初始化,返回结果,param={},result={}", JSON.toJSONString(param), JSON.toJSONString(result));
         return result;
     }
@@ -263,7 +264,7 @@ public class EmailH5Controller {
             throw new IllegalArgumentException("邮箱账单:登陆,参数缺失,taskId必传");
         }
         logger.info("邮箱账单:登陆,传入参数,param={}", JSON.toJSONString(param));
-        Object result = emailLoginSimulationService.loginForSina(param);
+        Object result = bakEmailLoginSimulationService.loginForSina(param);
         logger.info("邮箱账单:登陆,返回结果,param={},result={}", JSON.toJSONString(param), JSON.toJSONString(result));
         return result;
     }
@@ -278,7 +279,7 @@ public class EmailH5Controller {
     @RequestMapping(value = "/sina/refresh/picCode", method = RequestMethod.POST)
     public Object refreshPicCodeForSina(CommonPluginParam param) {
         logger.info("邮箱账单:刷新图片验证码,传入参数,param={}", JSON.toJSONString(param));
-        Object result = emailLoginSimulationService.refreshPicCodeForSina(param);
+        Object result = bakEmailLoginSimulationService.refreshPicCodeForSina(param);
         logger.info("邮箱账单:刷新图片验证码,返回结果,param={},result={}", JSON.toJSONString(param), JSON.toJSONString(result));
         return result;
     }
@@ -303,7 +304,7 @@ public class EmailH5Controller {
         }
         param.setUserIp(userIp);
         logger.info("邮箱账单:查询是否支持当前IP的省份代理,传入参数,param={}", JSON.toJSONString(param));
-        Object result = emailLoginSimulationService.supportProvinceProxy(param);
+        Object result = bakEmailLoginSimulationService.supportProvinceProxy(param);
         logger.info("邮箱账单:查询是否支持当前IP的省份代理,返回结果,param={},result={}", JSON.toJSONString(param), JSON.toJSONString(result));
         return result;
     }
@@ -324,7 +325,7 @@ public class EmailH5Controller {
             logger.error("邮箱账单:轮询处理状态,参数缺失,taskId必传");
             throw new IllegalArgumentException("邮箱账单:轮询处理状态,参数缺失,taskId必传");
         }
-        Object result = emailLoginSimulationService.processStatus(processId, taskId);
+        Object result = bakEmailLoginSimulationService.processStatus(processId, taskId);
         logger.info("邮箱账单:轮询处理状态,返回结果,processId={},taskId={},result={}", processId, taskId, JSON.toJSONString(result));
         return result;
     }

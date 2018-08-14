@@ -257,6 +257,12 @@
         </dependency>
 
         <dependency>
+            <groupId>com.datatrees.spider</groupId>
+            <artifactId>spider-bank-api</artifactId>
+            <version>3.0.4-SNAPSHOT</version>
+        </dependency>
+
+        <dependency>
             <groupId>com.treefinance.saas</groupId>
             <artifactId>merchant-center-facade</artifactId>
             <version>${merchant-center.version}</version>

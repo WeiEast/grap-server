@@ -35,10 +35,11 @@ import java.util.concurrent.TimeUnit;
  * 邮箱账单模拟登陆
  * Created by haojiahong on 2017/12/26.
  */
+@Deprecated
 @Service
-public class EmailLoginSimulationService {
+public class BakEmailLoginSimulationService {
 
-    private static final Logger logger = LoggerFactory.getLogger(EmailLoginSimulationService.class);
+    private static final Logger logger = LoggerFactory.getLogger(BakEmailLoginSimulationService.class);
 
     private static final String EMAIL_LOGIN_PROCESS_KEY_PREFIX = "email_login_key";
 
