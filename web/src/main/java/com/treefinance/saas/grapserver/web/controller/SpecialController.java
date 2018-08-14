@@ -5,6 +5,7 @@ import com.datatrees.rawdatacentral.api.CrawlerService;
 import com.datatrees.rawdatacentral.domain.result.HttpResult;
 import com.google.common.collect.Maps;
 import com.treefinance.saas.grapserver.biz.service.TaskNextDirectiveService;
+import com.treefinance.saas.grapserver.common.enums.EDirective;
 import com.treefinance.saas.grapserver.common.enums.EQRResult;
 import com.treefinance.saas.knife.result.SimpleResult;
 import org.apache.commons.lang3.StringUtils;
@@ -42,7 +43,7 @@ public class SpecialController {
         if (StringUtils.isNotEmpty(result.getData()) && (result.getData().equals(EQRResult.FAILED.toString()) ||
                 result.getData().equals(EQRResult.SUCCESS.toString()) ||
                 result.getData().equals(EQRResult.SKIP.toString()))) {
-            taskNextDirectiveService.deleteNextDirective(taskid);
+            taskNextDirectiveService.deleteNextDirective(taskid, EDirective.REQUIRE_QR.getText());
         }
         Map<String, Object> map = Maps.newHashMap();
         map.put("result", result.getData());
