@@ -1,7 +1,7 @@
 package com.treefinance.saas.grapserver.web.controller;
 
 import com.alibaba.fastjson.JSON;
-import com.datatrees.rawdatacentral.domain.plugin.CommonPluginParam;
+import com.datatrees.spider.share.domain.CommonPluginParam;
 import com.treefinance.saas.grapserver.biz.service.EmailLoginSimulationService;
 import com.treefinance.saas.knife.result.Results;
 import org.apache.commons.lang3.StringUtils;

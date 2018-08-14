@@ -20,32 +20,32 @@
     <dubbo:reference id="appLicenseFacade"
                      interface="com.treefinance.saas.merchant.center.facade.service.AppLicenseFacade" version="1.0.0"/>
 
-    <dubbo:reference id="crawlerOperatorService" interface="com.datatrees.rawdatacentral.api.CrawlerOperatorService"
-                     timeout="20000"/>
+    <!--<dubbo:reference id="crawlerOperatorService" interface="com.datatrees.rawdatacentral.api.CrawlerOperatorService"-->
+    <!--timeout="20000"/>-->
 
     <dubbo:reference id="rpcEducationService" interface="com.datatrees.rawdatacentral.api.RpcEducationService"
                      timeout="20000"/>
 
-    <dubbo:reference id="mailServiceApiForQQ" interface="com.datatrees.rawdatacentral.api.mail.qq.MailServiceApiForQQ"
-                     timeout="20000"/>
+    <!--<dubbo:reference id="mailServiceApiForQQ" interface="com.datatrees.rawdatacentral.api.mail.qq.MailServiceApiForQQ"-->
+    <!--timeout="20000"/>-->
 
-    <dubbo:reference id="mailServiceApiForExMailQQ"
-                     interface="com.datatrees.rawdatacentral.api.mail.exmail_qq.MailServiceApiForExMailQQ"
-                     timeout="20000"/>
+    <!--<dubbo:reference id="mailServiceApiForExMailQQ"-->
+    <!--interface="com.datatrees.rawdatacentral.api.mail.exmail_qq.MailServiceApiForExMailQQ"-->
+    <!--timeout="20000"/>-->
 
-    <dubbo:reference id="mailServiceApiFor163"
-                     interface="com.datatrees.rawdatacentral.api.mail._163.MailServiceApiFor163"
-                     timeout="20000"/>
+    <!--<dubbo:reference id="mailServiceApiFor163"-->
+    <!--interface="com.datatrees.rawdatacentral.api.mail._163.MailServiceApiFor163"-->
+    <!--timeout="20000"/>-->
 
-    <dubbo:reference id="mailServiceApiFor126"
-                     interface="com.datatrees.rawdatacentral.api.mail._126.MailServiceApiFor126"
-                     timeout="20000"/>
+    <!--<dubbo:reference id="mailServiceApiFor126"-->
+    <!--interface="com.datatrees.rawdatacentral.api.mail._126.MailServiceApiFor126"-->
+    <!--timeout="20000"/>-->
 
-    <dubbo:reference id="mailServiceApiForSina"
-                     interface="com.datatrees.rawdatacentral.api.mail.sina.MailServiceApiForSina"
-                     timeout="20000"/>
+    <!--<dubbo:reference id="mailServiceApiForSina"-->
+    <!--interface="com.datatrees.rawdatacentral.api.mail.sina.MailServiceApiForSina"-->
+    <!--timeout="20000"/>-->
 
-    <dubbo:reference id="commonPluginApi" interface="com.datatrees.rawdatacentral.api.CommonPluginApi"/>
+    <!--<dubbo:reference id="commonPluginApi" interface="com.datatrees.rawdatacentral.api.CommonPluginApi"/>-->
 
     <dubbo:reference id="proxyProvider" interface="com.treefinance.proxy.api.ProxyProvider"/>
 
@@ -91,8 +91,14 @@
 
     <dubbo:reference id="operatorApi" interface="com.datatrees.spider.operator.api.OperatorApi" timeout="20000"
                      cluster="failfast"/>
-
     <dubbo:reference id="spiderTaskApi" interface="com.datatrees.spider.share.api.SpiderTaskApi"/>
+    <dubbo:reference id="mailServiceApiForQQ" interface="com.datatrees.spider.bank.api.MailServiceApiForQQ"/>
+    <dubbo:reference id="mailServiceApiForExMailQQ"
+                     interface="com.datatrees.spider.bank.api.MailServiceApiForExMailQQ"/>
+    <dubbo:reference id="mailServiceApiFor163" interface="com.datatrees.spider.bank.api.MailServiceApiFor163"/>
+    <dubbo:reference id="mailServiceApiFor126" interface="com.datatrees.spider.bank.api.MailServiceApiFor126"/>
+    <dubbo:reference id="mailServiceApiForSina" interface="com.datatrees.spider.bank.api.MailServiceApiForSina"/>
+
 
     <!--生产者-->
     <dubbo:service interface="com.treefinance.saas.grapserver.facade.service.TaskFacade" ref="taskFacade"/>
