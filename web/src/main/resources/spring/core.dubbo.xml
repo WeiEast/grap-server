@@ -26,7 +26,8 @@
     <dubbo:reference id="rpcEducationService" interface="com.datatrees.rawdatacentral.api.RpcEducationService"
                      timeout="20000"/>
 
-    <dubbo:reference id="mailServiceApiForQQBak" interface="com.datatrees.rawdatacentral.api.mail.qq.MailServiceApiForQQ"
+    <dubbo:reference id="mailServiceApiForQQBak"
+                     interface="com.datatrees.rawdatacentral.api.mail.qq.MailServiceApiForQQ"
                      timeout="20000"/>
 
     <dubbo:reference id="mailServiceApiForExMailQQBak"
@@ -92,12 +93,16 @@
     <dubbo:reference id="operatorApi" interface="com.datatrees.spider.operator.api.OperatorApi" timeout="20000"
                      cluster="failfast"/>
     <dubbo:reference id="spiderTaskApi" interface="com.datatrees.spider.share.api.SpiderTaskApi"/>
-    <dubbo:reference id="mailServiceApiForQQ" interface="com.datatrees.spider.bank.api.MailServiceApiForQQ"/>
+    <dubbo:reference id="mailServiceApiForQQ" interface="com.datatrees.spider.bank.api.MailServiceApiForQQ"
+                     timeout="20000"/>
     <dubbo:reference id="mailServiceApiForExMailQQ"
-                     interface="com.datatrees.spider.bank.api.MailServiceApiForExMailQQ"/>
-    <dubbo:reference id="mailServiceApiFor163" interface="com.datatrees.spider.bank.api.MailServiceApiFor163"/>
-    <dubbo:reference id="mailServiceApiFor126" interface="com.datatrees.spider.bank.api.MailServiceApiFor126"/>
-    <dubbo:reference id="mailServiceApiForSina" interface="com.datatrees.spider.bank.api.MailServiceApiForSina"/>
+                     interface="com.datatrees.spider.bank.api.MailServiceApiForExMailQQ" timeout="20000"/>
+    <dubbo:reference id="mailServiceApiFor163" interface="com.datatrees.spider.bank.api.MailServiceApiFor163"
+                     timeout="20000"/>
+    <dubbo:reference id="mailServiceApiFor126" interface="com.datatrees.spider.bank.api.MailServiceApiFor126"
+                     timeout="20000"/>
+    <dubbo:reference id="mailServiceApiForSina" interface="com.datatrees.spider.bank.api.MailServiceApiForSina"
+                     timeout="20000"/>
 
 
     <!--生产者-->
