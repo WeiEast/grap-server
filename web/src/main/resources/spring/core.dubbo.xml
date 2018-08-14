@@ -20,32 +20,32 @@
     <dubbo:reference id="appLicenseFacade"
                      interface="com.treefinance.saas.merchant.center.facade.service.AppLicenseFacade" version="1.0.0"/>
 
-    <!--<dubbo:reference id="crawlerOperatorService" interface="com.datatrees.rawdatacentral.api.CrawlerOperatorService"-->
-    <!--timeout="20000"/>-->
+    <dubbo:reference id="crawlerOperatorService" interface="com.datatrees.rawdatacentral.api.CrawlerOperatorService"
+                     timeout="20000"/>
 
     <dubbo:reference id="rpcEducationService" interface="com.datatrees.rawdatacentral.api.RpcEducationService"
                      timeout="20000"/>
 
-    <!--<dubbo:reference id="mailServiceApiForQQ" interface="com.datatrees.rawdatacentral.api.mail.qq.MailServiceApiForQQ"-->
-    <!--timeout="20000"/>-->
+    <dubbo:reference id="mailServiceApiForQQBak" interface="com.datatrees.rawdatacentral.api.mail.qq.MailServiceApiForQQ"
+                     timeout="20000"/>
 
-    <!--<dubbo:reference id="mailServiceApiForExMailQQ"-->
-    <!--interface="com.datatrees.rawdatacentral.api.mail.exmail_qq.MailServiceApiForExMailQQ"-->
-    <!--timeout="20000"/>-->
+    <dubbo:reference id="mailServiceApiForExMailQQBak"
+                     interface="com.datatrees.rawdatacentral.api.mail.exmail_qq.MailServiceApiForExMailQQ"
+                     timeout="20000"/>
 
-    <!--<dubbo:reference id="mailServiceApiFor163"-->
-    <!--interface="com.datatrees.rawdatacentral.api.mail._163.MailServiceApiFor163"-->
-    <!--timeout="20000"/>-->
+    <dubbo:reference id="mailServiceApiFor163Bak"
+                     interface="com.datatrees.rawdatacentral.api.mail._163.MailServiceApiFor163"
+                     timeout="20000"/>
 
-    <!--<dubbo:reference id="mailServiceApiFor126"-->
-    <!--interface="com.datatrees.rawdatacentral.api.mail._126.MailServiceApiFor126"-->
-    <!--timeout="20000"/>-->
+    <dubbo:reference id="mailServiceApiFor126Bak"
+                     interface="com.datatrees.rawdatacentral.api.mail._126.MailServiceApiFor126"
+                     timeout="20000"/>
 
-    <!--<dubbo:reference id="mailServiceApiForSina"-->
-    <!--interface="com.datatrees.rawdatacentral.api.mail.sina.MailServiceApiForSina"-->
-    <!--timeout="20000"/>-->
+    <dubbo:reference id="mailServiceApiForSinaBak"
+                     interface="com.datatrees.rawdatacentral.api.mail.sina.MailServiceApiForSina"
+                     timeout="20000"/>
 
-    <!--<dubbo:reference id="commonPluginApi" interface="com.datatrees.rawdatacentral.api.CommonPluginApi"/>-->
+    <dubbo:reference id="commonPluginApi" interface="com.datatrees.rawdatacentral.api.CommonPluginApi"/>
 
     <dubbo:reference id="proxyProvider" interface="com.treefinance.proxy.api.ProxyProvider"/>
 
