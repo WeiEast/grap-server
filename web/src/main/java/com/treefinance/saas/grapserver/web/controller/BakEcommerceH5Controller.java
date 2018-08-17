@@ -1,8 +1,8 @@
 package com.treefinance.saas.grapserver.web.controller;
 
 import com.alibaba.fastjson.JSON;
-import com.datatrees.spider.share.domain.CommonPluginParam;
-import com.treefinance.saas.grapserver.biz.service.EcommerceLoginSimulationService;
+import com.datatrees.rawdatacentral.domain.plugin.CommonPluginParam;
+import com.treefinance.saas.grapserver.biz.service.BakEcommerceLoginSimulationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,14 +13,15 @@ import org.springframework.web.bind.annotation.RestController;
 /**
  * Created by haojiahong on 2018/1/11.
  */
+@Deprecated
 @RestController
-@RequestMapping(value = {"/h5/ecommerce", "/grap/h5/ecommerce"})
-public class EcommerceH5Controller {
+@RequestMapping(value = {"/bak/h5/ecommerce", "/bak/grap/h5/ecommerce"})
+public class BakEcommerceH5Controller {
 
-    private static final Logger logger = LoggerFactory.getLogger(EcommerceH5Controller.class);
+    private static final Logger logger = LoggerFactory.getLogger(BakEcommerceH5Controller.class);
 
     @Autowired
-    private EcommerceLoginSimulationService ecommerceLoginSimulationService;
+    private BakEcommerceLoginSimulationService ecommerceLoginSimulationService;
 
     /**
      * 获取二维码

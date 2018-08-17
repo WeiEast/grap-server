@@ -1,9 +1,9 @@
 package com.treefinance.saas.grapserver.biz.service;
 
 import com.alibaba.fastjson.JSON;
-import com.datatrees.spider.ecommerce.api.EconomicApiForTaoBaoQR;
-import com.datatrees.spider.share.domain.CommonPluginParam;
-import com.datatrees.spider.share.domain.http.HttpResult;
+import com.datatrees.rawdatacentral.api.economic.taobao.EconomicApiForTaoBaoQR;
+import com.datatrees.rawdatacentral.domain.plugin.CommonPluginParam;
+import com.datatrees.rawdatacentral.domain.result.HttpResult;
 import com.treefinance.saas.grapserver.common.exception.CrawlerBizException;
 import com.treefinance.saas.knife.result.SimpleResult;
 import org.apache.commons.lang3.StringUtils;
@@ -17,9 +17,10 @@ import java.util.Date;
 /**
  * Created by haojiahong on 2018/1/11.
  */
+@Deprecated
 @Service
-public class EcommerceLoginSimulationService {
-    private static final Logger logger = LoggerFactory.getLogger(EcommerceLoginSimulationService.class);
+public class BakEcommerceLoginSimulationService {
+    private static final Logger logger = LoggerFactory.getLogger(BakEcommerceLoginSimulationService.class);
 
     @Autowired
     private EconomicApiForTaoBaoQR economicApiForTaoBaoQR;

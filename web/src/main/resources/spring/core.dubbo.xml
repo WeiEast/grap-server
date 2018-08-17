@@ -50,7 +50,7 @@
 
     <dubbo:reference id="proxyProvider" interface="com.treefinance.proxy.api.ProxyProvider"/>
 
-    <dubbo:reference id="economicApiForTaoBaoQR"
+    <dubbo:reference id="economicApiForTaoBaoQRBak"
                      interface="com.datatrees.rawdatacentral.api.economic.taobao.EconomicApiForTaoBaoQR"/>
 
     <dubbo:reference id="iMobileAttributionService"
@@ -103,7 +103,10 @@
                      timeout="20000"/>
     <dubbo:reference id="mailServiceApiForSina" interface="com.datatrees.spider.bank.api.MailServiceApiForSina"
                      timeout="20000"/>
-
+    <dubbo:reference id="educationApi" interface="com.datatrees.spider.extra.api.EducationApi" timeout="20000"/>
+    <dubbo:reference id="economicApiForTaoBaoQR" interface="com.datatrees.spider.ecommerce.api.EconomicApiForTaoBaoQR"/>
+    <dubbo:reference id="bankApi" interface="com.datatrees.spider.bank.api.BankApi"/>
+    <dubbo:reference id="economicApi" interface="com.datatrees.spider.ecommerce.api.EconomicApi"/>
 
     <!--生产者-->
     <dubbo:service interface="com.treefinance.saas.grapserver.facade.service.TaskFacade" ref="taskFacade"/>
