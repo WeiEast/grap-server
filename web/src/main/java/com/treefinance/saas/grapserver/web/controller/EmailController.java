@@ -74,16 +74,16 @@ public class EmailController {
         return new SimpleResult<>();
     }
 
-    @RequestMapping(value = "/acquisition/process", method = {RequestMethod.POST})
-    public Object loginProcess(@RequestParam("taskid") Long taskid,
-                               @RequestParam("directiveId") String directiveId,
-                               @RequestParam(value = "html", required = false) String html,
-                               @RequestParam(value = "cookie", required = false) String cookie) throws Exception {
-        if (StringUtils.isEmpty(html) && StringUtils.isEmpty(cookie)) {
-            throw new Exception("html和cookie不能同时为空");
-        }
-        logger.info("邮箱-loginProcess: taskid={},directiveId={},html={},cookie={}", taskid, directiveId, cookie, html, cookie);
-        acquisitionService.loginProcess(directiveId, taskid, html, cookie);
-        return new SimpleResult<>();
-    }
+//    @RequestMapping(value = "/acquisition/process", method = {RequestMethod.POST})
+//    public Object loginProcess(@RequestParam("taskid") Long taskid,
+//                               @RequestParam("directiveId") String directiveId,
+//                               @RequestParam(value = "html", required = false) String html,
+//                               @RequestParam(value = "cookie", required = false) String cookie) throws Exception {
+//        if (StringUtils.isEmpty(html) && StringUtils.isEmpty(cookie)) {
+//            throw new Exception("html和cookie不能同时为空");
+//        }
+//        logger.info("邮箱-loginProcess: taskid={},directiveId={},html={},cookie={}", taskid, directiveId, cookie, html, cookie);
+//        acquisitionService.loginProcess(directiveId, taskid, html, cookie);
+//        return new SimpleResult<>();
+//    }
 }

@@ -1,6 +1,6 @@
 package com.treefinance.saas.grapserver.biz.service;
 
-import com.datatrees.rawdatacentral.api.CrawlerTaskService;
+import com.datatrees.spider.share.api.SpiderTaskApi;
 import com.treefinance.basicservice.security.crypto.facade.EncryptionIntensityEnum;
 import com.treefinance.basicservice.security.crypto.facade.ISecurityCryptoService;
 import com.treefinance.saas.grapserver.common.model.dto.TaskDTO;
@@ -26,7 +26,7 @@ public class QRCodeAccountNoLogService {
     @Autowired
     private TaskMapper taskMapper;
     @Autowired
-    private CrawlerTaskService crawlerTaskService;
+    private SpiderTaskApi spiderTaskApi;
     @Autowired
     private ISecurityCryptoService securityCryptoService;
 
@@ -37,7 +37,7 @@ public class QRCodeAccountNoLogService {
         }
         String accountNo = null;
         try {
-            accountNo = crawlerTaskService.getTaskAccountNo(taskId);
+            accountNo = spiderTaskApi.getTaskAccountNo(taskId);
             logger.info("记录任务accountNo:调用爬数查询任务账号信息,taskId={},accountNo={}", taskId, accountNo);
         } catch (Exception e) {
             logger.error("记录任务accountNo:调用爬数查询任务账号信息异常,taskId={}", taskId, e);

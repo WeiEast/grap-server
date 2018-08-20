@@ -1,8 +1,8 @@
 package com.treefinance.saas.grapserver.web.controller;
 
 import com.alibaba.fastjson.JSON;
-import com.datatrees.rawdatacentral.api.CrawlerService;
-import com.datatrees.rawdatacentral.domain.result.HttpResult;
+import com.datatrees.spider.share.api.SpiderTaskApi;
+import com.datatrees.spider.share.domain.http.HttpResult;
 import com.google.common.collect.Maps;
 import com.treefinance.saas.grapserver.biz.service.TaskNextDirectiveService;
 import com.treefinance.saas.grapserver.common.enums.EQRResult;
@@ -29,7 +29,7 @@ public class SpecialController {
     private static final Logger logger = LoggerFactory.getLogger(SpecialController.class);
 
     @Autowired
-    private CrawlerService crawlerService;
+    private SpiderTaskApi spiderTaskApi;
     @Autowired
     private TaskNextDirectiveService taskNextDirectiveService;
 
@@ -37,7 +37,7 @@ public class SpecialController {
     public Object qrCheck(
             @RequestParam() String directiveId,
             @RequestParam("taskid") Long taskid) throws Exception {
-        HttpResult<String> result = crawlerService.verifyQr(directiveId, taskid, null);
+        HttpResult<String> result = spiderTaskApi.verifyQr(directiveId, taskid, null);
         logger.info("taskId={},directiveId={}, 二维码验证结果={}", taskid, directiveId, JSON.toJSONString(result));
         if (StringUtils.isNotEmpty(result.getData()) && (result.getData().equals(EQRResult.FAILED.toString()) ||
                 result.getData().equals(EQRResult.SUCCESS.toString()) ||

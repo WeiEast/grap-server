@@ -17,8 +17,7 @@
 package com.treefinance.saas.grapserver.biz.service;
 
 import com.alibaba.fastjson.JSON;
-import com.datatrees.spider.bank.api.BankApi;
-import com.datatrees.spider.ecommerce.api.EconomicApi;
+import com.datatrees.spider.share.api.SpiderTaskApi;
 import com.datatrees.spider.share.domain.model.WebsiteConf;
 import com.datatrees.toolkits.util.json.Jackson;
 import com.treefinance.saas.grapserver.common.enums.EBizType;
@@ -44,9 +43,7 @@ public class TaskConfigService {
     @Autowired
     private TaskSupportService taskSupportService;
     @Autowired
-    private BankApi bankApi;
-    @Autowired
-    private EconomicApi economicApi;
+    private SpiderTaskApi spiderTaskApi;
 
     /**
      * 获取配置信息
@@ -69,19 +66,7 @@ public class TaskConfigService {
         List<String> list = supportedList.stream().map(TaskSupport::getName)
                 .collect(Collectors.toList());
 
-        List<WebsiteConf> websiteConf;
-        switch (supportType) {
-            case EMAIL:
-            case EMAIL_H5:
-                websiteConf = bankApi.getWebsiteConf(list);
-                break;
-            case ECOMMERCE:
-                websiteConf = economicApi.getWebsiteConf(list);
-                break;
-            default:
-                throw new IllegalArgumentException("Can not find any supported list.");
-        }
-
+        List<WebsiteConf> websiteConf = spiderTaskApi.getWebsiteConf(list);
         return merge(supportedList, websiteConf, supportType);
     }
 

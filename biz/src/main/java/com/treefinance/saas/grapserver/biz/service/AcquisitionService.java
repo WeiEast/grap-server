@@ -1,21 +1,16 @@
 package com.treefinance.saas.grapserver.biz.service;
 
-import com.alibaba.fastjson.JSON;
 import com.datatrees.common.util.GsonUtils;
-import com.datatrees.rawdatacentral.api.CrawlerService;
-import com.datatrees.rawdatacentral.domain.result.HttpResult;
 import com.google.gson.reflect.TypeToken;
 import com.treefinance.saas.grapserver.biz.mq.MessageProducer;
 import com.treefinance.saas.grapserver.biz.mq.MqConfig;
 import com.treefinance.saas.grapserver.biz.mq.model.LoginMessage;
-import com.treefinance.saas.grapserver.common.enums.EDirective;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.Resource;
 import java.util.Date;
 import java.util.Map;
 
@@ -32,10 +27,6 @@ public class AcquisitionService {
     private MqConfig mqConfig;
     @Autowired
     private TaskService taskService;
-    @Resource
-    CrawlerService crawlerService;
-    @Autowired
-    private TaskNextDirectiveService taskNextDirectiveService;
     @Autowired
     private TaskTimeService taskTimeService;
 
@@ -72,8 +63,8 @@ public class AcquisitionService {
     @Deprecated
     //兴海:这个已经不用了
     public void loginProcess(String directiveId, Long taskid, String html, String cookie) {
-        HttpResult<Boolean> res = crawlerService.importAppCrawlResult(directiveId, taskid, html, cookie, null);
-        taskNextDirectiveService.deleteNextDirective(taskid, EDirective.GRAB_URL.getText());
-        logger.debug("taskId={}已发送sdk爬取结果={}", taskid, JSON.toJSONString(res));
+//        HttpResult<Boolean> res = crawlerService.importAppCrawlResult(directiveId, taskid, html, cookie, null);
+//        taskNextDirectiveService.deleteNextDirective(taskid, EDirective.GRAB_URL.getText());
+//        logger.debug("taskId={}已发送sdk爬取结果={}", taskid, JSON.toJSONString(res));
     }
 }
