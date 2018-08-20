@@ -14,36 +14,6 @@
         <dependency>
             <groupId>com.treefinance.proxy</groupId>
             <artifactId>proxy-api</artifactId>
-            <exclusions>
-                <exclusion>
-                    <artifactId>slf4j-log4j12</artifactId>
-                    <groupId>org.slf4j</groupId>
-                </exclusion>
-                <exclusion>
-                    <artifactId>ibatis-sqlmap</artifactId>
-                    <groupId>org.apache.ibatis</groupId>
-                </exclusion>
-                <exclusion>
-                    <artifactId>AbstractPlugin</artifactId>
-                    <groupId>com.datatrees.rawdata</groupId>
-                </exclusion>
-                <exclusion>
-                    <artifactId>spring-ibatis</artifactId>
-                    <groupId>org.springframework</groupId>
-                </exclusion>
-                <exclusion>
-                    <artifactId>*</artifactId>
-                    <groupId>org.jfrog.jade.plugins.common</groupId>
-                </exclusion>
-                <exclusion>
-                    <artifactId>log4j</artifactId>
-                    <groupId>log4j</groupId>
-                </exclusion>
-                <exclusion>
-                    <artifactId>crawler-core</artifactId>
-                    <groupId>com.datatrees.crawler</groupId>
-                </exclusion>
-            </exclusions>
         </dependency>
 
         <dependency>
