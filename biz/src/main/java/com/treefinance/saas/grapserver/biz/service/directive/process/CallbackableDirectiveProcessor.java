@@ -416,6 +416,7 @@ public abstract class CallbackableDirectiveProcessor {
         String params = this.encryptParams(dataMap, appLicense, config);
         Map<String, Object> paramMap = Maps.newHashMap();
         paramMap.put("params", params);
+        paramMap.put("appId", appLicense.getAppId());
         String callbackUrl = config.getUrl();
         // 超时时间（秒）
         Byte timeOut = config.getTimeOut();
