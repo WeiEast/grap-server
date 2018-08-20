@@ -247,31 +247,31 @@
         <dependency>
             <groupId>com.datatrees.spider</groupId>
             <artifactId>spider-share-api</artifactId>
-            <version>3.0.6-SNAPSHOT</version>
+            <version>3.0.7-SNAPSHOT</version>
         </dependency>
 
         <dependency>
             <groupId>com.datatrees.spider</groupId>
             <artifactId>spider-operator-api</artifactId>
-            <version>3.0.6-SNAPSHOT</version>
+            <version>3.0.7-SNAPSHOT</version>
         </dependency>
 
         <dependency>
             <groupId>com.datatrees.spider</groupId>
             <artifactId>spider-bank-api</artifactId>
-            <version>3.0.6-SNAPSHOT</version>
+            <version>3.0.7-SNAPSHOT</version>
         </dependency>
 
         <dependency>
             <groupId>com.datatrees.spider</groupId>
             <artifactId>spider-extra-api</artifactId>
-            <version>3.0.6-SNAPSHOT</version>
+            <version>3.0.7-SNAPSHOT</version>
         </dependency>
 
         <dependency>
             <groupId>com.datatrees.spider</groupId>
             <artifactId>spider-ecommerce-api</artifactId>
-            <version>3.0.6-SNAPSHOT</version>
+            <version>3.0.7-SNAPSHOT</version>
         </dependency>
 
         <dependency>
