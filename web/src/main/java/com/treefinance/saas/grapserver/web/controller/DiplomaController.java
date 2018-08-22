@@ -69,9 +69,9 @@ public class DiplomaController {
     @RequestMapping(value = "/login/submit", method = {RequestMethod.POST})
     public Object loginSubmit(CommonPluginParam param) {
         logger.info("学信网:登陆,传入参数,param={}", JSON.toJSONString(param));
-        if (param == null || param.getTaskId() == null || StringUtils.isBlank(param.getUsername())) {
-            logger.error("学信网:登陆,参数缺失,taskId,loginName必传,param={}", JSON.toJSONString(param));
-            throw new IllegalArgumentException("学信网:登陆,参数缺失,taskId,loginName必传");
+        if (param == null || param.getTaskId() == null) {
+            logger.error("学信网:登陆,参数缺失,taskId必传,param={}", JSON.toJSONString(param));
+            throw new IllegalArgumentException("学信网:登陆,参数缺失,taskId必传");
         }
         Object result = diplomaLoginSimulationService.loginSubmit(param);
         logger.info("学信网:登陆,返回结果,param={},result={}", JSON.toJSONString(param), JSON.toJSONString(result));
