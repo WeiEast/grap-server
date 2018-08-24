@@ -1,13 +1,9 @@
 package com.treefinance.saas.grapserver.web.controller;
 
-import com.google.common.collect.Maps;
-import com.treefinance.saas.grapserver.biz.config.DiamondConfig;
-import com.treefinance.saas.grapserver.biz.service.*;
+import com.treefinance.saas.grapserver.biz.service.AcquisitionService;
 import com.treefinance.saas.grapserver.common.enums.EBizType;
-import com.treefinance.saas.grapserver.common.exception.ForbiddenException;
-import com.treefinance.saas.grapserver.common.utils.IpUtils;
+import com.treefinance.saas.grapserver.common.enums.ESpiderTopic;
 import com.treefinance.saas.knife.result.SimpleResult;
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,9 +13,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.ModelAndView;
 
-import javax.servlet.http.HttpServletRequest;
-import java.util.Map;
-
 /**
  * Created by luoyihua on 2017/5/4.
  */
@@ -28,7 +21,7 @@ import java.util.Map;
 public class EmailController {
     private static final Logger logger = LoggerFactory.getLogger(EmailController.class);
 
-//    @Autowired
+    //    @Autowired
 //    private TaskService taskServiceImpl;
 //    @Autowired
 //    private MerchantConfigService merchantConfigService;
@@ -70,7 +63,7 @@ public class EmailController {
     public Object sendToMq(@RequestParam("taskid") Long taskid, @RequestParam(value = "header", required = false) String header,
                            @RequestParam("cookie") String cookie, @RequestParam("url") String url,
                            @RequestParam("website") String website, @RequestParam(value = "accountNo", required = false) String accountNo) {
-        acquisitionService.acquisition(taskid, header, cookie, url, website, accountNo);
+        acquisitionService.acquisition(taskid, header, cookie, url, website, accountNo, ESpiderTopic.SPIDER_BANK.name().toLowerCase());
         return new SimpleResult<>();
     }
 

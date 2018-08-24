@@ -2,6 +2,7 @@ package com.treefinance.saas.grapserver.web.controller;
 
 import com.treefinance.saas.grapserver.biz.service.AcquisitionService;
 import com.treefinance.saas.grapserver.common.enums.EBizType;
+import com.treefinance.saas.grapserver.common.enums.ESpiderTopic;
 import com.treefinance.saas.knife.result.SimpleResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -49,7 +50,7 @@ public class EcommerceController {
                            @RequestParam("website") String website,
                            @RequestParam(value = "accountNo", required = false) String accountNo) {
         logger.info("电商-发消息：acquisition，taskid={},header={},cookie={},url={},website={},accountNo={}", taskid, header, cookie, url, website, accountNo);
-        acquisitionService.acquisition(taskid, header, cookie, url, website, accountNo);
+        acquisitionService.acquisition(taskid, header, cookie, url, website, accountNo, ESpiderTopic.SPIDER_ECOMMERCE.name().toLowerCase());
         return new SimpleResult<>();
     }
 

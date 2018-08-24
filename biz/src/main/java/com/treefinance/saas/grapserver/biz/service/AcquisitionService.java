@@ -3,7 +3,6 @@ package com.treefinance.saas.grapserver.biz.service;
 import com.datatrees.common.util.GsonUtils;
 import com.google.gson.reflect.TypeToken;
 import com.treefinance.saas.grapserver.biz.mq.MessageProducer;
-import com.treefinance.saas.grapserver.biz.mq.MqConfig;
 import com.treefinance.saas.grapserver.biz.mq.model.LoginMessage;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -24,13 +23,11 @@ public class AcquisitionService {
     @Autowired
     private MessageProducer messageProducer;
     @Autowired
-    private MqConfig mqConfig;
-    @Autowired
     private TaskService taskService;
     @Autowired
     private TaskTimeService taskTimeService;
 
-    public void acquisition(Long taskid, String header, String cookie, String url, String website, String accountNo) {
+    public void acquisition(Long taskid, String header, String cookie, String url, String website, String accountNo, String topic) {
         logger.info("acquisition : taskid={},header={},cookie={},url={},website={},accountNo={}", taskid, header, cookie, url, website, accountNo);
         LoginMessage loginMessage = new LoginMessage();
         loginMessage.setCookie(cookie);
@@ -46,8 +43,7 @@ public class AcquisitionService {
             }
         }
         try {
-            messageProducer.send(GsonUtils.toJson(loginMessage), mqConfig.getProviderRawdataTopic(), mqConfig.getProviderRawdataTag(),
-                    taskid.toString());
+            messageProducer.send(GsonUtils.toJson(loginMessage), topic, "login_info", taskid.toString());
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
         }
