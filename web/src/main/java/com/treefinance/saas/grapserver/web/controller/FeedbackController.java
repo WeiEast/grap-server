@@ -33,7 +33,7 @@ public class FeedbackController {
     public Object saveResult(@RequestParam("bizType") String bizType,
                              @RequestParam("appid") String appId,
                              @RequestParam("taskid") Long taskId,
-                             @RequestParam("uniqueid") String uniqueId,
+                             @RequestParam(value = "uniqueid", required = false) String uniqueId,
                              @RequestParam("feedbackValue") String feedbackValue) {
         logger.info("意见反馈输入参数:bizType={},appid={},taskid={},uniqueid={},feedbackValue={}",
                 bizType, appId, taskId, uniqueId, feedbackValue);
