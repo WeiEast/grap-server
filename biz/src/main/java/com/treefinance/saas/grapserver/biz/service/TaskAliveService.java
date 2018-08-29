@@ -1,5 +1,6 @@
 package com.treefinance.saas.grapserver.biz.service;
 
+import com.google.common.collect.Maps;
 import com.treefinance.saas.grapserver.biz.cache.RedisDao;
 import com.treefinance.saas.grapserver.common.enums.ETaskStatus;
 import com.treefinance.saas.grapserver.common.utils.GrapDateUtils;
@@ -15,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -37,25 +39,32 @@ public class TaskAliveService {
 
     /**
      * 更新任务最近活跃时间
+     * 可能存在多个请求同时更新活跃时间,未获得锁的请求可过滤掉
      *
      * @param taskId 任务id
      */
     public void updateTaskActiveTime(Long taskId) {
-        Task task = taskMapper.selectByPrimaryKey(taskId);
-        if (task == null) {
-            return;
+        Map<String, Object> lockMap = Maps.newHashMap();
+        try {
+            lockMap = redisDao.acquireLock(RedisKeyUtils.genAliveTimeUpdateLockKey(taskId), 60 * 1000L);
+            if (lockMap != null) {
+                Task task = taskMapper.selectByPrimaryKey(taskId);
+                if (task == null) {
+                    return;
+                }
+                if (!ETaskStatus.RUNNING.getStatus().equals(task.getStatus())) {
+                    logger.info("任务已结束,无需更新任务活跃时间,taskId={}", taskId);
+                    return;
+                }
+                Date date = new Date();
+                taskAttributeService.insertOrUpdateSelective(taskId, ETaskAttribute.ALIVE_TIME.getAttribute(), GrapDateUtils.getDateStrByDate(date));
+                String key = RedisKeyUtils.genTaskActiveTimeKey(taskId);
+                String value = date.getTime() + "";
+                redisDao.setEx(key, value, 30, TimeUnit.MINUTES);
+            }
+        } finally {
+            redisDao.releaseLock(RedisKeyUtils.genAliveTimeUpdateLockKey(taskId), lockMap, 60 * 1000L);
         }
-        if (!ETaskStatus.RUNNING.getStatus().equals(task.getStatus())) {
-            logger.info("任务已结束,无需更新任务活跃时间,taskId={}", taskId);
-            return;
-        }
-        Date date = new Date();
-        taskAttributeService.insertOrUpdateSelective(taskId, ETaskAttribute.ALIVE_TIME.getAttribute(), GrapDateUtils.getDateStrByDate(date));
-
-        String key = RedisKeyUtils.genTaskActiveTimeKey(taskId);
-        String value = date.getTime() + "";
-        redisDao.setEx(key, value, 30, TimeUnit.MINUTES);
-
     }
 
     /**
@@ -64,6 +73,7 @@ public class TaskAliveService {
      * @param taskId 任务id
      * @param date
      */
+
     public void updateTaskActiveTime(Long taskId, Date date) {
         Task task = taskMapper.selectByPrimaryKey(taskId);
         if (task == null) {

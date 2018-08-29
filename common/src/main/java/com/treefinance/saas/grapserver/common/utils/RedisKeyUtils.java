@@ -9,6 +9,7 @@ public class RedisKeyUtils {
 
     private final static String PREFIX_KEY = "saas-gateway:%s";
     private final static String PREFIX_LOGIN_LOCK_KEY = "saas-grap-server:login_lock:%s";
+    private final static String PREFIX_ALIVE_TIME_UPDATE_LOCK_KEY = "saas-grap-server:alive_time_update_lock:%s";
     private final static String PREFIX_REDIS_LOCK_KEY = "saas-grap-server:redis_lock";
     private final static String PREFIX_CREATE_TASK_USER_LOCK_KEY = "saas-grap-server:create_task_user_lock";
     private final static String PREFIX_TASK_ACTIVE_TIME_KEY = "saas-grap-server-task-active-time:%s";
@@ -28,6 +29,10 @@ public class RedisKeyUtils {
      */
     public static String genLoginLockKey(Long taskId) {
         return String.format(PREFIX_LOGIN_LOCK_KEY, taskId);
+    }
+
+    public static String genAliveTimeUpdateLockKey(Long taskId) {
+        return String.format(PREFIX_ALIVE_TIME_UPDATE_LOCK_KEY, taskId);
     }
 
     public static String genRedisLockKey(Long taskId, String... s) {
