@@ -115,6 +115,7 @@ public class FundController {
         map.put("license", appBizLicenseService.isShowLicense(appid, EBizType.FUND.getText()));
         map.put("licenseTemplate", appBizLicenseService.getLicenseTemplate(appid, EBizType.FUND.getText()));
         map.put("currentProvince", "");
+        map.putAll(appBizLicenseService.isShowQuestionnaireOrFeedback(appid, EBizType.FUND.getText()));
         return SimpleResult.successResult(map);
     }
 
