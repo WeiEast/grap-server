@@ -80,6 +80,7 @@ public class TaskController {
         map.put("color", colorMap);
         map.put("license", appBizLicenseService.isShowLicense(appid, type));
         map.put("licenseTemplate", appBizLicenseService.getLicenseTemplate(appid, type));
+        map.putAll(appBizLicenseService.isShowQuestionaireOrFeedback(appid, type));
         map.put("questionnaire", appBizLicenseService.isShowQuestionaire(appid, type));
         return new SimpleResult<>(map);
     }

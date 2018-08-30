@@ -5,15 +5,13 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.treefinance.saas.assistant.variable.notify.client.VariableMessageHandler;
 import com.treefinance.saas.assistant.variable.notify.model.VariableMessage;
 import com.treefinance.saas.grapserver.common.enums.EBizType;
 import com.treefinance.saas.grapserver.common.utils.DataConverterUtils;
 import com.treefinance.saas.grapserver.dao.entity.AppBizLicense;
-import com.treefinance.saas.grapserver.dao.entity.AppBizLicenseCriteria;
-import com.treefinance.saas.grapserver.dao.mapper.AppBizLicenseMapper;
 import com.treefinance.saas.merchant.center.facade.request.common.BaseRequest;
-import com.treefinance.saas.merchant.center.facade.request.console.QueryAppBizLicenseByAppIdRequest;
 import com.treefinance.saas.merchant.center.facade.request.grapserver.GetAppLicenseByAppIdRequest;
 import com.treefinance.saas.merchant.center.facade.result.console.AppBizLicenseResult;
 import com.treefinance.saas.merchant.center.facade.result.console.MerchantResult;
@@ -28,8 +26,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
-import java.util.Random;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
@@ -148,8 +146,18 @@ public class AppBizLicenseService implements InitializingBean, VariableMessageHa
         if (questionaireRate >= 100) {
             return true;
         }
-        int random = RandomUtils.nextInt(0,101);
+        int random = RandomUtils.nextInt(0, 101);
         return questionaireRate >= random;
+    }
+
+
+    public Map<String, Boolean> isShowQuestionaireOrFeedback(String appId, String type) {
+        Map<String, Boolean> map = Maps.newHashMap();
+        map.put("questionnaire", false);
+        map.put("feedback", false);
+
+
+        return null;
     }
 
 
@@ -201,4 +209,5 @@ public class AppBizLicenseService implements InitializingBean, VariableMessageHa
         }
         this.cache.refresh(appId);
     }
+
 }
