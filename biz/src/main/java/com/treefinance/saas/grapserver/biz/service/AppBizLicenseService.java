@@ -151,13 +151,58 @@ public class AppBizLicenseService implements InitializingBean, VariableMessageHa
     }
 
 
-    public Map<String, Boolean> isShowQuestionaireOrFeedback(String appId, String type) {
+    /**
+     * 是否显示意见反馈
+     *
+     * @param appId
+     * @param type
+     * @return
+     */
+    public boolean isShowFeedback(String appId, String type) {
+        Byte bizType = EBizType.getCode(type);
+        if (bizType == null) {
+            return false;
+        }
+
+        List<AppBizLicense> list = getByAppId(appId);
+        if (CollectionUtils.isEmpty(list)) {
+            return false;
+        }
+        Optional<AppBizLicense> optional = list.stream()
+                .filter(appBizLicense -> bizType.equals(appBizLicense.getBizType()))
+                .filter(appBizLicense -> appBizLicense.getFeedbackRate() > 0)
+                .findFirst();
+        if (optional == null || !optional.isPresent()) {
+            return false;
+        }
+        AppBizLicense appBizLicense = optional.get();
+        int feedbackRate = appBizLicense.getFeedbackRate();
+        if (feedbackRate >= 100) {
+            return true;
+        }
+        int random = RandomUtils.nextInt(0, 101);
+        return feedbackRate >= random;
+    }
+
+
+    public static void main(String[] args) {
+        System.out.println(RandomUtils.nextBoolean());
+    }
+
+
+    public Map<String, Boolean> isShowQuestionnaireOrFeedback(String appId, String type) {
         Map<String, Boolean> map = Maps.newHashMap();
-        map.put("questionnaire", false);
-        map.put("feedback", false);
-
-
-        return null;
+        boolean questionnaireFlag = this.isShowQuestionaire(appId, type);
+        boolean feedbackFlag = this.isShowFeedback(appId, type);
+        if (questionnaireFlag && feedbackFlag) {
+            boolean flag = RandomUtils.nextBoolean();
+            map.put("questionnaire", flag);
+            map.put("feedback", !flag);
+        } else {
+            map.put("questionnaire", questionnaireFlag);
+            map.put("feedback", feedbackFlag);
+        }
+        return map;
     }
 
 

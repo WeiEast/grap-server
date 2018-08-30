@@ -54,7 +54,7 @@
         <grap-server-facade.version>1.1.0-SNAPSHOT</grap-server-facade.version>
         <assistant.version>1.0.10</assistant.version>
         <assistant-monitor.version>1.1.0-SNAPSHOT</assistant-monitor.version>
-        <merchant-center.version>1.0.8-SNAPSHOT</merchant-center.version>
+        <merchant-center.version>1.0.9-SNAPSHOT</merchant-center.version>
         <rawdatacentral-api.version>3.1.2-SNAPSHOT</rawdatacentral-api.version>
     </properties>
 
