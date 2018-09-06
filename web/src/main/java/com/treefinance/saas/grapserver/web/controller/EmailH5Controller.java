@@ -1,7 +1,7 @@
 package com.treefinance.saas.grapserver.web.controller;
 
 import com.alibaba.fastjson.JSON;
-import com.datatrees.rawdatacentral.domain.plugin.CommonPluginParam;
+import com.datatrees.spider.share.domain.CommonPluginParam;
 import com.treefinance.saas.grapserver.biz.service.EmailLoginSimulationService;
 import com.treefinance.saas.knife.result.Results;
 import org.apache.commons.lang3.StringUtils;
@@ -84,6 +84,7 @@ public class EmailH5Controller {
     }
 
     //=====qq企业邮箱=====
+
     /**
      * 登陆(异步)
      *
@@ -281,8 +282,6 @@ public class EmailH5Controller {
         logger.info("邮箱账单:刷新图片验证码,返回结果,param={},result={}", JSON.toJSONString(param), JSON.toJSONString(result));
         return result;
     }
-
-
 
 
     //=============通用接口==============

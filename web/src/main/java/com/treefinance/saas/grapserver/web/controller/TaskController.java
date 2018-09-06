@@ -1,7 +1,7 @@
 package com.treefinance.saas.grapserver.web.controller;
 
 import com.alibaba.fastjson.JSON;
-import com.datatrees.rawdatacentral.api.CrawlerService;
+import com.datatrees.spider.share.api.SpiderTaskApi;
 import com.google.common.collect.Maps;
 import com.treefinance.saas.grapserver.biz.mq.model.DirectiveMessage;
 import com.treefinance.saas.grapserver.biz.service.*;
@@ -42,7 +42,7 @@ public class TaskController {
     @Autowired
     private TaskNextDirectiveService taskNextDirectiveService;
     @Autowired
-    private CrawlerService crawlerService;
+    private SpiderTaskApi spiderTaskApi;
     @Autowired
     private MerchantConfigService merchantConfigService;
     @Autowired
@@ -188,7 +188,7 @@ public class TaskController {
         logger.info("taskId={}输入验证信息,directiveId={},type={},code={},extra={}",
                 taskid, directiveId, type, code, extra);
         taskNextDirectiveService.deleteNextDirective(taskid);
-        crawlerService.importCrawlCode(directiveId, taskid, EOperatorCodeType.getCode(type), code, JsonUtils.toMap(extra, String.class, String.class));
+        spiderTaskApi.importCrawlCode(directiveId, taskid, EOperatorCodeType.getCode(type), code, JsonUtils.toMap(extra, String.class, String.class));
         return new SimpleResult<>();
     }
 

@@ -1,7 +1,7 @@
 package com.treefinance.saas.grapserver.web.controller;
 
 import com.alibaba.fastjson.JSON;
-import com.datatrees.rawdatacentral.domain.operator.OperatorParam;
+import com.datatrees.spider.operator.domain.OperatorParam;
 import com.treefinance.saas.grapserver.biz.service.OperatorExtendLoginService;
 import com.treefinance.saas.grapserver.common.enums.EBizType;
 import com.treefinance.saas.knife.result.SimpleResult;
@@ -36,25 +36,6 @@ public class OperatorController {
         ModelAndView modelAndView = new ModelAndView("forward:/start");
         modelAndView.addObject("bizType", EBizType.OPERATOR.getText());
         return modelAndView;
-    }
-
-    /**
-     * 运营商获取配置
-     * 返回商户配置信息,运营商分组信息,以及各运营商登录配置信息
-     *
-     * @param appid
-     * @return
-     */
-    @RequestMapping(value = "/config", method = {RequestMethod.POST})
-    public Object getConfig(@RequestParam String appid,
-                            @RequestParam("taskid") Long taskId,
-                            @RequestParam(value = "style", required = false) String style) {
-        if (StringUtils.isBlank(appid) || taskId == null) {
-            logger.error("运营商:获取配置,参数缺失,appid,taskid必传,appid={},taskId={}", appid, taskId);
-            throw new IllegalArgumentException("运营商:获取配置,参数缺失,appid,taskid必传");
-        }
-        Map<String, Object> map = operatorExtendLoginService.getConfig(appid, taskId, style);
-        return SimpleResult.successResult(map);
     }
 
     /**
@@ -100,7 +81,6 @@ public class OperatorController {
      * @return
      */
     @RequestMapping(value = "/mobile/attribution", method = {RequestMethod.POST})
-
     public Object mobileAttribution(@RequestParam("mobile") String mobile) {
         Map<String, Object> map = operatorExtendLoginService.getMobileAttribution(mobile);
         return SimpleResult.successResult(map);

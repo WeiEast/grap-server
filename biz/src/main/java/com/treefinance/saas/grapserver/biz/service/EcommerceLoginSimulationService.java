@@ -1,9 +1,9 @@
 package com.treefinance.saas.grapserver.biz.service;
 
 import com.alibaba.fastjson.JSON;
-import com.datatrees.rawdatacentral.api.economic.taobao.EconomicApiForTaoBaoQR;
-import com.datatrees.rawdatacentral.domain.plugin.CommonPluginParam;
-import com.datatrees.rawdatacentral.domain.result.HttpResult;
+import com.datatrees.spider.ecommerce.api.EconomicApiForTaoBaoQR;
+import com.datatrees.spider.share.domain.CommonPluginParam;
+import com.datatrees.spider.share.domain.http.HttpResult;
 import com.treefinance.saas.grapserver.common.exception.CrawlerBizException;
 import com.treefinance.saas.knife.result.SimpleResult;
 import org.apache.commons.lang3.StringUtils;

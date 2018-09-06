@@ -1,6 +1,6 @@
 package com.treefinance.saas.grapserver.biz.service.task.timeout;
 
-import com.datatrees.rawdatacentral.api.CrawlerService;
+import com.datatrees.spider.share.api.SpiderTaskApi;
 import com.google.common.collect.Maps;
 import com.treefinance.saas.grapserver.biz.service.TaskLogService;
 import com.treefinance.saas.grapserver.biz.service.directive.DirectiveService;
@@ -31,7 +31,7 @@ public class MainStreamTaskTimeoutHandler implements TaskTimeoutHandler {
     @Autowired
     private TaskLogService taskLogService;
     @Autowired
-    private CrawlerService crawlerService;
+    private SpiderTaskApi spiderTaskApi;
 
     @Override
     public void handleTaskTimeout(TaskDTO task, Integer timeout, Date loginTime) {
@@ -51,7 +51,7 @@ public class MainStreamTaskTimeoutHandler implements TaskTimeoutHandler {
         try {
             Map<String, String> extMap = Maps.newHashMap();
             extMap.put("reason", "timeout");
-            this.crawlerService.cancel(taskId, extMap);
+            this.spiderTaskApi.cancel(taskId, extMap);
         } catch (Exception e) {
             logger.error("crawlerService.cancel(" + taskId + ") failed", e);
         }

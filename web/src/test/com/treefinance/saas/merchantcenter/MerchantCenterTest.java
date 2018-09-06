@@ -7,8 +7,8 @@ import com.treefinance.saas.grapserver.biz.service.AppColorConfigService;
 import com.treefinance.saas.grapserver.biz.service.OperatorExtendLoginService;
 import com.treefinance.saas.grapserver.common.model.dto.AppCallbackConfigDTO;
 import com.treefinance.saas.grapserver.dao.entity.AppBizType;
-import com.treefinance.saas.grapserver.dao.entity.AppCallbackConfig;
 import com.treefinance.saas.grapserver.dao.entity.AppColorConfig;
+import com.treefinance.saas.grapserver.facade.enums.EDataType;
 import com.treefinance.saas.grapserver.facade.model.MerchantBaseInfoRO;
 import com.treefinance.saas.grapserver.facade.service.MerchantFacade;
 import com.treefinance.saas.grapserver.web.GrapServerApplication;
@@ -20,10 +20,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import com.treefinance.saas.grapserver.facade.enums.EDataType;
 
 import java.util.List;
-import java.util.Map;
 
 /**
  * @author:guoguoyun
@@ -51,13 +49,6 @@ public class MerchantCenterTest {
     @Autowired
     AppBizTypeService appBizTypeService;
 
-    @Test
-    public void TestGetConfig() {
-        long taskId = new Long(2100000146);
-        Map<String, Object> map = operatorExtendLoginService.getConfig("97a6fbf3c25e1daf", taskId, "DEFAULT");
-        logger.info("map为{}", map.toString());
-
-    }
 
     @Test
     public void TestMerchantConfig() {
@@ -74,8 +65,8 @@ public class MerchantCenterTest {
     @Test
     public void TestAppCallbackConfig() {
         Byte bytes = new Byte("1");
-        List<AppCallbackConfigDTO> dtoList = appCalllbackConfigService.getByAppIdAndBizType("bFRjwJJL1stVBrqP",bytes,EDataType.DELIVERY_ADDRESS);
-        logger.info("测试AppCallbackConfig为{}",dtoList.toString());
+        List<AppCallbackConfigDTO> dtoList = appCalllbackConfigService.getByAppIdAndBizType("bFRjwJJL1stVBrqP", bytes, EDataType.DELIVERY_ADDRESS);
+        logger.info("测试AppCallbackConfig为{}", dtoList.toString());
 
     }
 
@@ -83,17 +74,17 @@ public class MerchantCenterTest {
     public void TestAppColorback() {
 
 
-        AppColorConfig app = appColorConfigService.getByAppId("QATestabcdefghQA","1");
+        AppColorConfig app = appColorConfigService.getByAppId("QATestabcdefghQA", "1");
         logger.info("测试AppColorback为{}", app.toString());
 
     }
 
-   @Test
+    @Test
     public void TestAppBizType() {
-       Byte bizType= new Byte("1");
+        Byte bizType = new Byte("1");
 
         AppBizType appBizType = appBizTypeService.getAppBizType(bizType);
-        logger.info("测试AppBizType为{}",appBizType.toString());
+        logger.info("测试AppBizType为{}", appBizType.toString());
 
     }
 

@@ -10,6 +10,38 @@
     <artifactId>grap-server-biz</artifactId>
 
     <dependencies>
+
+        <dependency>
+            <groupId>com.treefinance.proxy</groupId>
+            <artifactId>proxy-api</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>com.datatrees.spider</groupId>
+            <artifactId>spider-share-api</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>com.datatrees.spider</groupId>
+            <artifactId>spider-operator-api</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>com.datatrees.spider</groupId>
+            <artifactId>spider-bank-api</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>com.datatrees.spider</groupId>
+            <artifactId>spider-extra-api</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>com.datatrees.spider</groupId>
+            <artifactId>spider-ecommerce-api</artifactId>
+        </dependency>
+
+
         <!-- 兼容老的gateway接口 -->
         <dependency>
             <groupId>com.treefinance.saas.gateway</groupId>
@@ -112,10 +144,6 @@
             <artifactId>fastjson</artifactId>
         </dependency>
 
-        <dependency>
-            <groupId>com.datatrees.rawdatacentral</groupId>
-            <artifactId>rawdatacentral-api</artifactId>
-        </dependency>
         <dependency>
             <groupId>com.datatrees.basisdata</groupId>
             <artifactId>basisdata-operator-common-facade</artifactId>

@@ -2,15 +2,11 @@ package com.treefinance.saas.grapserver.biz.service;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
-import com.datatrees.rawdatacentral.api.CommonPluginApi;
-import com.datatrees.rawdatacentral.api.mail._126.MailServiceApiFor126;
-import com.datatrees.rawdatacentral.api.mail._163.MailServiceApiFor163;
-import com.datatrees.rawdatacentral.api.mail.exmail_qq.MailServiceApiForExMailQQ;
-import com.datatrees.rawdatacentral.api.mail.qq.MailServiceApiForQQ;
-import com.datatrees.rawdatacentral.api.mail.sina.MailServiceApiForSina;
-import com.datatrees.rawdatacentral.domain.plugin.CommonPluginParam;
-import com.datatrees.rawdatacentral.domain.result.HttpResult;
-import com.datatrees.rawdatacentral.domain.result.ProcessResult;
+import com.datatrees.spider.bank.api.*;
+import com.datatrees.spider.share.api.SpiderTaskApi;
+import com.datatrees.spider.share.domain.CommonPluginParam;
+import com.datatrees.spider.share.domain.ProcessResult;
+import com.datatrees.spider.share.domain.http.HttpResult;
 import com.google.common.base.Joiner;
 import com.google.common.collect.Maps;
 import com.treefinance.proxy.api.ProxyProvider;
@@ -53,7 +49,7 @@ public class EmailLoginSimulationService {
     @Autowired
     private MailServiceApiForExMailQQ mailServiceApiForExMailQQ;
     @Autowired
-    private CommonPluginApi commonPluginApi;
+    private SpiderTaskApi spiderTaskApi;
     @Autowired
     private TaskService taskService;
     @Autowired
@@ -162,8 +158,7 @@ public class EmailLoginSimulationService {
      * qq企业邮箱登录
      *
      * @param param
-     *
-     * */
+     */
     public Object loginForQQExMail(CommonPluginParam param) {
         Map<String, Object> lockMap = Maps.newHashMap();
         String key = RedisKeyUtils.genLoginLockKey(param.getTaskId());
@@ -457,7 +452,7 @@ public class EmailLoginSimulationService {
     public Object processStatus(Long processId, Long taskId) {
         ProcessResult result;
         try {
-            result = commonPluginApi.queryProcessResult(processId);
+            result = spiderTaskApi.queryProcessResult(processId);
         } catch (Exception e) {
             logger.error("邮箱账单:调用爬数邮箱账单轮询处理状态异常,processId={},taskId={}", processId, taskId, e);
             throw e;

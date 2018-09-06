@@ -17,8 +17,8 @@
 package com.treefinance.saas.grapserver.biz.service;
 
 import com.alibaba.fastjson.JSON;
-import com.datatrees.rawdatacentral.api.CrawlerService;
-import com.datatrees.rawdatacentral.domain.model.WebsiteConf;
+import com.datatrees.spider.share.api.SpiderTaskApi;
+import com.datatrees.spider.share.domain.model.WebsiteConf;
 import com.datatrees.toolkits.util.json.Jackson;
 import com.treefinance.saas.grapserver.common.enums.EBizType;
 import com.treefinance.saas.grapserver.common.enums.EOperatorType;
@@ -43,7 +43,7 @@ public class TaskConfigService {
     @Autowired
     private TaskSupportService taskSupportService;
     @Autowired
-    private CrawlerService crawlerService;
+    private SpiderTaskApi spiderTaskApi;
 
     /**
      * 获取配置信息
@@ -66,8 +66,7 @@ public class TaskConfigService {
         List<String> list = supportedList.stream().map(TaskSupport::getName)
                 .collect(Collectors.toList());
 
-        List<WebsiteConf> websiteConf = crawlerService.getWebsiteConf(list);
-
+        List<WebsiteConf> websiteConf = spiderTaskApi.getWebsiteConf(list);
         return merge(supportedList, websiteConf, supportType);
     }
 

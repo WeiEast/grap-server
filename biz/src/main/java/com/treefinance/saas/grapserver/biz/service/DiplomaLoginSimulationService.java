@@ -1,9 +1,9 @@
 package com.treefinance.saas.grapserver.biz.service;
 
 import com.alibaba.fastjson.JSON;
-import com.datatrees.rawdatacentral.api.RpcEducationService;
-import com.datatrees.rawdatacentral.domain.education.EducationParam;
-import com.datatrees.rawdatacentral.domain.result.HttpResult;
+import com.datatrees.spider.extra.api.EducationApi;
+import com.datatrees.spider.share.domain.CommonPluginParam;
+import com.datatrees.spider.share.domain.http.HttpResult;
 import com.google.common.collect.Maps;
 import com.treefinance.saas.grapserver.biz.cache.RedisDao;
 import com.treefinance.saas.grapserver.common.enums.EBizType;
@@ -32,7 +32,7 @@ public class DiplomaLoginSimulationService {
     private static final Logger logger = LoggerFactory.getLogger(DiplomaLoginSimulationService.class);
 
     @Autowired
-    private RpcEducationService rpcEducationService;
+    private EducationApi educationApi;
     @Autowired
     private TaskService taskService;
     @Autowired
@@ -53,15 +53,15 @@ public class DiplomaLoginSimulationService {
      * @param educationParam
      * @return
      */
-    public Object loginInit(EducationParam educationParam) {
+    public Object loginInit(CommonPluginParam educationParam) {
         Map<String, Object> lockMap = Maps.newHashMap();
         String key = RedisKeyUtils.genRedisLockKey(educationParam.getTaskId(), "diploma_login_init");
         try {
             lockMap = redisDao.acquireLock(key, 60 * 1000L);
             if (lockMap != null) {
-                HttpResult<Map<String, Object>> result;
+                HttpResult<Object> result;
                 try {
-                    result = rpcEducationService.loginInit(educationParam);
+                    result = educationApi.loginInit(educationParam);
                 } catch (Exception e) {
                     logger.error("学信网:调用爬数登陆初始化异常,param={}", JSON.toJSONString(educationParam), e);
                     throw e;
@@ -87,15 +87,15 @@ public class DiplomaLoginSimulationService {
      * @param param
      * @return
      */
-    public Object loginSubmit(EducationParam param) {
+    public Object loginSubmit(CommonPluginParam param) {
         Map<String, Object> lockMap = Maps.newHashMap();
         String key = RedisKeyUtils.genLoginLockKey(param.getTaskId());
         try {
             lockMap = redisDao.acquireLock(key, 60 * 1000L);
             if (lockMap != null) {
-                HttpResult<Map<String, Object>> result;
+                HttpResult<Object> result;
                 try {
-                    result = rpcEducationService.loginSubmit(param);
+                    result = educationApi.loginSubmit(param);
                 } catch (Exception e) {
                     logger.error("学信网:调用爬数登陆异常,param={}", JSON.toJSONString(param), e);
                     throw e;
@@ -110,7 +110,7 @@ public class DiplomaLoginSimulationService {
                 }
                 Long taskId = param.getTaskId();
                 String website = param.getWebsiteName();
-                String loginName = param.getLoginName();
+                String loginName = param.getUsername();
                 taskService.updateTask(taskId, loginName, website);
                 taskTimeService.updateLoginTime(taskId, new Date());
                 return SimpleResult.successResult(result.getData());
@@ -128,15 +128,15 @@ public class DiplomaLoginSimulationService {
      * @param educationParam
      * @return
      */
-    public Object registerInit(EducationParam educationParam) {
+    public Object registerInit(CommonPluginParam educationParam) {
         Map<String, Object> lockMap = Maps.newHashMap();
         String key = RedisKeyUtils.genRedisLockKey(educationParam.getTaskId(), "diploma_register_init");
         try {
             lockMap = redisDao.acquireLock(key, 60 * 1000L);
             if (lockMap != null) {
-                HttpResult<Map<String, Object>> result;
+                HttpResult<Object> result;
                 try {
-                    result = rpcEducationService.registerInit(educationParam);
+                    result = educationApi.registerInit(educationParam);
                 } catch (Exception e) {
                     logger.error("学信网:调用爬数注册初始化异常,param={}", JSON.toJSONString(educationParam), e);
                     throw e;
@@ -162,10 +162,10 @@ public class DiplomaLoginSimulationService {
      * @param param
      * @return
      */
-    public Object registerRefreshPicCode(EducationParam param) {
-        HttpResult<Map<String, Object>> result;
+    public Object registerRefreshPicCode(CommonPluginParam param) {
+        HttpResult<Object> result;
         try {
-            result = rpcEducationService.registerRefeshPicCode(param);
+            result = educationApi.registerRefeshPicCode(param);
         } catch (Exception e) {
             logger.error("学信网:调用爬数注册时刷新图片验证码异常,param={}", JSON.toJSONString(param), e);
             throw e;
@@ -183,10 +183,10 @@ public class DiplomaLoginSimulationService {
      * @param param
      * @return
      */
-    public Object registerValidatePicCodeAndSendSmsCode(EducationParam param) {
-        HttpResult<Map<String, Object>> result;
+    public Object registerValidatePicCodeAndSendSmsCode(CommonPluginParam param) {
+        HttpResult<Object> result;
         try {
-            result = rpcEducationService.registerValidatePicCodeAndSendSmsCode(param);
+            result = educationApi.registerValidatePicCodeAndSendSmsCode(param);
         } catch (Exception e) {
             logger.error("学信网:调用爬数注册时验证图片验证码并发送短信异常,param={}", JSON.toJSONString(param), e);
             throw e;
@@ -204,15 +204,15 @@ public class DiplomaLoginSimulationService {
      * @param param
      * @return
      */
-    public Object registerSubmit(EducationParam param) {
+    public Object registerSubmit(CommonPluginParam param) {
         Map<String, Object> lockMap = Maps.newHashMap();
         String key = RedisKeyUtils.genRedisLockKey(param.getTaskId(), "diploma_register_submit");
         try {
             lockMap = redisDao.acquireLock(key, 60 * 1000L);
             if (lockMap != null) {
-                HttpResult<Map<String, Object>> result;
+                HttpResult<Object> result;
                 try {
-                    result = rpcEducationService.registerSubmit(param);
+                    result = educationApi.registerSubmit(param);
                 } catch (Exception e) {
                     logger.error("学信网:调用爬数注册提交异常,param={}", JSON.toJSONString(param), e);
                     throw e;

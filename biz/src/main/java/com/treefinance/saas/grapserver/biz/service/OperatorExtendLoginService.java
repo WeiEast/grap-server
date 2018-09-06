@@ -1,12 +1,11 @@
 package com.treefinance.saas.grapserver.biz.service;
 
 import com.alibaba.fastjson.JSON;
-import com.datatrees.rawdatacentral.api.CrawlerOperatorService;
-import com.datatrees.rawdatacentral.domain.operator.OperatorCatalogue;
-import com.datatrees.rawdatacentral.domain.operator.OperatorGroup;
-import com.datatrees.rawdatacentral.domain.operator.OperatorLoginConfig;
-import com.datatrees.rawdatacentral.domain.operator.OperatorParam;
-import com.datatrees.rawdatacentral.domain.result.HttpResult;
+import com.datatrees.spider.operator.api.OperatorApi;
+import com.datatrees.spider.operator.domain.OperatorGroup;
+import com.datatrees.spider.operator.domain.OperatorLoginConfig;
+import com.datatrees.spider.operator.domain.OperatorParam;
+import com.datatrees.spider.share.domain.http.HttpResult;
 import com.google.common.collect.Maps;
 import com.treefinance.commonservice.facade.mobileattribution.IMobileAttributionService;
 import com.treefinance.commonservice.facade.mobileattribution.MobileAttributionDTO;
@@ -39,8 +38,6 @@ public class OperatorExtendLoginService {
     @Autowired
     private MerchantConfigService merchantConfigService;
     @Autowired
-    private CrawlerOperatorService crawlerOperatorService;
-    @Autowired
     private TaskAttributeService taskAttributeService;
     @Autowired
     private AppBizLicenseService appBizLicenseService;
@@ -52,39 +49,8 @@ public class OperatorExtendLoginService {
     private TaskTimeService taskTimeService;
     @Autowired
     private RedisDao redisDao;
-
-    /**
-     * 获取运营商配置
-     *
-     * @param appId
-     * @param taskId
-     * @return
-     */
-    public Map<String, Object> getConfig(String appId, Long taskId, String style) {
-        Map<String, Object> colorMap = merchantConfigService.getColorConfig(appId, style);
-        HttpResult<List<OperatorCatalogue>> result;
-        try {
-            result = crawlerOperatorService.queryAllConfig();
-        } catch (Exception e) {
-            logger.error("运营商:调用爬数获取所有登录运营商配置异常,taskId={}", taskId, e);
-            throw e;
-        }
-        if (!result.getStatus()) {
-            logger.info("运营商:调用爬数获取所有登录运营商配置失败,taskId={},result={}", taskId, JSON.toJSONString(result));
-            throw new CrawlerBizException(result.getMessage());
-        }
-        TaskAttribute taskAttribute = taskAttributeService.findByName(taskId, "mobile", true);
-        Map<String, Object> map = Maps.newHashMap();
-        map.put("config", result.getData());
-        map.put("color", colorMap);
-        map.put("license", appBizLicenseService.isShowLicense(appId, EBizType.OPERATOR.getText()));
-        map.put("licenseTemplate", appBizLicenseService.getLicenseTemplate(appId, EBizType.OPERATOR.getText()));
-        map.putAll(appBizLicenseService.isShowQuestionnaireOrFeedback(appId, EBizType.OPERATOR.getText()));
-        if (taskAttribute != null) {
-            map.put(taskAttribute.getName(), taskAttribute.getValue());
-        }
-        return map;
-    }
+    @Autowired
+    private OperatorApi operatorApi;
 
     /**
      * 根据输入号码查找该号码的归属地
@@ -124,7 +90,7 @@ public class OperatorExtendLoginService {
     public Object prepare(OperatorParam operatorParam) {
         HttpResult<Map<String, Object>> result;
         try {
-            result = crawlerOperatorService.init(operatorParam);
+            result = operatorApi.init(operatorParam);
         } catch (Exception e) {
             logger.error("运营商:调用爬数登陆初始化,获取基本信息异常,operatorParam={}", JSON.toJSONString(operatorParam), e);
             throw e;
@@ -154,7 +120,7 @@ public class OperatorExtendLoginService {
     public Object refreshPicCode(OperatorParam operatorParam) {
         HttpResult<Map<String, Object>> result;
         try {
-            result = crawlerOperatorService.refeshPicCode(operatorParam);
+            result = operatorApi.refeshPicCode(operatorParam);
         } catch (Exception e) {
             logger.error("运营商:调用爬数刷新图片验证码异常,operatorParam={}", JSON.toJSONString(operatorParam), e);
             throw e;
@@ -176,7 +142,7 @@ public class OperatorExtendLoginService {
     public Object refreshSmsCode(OperatorParam operatorParam) {
         HttpResult<Map<String, Object>> result;
         try {
-            result = crawlerOperatorService.refeshSmsCode(operatorParam);
+            result = operatorApi.refeshSmsCode(operatorParam);
         } catch (Exception e) {
             logger.error("运营商:调用爬数刷新短信验证码异常,operatorParam={}", JSON.toJSONString(operatorParam), e);
             throw e;
@@ -202,7 +168,7 @@ public class OperatorExtendLoginService {
             if (lockMap != null) {
                 HttpResult<Map<String, Object>> result;
                 try {
-                    result = crawlerOperatorService.submit(operatorParam);
+                    result = operatorApi.submit(operatorParam);
                 } catch (Exception e) {
                     logger.error("运营商:调用爬数运营商登陆异常,operatorParam={}", JSON.toJSONString(operatorParam), e);
                     throw e;
@@ -239,7 +205,7 @@ public class OperatorExtendLoginService {
         Map<String, Object> colorMap = merchantConfigService.getColorConfig(appId, style);
         HttpResult<List<Map<String, List<OperatorGroup>>>> result;
         try {
-            result = crawlerOperatorService.queryGroups();
+            result = operatorApi.queryGroups();
         } catch (Exception e) {
             logger.error("运营商:调用爬数查询运营商分组信息异常", e);
             throw e;
@@ -270,7 +236,7 @@ public class OperatorExtendLoginService {
     public Object preLoginConfig(OperatorParam operatorParam) {
         HttpResult<OperatorLoginConfig> result;
         try {
-            result = crawlerOperatorService.preLogin(operatorParam);
+            result = operatorApi.preLogin(operatorParam);
         } catch (Exception e) {
             logger.error("运营商:调用爬数获取运营商登陆配置信息异常,operatorParam={}", JSON.toJSONString(operatorParam), e);
             throw e;
