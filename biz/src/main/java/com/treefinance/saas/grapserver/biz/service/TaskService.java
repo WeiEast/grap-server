@@ -1,45 +1,36 @@
 package com.treefinance.saas.grapserver.biz.service;
 
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
 import com.google.common.base.Splitter;
 import com.google.common.collect.Lists;
 import com.treefinance.basicservice.security.crypto.facade.EncryptionIntensityEnum;
 import com.treefinance.basicservice.security.crypto.facade.ISecurityCryptoService;
-import com.treefinance.commonservice.uid.UidGenerator;
 import com.treefinance.saas.assistant.model.Constants;
 import com.treefinance.saas.grapserver.biz.config.DiamondConfig;
-import com.treefinance.saas.grapserver.biz.service.directive.DirectiveService;
-import com.treefinance.saas.grapserver.common.enums.EDirective;
 import com.treefinance.saas.grapserver.common.enums.ETaskStatus;
 import com.treefinance.saas.grapserver.common.enums.ETaskStep;
 import com.treefinance.saas.grapserver.common.exception.AppIdUncheckException;
+import com.treefinance.saas.grapserver.common.exception.BizException;
 import com.treefinance.saas.grapserver.common.exception.ForbiddenException;
 import com.treefinance.saas.grapserver.common.exception.base.MarkBaseException;
-import com.treefinance.saas.grapserver.common.model.dto.DirectiveDTO;
 import com.treefinance.saas.grapserver.common.model.dto.TaskDTO;
-import com.treefinance.saas.grapserver.common.utils.CommonUtils;
 import com.treefinance.saas.grapserver.common.utils.DataConverterUtils;
 import com.treefinance.saas.grapserver.dao.entity.Task;
 import com.treefinance.saas.grapserver.dao.entity.TaskCriteria;
 import com.treefinance.saas.grapserver.dao.entity.TaskLog;
 import com.treefinance.saas.grapserver.dao.mapper.TaskMapper;
-import com.treefinance.saas.grapserver.facade.enums.ETaskAttribute;
-import org.apache.commons.collections.MapUtils;
+import com.treefinance.saas.taskcenter.facade.request.TaskCreateRequest;
+import com.treefinance.saas.taskcenter.facade.result.common.TaskResult;
+import com.treefinance.saas.taskcenter.facade.service.TaskFacade;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.validation.ValidationException;
 import java.io.IOException;
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 /**
  *
@@ -62,11 +53,9 @@ public class TaskService {
     @Autowired
     private TaskLogService taskLogService;
     @Autowired
-    private TaskAttributeService taskAttributeService;
-    @Autowired
     private DiamondConfig diamondConfig;
     @Autowired
-    private DirectiveService directiveService;
+    private TaskFacade taskFacade;
 
     /**
      * 创建任务
@@ -80,7 +69,6 @@ public class TaskService {
      * @return
      * @throws IOException
      */
-    @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
     public Long createTask(String uniqueId, String appId, Byte bizType, String extra, String website, String source) {
         if (StringUtils.isBlank(appId)) {
             throw new AppIdUncheckException("appId非法");
@@ -100,30 +88,26 @@ public class TaskService {
             checkUniqueId(uniqueId, appId, bizType);
         }
 
-        long id = UidGenerator.getId();
-        Task task = new Task();
-        task.setUniqueId(uniqueId);
-        task.setAppId(appId);
-        task.setBizType(bizType);
-        task.setStatus((byte) 0);
+        TaskCreateRequest rpcRequest = new TaskCreateRequest();
+        rpcRequest.setUniqueId(uniqueId);
+        rpcRequest.setAppId(appId);
+        rpcRequest.setBizType(bizType);
+        rpcRequest.setStatus((byte) 0);
         if (StringUtils.isNotBlank(website)) {
-            task.setWebSite(website);
+            rpcRequest.setWebsite(website);
         }
-        task.setId(id);
-        task.setSaasEnv(Byte.valueOf(Constants.SAAS_ENV_VALUE));
-        taskMapper.insertSelective(task);
-        if (StringUtils.isNotBlank(extra)) {
-            JSONObject jsonObject = JSON.parseObject(extra);
-            if (MapUtils.isNotEmpty(jsonObject)) {
-                setAttribute(id, jsonObject);
-            }
+        rpcRequest.setSaasEnv(Byte.valueOf(Constants.SAAS_ENV_VALUE));
+        rpcRequest.setExtra(extra);
+        TaskResult<Long> rpcResult;
+        try {
+            rpcResult = taskFacade.createTask(rpcRequest);
+        } catch (Exception e) {
+            throw new BizException("调用taskcenter异常");
         }
-        if (StringUtils.isNotEmpty(source)) {
-            taskAttributeService.insert(id, ETaskAttribute.SOURCE_TYPE.getAttribute(), source);
+        if (!rpcResult.isSuccess()) {
+            throw new BizException("调用taskcenter失败");
         }
-        // 记录创建日志
-        taskLogService.logCreateTask(id);
-        return id;
+        return rpcResult.getData();
     }
 
     /**
@@ -148,20 +132,6 @@ public class TaskService {
         return prefix + ":" + appId + ":" + bizType + ":" + uniqueId;
     }
 
-    /**
-     * 更改任务状态
-     *
-     * @param taskId
-     * @param status
-     * @return
-     */
-    public int updateTaskStatus(Long taskId, Byte status) {
-        Task task = new Task();
-        task.setId(taskId);
-        task.setStatus(status);
-
-        return updateUnfinishedTask(task);
-    }
 
     /**
      * 更新未完成任务
@@ -200,28 +170,6 @@ public class TaskService {
         }
     }
 
-    /**
-     * 任务是否完成
-     *
-     * @param taskid
-     * @return
-     */
-    public boolean isTaskCompleted(Long taskid) {
-        if (taskid == null) {
-            return false;
-        }
-        Task existTask = taskMapper.selectByPrimaryKey(taskid);
-        if (existTask == null) {
-            return false;
-        }
-        Byte status = existTask.getStatus();
-        if (ETaskStatus.CANCEL.getStatus().equals(status)
-                || ETaskStatus.FAIL.getStatus().equals(status)
-                || ETaskStatus.SUCCESS.getStatus().equals(status)) {
-            return true;
-        }
-        return false;
-    }
 
     /**
      * 任务是否完成
@@ -242,13 +190,6 @@ public class TaskService {
         return false;
     }
 
-    public List<Long> getUserTaskIdList(Long taskId) {
-        Task task = taskMapper.selectByPrimaryKey(taskId);
-        TaskCriteria taskCriteria = new TaskCriteria();
-        taskCriteria.createCriteria().andUniqueIdEqualTo(task.getUniqueId()).andAppIdEqualTo(task.getAppId()).andBizTypeEqualTo(task.getBizType());
-        List<Long> list = taskMapper.selectByExample(taskCriteria).stream().map(s -> s.getId()).collect(Collectors.toList());
-        return list;
-    }
 
     public TaskDTO getById(Long taskId) {
         Task task = taskMapper.selectByPrimaryKey(taskId);
@@ -259,39 +200,6 @@ public class TaskService {
         return result;
     }
 
-    /**
-     * @param taskId
-     * @return
-     */
-    public String getAppIdById(Long taskId) {
-        Task task = taskMapper.selectByPrimaryKey(taskId);
-        return task == null ? null : task.getAppId();
-    }
-
-    private void setAttribute(Long taskId, Map map) {
-        String mobileAttribute = ETaskAttribute.MOBILE.getAttribute();
-        String nameAttribute = ETaskAttribute.NAME.getAttribute();
-        String idCardAttribute = ETaskAttribute.ID_CARD.getAttribute();
-        String mobile = map.get(mobileAttribute) == null ? "" : String.valueOf(map.get(mobileAttribute));
-        if (StringUtils.isNotBlank(mobile)) {
-            boolean b = CommonUtils.regexMatch(mobile, "^1(3|4|5|6|7|8|9)[0-9]\\d{8}$");
-            if (!b) {
-                throw new ValidationException(String.format("the mobile number is illegal! mobile=%s", mobile));
-            }
-            String value = securityCryptoService.encrypt(mobile, EncryptionIntensityEnum.NORMAL);
-            taskAttributeService.insert(taskId, mobileAttribute, value);
-        }
-        String name = map.get(nameAttribute) == null ? "" : String.valueOf(map.get(nameAttribute));
-        if (StringUtils.isNotBlank(name)) {
-            String value = securityCryptoService.encrypt(name, EncryptionIntensityEnum.NORMAL);
-            taskAttributeService.insert(taskId, nameAttribute, value);
-        }
-        String idCard = map.get(idCardAttribute) == null ? "" : String.valueOf(map.get(idCardAttribute));
-        if (StringUtils.isNotBlank(idCard)) {
-            String value = securityCryptoService.encrypt(idCard, EncryptionIntensityEnum.NORMAL);
-            taskAttributeService.insert(taskId, idCardAttribute, value);
-        }
-    }
 
     /**
      * 更新AccountNo
@@ -381,13 +289,10 @@ public class TaskService {
      */
     public void cancelTask(Long taskId) {
         logger.info("取消任务 : taskId={} ", taskId);
-        Task existTask = taskMapper.selectByPrimaryKey(taskId);
-        if (existTask != null && existTask.getStatus() == 0) {
-            logger.info("取消正在执行任务 : taskId={} ", taskId);
-            DirectiveDTO cancelDirective = new DirectiveDTO();
-            cancelDirective.setTaskId(taskId);
-            cancelDirective.setDirective(EDirective.TASK_CANCEL.getText());
-            directiveService.process(cancelDirective);
+        try {
+            taskFacade.cancelTask(taskId);
+        } catch (Exception e) {
+            throw new BizException("调用taskcenter异常");
         }
     }
 

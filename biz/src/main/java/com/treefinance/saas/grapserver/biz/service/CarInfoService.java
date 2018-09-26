@@ -6,20 +6,20 @@ import com.alibaba.fastjson.serializer.SerializerFeature;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.treefinance.saas.grapserver.biz.config.DiamondConfig;
-import com.treefinance.saas.grapserver.biz.service.monitor.MonitorService;
 import com.treefinance.saas.grapserver.common.enums.EBizType;
-import com.treefinance.saas.grapserver.common.enums.ETaskStatus;
 import com.treefinance.saas.grapserver.common.enums.ETaskStep;
 import com.treefinance.saas.grapserver.common.model.dto.carinfo.CarInfoCollectTaskLogDTO;
+import com.treefinance.saas.grapserver.common.utils.DataConverterUtils;
 import com.treefinance.saas.grapserver.common.utils.HttpClientUtils;
 import com.treefinance.saas.grapserver.dao.entity.AppLicense;
 import com.treefinance.saas.knife.result.SimpleResult;
+import com.treefinance.saas.taskcenter.facade.request.CarInfoCollectTaskLogRequest;
+import com.treefinance.saas.taskcenter.facade.service.CarInfoFacade;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
 import java.util.List;
@@ -42,13 +42,11 @@ public class CarInfoService {
     @Autowired
     private TaskLicenseService taskLicenseService;
     @Autowired
-    private TaskLogService taskLogService;
-    @Autowired
-    private MonitorService monitorService;
-    @Autowired
     private AppLicenseService appLicenseService;
     @Autowired
     private DiamondConfig diamondConfig;
+    @Autowired
+    private CarInfoFacade carInfoFacade;
 
     /**
      * 创建车辆信息采集任务
@@ -102,20 +100,9 @@ public class CarInfoService {
         }
     }
 
-    @Transactional(rollbackFor = Exception.class)
     public void updateCollectTaskStatusAndTaskLogAndSendMonitor(Long taskId, List<CarInfoCollectTaskLogDTO> logList) {
-        for (CarInfoCollectTaskLogDTO log : logList) {
-            taskLogService.insert(taskId, log.getMsg(), log.getOccurTime(), log.getErrorMsg());
-            //任务成功
-            if (StringUtils.equalsIgnoreCase(log.getMsg(), ETaskStep.TASK_SUCCESS.getText())) {
-                taskService.updateTaskStatus(taskId, ETaskStatus.SUCCESS.getStatus());
-            }
-            //任务失败
-            if (StringUtils.equalsIgnoreCase(log.getMsg(), ETaskStep.TASK_FAIL.getText())) {
-                taskService.updateTaskStatus(taskId, ETaskStatus.FAIL.getStatus());
-            }
-        }
-        monitorService.sendMonitorMessage(taskId);
+        List<CarInfoCollectTaskLogRequest> carInfoCollectTaskLogRequestList = DataConverterUtils.convert(logList, CarInfoCollectTaskLogRequest.class);
+        carInfoFacade.updateCollectTaskStatusAndTaskLogAndSendMonitor(taskId, carInfoCollectTaskLogRequestList);
     }
 
 

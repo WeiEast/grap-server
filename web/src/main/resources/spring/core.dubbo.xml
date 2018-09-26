@@ -73,6 +73,11 @@
     <dubbo:reference id="economicApiForTaoBaoQR" interface="com.datatrees.spider.ecommerce.api.EconomicApiForTaoBaoQR"/>
     <dubbo:reference id="educationApi" interface="com.datatrees.spider.extra.api.EducationApi" timeout="20000"/>
 
+    <dubbo:reference interface="com.treefinance.saas.taskcenter.facade.service.TaskFacade" id="taskFacade"
+                     version="1.0.0"/>
+    <dubbo:reference interface="com.treefinance.saas.taskcenter.facade.service.CarInfoFacade" id="carInfoFacade"
+                     version="1.0.0"/>
+
     <!--生产者-->
     <dubbo:service interface="com.treefinance.saas.grapserver.facade.service.TaskFacade" ref="taskFacade"/>
 
