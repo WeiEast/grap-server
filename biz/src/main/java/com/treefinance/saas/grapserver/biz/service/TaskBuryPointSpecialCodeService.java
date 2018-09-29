@@ -3,13 +3,9 @@ package com.treefinance.saas.grapserver.biz.service;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.treefinance.basicservice.security.crypto.facade.EncryptionIntensityEnum;
-import com.treefinance.basicservice.security.crypto.facade.ISecurityCryptoService;
-import com.treefinance.commonservice.uid.UidGenerator;
 import com.treefinance.saas.grapserver.common.utils.JsonUtils;
-import com.treefinance.saas.grapserver.dao.entity.TaskOperatorMaintainUserLog;
-import com.treefinance.saas.grapserver.dao.mapper.TaskOperatorMaintainUserLogMapper;
 import com.treefinance.saas.grapserver.facade.enums.ETaskAttribute;
+import com.treefinance.saas.taskcenter.facade.service.TaskBuryPointLogFacade;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -30,11 +26,9 @@ public class TaskBuryPointSpecialCodeService {
     private final static Logger logger = LoggerFactory.getLogger(TaskBuryPointSpecialCodeService.class);
 
     @Autowired
-    private TaskOperatorMaintainUserLogMapper taskOperatorMaintainUserLogMapper;
-    @Autowired
     private TaskAttributeService taskAttributeService;
     @Autowired
-    private ISecurityCryptoService iSecurityCryptoService;
+    private TaskBuryPointLogFacade taskBuryPointLogFacade;
 
 
     @Async
@@ -89,13 +83,7 @@ public class TaskBuryPointSpecialCodeService {
             logger.error("运营商正在维护,记录用户信息,extra={}中未传入mobile信息", extra);
             return;
         }
-        TaskOperatorMaintainUserLog log = new TaskOperatorMaintainUserLog();
-        log.setId(UidGenerator.getId());
-        log.setTaskId(taskId);
-        log.setAppId(appId);
-        log.setMobile(iSecurityCryptoService.encrypt(mobile, EncryptionIntensityEnum.NORMAL));
-        log.setOperatorName(operatorName);
-        taskOperatorMaintainUserLogMapper.insertSelective(log);
+        taskBuryPointLogFacade.logTaskOperatorMaintainUser(taskId, appId, extra);
 
     }
 }

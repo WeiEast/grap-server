@@ -24,7 +24,7 @@ import com.google.common.collect.Maps;
 import com.treefinance.saas.assistant.model.HttpMonitorMessage;
 import com.treefinance.saas.grapserver.biz.config.DiamondConfig;
 import com.treefinance.saas.grapserver.biz.service.AppLicenseService;
-import com.treefinance.saas.grapserver.biz.service.monitor.MonitorPluginService;
+import com.treefinance.saas.grapserver.biz.service.MonitorService;
 import com.treefinance.saas.grapserver.common.exception.AppIdUncheckException;
 import com.treefinance.saas.grapserver.common.exception.ForbiddenException;
 import com.treefinance.saas.grapserver.common.model.AppLicenseKey;
@@ -54,15 +54,15 @@ import java.util.regex.Pattern;
 
 public class WebContextFilter extends AbstractRequestFilter {
     private static final Logger logger = LoggerFactory.getLogger(WebContextFilter.class);
-    private MonitorPluginService monitorPluginService;
+    private MonitorService monitorService;
     private DiamondConfig diamondConfig;
     private AppLicenseService appLicenseService;
 
 
-    public WebContextFilter(MonitorPluginService monitorPluginService,
+    public WebContextFilter(MonitorService monitorService,
                             DiamondConfig diamondConfig,
                             AppLicenseService appLicenseService) {
-        this.monitorPluginService = monitorPluginService;
+        this.monitorService = monitorService;
         this.diamondConfig = diamondConfig;
         this.appLicenseService = appLicenseService;
     }
@@ -200,6 +200,6 @@ public class WebContextFilter extends AbstractRequestFilter {
         message.setRequestIp(ServletRequestUtils.getIP(request));
         message.setRequestUrl(request.getRequestURI());
         message.setServerIp(IpUtils.getServerIp());
-        monitorPluginService.pushHttpMonitorMessage(message);
+        monitorService.pushHttpMonitorMessage(message);
     }
 }

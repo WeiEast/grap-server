@@ -16,11 +16,12 @@
 
 package com.treefinance.saas.grapserver.biz.service;
 
+import com.treefinance.saas.grapserver.common.exception.UnknownException;
+import com.treefinance.saas.grapserver.common.utils.DataConverterUtils;
 import com.treefinance.saas.grapserver.dao.entity.TaskSupport;
-import com.treefinance.saas.grapserver.dao.entity.TaskSupportCriteria;
-import com.treefinance.saas.grapserver.dao.mapper.TaskSupportMapper;
-import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
+import com.treefinance.saas.taskcenter.facade.result.TaskSupportRO;
+import com.treefinance.saas.taskcenter.facade.result.common.TaskResult;
+import com.treefinance.saas.taskcenter.facade.service.TaskSupportFacade;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -34,34 +35,15 @@ import java.util.List;
 public class TaskSupportService {
 
     @Autowired
-    private TaskSupportMapper taskSupportMapper;
+    private TaskSupportFacade taskSupportFacade;
 
 
     public List<TaskSupport> getSupportedList(String supportType, Integer id, String name) {
-        TaskSupportCriteria supportCriteria = new TaskSupportCriteria();
-        supportCriteria.setOrderByClause("Sort ASC");
-        TaskSupportCriteria.Criteria innerCriteria = supportCriteria.createCriteria();
-        innerCriteria.andEnableEqualTo(Boolean.TRUE).andCategoryEqualTo(supportType);
-        if (StringUtils.isBlank(name)) {
-            innerCriteria.andIsShowEqualTo(Boolean.TRUE);
+        TaskResult<List<TaskSupportRO>> rpcResult = taskSupportFacade.getSupportedList(supportType, id, name);
+        if (!rpcResult.isSuccess()) {
+            throw new UnknownException("调用taskcenter失败");
         }
-        if (id != null) {
-            innerCriteria.andIdEqualTo(id);
-        }
-        if (StringUtils.isNotBlank(name)) {
-            innerCriteria.andTypeEqualTo(name);
-        }
-
-        return taskSupportMapper.selectByExample(supportCriteria);
-    }
-
-    public int getSupported(String category, String name) {
-        TaskSupportCriteria supportCriteria = new TaskSupportCriteria();
-        supportCriteria.createCriteria().andCategoryEqualTo(category).andNameEqualTo(name);
-        List<TaskSupport> list = taskSupportMapper.selectByExample(supportCriteria);
-        if (CollectionUtils.isEmpty(list)) {
-            return 0;
-        }
-        return list.get(0).getEnable() ? 1 : 0;
+        List<TaskSupport> list = DataConverterUtils.convert(rpcResult.getData(), TaskSupport.class);
+        return list;
     }
 }

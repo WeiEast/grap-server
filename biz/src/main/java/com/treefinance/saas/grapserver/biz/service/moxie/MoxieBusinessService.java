@@ -19,7 +19,6 @@ import com.treefinance.saas.grapserver.biz.service.TaskAttributeService;
 import com.treefinance.saas.grapserver.biz.service.TaskLogService;
 import com.treefinance.saas.grapserver.biz.service.TaskNextDirectiveService;
 import com.treefinance.saas.grapserver.biz.service.TaskService;
-import com.treefinance.saas.grapserver.biz.service.moxie.directive.MoxieDirectiveService;
 import com.treefinance.saas.grapserver.common.enums.ETaskStatus;
 import com.treefinance.saas.grapserver.common.enums.ETaskStep;
 import com.treefinance.saas.grapserver.common.enums.moxie.EMoxieDirective;
@@ -27,11 +26,13 @@ import com.treefinance.saas.grapserver.common.exception.RequestFailedException;
 import com.treefinance.saas.grapserver.common.model.dto.TaskDTO;
 import com.treefinance.saas.grapserver.common.model.dto.moxie.*;
 import com.treefinance.saas.grapserver.common.model.vo.moxie.MoxieCityInfoVO;
+import com.treefinance.saas.grapserver.common.utils.DataConverterUtils;
 import com.treefinance.saas.grapserver.common.utils.JsonUtils;
 import com.treefinance.saas.grapserver.dao.entity.TaskAttribute;
 import com.treefinance.saas.grapserver.dao.entity.TaskLog;
 import com.treefinance.saas.grapserver.facade.enums.ETaskAttribute;
-import com.treefinance.saas.processor.thirdparty.facade.fund.FundService;
+import com.treefinance.saas.taskcenter.facade.request.MoxieTaskEventNoticeRequest;
+import com.treefinance.saas.taskcenter.facade.service.MoxieTaskEventNoticeFacade;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -61,15 +62,11 @@ public class MoxieBusinessService implements InitializingBean {
     @Autowired
     private TaskLogService taskLogService;
     @Autowired
-    private MoxieDirectiveService moxieDirectiveService;
-    @Autowired
     private TaskAttributeService taskAttributeService;
     @Autowired
     private FundMoxieService fundMoxieService;
     @Autowired
     private TaskNextDirectiveService taskNextDirectiveService;
-    @Autowired
-    private FundService fundService;
     @Autowired
     private TaskService taskService;
     @Autowired
@@ -78,6 +75,8 @@ public class MoxieBusinessService implements InitializingBean {
     private RedisDao redisDao;
     @Autowired
     private GeocodeService geocodeService;
+    @Autowired
+    private MoxieTaskEventNoticeFacade moxieTaskEventNoticeFacade;
 
     /**
      * 本地缓存
@@ -104,43 +103,6 @@ public class MoxieBusinessService implements InitializingBean {
             return;
         }
         this.cache.put("citys", cityList);
-    }
-
-    /**
-     * 魔蝎任务采集失败业务处理
-     *
-     * @param eventNoticeDTO
-     */
-    public void grabFail(MoxieTaskEventNoticeDTO eventNoticeDTO) {
-        String moxieTaskId = eventNoticeDTO.getMoxieTaskId();
-        String message = eventNoticeDTO.getMessage();
-        if (StringUtils.isBlank(moxieTaskId)) {
-            logger.error("handle moxie business error: moxieTaskId={} is null", moxieTaskId);
-            return;
-        }
-        TaskAttribute taskAttribute = taskAttributeService.findByNameAndValue(ETaskAttribute.FUND_MOXIE_TASKID.getAttribute(), moxieTaskId, false);
-        if (taskAttribute == null) {
-            logger.error("handle moxie business error: moxieTaskId={} doesn't have taskId matched in task_attribute", moxieTaskId);
-            return;
-        }
-        long taskId = taskAttribute.getTaskId();
-        //任务已经完成,不再继续后续处理.(当任务超时时,会发生魔蝎回调接口重试)
-        boolean flag = isTaskDone(taskId);
-        if (flag) {
-            return;
-        }
-        //1.记录采集失败日志
-        taskLogService.insert(taskId, ETaskStep.CRAWL_FAIL.getText(), new Date(), message);
-        //2.发送任务失败指令
-        MoxieDirectiveDTO directiveDTO = new MoxieDirectiveDTO();
-        directiveDTO.setDirective(EMoxieDirective.TASK_FAIL.getText());
-        Map<String, Object> map = Maps.newHashMap();
-        map.put("taskErrorMsg", "爬数失败");
-        directiveDTO.setRemark(JsonUtils.toJsonString(map));
-        directiveDTO.setTaskId(taskId);
-        directiveDTO.setMoxieTaskId(moxieTaskId);
-        moxieDirectiveService.process(directiveDTO);
-
     }
 
     /**
@@ -172,79 +134,8 @@ public class MoxieBusinessService implements InitializingBean {
      */
     @Transactional(rollbackFor = Exception.class)
     public void bill(MoxieTaskEventNoticeDTO eventNoticeDTO) {
-        String moxieTaskId = eventNoticeDTO.getMoxieTaskId();
-        if (StringUtils.isBlank(moxieTaskId)) {
-            logger.error("handle moxie business error: moxieTaskId={} is null", moxieTaskId);
-            return;
-        }
-        TaskAttribute taskAttribute = taskAttributeService.findByNameAndValue(ETaskAttribute.FUND_MOXIE_TASKID.getAttribute(), moxieTaskId, false);
-        if (taskAttribute == null) {
-            logger.error("handle moxie business error: moxieTaskId={} doesn't have taskId matched in task_attribute", moxieTaskId);
-            return;
-        }
-        long taskId = taskAttribute.getTaskId();
-
-        //任务已经完成,不再继续后续处理.(当任务超时时,会发生魔蝎回调接口重试)
-        boolean flag = isTaskDone(taskId);
-        if (flag) {
-            return;
-        }
-
-        //获取魔蝎数据,调用洗数,传递账单数据
-        Boolean result = true;
-        String message = null;
-        String processResult = null;
-        try {
-            processResult = this.billAndProcess(taskId, moxieTaskId);
-        } catch (Exception e) {
-            logger.error("handle moxie business error:bill and process fail.taskId={},moxieTaskId={}", taskId, moxieTaskId, e);
-            result = false;
-            message = e.getMessage();
-        }
-        //3.根据洗数返回结果,发送任务成功或失败指令
-        if (result) {
-            MoxieDirectiveDTO directiveDTO = new MoxieDirectiveDTO();
-            directiveDTO.setMoxieTaskId(moxieTaskId);
-            directiveDTO.setTaskId(taskId);
-            directiveDTO.setDirective(EMoxieDirective.TASK_SUCCESS.getText());
-            directiveDTO.setRemark(processResult);
-            moxieDirectiveService.process(directiveDTO);
-        } else {
-            MoxieDirectiveDTO directiveDTO = new MoxieDirectiveDTO();
-            directiveDTO.setMoxieTaskId(moxieTaskId);
-            directiveDTO.setTaskId(taskId);
-            directiveDTO.setDirective(EMoxieDirective.TASK_FAIL.getText());
-            Map<String, Object> map = Maps.newHashMap();
-            map.put("taskErrorMsg", message);
-            directiveDTO.setRemark(JsonUtils.toJsonString(map));
-            moxieDirectiveService.process(directiveDTO);
-        }
-    }
-
-    private String billAndProcess(Long taskId, String moxieTaskId) throws Exception {
-        String moxieResult = null;
-        try {
-            moxieResult = fundMoxieService.queryFundsEx(moxieTaskId);
-            //记录抓取日志
-            taskLogService.insert(taskId, ETaskStep.CRAWL_SUCCESS.getText(), new Date(), null);
-            taskLogService.insert(taskId, ETaskStep.CRAWL_COMPLETE.getText(), new Date(), null);
-            logger.info("handle moxie business moxieResult,taskId={},moxieTaskId={},result={}", taskId, moxieTaskId, moxieResult);
-        } catch (Exception e) {
-            logger.error("handle moxie business error:bill fail", e);
-            taskLogService.insert(taskId, ETaskStep.CRAWL_FAIL.getText(), new Date(), e.getMessage());
-            throw new Exception("获取公积金信息失败");
-        }
-        try {
-            String processResult = fundService.fund(taskId, moxieResult);
-            //记录数据保存日志
-            taskLogService.insert(taskId, ETaskStep.DATA_SAVE_SUCCESS.getText(), new Date(), null);
-            logger.info("handle moxie business processResult,taskId={},moxieTaskId={},result={}", taskId, moxieTaskId, processResult);
-            return processResult;
-        } catch (Exception e) {
-            logger.error("handle moxie business error:process fail", e);
-            taskLogService.insert(taskId, ETaskStep.DATA_SAVE_FAIL.getText(), new Date(), e.getMessage());
-            throw new Exception("洗数失败");
-        }
+        MoxieTaskEventNoticeRequest request = DataConverterUtils.convert(eventNoticeDTO, MoxieTaskEventNoticeRequest.class);
+        moxieTaskEventNoticeFacade.bill(request);
     }
 
     /**
@@ -320,20 +211,6 @@ public class MoxieBusinessService implements InitializingBean {
 
     }
 
-    public void loginSuccess(MoxieTaskEventNoticeDTO eventNoticeDTO) {
-        MoxieDirectiveDTO directiveDTO = new MoxieDirectiveDTO();
-        directiveDTO.setMoxieTaskId(eventNoticeDTO.getMoxieTaskId());
-        directiveDTO.setDirective(EMoxieDirective.LOGIN_SUCCESS.getText());
-        moxieDirectiveService.process(directiveDTO);
-    }
-
-    public void loginFail(MoxieTaskEventNoticeDTO eventNoticeDTO) {
-        MoxieDirectiveDTO directiveDTO = new MoxieDirectiveDTO();
-        directiveDTO.setMoxieTaskId(eventNoticeDTO.getMoxieTaskId());
-        directiveDTO.setDirective(EMoxieDirective.LOGIN_FAIL.getText());
-        directiveDTO.setRemark(eventNoticeDTO.getMessage());
-        moxieDirectiveService.process(directiveDTO);
-    }
 
     /**
      * 创建魔蝎任务,得到moxieTaskId
@@ -560,6 +437,27 @@ public class MoxieBusinessService implements InitializingBean {
         map.put("province", currentList.get(0).getLabel());
         map.put("list", currentList.get(0).getList());
         return map;
+    }
+
+
+    public void loginSuccess(MoxieTaskEventNoticeDTO eventNoticeDTO) {
+        MoxieTaskEventNoticeRequest request = DataConverterUtils.convert(eventNoticeDTO, MoxieTaskEventNoticeRequest.class);
+        moxieTaskEventNoticeFacade.loginSuccess(request);
+    }
+
+    public void loginFail(MoxieTaskEventNoticeDTO eventNoticeDTO) {
+        MoxieTaskEventNoticeRequest request = DataConverterUtils.convert(eventNoticeDTO, MoxieTaskEventNoticeRequest.class);
+        moxieTaskEventNoticeFacade.loginFail(request);
+    }
+
+    /**
+     * 魔蝎任务采集失败业务处理
+     *
+     * @param eventNoticeDTO
+     */
+    public void grabFail(MoxieTaskEventNoticeDTO eventNoticeDTO) {
+        MoxieTaskEventNoticeRequest request = DataConverterUtils.convert(eventNoticeDTO, MoxieTaskEventNoticeRequest.class);
+        moxieTaskEventNoticeFacade.grabFail(request);
     }
 
 }
