@@ -55,7 +55,7 @@ public class OperatorController {
             throw new IllegalArgumentException("运营商:获取配置,参数缺失,appid,taskid必传");
         }
         Object result = operatorExtendLoginService.getConfigAndGroups(appid, taskId, style);
-        logger.info("运营商:获取商户配置与运营商分组信息,返回结果,result={}", JSON.toJSONString(result));
+        logger.info("运营商:获取商户配置与运营商分组信息,返回结果,taskId={},result={}", taskId, JSON.toJSONString(result));
         return result;
     }
 
