@@ -4,9 +4,13 @@ import com.google.common.base.Function;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
+import com.google.common.collect.Maps;
+import com.treefinance.saas.assistant.model.Constants;
+import com.treefinance.saas.grapserver.biz.cache.RedisDao;
 import com.treefinance.saas.grapserver.common.exception.UnknownException;
 import com.treefinance.saas.grapserver.common.utils.CommonUtils;
 import com.treefinance.saas.grapserver.common.utils.DataConverterUtils;
+import com.treefinance.saas.grapserver.common.utils.RedisKeyUtils;
 import com.treefinance.saas.grapserver.dao.entity.AppBizType;
 import com.treefinance.saas.grapserver.dao.entity.Task;
 import com.treefinance.saas.taskcenter.facade.request.TaskRequest;
@@ -14,13 +18,17 @@ import com.treefinance.saas.taskcenter.facade.result.TaskRO;
 import com.treefinance.saas.taskcenter.facade.result.common.TaskResult;
 import com.treefinance.saas.taskcenter.facade.service.TaskFacade;
 import com.treefinance.saas.taskcenter.facade.service.TaskTimeFacade;
+import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.time.DateUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
@@ -41,6 +49,8 @@ public class TaskTimeService {
     private TaskTimeFacade taskTimeFacade;
     @Autowired
     private TaskFacade taskFacade;
+    @Autowired
+    private RedisDao redisDao;
 
 
     /**
@@ -163,6 +173,73 @@ public class TaskTimeService {
     public void handleTaskTimeout(Long taskId) {
         logger.info("任务抓取超时异步处理:taskId={}", taskId);
         taskTimeFacade.handleTaskTimeout(taskId);
+    }
+
+
+    /**
+     * 处理任务抓取超时
+     *
+     * @param taskId
+     * @param startTime
+     */
+    public void handleTaskAliveTimeout(Long taskId, Date startTime) {
+        logger.info("任务活跃超时异步处理:taskId={}", taskId);
+        taskTimeFacade.handleTaskAliveTimeout(taskId, startTime);
+    }
+
+
+    /**
+     * 处理登录后抓取任务超时(注意区分环境)
+     */
+    @Scheduled(cron = "0 0/1 * * * ?")
+    public void scheduleTaskTimeout() {
+        Map<String, Object> lockMap = Maps.newHashMap();
+        String lockKey = RedisKeyUtils.genRedisLockKey("task-crawler-time-job", Constants.SAAS_ENV_VALUE);
+        try {
+            Date startTime = new Date();
+            lockMap = redisDao.acquireLock(lockKey, 60 * 1000L);
+            if (MapUtils.isEmpty(lockMap)) {
+                return;
+            }
+            Date endTime = DateUtils.addMinutes(startTime, -60);
+            TaskResult<List<TaskRO>> rpcResult = taskFacade.selectRecentRunningTaskList(Byte.parseByte(Constants.SAAS_ENV_VALUE), startTime, endTime);
+            List<Task> tasks = DataConverterUtils.convert(rpcResult.getData(), Task.class);
+            for (Task task : tasks) {
+                if (this.isTaskTimeout(task.getId())) {
+                    //处理抓取超时任务
+                    this.handleTaskTimeout(task.getId());
+                }
+            }
+
+        } finally {
+            redisDao.releaseLock(lockKey, lockMap, 60 * 1000L);
+        }
+    }
+
+
+    /**
+     * 处理任务活跃时间超时(任务10分钟不活跃则取消任务)
+     * (注意区分环境)
+     */
+    @Scheduled(cron = "0 0/1 * * * ?")
+    public void scheduleTaskActiveTimeout() {
+        Map<String, Object> lockMap = Maps.newHashMap();
+        String lockKey = RedisKeyUtils.genRedisLockKey("task-alive-time-job", Constants.SAAS_ENV_VALUE);
+        try {
+            Date startTime = new Date();
+            lockMap = redisDao.acquireLock(lockKey, 60 * 1000L);
+            if (MapUtils.isEmpty(lockMap)) {
+                return;
+            }
+            Date endTime = DateUtils.addMinutes(startTime, -60);
+            TaskResult<List<TaskRO>> rpcResult = taskFacade.selectRecentRunningTaskList(Byte.parseByte(Constants.SAAS_ENV_VALUE), startTime, endTime);
+            List<Task> tasks = DataConverterUtils.convert(rpcResult.getData(), Task.class);
+            for (Task task : tasks) {
+                this.handleTaskAliveTimeout(task.getId(), startTime);
+            }
+        } finally {
+            redisDao.releaseLock(lockKey, lockMap, 60 * 1000L);
+        }
     }
 
 

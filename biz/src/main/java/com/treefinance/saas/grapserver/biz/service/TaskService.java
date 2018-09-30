@@ -7,7 +7,6 @@ import com.treefinance.saas.assistant.model.Constants;
 import com.treefinance.saas.grapserver.biz.config.DiamondConfig;
 import com.treefinance.saas.grapserver.common.enums.ETaskStatus;
 import com.treefinance.saas.grapserver.common.exception.AppIdUncheckException;
-import com.treefinance.saas.grapserver.common.exception.BizException;
 import com.treefinance.saas.grapserver.common.exception.ForbiddenException;
 import com.treefinance.saas.grapserver.common.exception.UnknownException;
 import com.treefinance.saas.grapserver.common.exception.base.MarkBaseException;
@@ -95,10 +94,11 @@ public class TaskService {
         try {
             rpcResult = taskFacade.createTask(rpcRequest);
         } catch (Exception e) {
-            throw new BizException("调用taskcenter异常");
+            logger.error("调用taskcenter异常", e);
+            throw new UnknownException("调用taskcenter异常");
         }
         if (!rpcResult.isSuccess()) {
-            throw new BizException("调用taskcenter失败");
+            throw new UnknownException("调用taskcenter失败");
         }
         return rpcResult.getData();
     }
@@ -255,6 +255,7 @@ public class TaskService {
         try {
             taskFacade.cancelTask(taskId);
         } catch (Exception e) {
+            logger.error("调用taskcenter异常", e);
             throw new UnknownException("调用taskcenter异常");
         }
     }
