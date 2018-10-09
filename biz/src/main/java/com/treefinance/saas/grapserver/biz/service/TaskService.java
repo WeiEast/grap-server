@@ -85,6 +85,7 @@ public class TaskService {
         rpcRequest.setAppId(appId);
         rpcRequest.setBizType(bizType);
         rpcRequest.setStatus((byte) 0);
+        rpcRequest.setSource(source);
         if (StringUtils.isNotBlank(website)) {
             rpcRequest.setWebsite(website);
         }
