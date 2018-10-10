@@ -15,6 +15,7 @@ import com.treefinance.saas.grapserver.common.utils.DataConverterUtils;
 import com.treefinance.saas.grapserver.dao.entity.Task;
 import com.treefinance.saas.taskcenter.facade.request.TaskCreateRequest;
 import com.treefinance.saas.taskcenter.facade.request.TaskRequest;
+import com.treefinance.saas.taskcenter.facade.request.TaskUpdateRequest;
 import com.treefinance.saas.taskcenter.facade.result.TaskRO;
 import com.treefinance.saas.taskcenter.facade.result.common.TaskResult;
 import com.treefinance.saas.taskcenter.facade.service.TaskFacade;
@@ -134,8 +135,8 @@ public class TaskService {
      * @return
      */
     private int updateUnfinishedTask(Task task) {
-        TaskCreateRequest taskCreateRequest = DataConverterUtils.convert(task, TaskCreateRequest.class);
-        TaskResult<Integer> rpcResult = taskFacade.updateUnfinishedTask(taskCreateRequest);
+        TaskUpdateRequest taskUpdateRequest = DataConverterUtils.convert(task, TaskUpdateRequest.class);
+        TaskResult<Integer> rpcResult = taskFacade.updateUnfinishedTask(taskUpdateRequest);
         if (!rpcResult.isSuccess()) {
             throw new UnknownException("调用taskcenter失败");
         }
