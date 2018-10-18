@@ -45,7 +45,7 @@ public class TongdunService {
     }
 
     public Object processCollectTask(Long taskId, String appId, TongdunRequest tongdunRequest) {
-        String url = "http://risk-third-party.test.91gfd.cn/td/saas/query";
+        String url = diamondConfig.getTongdunUrlCollect();
         JSONObject data = JSON.parseObject(JSON.toJSONString(tongdunRequest));
         Map map = new HashMap();
         map.put("data", data);
