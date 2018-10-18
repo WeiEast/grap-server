@@ -3,6 +3,7 @@ package com.treefinance.saas.grapserver.web.controller;
 import com.alibaba.fastjson.JSON;
 import com.treefinance.saas.grapserver.biz.service.TongdunService;
 import com.treefinance.saas.grapserver.common.exception.BizException;
+import com.treefinance.saas.grapserver.common.request.TongdunRequest;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,7 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
  * @date:Created in 2018/10/17下午2:13
  */
 @RestController
-@RequestMapping(value = {"/car_info", "/grap/car_info"})
+@RequestMapping(value = {"/loan/special/ss"})
 public class TongdunController {
 
     private static final Logger logger = LoggerFactory.getLogger(CarInfoController.class);
@@ -25,23 +26,31 @@ public class TongdunController {
     @Autowired
     private TongdunService tongdunService;
 
-
     /**
      * 同盾信息采集
      *
      * @return
      */
-    @RequestMapping(value = "/collect", method = {RequestMethod.POST})
-    public Object collect(@RequestParam("appid") String appId,
-        @RequestParam("name") String name,@RequestParam("idcard") String idcard,@RequestParam("modelNum") String modelNum) {
-        logger.info("车辆信息采集,输入参数:appid={},modelNum={}", appId, modelNum);
-        if (StringUtils.isBlank(modelNum)) {
-            throw new BizException("车型编码不能为空");
+    @RequestMapping(value = "/query", method = {RequestMethod.POST})
+    public Object collect(@RequestParam("appid") String appId, @RequestParam("name") String name,
+        @RequestParam("idcard") String idcard, @RequestParam("mobile") String mobile,
+        @RequestParam(value = "email", required = false) String email) {
+        if (StringUtils.isBlank(name) || StringUtils.isBlank(idcard) || StringUtils.isBlank(mobile)) {
+            throw new BizException("姓名，身份证号，手机号必填信息不能为空");
         }
-        Long taskId = tongdunService.startCollectTask(appId, modelNum);
-        Object result = tongdunService.processCollectTask(taskId, appId, modelNum);
-        logger.info("车辆信息采集,返回结果:result={},taskId={},appid={},modelNum={}",
-            JSON.toJSONString(result), taskId, appId, modelNum);
+        logger.info("同盾信息采集,输入参数:appid={},name={},idcard={},mobile={}", appId, name, idcard, mobile);
+        TongdunRequest tongdunRequest = new TongdunRequest();
+        tongdunRequest.setUserName(name);
+        tongdunRequest.setIdCard(idcard);
+        tongdunRequest.setTelNum(mobile);
+        if (StringUtils.isNotBlank(email)) {
+            tongdunRequest.setAccountEmail(email);
+            logger.info("同盾信息采集,输入参数:email={}", email);
+        }
+        Long taskId = tongdunService.startCollectTask(appId,tongdunRequest);
+        Object result = tongdunService.processCollectTask(taskId, appId,tongdunRequest);
+        logger.info("同盾信息采集,返回结果:result={},taskId={},appid={}", JSON.toJSONString(result), taskId, appId
+        );
         return result;
     }
 }
