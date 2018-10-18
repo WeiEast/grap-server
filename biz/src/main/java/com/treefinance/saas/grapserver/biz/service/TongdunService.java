@@ -9,11 +9,11 @@ import com.treefinance.saas.grapserver.common.enums.EBizType;
 import com.treefinance.saas.grapserver.common.enums.ETaskStatus;
 import com.treefinance.saas.grapserver.common.enums.ETongdunData;
 import com.treefinance.saas.grapserver.common.request.TongdunRequest;
+import com.treefinance.saas.grapserver.common.result.SaasResult;
 import com.treefinance.saas.grapserver.common.result.TongdunData;
 import com.treefinance.saas.grapserver.common.utils.HttpClientUtils;
 import com.treefinance.saas.grapserver.common.utils.TongdunDataResolver;
 import com.treefinance.saas.grapserver.dao.entity.AppLicense;
-import com.treefinance.saas.knife.result.SimpleResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -57,7 +57,7 @@ public class TongdunService {
             logger.error("调用功夫贷同盾采集任务异常:taskId={},tongdunRequset={}", taskId, tongdunRequest, e);
             taskLogService.insert(taskId, "调用功夫贷同盾采集任务异常", new Date(), "调用功夫贷同盾采集任务异常");
             taskService.updateTaskStatus(taskId, ETaskStatus.FAIL.getStatus());
-            return SimpleResult.failResult("功夫贷同盾采集任务采集失败");
+            return SaasResult.failResult("功夫贷同盾采集任务采集失败",-1);
         }
         JSONObject result = JSON.parseObject(httpResult);
         JSONArray saasRuleScoreDTOArrays = JSONArray.parseArray(result.get("saasRuleScoreDTO").toString());
@@ -89,13 +89,13 @@ public class TongdunService {
             AppLicense license = appLicenseService.getAppLicense(appId);
             taskLogService.insert(taskId, "任务成功", new Date(), "");
             taskService.updateTaskStatus(taskId, ETaskStatus.SUCCESS.getStatus());
-            return SimpleResult.successEncryptByRSAResult(tongdunDataList, license.getServerPublicKey());
+            return SaasResult.successEncryptByRSAResult(tongdunDataList, license.getServerPublicKey());
         } else {
             logger.error("调用功夫贷同盾采集任务返回值中任务日志信息存在问题:taskId={},tongdunRequest={},httpResult={},result={}", taskId,
                 tongdunRequest, httpResult, JSON.toJSONString(result));
             taskLogService.insert(taskId, "调用功夫贷同盾采集任务返回值中任务日志信息存在问题", new Date(), "调用功夫贷同盾采集任务返回值中任务日志信息存在问题");
             taskService.updateTaskStatus(taskId, ETaskStatus.FAIL.getStatus());
-            return SimpleResult.failResult("功夫贷同盾采集任务采集失败");
+            return SaasResult.failResult("功夫贷同盾采集任务采集失败",-1);
         }
     }
 
