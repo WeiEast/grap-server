@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
  * @date:Created in 2018/10/17下午2:13
  */
 @RestController
-@RequestMapping(value = {"/grap/loan/special/ss"})
+@RequestMapping(value = {"/loan/special/ss"})
 public class TongdunController {
 
     private static final Logger logger = LoggerFactory.getLogger(CarInfoController.class);
