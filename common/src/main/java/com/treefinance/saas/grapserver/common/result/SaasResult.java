@@ -71,12 +71,13 @@ public class SaasResult<T> {
         return successResult(encryptData);
     }
 
-    public static <T> SaasResult<T> failResult(String errorMsg,int code) {
-        return failResult(null,errorMsg,code);
+    public static <T> SaasResult<T> failResult(String errorMsg) {
+        return failResult(null,errorMsg,-1);
     }
 
     public static <T> SaasResult<T> failResult(T data, String msg,int code) {
         SaasResult<T> result = new SaasResult(msg,data,code);
+
         return result;
     }
 
