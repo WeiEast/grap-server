@@ -58,6 +58,7 @@ public class SaasResult<T> {
     public static <T> SaasResult<T> successResult(T data) {
         SaasResult<T> result = new SaasResult(data);
         result.setCode(0);
+        result.setMsg("success");
         return result;
     }
 
