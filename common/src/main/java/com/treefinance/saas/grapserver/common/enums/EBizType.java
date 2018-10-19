@@ -12,7 +12,8 @@ public enum EBizType {
     OPERATOR("OPERATOR", (byte) 3),
     FUND("FUND", (byte) 4),
     DIPLOMA("DIPLOMA", (byte) 7),
-    CAR_INFO("CAR_INFO", (byte) 9),;
+    CAR_INFO("CAR_INFO", (byte) 9),
+    TONGDUN("TONGDUN", (byte) 10);
 
     private String text;
     private Byte code;
