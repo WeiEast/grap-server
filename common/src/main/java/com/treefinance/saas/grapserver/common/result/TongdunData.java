@@ -5,8 +5,18 @@ package com.treefinance.saas.grapserver.common.result;
  * @date:Created in 2018/10/18下午7:32
  */
 public class TongdunData {
+
+    /**
+     * 对应规则 {@link com.treefinance.saas.grapserver.common.enums.ETongdunData#name}
+     */
     private String id;
+    /**
+     * 对应规则的数值
+     */
     private String value;
+    /**
+     * 对应规则的评分
+     */
     private String score;
 
     public String getId() {
