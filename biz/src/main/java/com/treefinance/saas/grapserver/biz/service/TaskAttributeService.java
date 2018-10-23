@@ -4,20 +4,15 @@
 package com.treefinance.saas.grapserver.biz.service;
 
 import com.google.common.collect.Maps;
-import com.treefinance.basicservice.security.crypto.facade.EncryptionIntensityEnum;
-import com.treefinance.basicservice.security.crypto.facade.ISecurityCryptoService;
-import com.treefinance.commonservice.uid.UidGenerator;
+import com.treefinance.saas.grapserver.common.exception.UnknownException;
+import com.treefinance.saas.grapserver.common.utils.DataConverterUtils;
 import com.treefinance.saas.grapserver.dao.entity.TaskAttribute;
-import com.treefinance.saas.grapserver.dao.entity.TaskAttributeCriteria;
-import com.treefinance.saas.grapserver.dao.mapper.TaskAttributeMapper;
-import com.treefinance.saas.grapserver.dao.mapper.TaskAttributeUpdateMapper;
-import org.apache.commons.lang3.StringUtils;
+import com.treefinance.saas.taskcenter.facade.result.TaskAttributeRO;
+import com.treefinance.saas.taskcenter.facade.result.common.TaskResult;
+import com.treefinance.saas.taskcenter.facade.service.TaskAttributeFacade;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.util.CollectionUtils;
 
-import javax.annotation.Resource;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -28,31 +23,9 @@ import java.util.Map;
  */
 @Service
 public class TaskAttributeService {
-    @Resource
-    private TaskAttributeMapper taskAttributeMapper;
     @Autowired
-    private TaskAttributeUpdateMapper taskAttributeUpdateMapper;
-    @Autowired
-    private ISecurityCryptoService securityCryptoService;
+    private TaskAttributeFacade taskAttributeFacade;
 
-    /**
-     * 保存属性
-     *
-     * @param taskId
-     * @param name
-     * @param value
-     * @return
-     */
-    public Long insert(Long taskId, String name, String value) {
-        long id = UidGenerator.getId();
-        TaskAttribute target = new TaskAttribute();
-        target.setId(id);
-        target.setTaskId(taskId);
-        target.setName(name);
-        target.setValue(value);
-        taskAttributeMapper.insert(target);
-        return id;
-    }
 
     /**
      * 保存或更新属性
@@ -62,13 +35,7 @@ public class TaskAttributeService {
      * @param value
      */
     public void insertOrUpdateSelective(Long taskId, String name, String value) {
-        long id = UidGenerator.getId();
-        TaskAttribute target = new TaskAttribute();
-        target.setId(id);
-        target.setTaskId(taskId);
-        target.setName(name);
-        target.setValue(value);
-        taskAttributeUpdateMapper.insertOrUpdateSelective(target);
+        taskAttributeFacade.insertOrUpdateSelective(taskId, name, value);
     }
 
     /**
@@ -80,16 +47,15 @@ public class TaskAttributeService {
      * @return
      */
     public TaskAttribute findByName(Long taskId, String name, boolean decrypt) {
-        TaskAttributeCriteria criteria = new TaskAttributeCriteria();
-        criteria.createCriteria().andTaskIdEqualTo(taskId).andNameEqualTo(name);
-        List<TaskAttribute> attributeList = taskAttributeMapper.selectByExample(criteria);
-        TaskAttribute taskAttribute = CollectionUtils.isEmpty(attributeList) ? null : attributeList.get(0);
-        if (taskAttribute == null) {
-            return taskAttribute;
+        TaskResult<TaskAttributeRO> rpcResult = taskAttributeFacade.findByName(taskId, name, decrypt);
+        if (!rpcResult.isSuccess()) {
+            throw new UnknownException("调用taskcenter失败");
+
         }
-        if (decrypt && StringUtils.isNotEmpty(taskAttribute.getValue())) {
-            taskAttribute.setValue(securityCryptoService.decrypt(taskAttribute.getValue(), EncryptionIntensityEnum.NORMAL));
+        if (rpcResult.getData() == null) {
+            return null;
         }
+        TaskAttribute taskAttribute = DataConverterUtils.convert(rpcResult.getData(), TaskAttribute.class);
         return taskAttribute;
     }
 
@@ -102,19 +68,16 @@ public class TaskAttributeService {
      * @return
      */
     public Map<String, TaskAttribute> findByNames(Long taskId, boolean decrypt, String... names) {
-        List<String> namelist = Arrays.asList(names);
-        TaskAttributeCriteria criteria = new TaskAttributeCriteria();
-        criteria.createCriteria().andTaskIdEqualTo(taskId).andNameIn(namelist);
-        List<TaskAttribute> attributeList = taskAttributeMapper.selectByExample(criteria);
 
+        TaskResult<Map<String, TaskAttributeRO>> rpcResult = taskAttributeFacade.findByNames(taskId, decrypt, names);
+        if (!rpcResult.isSuccess()) {
+            throw new UnknownException("调用taskcenter失败");
+        }
         Map<String, TaskAttribute> attributeMap = Maps.newHashMap();
-        if (!CollectionUtils.isEmpty(attributeList)) {
-            for (TaskAttribute taskAttribute : attributeList) {
-                if (decrypt && StringUtils.isNotEmpty(taskAttribute.getValue())) {
-                    taskAttribute.setValue(securityCryptoService.decrypt(taskAttribute.getValue(), EncryptionIntensityEnum.NORMAL));
-                }
-                attributeMap.put(taskAttribute.getName(), taskAttribute);
-            }
+
+        for (Map.Entry<String, TaskAttributeRO> taskAttributeROEntry : rpcResult.getData().entrySet()) {
+            TaskAttribute taskAttribute = DataConverterUtils.convert(taskAttributeROEntry, TaskAttribute.class);
+            attributeMap.put(taskAttributeROEntry.getKey(), taskAttribute);
         }
         return attributeMap;
     }
@@ -128,16 +91,15 @@ public class TaskAttributeService {
      * @return
      */
     public TaskAttribute findByNameAndValue(String name, String value, boolean encrypt) {
-        if (encrypt) {
-            value = securityCryptoService.encrypt(value, EncryptionIntensityEnum.NORMAL);
+
+        TaskResult<TaskAttributeRO> rpcResult = taskAttributeFacade.findByNameAndValue(name, value, encrypt);
+        if (!rpcResult.isSuccess()) {
+            throw new UnknownException("调用taskcenter失败");
         }
-        TaskAttributeCriteria criteria = new TaskAttributeCriteria();
-        criteria.createCriteria().andNameEqualTo(name).andValueEqualTo(value);
-        List<TaskAttribute> attributeList = taskAttributeMapper.selectByExample(criteria);
-        TaskAttribute taskAttribute = CollectionUtils.isEmpty(attributeList) ? null : attributeList.get(0);
-        if (taskAttribute == null) {
+        if (rpcResult.getData() == null) {
             return null;
         }
+        TaskAttribute taskAttribute = DataConverterUtils.convert(rpcResult.getData(), TaskAttribute.class);
         return taskAttribute;
     }
 
@@ -148,22 +110,12 @@ public class TaskAttributeService {
      * @return
      */
     public List<TaskAttribute> findByTaskId(Long taskId) {
-        TaskAttributeCriteria criteria = new TaskAttributeCriteria();
-        criteria.createCriteria().andTaskIdEqualTo(taskId);
-        List<TaskAttribute> attributeList = taskAttributeMapper.selectByExample(criteria);
+        TaskResult<List<TaskAttributeRO>> rpcResult = taskAttributeFacade.findByTaskId(taskId);
+        if (!rpcResult.isSuccess()) {
+            throw new UnknownException("调用taskcenter失败");
+        }
+        List<TaskAttribute> attributeList = DataConverterUtils.convert(rpcResult.getData(), TaskAttribute.class);
         return attributeList;
     }
 
-    /**
-     * 根据任务id和name删除属性
-     *
-     * @param taskId
-     * @param name
-     */
-    public void deleteByTaskIdAndName(Long taskId, String name) {
-        TaskAttributeCriteria taskAttributeCriteria = new TaskAttributeCriteria();
-        taskAttributeCriteria.createCriteria().andTaskIdEqualTo(taskId)
-                .andNameEqualTo(name);
-        taskAttributeMapper.deleteByExample(taskAttributeCriteria);
-    }
 }

@@ -82,7 +82,7 @@ public class StartController {
             if (lockMap != null) {
                 logger.info("task start : appid={},uniqueId={},coorType={},deviceInfo={},extra={},bizType={},source={}",
                         appid, uniqueId, coorType, deviceInfo, extra, bizType, source);
-                EBizType eBizType = EBizType.of(bizType);
+                EBizType  eBizType = EBizType.of(bizType);
                 taskLicenseService.verifyCreateTask(appid, uniqueId, eBizType);
                 Long taskId = taskService.createTask(uniqueId, appid, eBizType.getCode(), extra, website, source);
                 Map<String, Object> map = Maps.newHashMap();

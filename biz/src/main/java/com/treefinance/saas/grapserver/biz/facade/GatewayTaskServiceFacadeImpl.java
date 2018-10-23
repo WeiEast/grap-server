@@ -1,19 +1,18 @@
 package com.treefinance.saas.grapserver.biz.facade;
 
-import com.google.common.collect.Lists;
-import com.treefinance.saas.assistant.httpinvoker.utils.CollectionUtils;
 import com.treefinance.saas.gateway.servicefacade.TaskService;
 import com.treefinance.saas.gateway.servicefacade.enums.BizTypeEnum;
 import com.treefinance.saas.gateway.servicefacade.model.TaskDTO;
+import com.treefinance.saas.grapserver.common.exception.UnknownException;
 import com.treefinance.saas.grapserver.common.utils.DataConverterUtils;
 import com.treefinance.saas.grapserver.dao.entity.Task;
-import com.treefinance.saas.grapserver.dao.entity.TaskCriteria;
-import com.treefinance.saas.grapserver.dao.mapper.TaskMapper;
+import com.treefinance.saas.taskcenter.facade.request.TaskRequest;
+import com.treefinance.saas.taskcenter.facade.result.common.TaskResult;
+import com.treefinance.saas.taskcenter.facade.service.TaskFacade;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * 兼容老的任务服务
@@ -23,30 +22,26 @@ import java.util.stream.Collectors;
 public class GatewayTaskServiceFacadeImpl implements TaskService {
 
     @Autowired
-    private TaskMapper taskMapper;
+    private TaskFacade taskFacade;
 
     @Override
     public List<Long> getUserTaskIdList(Long taskId) {
-        Task task = taskMapper.selectByPrimaryKey(taskId);
-        TaskCriteria taskCriteria = new TaskCriteria();
-        taskCriteria.createCriteria()
-                .andUniqueIdEqualTo(task.getUniqueId())
-                .andAppIdEqualTo(task.getAppId())
-                .andBizTypeEqualTo(task.getBizType());
-        List<Long> list = Lists.newArrayList();
-        List<Task> tasks = taskMapper.selectByExample(taskCriteria);
-        if (CollectionUtils.isNotEmpty(tasks)) {
-            list = tasks.stream().map(s -> s.getId()).collect(Collectors.toList());
+        TaskResult<List<Long>> rpcResult = taskFacade.getUserTaskIdList(taskId);
+        if (!rpcResult.isSuccess()) {
+            throw new UnknownException("调用taskcenter失败");
         }
-        return list;
+        return rpcResult.getData();
     }
 
     @Override
     public TaskDTO getById(Long taskId) {
-        Task task = taskMapper.selectByPrimaryKey(taskId);
-        if (task == null) {
-            return null;
+        TaskRequest taskRequest = new TaskRequest();
+        taskRequest.setId(taskId);
+        TaskResult<com.treefinance.saas.taskcenter.facade.result.TaskRO> rpcResult = taskFacade.getTaskByPrimaryKey(taskRequest);
+        if (!rpcResult.isSuccess()) {
+            throw new UnknownException("调用taskcenter失败");
         }
+        Task task = DataConverterUtils.convert(rpcResult.getData(), Task.class);
         TaskDTO result = DataConverterUtils.convert(task, TaskDTO.class);
         for (BizTypeEnum type : BizTypeEnum.values()) {
             if (BizTypeEnum.valueOfType(type).equals(task.getBizType())) {

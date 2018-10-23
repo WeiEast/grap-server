@@ -7,8 +7,10 @@ import com.google.common.primitives.Doubles;
 import com.google.common.primitives.Ints;
 import com.treefinance.commonservice.facade.location.*;
 import com.treefinance.commonservice.uid.UidGenerator;
+import com.treefinance.saas.grapserver.common.utils.DataConverterUtils;
 import com.treefinance.saas.grapserver.dao.entity.TaskDevice;
-import com.treefinance.saas.grapserver.dao.mapper.TaskDeviceMapper;
+import com.treefinance.saas.taskcenter.facade.request.TaskDeviceRequest;
+import com.treefinance.saas.taskcenter.facade.service.TaskDeviceFacade;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -29,7 +31,7 @@ public class TaskDeviceService {
     private static final Logger logger = LoggerFactory.getLogger(TaskDeviceService.class);
 
     @Autowired
-    private TaskDeviceMapper taskDeviceMapper;
+    private TaskDeviceFacade taskDeviceFacade;
     @Autowired
     private GeocodeService geocodeService;
     @Autowired
@@ -106,7 +108,9 @@ public class TaskDeviceService {
                     record.setIpAddress(ipAddress);
                     IpLocation ipLocation = ipLocationService.findLocation(ipAddress);
                     record.setIpPosition(ipLocation.getProvince());
-                    taskDeviceMapper.insertSelective(record);
+
+                    TaskDeviceRequest rpcRequest = DataConverterUtils.convert(record, TaskDeviceRequest.class);
+                    taskDeviceFacade.insertSelective(rpcRequest);
                 } catch (GeoException ex) {
                     logger.error("经纬度解析地址异常={}", ex);
                 } catch (IpLocateException ex) {

@@ -2,8 +2,9 @@ package com.treefinance.saas.grapserver.web.controller;
 
 import com.alibaba.fastjson.JSON;
 import com.google.common.collect.Maps;
-import com.treefinance.saas.grapserver.biz.config.DiamondConfig;
-import com.treefinance.saas.grapserver.biz.service.*;
+import com.treefinance.saas.grapserver.biz.service.AppBizLicenseService;
+import com.treefinance.saas.grapserver.biz.service.TaskAttributeService;
+import com.treefinance.saas.grapserver.biz.service.TaskNextDirectiveService;
 import com.treefinance.saas.grapserver.biz.service.moxie.FundMoxieService;
 import com.treefinance.saas.grapserver.biz.service.moxie.MoxieBusinessService;
 import com.treefinance.saas.grapserver.biz.service.moxie.MoxieTimeoutService;
@@ -36,14 +37,6 @@ public class FundController {
     private static final Logger logger = LoggerFactory.getLogger(FundController.class);
 
     @Autowired
-    private TaskService taskService;
-    @Autowired
-    private MerchantConfigService merchantConfigService;
-    @Autowired
-    private TaskLicenseService taskLicenseService;
-    @Autowired
-    private DiamondConfig diamondConfig;
-    @Autowired
     private AppBizLicenseService appBizLicenseService;
     @Autowired
     private TaskAttributeService taskAttributeService;
@@ -56,38 +49,6 @@ public class FundController {
     @Autowired
     private MoxieTimeoutService moxieTimeoutService;
 
-//
-//    /**
-//     * 创建任务
-//     *
-//     * @param appid
-//     * @param uniqueId
-//     * @param coorType
-//     * @param deviceInfo
-//     * @param extra
-//     * @param request
-//     * @return
-//     * @throws ForbiddenException
-//     * @throws IOException
-//     */
-//    @RequestMapping(value = "/start", method = {RequestMethod.POST})
-//    public Object createTask(@RequestParam("appid") String appid,
-//                             @RequestParam("uniqueId") String uniqueId,
-//                             @RequestParam(name = "coorType", required = false) String coorType,
-//                             @RequestParam("deviceInfo") String deviceInfo,
-//                             @RequestParam(name = "extra", required = false) String extra,
-//                             HttpServletRequest request) throws ForbiddenException, IOException {
-//        logger.info("createTask : appid={},uniqueId={},coorType={},deviceInfo={},extra={}", appid, uniqueId, coorType,
-//                deviceInfo, extra);
-//        taskLicenseService.verifyCreateTask(appid, EBizType.FUND);
-//        String ipAddress = IpUtils.getIpAddress(request);
-//        Long taskId = taskService.startTask(uniqueId, appid, EBizType.FUND, deviceInfo, ipAddress, coorType, extra);
-//        Map<String, Object> map = Maps.newHashMap();
-//        map.put("taskid", String.valueOf(taskId));
-//        map.put("color", merchantConfigService.getColorConfig(appid));
-//        map.put("title", diamondConfig.getSdkTitle(EBizType.FUND));
-//        return SimpleResult.successResult(map);
-//    }
 
     @RequestMapping(value = "/start", method = {RequestMethod.POST})
     public ModelAndView createTask() {

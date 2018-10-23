@@ -73,14 +73,54 @@
     <dubbo:reference id="economicApiForTaoBaoQR" interface="com.datatrees.spider.ecommerce.api.EconomicApiForTaoBaoQR"/>
     <dubbo:reference id="educationApi" interface="com.datatrees.spider.extra.api.EducationApi" timeout="20000"/>
 
+
+    <dubbo:reference interface="com.treefinance.saas.taskcenter.facade.service.TaskFacade" id="taskFacade"
+                     version="1.0.0"/>
+    <dubbo:reference interface="com.treefinance.saas.taskcenter.facade.service.TaskAttributeFacade"
+                     id="taskAttributeFacade"
+                     version="1.0.0"/>
+    <dubbo:reference interface="com.treefinance.saas.taskcenter.facade.service.TaskAliveFacade" id="taskAliveFacade"
+                     version="1.0.0"/>
+    <dubbo:reference interface="com.treefinance.saas.taskcenter.facade.service.CarInfoFacade" id="carInfoFacade"
+                     version="1.0.0"/>
+    <dubbo:reference interface="com.treefinance.saas.taskcenter.facade.service.TaskTimeFacade" id="taskTimeFacade"
+                     version="1.0.0"/>
+    <dubbo:reference interface="com.treefinance.saas.taskcenter.facade.service.TaskNextDirectiveFacade"
+                     id="taskNextDirectiveFacade"
+                     version="1.0.0"/>
+    <dubbo:reference interface="com.treefinance.saas.taskcenter.facade.service.TaskLogFacade" id="taskLogFacade"
+                     version="1.0.0"/>
+    <dubbo:reference interface="com.treefinance.saas.taskcenter.facade.service.TaskCallbackLogFacade"
+                     id="taskCallbackLogFacade"
+                     version="1.0.0"/>
+    <dubbo:reference interface="com.treefinance.saas.taskcenter.facade.service.TaskBuryPointLogFacade"
+                     id="taskBuryPointLogFacade"
+                     version="1.0.0"/>
+    <dubbo:reference interface="com.treefinance.saas.taskcenter.facade.service.MoxieTaskEventNoticeFacade"
+                     id="moxieTaskEventNoticeFacade"
+                     version="1.0.0"/>
+    <dubbo:reference interface="com.treefinance.saas.taskcenter.facade.service.MoxieTimeoutFacade"
+                     id="moxieTimeoutFacade"
+                     version="1.0.0"/>
+    <dubbo:reference interface="com.treefinance.saas.taskcenter.facade.service.TaskDeviceFacade"
+                     id="taskDeviceFacade"
+                     version="1.0.0"/>
+    <dubbo:reference interface="com.treefinance.saas.taskcenter.facade.service.TaskSupportFacade"
+                     id="taskSupportFacade"
+                     version="1.0.0"/>
+    <dubbo:reference interface="com.treefinance.saas.taskcenter.facade.service.AcquisitionFacade"
+                     id="acquisitionFacade"
+                     version="1.0.0"/>
+
     <!--生产者-->
-    <dubbo:service interface="com.treefinance.saas.grapserver.facade.service.TaskFacade" ref="taskFacade"/>
+    <dubbo:service interface="com.treefinance.saas.grapserver.facade.service.TaskFacade" ref="grapTaskFacade"/>
 
     <!--兼容老的生产者-->
     <dubbo:service interface="com.treefinance.saas.gateway.servicefacade.TaskService" ref="gatewayTaskServiceFacade"/>
     <dubbo:service interface="com.treefinance.saas.gateway.servicefacade.AppLicenseService"
                    ref="gatewayAppLicenseServiceFacade"/>
     <dubbo:service interface="com.treefinance.saas.grapserver.facade.service.MerchantFacade" ref="merchantFacade"/>
+    <dubbo:service interface="com.treefinance.saas.grapserver.facade.service.FundMoxieFacade" ref="fundMoxieFacade"/>
 
 </beans>
 

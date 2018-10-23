@@ -6,7 +6,6 @@ import com.treefinance.saas.grapserver.common.utils.DataConverterUtils;
 import com.treefinance.saas.grapserver.dao.entity.MerchantBaseInfo;
 import com.treefinance.saas.grapserver.dao.entity.MerchantBaseInfoCriteria;
 import com.treefinance.saas.grapserver.dao.entity.Task;
-import com.treefinance.saas.grapserver.dao.mapper.TaskMapper;
 import com.treefinance.saas.grapserver.facade.model.MerchantBaseInfoRO;
 import com.treefinance.saas.grapserver.facade.service.MerchantFacade;
 import com.treefinance.saas.knife.common.CommonStateCode;
@@ -16,6 +15,10 @@ import com.treefinance.saas.merchant.center.facade.request.grapserver.QueryMerch
 import com.treefinance.saas.merchant.center.facade.result.console.MerchantBaseResult;
 import com.treefinance.saas.merchant.center.facade.result.console.MerchantResult;
 import com.treefinance.saas.merchant.center.facade.service.MerchantBaseInfoFacade;
+import com.treefinance.saas.taskcenter.facade.request.TaskRequest;
+import com.treefinance.saas.taskcenter.facade.result.TaskRO;
+import com.treefinance.saas.taskcenter.facade.result.common.TaskResult;
+import com.treefinance.saas.taskcenter.facade.service.TaskFacade;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,8 +35,9 @@ import java.util.List;
 public class MerchantFacadeImpl implements MerchantFacade {
     private static final Logger logger = LoggerFactory.getLogger(MerchantFacade.class);
 
+
     @Autowired
-    private TaskMapper taskMapper;
+    private TaskFacade taskFacade;
 
     @Autowired
     private MerchantBaseInfoFacade merchantBaseInfoFacade;
@@ -45,11 +49,18 @@ public class MerchantFacadeImpl implements MerchantFacade {
             logger.error("通过taskId查询商户基本信息传入taskId={}有误", taskId);
             return Results.newFailedResult(CommonStateCode.PARAMETER_LACK);
         }
-        Task task = taskMapper.selectByPrimaryKey(taskId);
-        if (task == null) {
+        TaskRequest taskRequest = new TaskRequest();
+        taskRequest.setId(taskId);
+
+        TaskResult<TaskRO> rpcResult = taskFacade.getTaskByPrimaryKey(taskRequest);
+        if (!rpcResult.isSuccess()) {
             logger.info("通过taskId查询商户基本信息,未查询到taskId={}的任务信息", taskId);
             return Results.newSuccessResult(null);
         }
+
+
+        Task task = DataConverterUtils.convert(rpcResult.getData(), Task.class);
+
         MerchantBaseInfoCriteria merchantBaseInfoCriteria = new MerchantBaseInfoCriteria();
         merchantBaseInfoCriteria.createCriteria().andAppIdEqualTo(task.getAppId());
 
