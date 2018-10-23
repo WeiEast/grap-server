@@ -442,7 +442,7 @@ public class HttpClientUtils {
             throw new RequestFailedException(url, statusCode, result, e);
         } finally {
             if (logger.isInfoEnabled()) {
-                logger.info(" doPost completed: url={}, params={}, statusCode={} ,result={}, cost {} ms ",
+                logger.info(" doPost completed: url={}, data={}, statusCode={} ,result={}, cost {} ms ",
                         url, JSON.toJSONString(params), statusCode, result, (System.currentTimeMillis() - start));
             }
             closeResponse(response);
@@ -517,7 +517,7 @@ public class HttpClientUtils {
      * @param json json对象
      * @return
      */
-    public static String doPost(String url, Object json) {
+    public static String doPost(String url, Object data) {
         long start = System.currentTimeMillis();
         CloseableHttpClient httpClient = getClient();
         String httpStr = null;
@@ -527,7 +527,7 @@ public class HttpClientUtils {
         int statusCode = 0;
         try {
             httpPost.setConfig(getBaseConfig());
-            StringEntity stringEntity = new StringEntity(json.toString(), "UTF-8");//解决中文乱码问题
+            StringEntity stringEntity = new StringEntity(data.toString(), "UTF-8");//解决中文乱码问题
             stringEntity.setContentEncoding("UTF-8");
             stringEntity.setContentType("application/json");
             httpPost.setEntity(stringEntity);
@@ -545,8 +545,8 @@ public class HttpClientUtils {
             throw new RequestFailedException(url, statusCode, httpStr, e);
         } finally {
             if (logger.isInfoEnabled()) {
-                logger.info(" doPost completed: url={}, json={}, statusCode={} ,result={}, cost {} ms ",
-                        url, JSON.toJSONString(json), statusCode, httpStr, (System.currentTimeMillis() - start));
+                logger.info(" doPost completed: url={}, data={}, statusCode={} ,result={}, cost {} ms ",
+                    url, JSON.toJSONString(data), statusCode, httpStr, (System.currentTimeMillis() - start));
             }
             closeResponse(response);
         }

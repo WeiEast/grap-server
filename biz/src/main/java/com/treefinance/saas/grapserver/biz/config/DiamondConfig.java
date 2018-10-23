@@ -79,6 +79,9 @@ public class DiamondConfig {
     @DAttribute(key = "crawler.url.car.info.collect")
     private String crawlerUrlCarInfoCollect;
 
+    @DAttribute(key = "tongdun.url.collect")
+    private String tongdunUrlCollect;
+
 
     @BeforeUpdate
     public void before(String key, Object newValue) {
@@ -250,5 +253,13 @@ public class DiamondConfig {
 
     public void setCrawlerUrlCarInfoCollect(String crawlerUrlCarInfoCollect) {
         this.crawlerUrlCarInfoCollect = crawlerUrlCarInfoCollect;
+    }
+
+    public String getTongdunUrlCollect() {
+        return tongdunUrlCollect;
+    }
+
+    public void setTongdunUrlCollect(String tongdunUrlCollect) {
+        this.tongdunUrlCollect = tongdunUrlCollect;
     }
 }
