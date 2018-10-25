@@ -13,7 +13,8 @@ public enum EBizType {
     FUND("FUND", (byte) 4),
     DIPLOMA("DIPLOMA", (byte) 7),
     CAR_INFO("CAR_INFO", (byte) 9),
-    TONGDUN("TONGDUN", (byte) 10);
+    TONGDUN("TONGDUN", (byte) 10),
+    TONGDUN_KANIU("TONGDUN_KANIU", (byte) 11);
 
     private String text;
     private Byte code;

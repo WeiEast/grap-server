@@ -50,6 +50,12 @@ public class TongdunService {
         return taskService.createTask(tongdunRequest.getIdCard(), appId, EBizType.TONGDUN.getCode(), null, null, null);
     }
 
+    public Long startCollectDetailTask(String appId, TongdunRequest tongdunRequest) {
+        // 使用身份证号当作uniqueId
+        taskLicenseService.verifyCreateTask(appId, tongdunRequest.getIdCard(), EBizType.TONGDUN_KANIU);
+        return taskService.createTask(tongdunRequest.getIdCard(), appId, EBizType.TONGDUN_KANIU.getCode(), null, null, null);
+    }
+
     public Object processCollectTask(Long taskId, String appId, TongdunRequest tongdunRequest) {
         String url = diamondConfig.getTongdunUrlCollect();
         JSONObject data = JSON.parseObject(JSON.toJSONString(tongdunRequest));
