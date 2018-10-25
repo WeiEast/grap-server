@@ -137,7 +137,7 @@ public class TongdunService {
             return SaasResult.failResult("Unexpected exception!");
         }
 
-        Map<String, Object> resultMap = new HashMap<>(2);
+        List<Object> resultList = new ArrayList<>(6);
         JSONObject detail = result.getJSONObject("details");
 
         // 获取详细数值
@@ -181,16 +181,17 @@ public class TongdunService {
 
         // 获取黑名单
         Map blackMap = new HashMap(2);
-        blackMap.put("id", "BLACK_LIST");
         blackMap.put("value", summary.get("isHitDiscreditPolicy"));
+        blackMap.put("id", "IS_BLACK");
 
-        resultMap.put("assess", tongdunDataList);
-        resultMap.put("black", blackMap);
+
+        resultList.addAll(tongdunDataList);
+        resultList.add(blackMap);
 
         AppLicense license = appLicenseService.getAppLicense(appId);
         taskLogService.insert(taskId, "任务成功", new Date(), "");
         taskFacade.updateTaskStatusWithStep(taskId, ETaskStatus.SUCCESS.getStatus());
-        return SaasResult.successEncryptByRSAResult(resultMap, license.getServerPublicKey());
+        return SaasResult.successEncryptByRSAResult(resultList, license.getServerPublicKey());
     }
 
 }
