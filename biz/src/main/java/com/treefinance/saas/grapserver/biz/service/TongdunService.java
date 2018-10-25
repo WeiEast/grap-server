@@ -181,8 +181,8 @@ public class TongdunService {
 
         // 获取黑名单
         Map blackMap = new HashMap(2);
-        blackMap.put("value", summary.get("isHitDiscreditPolicy"));
         blackMap.put("id", "IS_BLACK");
+        blackMap.put("value", summary.get("isHitDiscreditPolicy"));
 
 
         resultList.addAll(tongdunDataList);
