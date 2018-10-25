@@ -155,7 +155,14 @@ public class TongdunService {
                 for (ETongdunType eTongdunType : types) {
 
                     Map<String, String> secondmap = new HashMap<>();
-                    JSONObject jsonType = item.getJSONObject(eTongdunType.getText());
+                    JSONObject jsonType;
+                    if(!Objects.isNull(item.getJSONObject(eTongdunType.getText())))
+                    {
+                        jsonType = item.getJSONObject(eTongdunType.getText());
+                    }
+                    else{
+                        jsonType = item.getJSONObject(eTongdunType.getSecondtext());
+                    }
                     for (ETongdunDetailData eTongdunDetailData : ETongdunDetailData.values()) {
 
                         if (!Objects.isNull(jsonType.get(eTongdunDetailData.getText()))) {
@@ -183,7 +190,7 @@ public class TongdunService {
         AppLicense license = appLicenseService.getAppLicense(appId);
         taskLogService.insert(taskId, "任务成功", new Date(), "");
         taskFacade.updateTaskStatusWithStep(taskId, ETaskStatus.SUCCESS.getStatus());
-        return SaasResult.successEncryptByRSAResult(tongdunDataList, license.getServerPublicKey());
+        return SaasResult.successEncryptByRSAResult(resultMap, license.getServerPublicKey());
     }
 
 }

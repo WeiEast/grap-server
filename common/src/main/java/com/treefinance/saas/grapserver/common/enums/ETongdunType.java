@@ -8,19 +8,21 @@ import java.util.Objects;
  */
 public enum ETongdunType {
 
-    EMAIL("EMAIL", "借款人邮箱详情", (byte)1),
-    ID_CARD("ID_CARD", "借款人身份证详情", (byte)2),
-    MOBILE("MOBILE", "借款人手机详情", (byte)3);
+    EMAIL("EMAIL", "借款人邮箱详情", "借款人邮箱匹配借款事件的借款人邮箱关联的合作方详情",(byte)1),
+    ID_CARD("ID_CARD", "借款人身份证详情","借款人身份证匹配借款事件的借款人身份证关联的合作方详情", (byte)2),
+    MOBILE("MOBILE", "借款人手机详情","借款人手机匹配借款事件的借款人手机关联的合作方详情",(byte)3);
 
 
     private String name;
     private String text;
+    private String secondtext;
     private Byte code;
 
 
-    ETongdunType(String name, String text, Byte code) {
+    ETongdunType(String name, String text,String secondtext, Byte code) {
         this.name = name;
         this.text = text;
+        this.secondtext = secondtext;
         this.code = code;
     }
 
@@ -34,6 +36,14 @@ public enum ETongdunType {
 
     public String getText() {
         return text;
+    }
+
+    public String getSecondtext() {
+        return secondtext;
+    }
+
+    public void setSecondtext(String secondtext) {
+        this.secondtext = secondtext;
     }
 
     public void setText(String text) {
@@ -62,8 +72,19 @@ public enum ETongdunType {
     public static String getText(Byte code) {
         if (Objects.nonNull(code)) {
             for (ETongdunType item : ETongdunType.values()) {
-                if (code.equals(item.getText())) {
+                if (code.equals(item.getCode())) {
                     return item.getText();
+                }
+            }
+        }
+        return null;
+    }
+
+    public static String getSecondtext(Byte code) {
+        if (Objects.nonNull(code)) {
+            for (ETongdunType item : ETongdunType.values()) {
+                if (code.equals(item.getCode())) {
+                    return item.getSecondtext();
                 }
             }
         }

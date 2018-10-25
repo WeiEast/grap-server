@@ -26,8 +26,8 @@ public class RSAUtils {
      */
     public static void main(String[] args) throws Exception {
 
-        String params = "{\"idcard\":\"422326199610013775\",\"name\":\"郭国运\",\"email\":\"787394773@qq.com\",\"mobile\":\"15871362990\"}";
-        String key = "MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCzXPHHecBNeEV2hBpkpUjLAJPSKfX1bwK1IjaLEkkVKlWL4FvDvMFw2DN7eYYFGS3ny8Rb7La/2tsHGX2qkagJI9W4Xym7iwCH/N/OxzoH10S3rbwE2q3QFLxrDFEcDhNfM8lyA0uEcLQIygWiEJCXs4RTr7ehl4gR5wWQrFtVFwIDAQAB";
+        String params = "{\"idcard\":\"110000199001041119\",\"name\":\"xxx\",\"email\":\"xxx\",\"mobile\":\"12312xxx\"}";
+        String key = "MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCMe0CmYZFqmhj9cnRYz8eP0ChRaz8LR8gVEtgNj4XuhpJOGR3xnGEjVvi0NrJx8DAsoJRvJDZS4fZu0094X4kPAB9dZ8z3KNT+g4LnqLufua0JhCaPo1XtlynTL2I7l9Zz+EV3q8eXiL0G3yCDtAZPix3UsHoQxi+Q9VFafWAuxwIDAQAB";
         String data = encryptData(params, key);
         System.out.println(data);
         String privateKey = "MIICdQIBADANBgkqhkiG9w0BAQEFAASCAl8wggJbAgEAAoGBAK6azTbf9fzjmkncZ4Y490B0vYwMJ3waRs3iAzFKZ0n932Kz2Pw5nL0L4Qd4bY9NoFM0oc+XDOxDMd2KvdoBYMsuDdyFvMJ9lN4R1y3ZWHsJ4rFkH2bfKUJDBCQflKd6h6t4d8iP2/WoURaYLlSSF7d9uwqWKkV3oYXjdaP5H1WVAgMBAAECgYA60r42MYeO9iLhpVZfOsvZtDqzdtjKj5OxAuaucXGQ1O2wNATzHHm4msrqGGFYuP89aOrmo+3fnteq2nYRfwtbeaWwi+kXK6BsyEpQW7QjcgAY+Jt32HM0OSSOGHI0MV9zDxuyeEjd7wohNJyaADzLxDJJcugxlHGAkbMDMn8oFQJBANZQkQGoufjO29QxJ5Knb9pHnU46CSeMK0gMHvuDtT4BVTZKFZh7Q8tEL7TJhgluEaaXJh4YPZCWFjwIVLcdpO8CQQDQkPFiFjNXXJK53JrfvHlwSVYBRoNX1Dn7FlxYRhbMrK/y6H67dr7T1PRaTMl4A9fZOgTxkGtazjRJYxKZk9W7AkAv0AeZxCfBT30RqOm4OSymGQYKNr5mGUpqp3GeETM1Ixz8oKiSvSVRyuONxMvnfKvpa50wZ54MjL9nI0CrHaz3AkBlO5UOKPxukO5e7Gb35gGDsPTf1Zv2y3oBF49nAU4btk4ItzScRTzGkPyxv8eiSys/stunbJPPFXtni4EBrjH1AkAcuO/PfxB2UnCRnNLhoWPMOvgQ0TfumGj1lrboina+Qclez+dUm+oxeLkVPRvN35xS9HmDqzcEVejDwuiJFLqm";
