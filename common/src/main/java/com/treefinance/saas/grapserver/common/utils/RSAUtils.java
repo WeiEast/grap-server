@@ -25,10 +25,14 @@ public class RSAUtils {
      * @throws Exception
      */
     public static void main(String[] args) throws Exception {
-        String params = "EOzn179mcRJfOaYYQo7fMvR%2BvcY1%2FMRL%2FBbEMT9nwg9fExwbedLyn8XnNHmLV8nfZG5xZXvtbsLvld5UHcION041XQO17HTiAkWHkbeLmbUlO80D9Qb5W4KgAzLDElyNMYxbzjz4drR464Y0j8hwa2gqX5ZQEWvghFvNlHoqZsvQGo%2FsJ4B8VyWfwcljo5O3o4iGOFZUQ2CnPb4JvhX3Hvi045utS%2B1ND8Trs658fy707s%2FqxhMgsPp357uSm%2FQS4oKVksuHvOJQeQIrvTyBlIhLA%2BuBMHoMcbZ70810O8Bl2sZ%2FjCSzjAwMqMNT%2BiDirAP7ypIPZLfen5Os1DtsVlKHYk%2FXwSRir4lnHmFdLPNaWoAhlqplVVAopVT3ybRmQAGtOxRfAgCq2xlzUtbpuKP8%2FcWo2MA6zzbBg9i43eY0M%2Bh7PGIbJSlUFqdfeYGundEuvj5Fj1qeyf3yXO%2F1QGxaRh3v71bak6a0I4T7daAF4htK93yll0M1U5x9c3LalUw3ERi1Puw9vVkyWPljnIPEJq1sOkeOaWQEqLVbPeEH5NxFouRvynH7AH92n9fpQFaGkN84BJ0ibs3tfY9APxqvPuLOmh%2FgvHgasaWxpS1btxlZrQATOO2IQ8TVjAo2RPdbSSvtt1KzqFLMbWTHWAZuEr1e71%2FTD43jTPWKVeM%3D";
-        String key = "MIICdgIBADANBgkqhkiG9w0BAQEFAASCAmAwggJcAgEAAoGBANtHr+JgvD7vAgxmPma1R1Ta23rn/eu+5GahlDicFWY7zrmRw3nAW0B1GachmbQr4Sg3F0Mw6ID7ep9mUwl/BWJEob7Idf+SIc9d8bTI5Y0Gi+Nkoi/NSAx1pW3Mu6yGSGXGAN5jA6vFYlJBJaGx2Bl4TiSxMEaxofYoYt6Qz71/AgMBAAECgYB8jDMyeY9yj36yXECFReHGKKkRHkPzavF/+baekMj20HGSpWBJ/x/VdK2laEhNNb8lgGUOHPFykWQMtankcuky4mGExLyGWfG75+MHY1wgVVENvM9Wviv+aOEn+jsLO+P9c9PzgW3HLXfF2yZLAy3sSWDD+bhB/xw/zZsyfmJMAQJBAPI/PrGcd2+31Uqt4Z26PoI+u84C4tF5RwSV756Rr7toa52+UwKFGXm0FRlv08diveMliJBhdxRCFbLySRKj+EECQQDnuqU9FBrg8Q+9xhz1jqTwybHrQq430FXUwbDwW5OMw75aiXeyyvzX/AMJJYELkq+nxmuj1Q65nGeEDdNSkEW/AkAR2nNmZ5+tziCcFmCQXU+KDdGNh0zsH0IKpno4d4g6CaIUyBgaEXElNQ5xB3rWMQLJoNSFv4klJxGuVIjqJMeBAkEAzl61m8CU83EbwLl3vuRrVhl5/veiagh6+AALUPNtYzZMBxtX433NUZiZJ4Mj+qeHEdaus/ghpgF5WuxpH6VmxwJAC3AmtJ7UTOdT3zcTGB3auvwe+AScXJgs208yuaHs84iILJzEnAVtOFWQ+atqNZc1c4pz4eKJwwM0LWYyFocVpA==";
-        String data = decrytData(params, key);
+
+        String params = "{\"idcard\":\"422326199610013775\",\"name\":\"郭国运\",\"email\":\"787394773@qq.com\",\"mobile\":\"15871362990\"}";
+        String key = "MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCzXPHHecBNeEV2hBpkpUjLAJPSKfX1bwK1IjaLEkkVKlWL4FvDvMFw2DN7eYYFGS3ny8Rb7La/2tsHGX2qkagJI9W4Xym7iwCH/N/OxzoH10S3rbwE2q3QFLxrDFEcDhNfM8lyA0uEcLQIygWiEJCXs4RTr7ehl4gR5wWQrFtVFwIDAQAB";
+        String data = encryptData(params, key);
         System.out.println(data);
+        String privateKey = "MIICdQIBADANBgkqhkiG9w0BAQEFAASCAl8wggJbAgEAAoGBAK6azTbf9fzjmkncZ4Y490B0vYwMJ3waRs3iAzFKZ0n932Kz2Pw5nL0L4Qd4bY9NoFM0oc+XDOxDMd2KvdoBYMsuDdyFvMJ9lN4R1y3ZWHsJ4rFkH2bfKUJDBCQflKd6h6t4d8iP2/WoURaYLlSSF7d9uwqWKkV3oYXjdaP5H1WVAgMBAAECgYA60r42MYeO9iLhpVZfOsvZtDqzdtjKj5OxAuaucXGQ1O2wNATzHHm4msrqGGFYuP89aOrmo+3fnteq2nYRfwtbeaWwi+kXK6BsyEpQW7QjcgAY+Jt32HM0OSSOGHI0MV9zDxuyeEjd7wohNJyaADzLxDJJcugxlHGAkbMDMn8oFQJBANZQkQGoufjO29QxJ5Knb9pHnU46CSeMK0gMHvuDtT4BVTZKFZh7Q8tEL7TJhgluEaaXJh4YPZCWFjwIVLcdpO8CQQDQkPFiFjNXXJK53JrfvHlwSVYBRoNX1Dn7FlxYRhbMrK/y6H67dr7T1PRaTMl4A9fZOgTxkGtazjRJYxKZk9W7AkAv0AeZxCfBT30RqOm4OSymGQYKNr5mGUpqp3GeETM1Ixz8oKiSvSVRyuONxMvnfKvpa50wZ54MjL9nI0CrHaz3AkBlO5UOKPxukO5e7Gb35gGDsPTf1Zv2y3oBF49nAU4btk4ItzScRTzGkPyxv8eiSys/stunbJPPFXtni4EBrjH1AkAcuO/PfxB2UnCRnNLhoWPMOvgQ0TfumGj1lrboina+Qclez+dUm+oxeLkVPRvN35xS9HmDqzcEVejDwuiJFLqm";
+        String dData = decrytData(data, privateKey);
+        System.out.println(dData);
     }
 
     /**
@@ -41,7 +45,7 @@ public class RSAUtils {
      */
     public static String decrytData(String params, String key) throws Exception {
         // 1.decode
-        params = URLDecoder.decode(params, "utf-8");
+//        params = URLDecoder.decode(params, "utf-8");
         // 2.base64
         byte[] data = Base64.getDecoder().decode(params);
         // 3.rsa解密
@@ -60,7 +64,7 @@ public class RSAUtils {
     public static String encryptData(String data, String key) throws Exception {
         byte[] bytes = Helper.encrypt(data.getBytes(), key);
         String params = Base64.getEncoder().encodeToString(bytes);
-        params = URLEncoder.encode(params, "utf-8");
+//        params = URLEncoder.encode(params, "utf-8");
         return params;
     }
 

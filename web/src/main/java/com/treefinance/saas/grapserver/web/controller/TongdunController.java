@@ -53,4 +53,34 @@ public class TongdunController {
         );
         return result;
     }
+
+
+
+    /**
+     * 同盾详细信息采集
+     *
+     * @return
+     */
+    @RequestMapping(value = "/query/detail", method = {RequestMethod.POST})
+    public Object collectDetail(@RequestParam("appid") String appId, @RequestParam("name") String name,
+        @RequestParam("idcard") String idcard, @RequestParam("mobile") String mobile,
+        @RequestParam(value = "email", required = false) String email) {
+        if (StringUtils.isBlank(name) || StringUtils.isBlank(idcard) || StringUtils.isBlank(mobile)) {
+            throw new BizException("姓名，身份证号，手机号必填信息不能为空");
+        }
+        logger.info("同盾详细信息采集,输入参数:appid={},name={},idcard={},mobile={}", appId, name, idcard, mobile);
+        TongdunRequest tongdunRequest = new TongdunRequest();
+        tongdunRequest.setUserName(name);
+        tongdunRequest.setIdCard(idcard);
+        tongdunRequest.setTelNum(mobile);
+        if (StringUtils.isNotBlank(email)) {
+            tongdunRequest.setAccountEmail(email);
+            logger.info("同盾详细信息采集,输入参数:email={}", email);
+        }
+        Long taskId = tongdunService.startCollectTask(appId,tongdunRequest);
+        Object result = tongdunService.processCollectDetailTask(taskId, appId,tongdunRequest);
+        logger.info("同盾详细信息采集,返回结果:result={},taskId={},appid={}", JSON.toJSONString(result), taskId, appId
+        );
+        return result;
+    }
 }

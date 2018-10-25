@@ -4,27 +4,27 @@ import java.util.Objects;
 
 /**
  * @author:guoguoyun
- * @date:Created in 2018/10/18下午7:12
+ * @date:Created in 2018/10/25上午9:54
  */
-public enum ETongdunData {
-    MP_LOAN_12M("MP_LOAN_12M", "loanApply12MCntCopy", (byte)1),
-    MP_LOAN_6M("MP_LOAN_6M", "loanApply6MCntCopy", (byte)2),
-    MP_LOAN_3M("MP_LOAN_3M", "loanApply3MCntCopy", (byte)3),
-    MP_LOAN_1M("MP_LOAN_1M", "loanApply1MCntCopy", (byte)4),
-    MD_LOAN_1W("MD_LOAN_1W", "loanApply7DCntCopy", (byte)5),
-    MD_IDCARD_1M("MD_IDCARD_1M", "identityAssociatedDevice1MCntCopy", (byte)6),
-    MD_IDCARD_1W("MD_IDCARD_1W", "deviceAssociatedIdentity7DCntCopy", (byte)7),
-    MM_DEVICE_1W("MM_DEVICE_1W", "deviceAssociatedPhone7DCntCopy", (byte)8),
-    MI_DEVICE_1W("MI_DEVICE_1W", "identityAssociatedDevice7DCntCopy", (byte)9),
-    MI_MOBILE_3W("MI_MOBILE_3W", "phoneAssociatedIdentity3MCntCopy", (byte)10),
-    ME_IDCARD_3M("ME_IDCARD_3M", "identityAssociatedMail3MCntCopy", (byte)11),
-    MM_IDCARD_3M("MM_IDCARD_3M", "identityAssociatedPhone3MCntCopy", (byte)12);
+public enum ETongdunDetailData {
 
-
-
-
-
-
+    LevelA("LevelA", "一般消费分期平台", (byte)1),
+    LevelB("LevelB", "互联网金融门户", (byte)2),
+    LevelC("LevelC", "银行个人业务", (byte)3),
+    LevelD("LevelD", "融资租赁", (byte)4),
+    LevelE("LevelE", "财产保险", (byte)5),
+    LevelF("LevelF", "担保", (byte)6),
+    LevelG("LevelG", "大数据金融", (byte)7),
+    LevelH("LevelH", "银行消费金融公司", (byte)8),
+    LevelI("LevelI", "直销银行", (byte)9),
+    LevelJ("LevelJ", "信用卡中心", (byte)10),
+    LevelK("LevelK", "网上银行", (byte)11),
+    LevelL("LevelL", "小额贷款公司", (byte)12),
+    LevelM("LevelM", "P2P网贷", (byte)13),
+    LevelN("LevelN", "大型消费金融公司", (byte)14),
+    LevelO("LevelO", "银行小微贷款", (byte)15),
+    LevelP("LevelP", "厂商汽车金融", (byte)16),
+    LevelZ("LevelZ", "NULL", (byte)17);
 
 
 
@@ -32,7 +32,7 @@ public enum ETongdunData {
     private String text;
     private Byte code;
 
-    ETongdunData(String name, String text, Byte code) {
+    ETongdunDetailData(String name, String text, Byte code) {
         this.name = name;
         this.text = text;
         this.code = code;
@@ -64,7 +64,7 @@ public enum ETongdunData {
 
     public static Byte getCode(String text) {
         if (Objects.nonNull(text)) {
-            for (ETongdunData item : ETongdunData.values()) {
+            for (ETongdunDetailData item : ETongdunDetailData.values()) {
                 if (text.equals(item.getText())) {
                     return item.getCode();
                 }
@@ -75,8 +75,8 @@ public enum ETongdunData {
 
     public static String getText(Byte code) {
         if (Objects.nonNull(code)) {
-            for (ETongdunData item : ETongdunData.values()) {
-                if (code.equals(item.getCode())) {
+            for (ETongdunDetailData item : ETongdunDetailData.values()) {
+                if (code.equals(item.getText())) {
                     return item.getText();
                 }
             }
@@ -86,7 +86,7 @@ public enum ETongdunData {
 
     public static String getName(Byte code) {
         if (Objects.nonNull(code)) {
-            for (ETongdunData item : ETongdunData.values()) {
+            for (ETongdunDetailData item : ETongdunDetailData.values()) {
                 if (code.equals(item.getCode())) {
                     return item.getName();
                 }

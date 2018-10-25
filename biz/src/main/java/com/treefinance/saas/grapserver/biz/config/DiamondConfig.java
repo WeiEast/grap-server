@@ -82,6 +82,20 @@ public class DiamondConfig {
     @DAttribute(key = "tongdun.url.collect")
     private String tongdunUrlCollect;
 
+    @DAttribute(key = "tongdun.detail.url.collect")
+    private String tongdunDetailUrlCollect;
+
+    public static Logger getLogger() {
+        return logger;
+    }
+
+    public String getTongdunDetailUrlCollect() {
+        return tongdunDetailUrlCollect;
+    }
+
+    public void setTongdunDetailUrlCollect(String tongdunDetailUrlCollect) {
+        this.tongdunDetailUrlCollect = tongdunDetailUrlCollect;
+    }
 
     @BeforeUpdate
     public void before(String key, Object newValue) {

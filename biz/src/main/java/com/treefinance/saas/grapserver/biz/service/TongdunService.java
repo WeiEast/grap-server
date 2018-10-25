@@ -4,12 +4,11 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.treefinance.saas.grapserver.biz.config.DiamondConfig;
-import com.treefinance.saas.grapserver.common.enums.EBizType;
-import com.treefinance.saas.grapserver.common.enums.ETaskStatus;
-import com.treefinance.saas.grapserver.common.enums.ETongdunData;
+import com.treefinance.saas.grapserver.common.enums.*;
 import com.treefinance.saas.grapserver.common.request.TongdunRequest;
 import com.treefinance.saas.grapserver.common.result.SaasResult;
 import com.treefinance.saas.grapserver.common.result.TongdunData;
+import com.treefinance.saas.grapserver.common.result.TongdunDetailResult;
 import com.treefinance.saas.grapserver.common.utils.HttpClientUtils;
 import com.treefinance.saas.grapserver.common.utils.TongdunDataResolver;
 import com.treefinance.saas.grapserver.dao.entity.AppLicense;
@@ -101,6 +100,85 @@ public class TongdunService {
             tongdunData.setScore(TongdunDataResolver.to(saasRuleScoreDTOMap.get(item.getText())));
             tongdunDataList.add(tongdunData);
         }
+
+        AppLicense license = appLicenseService.getAppLicense(appId);
+        taskLogService.insert(taskId, "任务成功", new Date(), "");
+        taskFacade.updateTaskStatusWithStep(taskId, ETaskStatus.SUCCESS.getStatus());
+        return SaasResult.successEncryptByRSAResult(tongdunDataList, license.getServerPublicKey());
+    }
+
+    public Object processCollectDetailTask(Long taskId, String appId, TongdunRequest tongdunRequest) {
+        String url = diamondConfig.getTongdunDetailUrlCollect();
+        JSONObject data = JSON.parseObject(JSON.toJSONString(tongdunRequest));
+        Map<String, Object> map = new HashMap<>(1);
+        map.put("data", data);
+        String httpResult;
+        try {
+            httpResult = HttpClientUtils.doPost(url, map);
+        } catch (Exception e) {
+            logger.error("调用功夫贷同盾采集详细任务异常:taskId={},tongdunRequset={}", taskId, tongdunRequest, e);
+            taskLogFacade.insert(taskId, "调用功夫贷同盾采集任务异常", new Date(), "调用功夫贷同盾采集任务异常");
+            taskFacade.updateTaskStatusWithStep(taskId, ETaskStatus.FAIL.getStatus());
+            return SaasResult.failResult("Unexpected exception!");
+        }
+
+        JSONObject result = null;
+        try {
+            result = JSON.parseObject(httpResult);
+        } catch (Exception e) {
+            logger.error(e.getMessage(), e);
+        }
+        if (result == null) {
+            logger.error("调用功夫贷同盾采集详细任务返回值中任务日志信息存在问题:taskId={},tongdunRequest={},httpResult={}", taskId, tongdunRequest,
+                httpResult);
+            taskLogFacade.insert(taskId, "调用功夫贷同盾采集详细任务返回值中任务日志信息存在问题", new Date(), "调用功夫贷同盾采集任务返回值中任务日志信息存在问题");
+            taskFacade.updateTaskStatusWithStep(taskId, ETaskStatus.FAIL.getStatus());
+            // 错误日志中
+            return SaasResult.failResult("Unexpected exception!");
+        }
+
+        Map<String, Object> resultMap = new HashMap<>(2);
+        JSONObject detail = result.getJSONObject("details");
+
+        // 获取详细数值
+        JSONObject summary = result.getJSONObject("saasSummaryDTO");
+        ETongdunType[] types = ETongdunType.values();
+        List<TongdunDetailResult> tongdunDataList = new ArrayList<>(5);
+
+        for (int i = 1; i < 6; i++) {
+            if (summary.getInteger(ETongdunData.getText((byte)i)) != 0) {
+                TongdunDetailResult tongdunDetailResult = new TongdunDetailResult();
+                JSONObject item = detail.getJSONObject(ETongdunData.getText((byte)i));
+                tongdunDetailResult.setId(ETongdunData.getName((byte)i));
+                tongdunDetailResult.setValue(TongdunDataResolver.to(summary.getInteger(ETongdunData.getText((byte)i))));
+                Map<String, Map> firstmap = new HashMap<>();
+                for (ETongdunType eTongdunType : types) {
+
+                    Map<String, String> secondmap = new HashMap<>();
+                    JSONObject jsonType = item.getJSONObject(eTongdunType.getText());
+                    for (ETongdunDetailData eTongdunDetailData : ETongdunDetailData.values()) {
+
+                        if (!Objects.isNull(jsonType.get(eTongdunDetailData.getText()))) {
+                            secondmap.put(eTongdunDetailData.getName(),
+                                TongdunDataResolver.to(jsonType.getInteger(eTongdunDetailData.getText())));
+                        }
+                    }
+                    firstmap.put(eTongdunType.getName(), secondmap);
+
+                }
+
+                tongdunDetailResult.setDetails(firstmap);
+                tongdunDataList.add(tongdunDetailResult);
+            }
+        }
+
+        // 获取黑名单
+        Map blackMap = new HashMap(2);
+        blackMap.put("id", "BLACK_LIST");
+        blackMap.put("value", summary.get("isHitDiscreditPolicy"));
+
+        resultMap.put("assess", tongdunDataList);
+        resultMap.put("black", blackMap);
 
         AppLicense license = appLicenseService.getAppLicense(appId);
         taskLogService.insert(taskId, "任务成功", new Date(), "");

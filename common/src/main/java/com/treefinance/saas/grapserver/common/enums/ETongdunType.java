@@ -4,35 +4,21 @@ import java.util.Objects;
 
 /**
  * @author:guoguoyun
- * @date:Created in 2018/10/18下午7:12
+ * @date:Created in 2018/10/25下午1:49
  */
-public enum ETongdunData {
-    MP_LOAN_12M("MP_LOAN_12M", "loanApply12MCntCopy", (byte)1),
-    MP_LOAN_6M("MP_LOAN_6M", "loanApply6MCntCopy", (byte)2),
-    MP_LOAN_3M("MP_LOAN_3M", "loanApply3MCntCopy", (byte)3),
-    MP_LOAN_1M("MP_LOAN_1M", "loanApply1MCntCopy", (byte)4),
-    MD_LOAN_1W("MD_LOAN_1W", "loanApply7DCntCopy", (byte)5),
-    MD_IDCARD_1M("MD_IDCARD_1M", "identityAssociatedDevice1MCntCopy", (byte)6),
-    MD_IDCARD_1W("MD_IDCARD_1W", "deviceAssociatedIdentity7DCntCopy", (byte)7),
-    MM_DEVICE_1W("MM_DEVICE_1W", "deviceAssociatedPhone7DCntCopy", (byte)8),
-    MI_DEVICE_1W("MI_DEVICE_1W", "identityAssociatedDevice7DCntCopy", (byte)9),
-    MI_MOBILE_3W("MI_MOBILE_3W", "phoneAssociatedIdentity3MCntCopy", (byte)10),
-    ME_IDCARD_3M("ME_IDCARD_3M", "identityAssociatedMail3MCntCopy", (byte)11),
-    MM_IDCARD_3M("MM_IDCARD_3M", "identityAssociatedPhone3MCntCopy", (byte)12);
+public enum ETongdunType {
 
-
-
-
-
-
-
+    EMAIL("EMAIL", "借款人邮箱详情", (byte)1),
+    ID_CARD("ID_CARD", "借款人身份证详情", (byte)2),
+    MOBILE("MOBILE", "借款人手机详情", (byte)3);
 
 
     private String name;
     private String text;
     private Byte code;
 
-    ETongdunData(String name, String text, Byte code) {
+
+    ETongdunType(String name, String text, Byte code) {
         this.name = name;
         this.text = text;
         this.code = code;
@@ -64,7 +50,7 @@ public enum ETongdunData {
 
     public static Byte getCode(String text) {
         if (Objects.nonNull(text)) {
-            for (ETongdunData item : ETongdunData.values()) {
+            for (ETongdunType item : ETongdunType.values()) {
                 if (text.equals(item.getText())) {
                     return item.getCode();
                 }
@@ -75,8 +61,8 @@ public enum ETongdunData {
 
     public static String getText(Byte code) {
         if (Objects.nonNull(code)) {
-            for (ETongdunData item : ETongdunData.values()) {
-                if (code.equals(item.getCode())) {
+            for (ETongdunType item : ETongdunType.values()) {
+                if (code.equals(item.getText())) {
                     return item.getText();
                 }
             }
@@ -86,7 +72,7 @@ public enum ETongdunData {
 
     public static String getName(Byte code) {
         if (Objects.nonNull(code)) {
-            for (ETongdunData item : ETongdunData.values()) {
+            for (ETongdunType item : ETongdunType.values()) {
                 if (code.equals(item.getCode())) {
                     return item.getName();
                 }
@@ -94,5 +80,4 @@ public enum ETongdunData {
         }
         return null;
     }
-
 }

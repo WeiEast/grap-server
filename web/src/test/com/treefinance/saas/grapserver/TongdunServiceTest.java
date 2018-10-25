@@ -25,11 +25,11 @@ public class TongdunServiceTest {
     public void test() throws InterruptedException {
 //        Long taskId = taskService.createTask("223344", "QATestabcdefghQA", (byte) 8, null, null, null);
         TongdunRequest tongdunRequest = new TongdunRequest();
-        tongdunRequest.setIdCard("33048219910731002X");
-        tongdunRequest.setTelNum("158713628772");
-        tongdunRequest.setUserName("guo");
-        tongdunRequest.setAccountEmail("787392882@qq.com");
-        tongdunService.processCollectTask(1000L, "223344", tongdunRequest);
+        tongdunRequest.setIdCard("110000199001041119");
+        tongdunRequest.setTelNum("12312xxx");
+        tongdunRequest.setUserName("xxx");
+        tongdunRequest.setAccountEmail("xxx");
+        tongdunService.processCollectDetailTask(1000L, "223344", tongdunRequest);
         Thread.sleep(10000);
     }
 }
