@@ -25,7 +25,7 @@ public class TongdunServiceTest {
     public void test() throws InterruptedException {
 //        Long taskId = taskService.createTask("223344", "QATestabcdefghQA", (byte) 8, null, null, null);
         TongdunRequest tongdunRequest = new TongdunRequest();
-        tongdunRequest.setIdCard("110000199001041119");
+        tongdunRequest.setIdCard("4222");
         tongdunRequest.setTelNum("12312xxx");
         tongdunRequest.setUserName("xxx");
         tongdunRequest.setAccountEmail("xxx");
