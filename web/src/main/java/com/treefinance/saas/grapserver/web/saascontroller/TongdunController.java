@@ -1,9 +1,11 @@
-package com.treefinance.saas.grapserver.web.controller;
+package com.treefinance.saas.grapserver.web.saascontroller;
 
 import com.alibaba.fastjson.JSON;
 import com.treefinance.saas.grapserver.biz.service.TongdunService;
 import com.treefinance.saas.grapserver.common.exception.BizException;
 import com.treefinance.saas.grapserver.common.request.TongdunRequest;
+import com.treefinance.saas.grapserver.common.utils.JudgeUtils;
+import com.treefinance.saas.grapserver.web.controller.CarInfoController;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,14 +49,11 @@ public class TongdunController {
             tongdunRequest.setAccountEmail(email);
             logger.info("同盾信息采集,输入参数:email={}", email);
         }
-        Long taskId = tongdunService.startCollectTask(appId,tongdunRequest);
-        Object result = tongdunService.processCollectTask(taskId, appId,tongdunRequest);
-        logger.info("同盾信息采集,返回结果:result={},taskId={},appid={}", JSON.toJSONString(result), taskId, appId
-        );
+        Long taskId = tongdunService.startCollectTask(appId, tongdunRequest);
+        Object result = tongdunService.processCollectTask(taskId, appId, tongdunRequest);
+        logger.info("同盾信息采集,返回结果:result={},taskId={},appid={}", JSON.toJSONString(result), taskId, appId);
         return result;
     }
-
-
 
     /**
      * 同盾详细信息采集
@@ -68,19 +67,28 @@ public class TongdunController {
         if (StringUtils.isBlank(name) || StringUtils.isBlank(idcard) || StringUtils.isBlank(mobile)) {
             throw new BizException("姓名，身份证号，手机号必填信息不能为空");
         }
+        if (!JudgeUtils.isIdCard(idcard)) {
+            throw new BizException("身份证号不合法");
+        }
+        if (!JudgeUtils.isCellNumber(mobile)) {
+            throw new BizException("手机号不合法");
+        }
+
         logger.info("同盾详细信息采集,输入参数:appid={},name={},idcard={},mobile={}", appId, name, idcard, mobile);
         TongdunRequest tongdunRequest = new TongdunRequest();
         tongdunRequest.setUserName(name);
         tongdunRequest.setIdCard(idcard);
         tongdunRequest.setTelNum(mobile);
         if (StringUtils.isNotBlank(email)) {
+            if (!JudgeUtils.isEmail(email)) {
+                throw new BizException("邮箱不合法");
+            }
             tongdunRequest.setAccountEmail(email);
             logger.info("同盾详细信息采集,输入参数:email={}", email);
         }
-        Long taskId = tongdunService.startCollectDetailTask(appId,tongdunRequest);
-        Object result = tongdunService.processCollectDetailTask(taskId, appId,tongdunRequest);
-        logger.info("同盾详细信息采集,返回结果:result={},taskId={},appid={}", JSON.toJSONString(result), taskId, appId
-        );
+        Long taskId = tongdunService.startCollectDetailTask(appId, tongdunRequest);
+        Object result = tongdunService.processCollectDetailTask(taskId, appId, tongdunRequest);
+        logger.info("同盾详细信息采集,返回结果:result={},taskId={},appid={}", JSON.toJSONString(result), taskId, appId);
         return result;
     }
 }

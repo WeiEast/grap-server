@@ -115,7 +115,7 @@ public class TongdunService {
     }
 
     public Object processCollectDetailTask(Long taskId, String appId, TongdunRequest tongdunRequest) {
-        String url = diamondConfig.getTongdunDetailUrlCollect();
+        String url = "https://risk-third-party.99gfd.com/td/saas/ext/query";
         JSONObject data = JSON.parseObject(JSON.toJSONString(tongdunRequest));
         Map<String, Object> map = new HashMap<>(1);
         map.put("data", data);
@@ -151,50 +151,49 @@ public class TongdunService {
         JSONObject summary = result.getJSONObject("saasSummaryDTO");
         ETongdunType[] types = ETongdunType.values();
         List<TongdunDetailResult> tongdunDataList = new ArrayList<>(5);
-        try {
-        for (int i = 1; i < 6; i++) {
-            if (summary.getInteger(ETongdunData.getText((byte)i)) != 0) {
-                TongdunDetailResult tongdunDetailResult = new TongdunDetailResult();
-                JSONObject item = detail.getJSONObject(ETongdunData.getText((byte)i));
-                tongdunDetailResult.setId(ETongdunData.getName((byte)i));
-                tongdunDetailResult.setValue(TongdunDataResolver.to(summary.getInteger(ETongdunData.getText((byte)i))));
-                Map<String, Map> firstmap = new HashMap<>();
-                for (ETongdunType eTongdunType : types) {
+       try {
+           for (int i = 1; i < 6; i++) {
+               if (summary.getInteger(ETongdunData.getText((byte)i)) != 0) {
+                   TongdunDetailResult tongdunDetailResult = new TongdunDetailResult();
+                   JSONObject item = detail.getJSONObject(ETongdunData.getText((byte)i));
+                   tongdunDetailResult.setId(ETongdunData.getName((byte)i));
+                   tongdunDetailResult.setValue(TongdunDataResolver.to(summary.getInteger(ETongdunData.getText((byte)i))));
+                   Map<String, Map> firstmap = new HashMap<>();
+                   for (ETongdunType eTongdunType : types) {
 
-                    Map<String, String> secondmap = new HashMap<>();
-                    JSONObject jsonType;
-                    if (!Objects.isNull(item.getJSONObject(eTongdunType.getText()))) {
-                        jsonType = item.getJSONObject(eTongdunType.getText());
-                    } else {
-                        jsonType = item.getJSONObject(eTongdunType.getSecondtext());
-                    }
-                    for (ETongdunDetailData eTongdunDetailData : ETongdunDetailData.values()) {
+                       Map<String, String> secondmap = new HashMap<>();
+                       JSONObject jsonType;
+                       if (!Objects.isNull(item.getJSONObject(eTongdunType.getText()))) {
+                           jsonType = item.getJSONObject(eTongdunType.getText());
+                       } else {
+                           jsonType = item.getJSONObject(eTongdunType.getSecondtext());
+                       }
+                       for (ETongdunDetailData eTongdunDetailData : ETongdunDetailData.values()) {
 
-                        if (!Objects.isNull(jsonType.get(eTongdunDetailData.getText()))) {
-                            secondmap.put(eTongdunDetailData.getName(),
-                                TongdunDataResolver.to(jsonType.getInteger(eTongdunDetailData.getText())));
-                        }
-                    }
-                    firstmap.put(eTongdunType.getName(), secondmap);
+                           if (!Objects.isNull(jsonType.get(eTongdunDetailData.getText()))) {
+                               secondmap.put(eTongdunDetailData.getName(), TongdunDataResolver.to(jsonType.getInteger(eTongdunDetailData.getText())));
+                           }
+                       }
+                       firstmap.put(eTongdunType.getName(), secondmap);
 
-                }
+                   }
 
-                tongdunDetailResult.setDetails(firstmap);
-                tongdunDataList.add(tongdunDetailResult);
-            }
-        }
+                   tongdunDetailResult.setDetails(firstmap);
+                   tongdunDataList.add(tongdunDetailResult);
+               }
+           }
 
-
-            // 获取黑名单
-            Map blackMap = new HashMap(2);
-            blackMap.put("id", "IS_BLACK");
-            blackMap.put("value", summary.get("isHitDiscreditPolicy"));
-            resultList.addAll(tongdunDataList);
-            resultList.add(blackMap);
-
-        } catch (Exception e) {
-            return SaasResult.failResult("查询不到数据!");
-        }
+           // 获取黑名单
+           Map blackMap = new HashMap(2);
+           blackMap.put("id", "IS_BLACK");
+           blackMap.put("value", summary.get("isHitDiscreditPolicy"));
+           resultList.addAll(tongdunDataList);
+           resultList.add(blackMap);
+       }catch (Exception e)
+       {
+           logger.error(e.getMessage(),e);
+           return SaasResult.failResult("查询不到数据");
+       }
 
         AppLicense license = appLicenseService.getAppLicense(appId);
         taskLogService.insert(taskId, "任务成功", new Date(), "");

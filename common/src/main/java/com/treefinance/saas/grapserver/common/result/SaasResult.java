@@ -40,6 +40,9 @@ public class SaasResult<T> {
         this.code = code;
     }
 
+    public SaasResult() {
+    }
+
     public SaasResult(T data) {
 
         this.data = data;

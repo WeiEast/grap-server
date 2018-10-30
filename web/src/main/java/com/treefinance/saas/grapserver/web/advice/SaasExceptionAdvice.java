@@ -1,24 +1,10 @@
-/*
- * Copyright © 2015 - 2017 杭州大树网络技术有限公司. All Rights Reserved
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 package com.treefinance.saas.grapserver.web.advice;
 
 import com.alibaba.fastjson.JSON;
 import com.google.common.collect.Maps;
 import com.treefinance.saas.grapserver.common.exception.*;
 import com.treefinance.saas.grapserver.common.exception.base.MarkBaseException;
+import com.treefinance.saas.grapserver.common.result.SaasResult;
 import com.treefinance.saas.knife.result.SimpleResult;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -26,6 +12,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -38,12 +25,13 @@ import javax.validation.ValidationException;
 import java.util.Map;
 
 /**
- * @author <A HREF="mailto:yaojun@datatrees.com.cn">Jun Yao</A>
- * @version 1.0
- * @since 2017年3月06日 上午10:12:41
+ * @author:guoguoyun
+ * @date:Created in 2018/10/30上午9:46
  */
-@ControllerAdvice("com.treefinance.saas.grapserver.web.controller")
-public class GlobalExceptionAdvice extends ResponseEntityExceptionHandler {
+
+@ControllerAdvice("com.treefinance.saas.grapserver.web.saascontroller")
+public class SaasExceptionAdvice extends ResponseEntityExceptionHandler {
+
     private static final Logger logger = LoggerFactory.getLogger(GlobalExceptionAdvice.class);
 
     @ExceptionHandler(value = UnknownException.class)
@@ -111,7 +99,7 @@ public class GlobalExceptionAdvice extends ResponseEntityExceptionHandler {
 
     @Override
     public ResponseEntity<Object> handleMissingServletRequestParameter(MissingServletRequestParameterException ex,
-                                                                       HttpHeaders headers, HttpStatus status, WebRequest request) {
+        HttpHeaders headers, HttpStatus status, WebRequest request) {
         return handleExceptionInternal(ex, buildBody(ex), headers, status, request);
     }
 
@@ -128,38 +116,24 @@ public class GlobalExceptionAdvice extends ResponseEntityExceptionHandler {
 
     private Object buildBody(Exception ex) {
         logger.error("系统异常", ex);
-        SimpleResult result = new SimpleResult();
-        result.setSuccess(false);
+       SaasResult result = new SaasResult();
+        result.setCode(-1);
         if (ex instanceof ForbiddenException) {
-            Map map = Maps.newHashMap();
-            map.put("mark", 0);
-            result.setData(map);
-            result.setErrorMsg("用户未授权");
+            result.setMsg("用户未授权");
         } else if (ex instanceof AppIdUncheckException) {
-            Map map = Maps.newHashMap();
-            map.put("mark", 0);
-            result.setData(map);
-            result.setErrorMsg("appId非法");
+            result.setMsg("appId非法");
         } else if (ex instanceof MarkBaseException) {
-            Map map = Maps.newHashMap();
-            map.put("mark", ((MarkBaseException) ex).getMark());
-            result.setData(map);
-            result.setErrorMsg(((MarkBaseException) ex).getErrorMsg());
+            result.setMsg(((MarkBaseException) ex).getErrorMsg());
         } else if (ex instanceof MissingServletRequestParameterException) {
-            result.setErrorMsg("参数异常");
+            result.setMsg("参数异常");
         } else if (ex instanceof BizException) {
-            result.setErrorMsg(ex.getMessage());
-            Map<String, Object> map = JSON.parseObject(JSON.toJSONString(result));
-            map.put("errorCode", ((BizException) ex).getCode());
-            if (map.get("errorMsg") == null) {
-                map.put("errorMsg", "系统忙，请稍后重试");
-            }
-            return map;
+            result.setMsg(ex.getMessage());
+            return result;
         } else if (ex instanceof ParamsCheckException) {
-            result.setErrorMsg(ex.getMessage());
+            result.setMsg(ex.getMessage());
         }
-        if (StringUtils.isEmpty(result.getErrorMsg())) {
-            result.setErrorMsg("系统忙，请稍后重试");//暂时
+        if (StringUtils.isEmpty(result.getMsg())) {
+            result.setMsg("系统忙，请稍后重试");//暂时
         }
         logger.info("exception handle : ex={}, result={}", ex.getClass(), JSON.toJSONString(result));
         return result;
