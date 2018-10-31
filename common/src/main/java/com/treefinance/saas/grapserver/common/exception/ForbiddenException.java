@@ -22,23 +22,12 @@ package com.treefinance.saas.grapserver.common.exception;
  */
 public class ForbiddenException extends RuntimeException {
 
-    public int getMark() {
-        return mark;
-    }
 
-    public void setMark(int mark) {
-        this.mark = mark;
-    }
-
-    private int mark;
 
     public ForbiddenException(String message) {
         super(message);
     }
 
-    public ForbiddenException(String message, int mark) {
-        super(message);
-        this.mark = mark;
-    }
+
 
 }

@@ -50,27 +50,42 @@ public class SaasExceptionAdvice extends ResponseEntityExceptionHandler {
         return handleExceptionInternal(ex, buildBody(ex), null, HttpStatus.GATEWAY_TIMEOUT, request);
     }
 
-    @ExceptionHandler(value = ForbiddenException.class)
+    @ExceptionHandler(value = AppIdFormatException.class)
+    @ResponseStatus(HttpStatus.UNAUTHORIZED)
+    @ResponseBody
+    public ResponseEntity<Object> handleAppIdFormatException(WebRequest request, AppIdFormatException ex) {
+        handleLog(request, ex);
+        return handleExceptionInternal(ex, buildBody(ex), null, HttpStatus.UNAUTHORIZED, request);
+    }
+
+    @ExceptionHandler(value = AppIdInvalidException.class)
+    @ResponseStatus(HttpStatus.UNAUTHORIZED)
+    @ResponseBody
+    public ResponseEntity<Object> handleAppIdInvalidException(WebRequest request, AppIdInvalidException ex) {
+        handleLog(request, ex);
+        return handleExceptionInternal(ex, buildBody(ex), null, HttpStatus.UNAUTHORIZED, request);
+    }
+    @ExceptionHandler(value = UniqueidMaxException.class)
     @ResponseStatus(HttpStatus.FORBIDDEN)
     @ResponseBody
-    public ResponseEntity<Object> handleForbiddenException(WebRequest request, ForbiddenException ex) {
+    public ResponseEntity<Object> handleUniqueidMaxException(WebRequest request, UniqueidMaxException ex) {
         handleLog(request, ex);
         return handleExceptionInternal(ex, buildBody(ex), null, HttpStatus.FORBIDDEN, request);
     }
 
-    @ExceptionHandler(value = MarkBaseException.class)
+    @ExceptionHandler(value = AppIdNotActiveException.class)
     @ResponseStatus(HttpStatus.FORBIDDEN)
     @ResponseBody
-    public ResponseEntity<Object> handleMarkBaseException(WebRequest request, MarkBaseException ex) {
+    public ResponseEntity<Object> handleAppIdNotActiveException(WebRequest request, MarkBaseException ex) {
         return handleExceptionInternal(ex, buildBody(ex), null, HttpStatus.GATEWAY_TIMEOUT, request);
     }
 
-    @ExceptionHandler(value = AppIdUncheckException.class)
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ExceptionHandler(value = AppIdNoMessageException.class)
+    @ResponseStatus(HttpStatus.FORBIDDEN)
     @ResponseBody
-    public ResponseEntity<Object> handleAppIdUncheckException(WebRequest request, AppIdUncheckException ex) {
+    public ResponseEntity<Object> handleAppIdNoMessageException(WebRequest request, AppIdUncheckException ex) {
         handleLog(request, ex);
-        return handleExceptionInternal(ex, buildBody(ex), null, HttpStatus.BAD_REQUEST, request);
+        return handleExceptionInternal(ex, buildBody(ex), null, HttpStatus.FORBIDDEN, request);
     }
 
     @ExceptionHandler(Exception.class)
@@ -117,13 +132,16 @@ public class SaasExceptionAdvice extends ResponseEntityExceptionHandler {
     private Object buildBody(Exception ex) {
         logger.error("系统异常", ex);
        SaasResult result = new SaasResult();
-        result.setCode(-1);
+
         if (ex instanceof ForbiddenException) {
+            result.setCode(-1);
             result.setMsg("用户未授权");
-        } else if (ex instanceof AppIdUncheckException) {
-            result.setMsg("appId非法");
+        } else if (ex instanceof UnAuthorizedException) {
+            result.setCode(1);
+            result.setMsg(ex.getMessage());
         } else if (ex instanceof MarkBaseException) {
-            result.setMsg(((MarkBaseException) ex).getErrorMsg());
+            result.setCode(2);
+            result.setMsg("服务器内部异常");
         } else if (ex instanceof MissingServletRequestParameterException) {
             result.setMsg("参数异常");
         } else if (ex instanceof BizException) {
@@ -135,7 +153,7 @@ public class SaasExceptionAdvice extends ResponseEntityExceptionHandler {
         if (StringUtils.isEmpty(result.getMsg())) {
             result.setMsg("系统忙，请稍后重试");//暂时
         }
-        logger.info("exception handle : ex={}, result={}", ex.getClass(), JSON.toJSONString(result));
+        logger.info("exception handle : ex={},errormessage={} result={}", ex.getClass(), ex.getMessage(),JSON.toJSONString(result));
         return result;
     }
 
