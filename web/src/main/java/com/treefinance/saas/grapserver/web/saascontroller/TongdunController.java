@@ -15,6 +15,8 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.xml.bind.ValidationException;
+
 /**
  * @author:guoguoyun
  * @date:Created in 2018/10/17下午2:13
@@ -36,9 +38,12 @@ public class TongdunController {
     @RequestMapping(value = "/query", method = {RequestMethod.POST})
     public Object collect(@RequestParam("appid") String appId, @RequestParam("name") String name,
         @RequestParam("idcard") String idcard, @RequestParam("mobile") String mobile,
-        @RequestParam(value = "email", required = false) String email) {
-        if (StringUtils.isBlank(name) || StringUtils.isBlank(idcard) || StringUtils.isBlank(mobile)) {
-            throw new BizException("姓名，身份证号，手机号必填信息不能为空");
+        @RequestParam(value = "email", required = false) String email) throws ValidationException {
+        if (!JudgeUtils.isIdCard(idcard)) {
+            throw new ValidationException("身份证号不合法");
+        }
+        if (!JudgeUtils.isCellNumber(mobile)) {
+            throw new ValidationException("手机号不合法");
         }
         logger.info("同盾信息采集,输入参数:appid={},name={},idcard={},mobile={}", appId, name, idcard, mobile);
         TongdunRequest tongdunRequest = new TongdunRequest();
@@ -46,6 +51,9 @@ public class TongdunController {
         tongdunRequest.setIdCard(idcard);
         tongdunRequest.setTelNum(mobile);
         if (StringUtils.isNotBlank(email)) {
+            if (!JudgeUtils.isEmail(email)) {
+                throw new ValidationException("邮箱不合法");
+            }
             tongdunRequest.setAccountEmail(email);
             logger.info("同盾信息采集,输入参数:email={}", email);
         }
@@ -63,15 +71,12 @@ public class TongdunController {
     @RequestMapping(value = "/query/detail", method = {RequestMethod.POST})
     public Object collectDetail(@RequestParam("appid") String appId, @RequestParam("name") String name,
         @RequestParam("idcard") String idcard, @RequestParam("mobile") String mobile,
-        @RequestParam(value = "email", required = false) String email) {
-        if (StringUtils.isBlank(name) || StringUtils.isBlank(idcard) || StringUtils.isBlank(mobile)) {
-            throw new BizException("姓名，身份证号，手机号必填信息不能为空");
-        }
+        @RequestParam(value = "email", required = false) String email) throws ValidationException {
         if (!JudgeUtils.isIdCard(idcard)) {
-            throw new BizException("身份证号不合法");
+            throw new ValidationException("身份证号不合法");
         }
         if (!JudgeUtils.isCellNumber(mobile)) {
-            throw new BizException("手机号不合法");
+            throw new ValidationException("手机号不合法");
         }
 
         logger.info("同盾详细信息采集,输入参数:appid={},name={},idcard={},mobile={}", appId, name, idcard, mobile);
@@ -81,7 +86,7 @@ public class TongdunController {
         tongdunRequest.setTelNum(mobile);
         if (StringUtils.isNotBlank(email)) {
             if (!JudgeUtils.isEmail(email)) {
-                throw new BizException("邮箱不合法");
+                throw new ValidationException("邮箱不合法");
             }
             tongdunRequest.setAccountEmail(email);
             logger.info("同盾详细信息采集,输入参数:email={}", email);

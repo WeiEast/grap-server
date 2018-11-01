@@ -8,4 +8,9 @@ public class UniqueidMaxException extends ForbiddenException {
     public UniqueidMaxException(String message) {
         super(message);
     }
+    public UniqueidMaxException() {
+        super();
+    }
+
+
 }

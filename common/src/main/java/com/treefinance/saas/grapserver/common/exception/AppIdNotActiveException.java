@@ -8,4 +8,7 @@ public class AppIdNotActiveException  extends ForbiddenException {
     public AppIdNotActiveException(String message) {
         super(message);
     }
+
+    public AppIdNotActiveException() {
+    }
 }

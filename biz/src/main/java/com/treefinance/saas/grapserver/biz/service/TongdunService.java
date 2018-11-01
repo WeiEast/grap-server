@@ -151,7 +151,7 @@ public class TongdunService {
         JSONObject summary = result.getJSONObject("saasSummaryDTO");
         ETongdunType[] types = ETongdunType.values();
         List<TongdunDetailResult> tongdunDataList = new ArrayList<>(5);
-       try {
+
            for (int i = 1; i < 6; i++) {
                if (summary.getInteger(ETongdunData.getText((byte)i)) != 0) {
                    TongdunDetailResult tongdunDetailResult = new TongdunDetailResult();
@@ -189,11 +189,7 @@ public class TongdunService {
            blackMap.put("value", summary.get("isHitDiscreditPolicy"));
            resultList.addAll(tongdunDataList);
            resultList.add(blackMap);
-       }catch (Exception e)
-       {
-           logger.error(e.getMessage(),e);
-           return SaasResult.failResult("查询不到数据");
-       }
+
 
         AppLicense license = appLicenseService.getAppLicense(appId);
         taskLogService.insert(taskId, "任务成功", new Date(), "");

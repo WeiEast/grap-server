@@ -9,7 +9,7 @@ import java.util.Objects;
 
 public enum ECode {
 
-    EXCEPTION(-1, "服务器内部异常", "EXCEPTION", "具体含义自定义"),
+    EXCEPTION(200, "服务器内部异常", "EXCEPTION", "具体含义自定义"),
 
     UNAUTHORIZED_APPIDINVALID(1, "商户未授权", "AppIdInvalidException", "商户未授权,isvalid=false"),
     UNAUTHORIZED_APPIDFORMAT(2, "商户ID不符合格式", "AppIdFormatException", "appId不符合格式"),
@@ -22,13 +22,14 @@ public enum ECode {
     CRPTOR_RESPONSEENCRYPT(9, "加密返回参数异常", "ResponseEncryptException", "解密请求参数"),
     BIZ(10, "业务异常", "BizException", "自定义"),
     PARAMSCHECK(11, "参数异常", "ParamsCheckException", "具体含义自定义"),
-    RESPONSE(12, "服务器内部异常", "ResponseException", "返回数据异常"),
-    CRAWLERBIZ(13, "服务器内部异常", "CrawlerBizException", "爬树业务异常，具体含义自定义"),
+
     UNKNOW(201, "服务器内部异常", "UnknownException", "调用taskcenter异常"),
     TASKTIMEOUT(202, "服务器内部异常", "TaskTimeOutException", "任务超时异常"),
     REQUESTFAILED(203, "服务器内部异常", "RequestFailedException", "请求失败"),
     NOTFOUND(204, "服务器内部异常", "NotFoundException", "转发的URL没有对应服务"),
-    TIMEOUT(205, "服务器内部异常", "TimeOutException", "上游服务器没有响应，超时");
+    TIMEOUT(205, "服务器内部异常", "TimeOutException", "上游服务器没有响应，超时"),
+    RESPONSE(206, "服务器内部异常", "ResponseException", "返回数据异常"),
+    CRAWLERBIZ(207, "服务器内部异常", "CrawlerBizException", "爬树业务异常，具体含义自定义");
 
     /**自定义code码*/
     private int code;

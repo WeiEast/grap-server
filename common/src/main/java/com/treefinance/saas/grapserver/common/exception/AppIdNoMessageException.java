@@ -10,4 +10,6 @@ public class AppIdNoMessageException extends  ForbiddenException {
         super(message);
     }
 
+    public AppIdNoMessageException() {
+    }
 }
