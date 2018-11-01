@@ -156,7 +156,14 @@ public class SaasExceptionAdvice extends ResponseEntityExceptionHandler {
         } else if (ex instanceof ResponseException) {
             result.setCode(ECode.RESPONSE.getCode());
             result.setMsg(ECode.RESPONSE.getMsg());
-        } else if (ex instanceof UnknownException) {
+        }else if (ex instanceof CrawlerBizException) {
+            result.setCode(ECode.CRAWLERBIZ.getCode());
+            result.setMsg(ECode.CRAWLERBIZ.getMsg());
+            logger.error("exception handle : ex={},description={} result={}", ex.getClass(), ex.getMessage(),
+                JSON.toJSONString(result));
+            return result;
+        }
+        else if (ex instanceof UnknownException) {
             result.setCode(ECode.UNKNOW.getCode());
             result.setMsg(ECode.UNKNOW.getMsg());
         } else if (ex instanceof RequestFailedException) {

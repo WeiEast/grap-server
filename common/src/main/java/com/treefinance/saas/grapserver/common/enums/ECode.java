@@ -23,6 +23,7 @@ public enum ECode {
     BIZ(10, "业务异常", "BizException", "自定义"),
     PARAMSCHECK(11, "参数异常", "ParamsCheckException", "具体含义自定义"),
     RESPONSE(12, "服务器内部异常", "ResponseException", "返回数据异常"),
+    CRAWLERBIZ(13, "服务器内部异常", "CrawlerBizException", "爬树业务异常，具体含义自定义"),
     UNKNOW(201, "服务器内部异常", "UnknownException", "调用taskcenter异常"),
     TASKTIMEOUT(202, "服务器内部异常", "TaskTimeOutException", "任务超时异常"),
     REQUESTFAILED(203, "服务器内部异常", "RequestFailedException", "请求失败"),
