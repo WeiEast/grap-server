@@ -152,38 +152,40 @@ public class TongdunService {
         ETongdunType[] types = ETongdunType.values();
         List<TongdunDetailResult> tongdunDataList = new ArrayList<>(5);
         try {
-        for (int i = 1; i < 6; i++) {
-            if (summary.getInteger(ETongdunData.getText((byte)i)) != 0) {
-                TongdunDetailResult tongdunDetailResult = new TongdunDetailResult();
-                JSONObject item = detail.getJSONObject(ETongdunData.getText((byte)i));
-                tongdunDetailResult.setId(ETongdunData.getName((byte)i));
-                tongdunDetailResult.setValue(TongdunDataResolver.to(summary.getInteger(ETongdunData.getText((byte)i))));
-                Map<String, Map> firstmap = new HashMap<>();
-                for (ETongdunType eTongdunType : types) {
+            for (int i = 1; i < 6; i++) {
+                if (summary.getInteger(ETongdunData.getText((byte)i)) != 0) {
+                    TongdunDetailResult tongdunDetailResult = new TongdunDetailResult();
+                    JSONObject item = detail.getJSONObject(ETongdunData.getText((byte)i));
+                    tongdunDetailResult.setId(ETongdunData.getName((byte)i));
+                    tongdunDetailResult
+                        .setValue(TongdunDataResolver.to(summary.getInteger(ETongdunData.getText((byte)i))));
+                    Map<String, Map> firstmap = new HashMap<>();
+                    for (ETongdunType eTongdunType : types) {
 
-                    Map<String, String> secondmap = new HashMap<>();
-                    JSONObject jsonType;
-                    if (!Objects.isNull(item.getJSONObject(eTongdunType.getText()))) {
-                        jsonType = item.getJSONObject(eTongdunType.getText());
-                    } else {
-                        jsonType = item.getJSONObject(eTongdunType.getSecondtext());
-                    }
-                    for (ETongdunDetailData eTongdunDetailData : ETongdunDetailData.values()) {
-
-                        if (!Objects.isNull(jsonType.get(eTongdunDetailData.getText()))) {
-                            secondmap.put(eTongdunDetailData.getName(),
-                                TongdunDataResolver.to(jsonType.getInteger(eTongdunDetailData.getText())));
+                        Map<String, String> secondmap = new HashMap<>();
+                        JSONObject jsonType;
+                        if (!Objects.isNull(item.getJSONObject(eTongdunType.getText()))) {
+                            jsonType = item.getJSONObject(eTongdunType.getText());
+                        } else if (!Objects.isNull(item.getJSONObject(eTongdunType.getSecondtext()))) {
+                            jsonType = item.getJSONObject(eTongdunType.getSecondtext());
+                        } else {
+                            continue;
                         }
+                        for (ETongdunDetailData eTongdunDetailData : ETongdunDetailData.values()) {
+
+                            if (!Objects.isNull(jsonType.get(eTongdunDetailData.getText()))) {
+                                secondmap.put(eTongdunDetailData.getName(),
+                                    TongdunDataResolver.to(jsonType.getInteger(eTongdunDetailData.getText())));
+                            }
+                        }
+                        firstmap.put(eTongdunType.getName(), secondmap);
+
                     }
-                    firstmap.put(eTongdunType.getName(), secondmap);
 
+                    tongdunDetailResult.setDetails(firstmap);
+                    tongdunDataList.add(tongdunDetailResult);
                 }
-
-                tongdunDetailResult.setDetails(firstmap);
-                tongdunDataList.add(tongdunDetailResult);
             }
-        }
-
 
             // 获取黑名单
             Map blackMap = new HashMap(2);

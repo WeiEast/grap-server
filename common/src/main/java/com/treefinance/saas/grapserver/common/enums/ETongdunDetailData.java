@@ -24,7 +24,20 @@ public enum ETongdunDetailData {
     LevelN("LevelN", "大型消费金融公司", (byte)14),
     LevelO("LevelO", "银行小微贷款", (byte)15),
     LevelP("LevelP", "厂商汽车金融", (byte)16),
-    LevelZ("LevelZ", "NULL", (byte)17);
+    LevelQ("LevelQ", "房地产金融", (byte)17),
+    LevelR("LevelR", "第三方服务商", (byte)18),
+    LevelS("LevelS", "游戏", (byte)19),
+    LevelT("LevelT", "交通工具租赁", (byte)20),
+    LevelU("LevelU", "设备租赁", (byte)21),
+    LevelV("LevelV", "O2O", (byte)22),
+    LevelW("LevelW", "信息中介", (byte)23),
+    LevelX("LevelX", "汽车租赁", (byte)24),
+    LevelY("LevelY", "理财机构", (byte)25),
+    LevelZ("LevelZ", "NULL", (byte)26),
+    Level0("Level0", "房屋租赁", (byte)27),
+    Level2("Level1", "综合类电商平台", (byte)28),
+    Level3("Level2", "第三方支付", (byte)29);
+
 
 
 
