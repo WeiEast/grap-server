@@ -176,6 +176,9 @@ public class TongdunService {
                             if (!Objects.isNull(jsonType.get(eTongdunDetailData.getText()))) {
                                 secondmap.put(eTongdunDetailData.getName(),
                                     TongdunDataResolver.to(jsonType.getInteger(eTongdunDetailData.getText())));
+                            }else{
+                                secondmap.put(ETongdunDetailData.LevelZ.getName(),
+                                    TongdunDataResolver.to(jsonType.getInteger(eTongdunDetailData.getText())));
                             }
                         }
                         firstmap.put(eTongdunType.getName(), secondmap);
