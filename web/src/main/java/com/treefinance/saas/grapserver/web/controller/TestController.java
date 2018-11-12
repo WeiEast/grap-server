@@ -31,14 +31,15 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class TestController {
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(TestController.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(TestController.class);
 
-  @RequestMapping("/test")
-  public SimpleResult testCrypto(@RequestParam("appid") String appId, String info) {
-    LOGGER.info("appId: {}", appId);
-    LOGGER.info("information: {}", info);
-    ImmutableMap<String, String> data = ImmutableMap
-        .of("result", "I has received your information:" + info);
-    return new SimpleResult<>(data);
-  }
+    @RequestMapping("/test")
+    public SimpleResult testCrypto(@RequestParam("appid") String appId, String info) {
+        LOGGER.info("appId: {}", appId);
+        LOGGER.info("information: {}", info);
+        ImmutableMap<String, String> data = ImmutableMap
+                .of("result", "I has received your information:" + info);
+        return new SimpleResult<>(data);
+    }
+
 }

@@ -6,20 +6,15 @@ import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.google.common.collect.Lists;
 import com.treefinance.saas.grapserver.common.utils.DataConverterUtils;
-import com.treefinance.saas.grapserver.dao.entity.AppBizLicense;
 import com.treefinance.saas.grapserver.dao.entity.AppBizType;
-import com.treefinance.saas.grapserver.dao.entity.AppBizTypeCriteria;
-import com.treefinance.saas.grapserver.dao.mapper.AppBizTypeMapper;
 import com.treefinance.saas.merchant.center.facade.request.common.BaseRequest;
 import com.treefinance.saas.merchant.center.facade.request.grapserver.GetAppBizTypeRequest;
-import com.treefinance.saas.merchant.center.facade.result.console.AppBizLicenseResult;
 import com.treefinance.saas.merchant.center.facade.result.console.AppBizTypeResult;
 import com.treefinance.saas.merchant.center.facade.result.console.MerchantResult;
 import com.treefinance.saas.merchant.center.facade.service.AppBizTypeFacade;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -33,6 +28,7 @@ import java.util.stream.Collectors;
  */
 @Service
 public class AppBizTypeService implements InitializingBean {
+
     /**
      * logger
      */

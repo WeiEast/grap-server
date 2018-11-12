@@ -21,11 +21,12 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 /**
- * Created by yh-treefinance on 2018/6/29.
+ * @author yh-treefinance on 2018/6/29.
  */
 @RestController
 @RequestMapping(value = {"/grap", "/grap/h5/"})
 public class QuestionnaireController {
+
     private static final Logger logger = LoggerFactory.getLogger(QuestionnaireController.class);
 
     @Autowired
@@ -33,9 +34,6 @@ public class QuestionnaireController {
 
     /**
      * 查询问卷
-     *
-     * @param bizType
-     * @return
      */
     @RequestMapping(value = "/{bizType}/questionnaire/get", method = {RequestMethod.POST})
     public Object getQuestionnaire(@PathVariable(name = "bizType") String bizType,
@@ -51,10 +49,6 @@ public class QuestionnaireController {
 
     /**
      * 保存问卷结果
-     *
-     * @param bizType
-     * @param request
-     * @return
      */
     @RequestMapping(value = "/{bizType}/questionnaire/save", method = {RequestMethod.POST})
     public Object saveResult(@PathVariable(name = "bizType") String bizType,

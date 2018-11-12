@@ -15,7 +15,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Created by haojiahong on 2017/9/13.
+ * @author haojiahong on 2017/9/13.
  */
 @Service
 public class FundMoxieService {
@@ -25,38 +25,29 @@ public class FundMoxieService {
 
     /**
      * 获取城市公积金列表
-     *
-     * @return
      */
     public List<MoxieCityInfoDTO> queryCityList() {
         String url = diamondConfig.getMoxieUrlFundGetCityList();
         Map<String, String> headers = Maps.newHashMap();
         wrapperApiKeyHeaders(headers);
         String data = HttpClientUtils.doGetWithHeaders(url, headers);
-        List<MoxieCityInfoDTO> moxieCityInfoDTOList = JsonUtils.toJavaBeanList(data, MoxieCityInfoDTO.class);
-        return moxieCityInfoDTOList;
+        return JsonUtils.toJavaBeanList(data, MoxieCityInfoDTO.class);
     }
 
     /**
      * 获取城市公积金列表(省市关联接口，含province)
-     *
-     * @return
      */
     public List<MoxieCityInfoDTO> queryCityListEx() {
         String url = diamondConfig.getMoxieUrlFundGetCityListEx();
         Map<String, String> headers = Maps.newHashMap();
         wrapperApiKeyHeaders(headers);
         String data = HttpClientUtils.doGetWithHeaders(url, headers);
-        List<MoxieCityInfoDTO> moxieCityInfoDTOList = JsonUtils.toJavaBeanList(data, MoxieCityInfoDTO.class);
-        return moxieCityInfoDTOList;
+        return JsonUtils.toJavaBeanList(data, MoxieCityInfoDTO.class);
 
     }
 
     /**
      * 根据area_code获取当前公积金UI登录元素
-     *
-     * @param areaCode
-     * @return
      */
     public Object queryLoginElementsEx(String areaCode) {
         String url = diamondConfig.getMoxieUrlFundGetLoginElementsEx();
@@ -69,9 +60,6 @@ public class FundMoxieService {
 
     /**
      * 获取公积金登录提示信息(根据area_code查询)
-     *
-     * @param areaCode
-     * @return
      */
     public Object queryInformation(String areaCode) {
         String url = diamondConfig.getMoxieUrlFundGetInformation();
@@ -84,9 +72,6 @@ public class FundMoxieService {
 
     /**
      * 创建公积金采集任务
-     *
-     * @param moxieLoginParams
-     * @return
      */
     public String createTasks(MoxieLoginParamsDTO moxieLoginParams) {
         String url = diamondConfig.getMoxieUrlFundPostTasks();
@@ -105,9 +90,6 @@ public class FundMoxieService {
 
     /**
      * 获取公积金采集任务执行状态
-     *
-     * @param moxieTaskId
-     * @return
      */
     public Object queryTaskStatus(String moxieTaskId) {
         String url = diamondConfig.getMoxieUrlFundGetTasksStatus();
@@ -120,9 +102,6 @@ public class FundMoxieService {
 
     /**
      * 输入图片验证码/短信
-     *
-     * @param moxieTaskId
-     * @param input
      */
     public void submitTaskInput(String moxieTaskId, String input) {
         String url = diamondConfig.getMoxieUrlFundPostTasksInput();
@@ -136,49 +115,36 @@ public class FundMoxieService {
 
     /**
      * 根据task_id获取公积金全部信息
-     *
-     * @param moxieTaskId
-     * @return
      */
     public String queryFunds(String moxieTaskId) {
         String url = diamondConfig.getMoxieUrlFundGetFunds();
         url = url.replaceAll("\\{task_id\\}", moxieTaskId);
         Map<String, String> headers = Maps.newHashMap();
         wrapperTokenHeaders(headers);
-        String data = HttpClientUtils.doGetWithHeaders(url, headers);
-        return data;
+        return HttpClientUtils.doGetWithHeaders(url, headers);
     }
 
     /**
      * 根据task_id获取公积金全部信息(扩展接口，含area_code和city)
-     *
-     * @param moxieTaskId
-     * @return
      */
     public String queryFundsEx(String moxieTaskId) {
         String url = diamondConfig.getMoxieUrlFundGetFundsEx();
         url = url.replaceAll("\\{task_id\\}", moxieTaskId);
         Map<String, String> headers = Maps.newHashMap();
         wrapperTokenHeaders(headers);
-        String data = HttpClientUtils.doGetWithHeaders(url, headers);
-        return data;
+        return HttpClientUtils.doGetWithHeaders(url, headers);
     }
 
 
     private void wrapperTokenHeaders(Map<String, String> headers) {
-        StringBuilder sb = new StringBuilder();
-        sb.append("token").append(" ").append(diamondConfig.getMoxieFundToken());
-        headers.put("Authorization", sb.toString());
+        headers.put("Authorization", "token" + " " + diamondConfig.getMoxieFundToken());
     }
 
     private void wrapperApiKeyHeaders(Map<String, String> headers) {
-        StringBuilder sb = new StringBuilder();
-        sb.append("apiKey").append(" ").append(diamondConfig.getMoxieFundApiKey());
-        headers.put("Authorization", sb.toString());
+        headers.put("Authorization", "apiKey" + " " + diamondConfig.getMoxieFundApiKey());
     }
 
     private void wrapperParams(Map<String, Object> params, MoxieLoginParamsDTO moxieLoginParams) {
-
         params.put("user_id", moxieLoginParams.getTaskId());
         params.put("area_code", moxieLoginParams.getAreaCode());
         params.put("account", moxieLoginParams.getAccount());
@@ -214,8 +180,6 @@ public class FundMoxieService {
         if (StringUtils.isNotBlank(moxieLoginParams.getIp())) {
             params.put("ip", moxieLoginParams.getIp());
         }
-
     }
-
 
 }

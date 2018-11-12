@@ -10,15 +10,18 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- * Created by yh-treefinance on 2018/2/7.
+ * @author yh-treefinance on 2018/2/7.
  */
 @RestController
 public class GrapDataController {
+
     @Autowired
     private GrapDataDownloadService grapDataDownloadService;
 
     @RequestMapping(value = {"/grap/{bizType}/data"}, method = {RequestMethod.GET})
     public Object getData(@PathVariable("bizType") String bizType, GrapDataVO grapDataVO) {
-        return SimpleResult.successResult(grapDataDownloadService.getEncryptGrapData(grapDataVO.getAppid(), bizType, grapDataVO.getTaskId()));
+        return SimpleResult.successResult(
+                grapDataDownloadService.getEncryptGrapData(grapDataVO.getAppid(), bizType, grapDataVO.getTaskId()));
     }
+
 }

@@ -21,7 +21,7 @@ import java.util.Map;
 
 /**
  * 前端提交扫描二维码
- * Created by luyuan on 2017/5/2.
+ * @author luyuan on 2017/5/2.
  */
 
 @RestController
@@ -40,9 +40,10 @@ public class SpecialController {
             @RequestParam("taskid") Long taskid) throws Exception {
         HttpResult<String> result = spiderTaskApi.verifyQr(directiveId, taskid, null);
         logger.info("taskId={},directiveId={}, 二维码验证结果={}", taskid, directiveId, JSON.toJSONString(result));
-        if (StringUtils.isNotEmpty(result.getData()) && (result.getData().equals(EQRResult.FAILED.toString()) ||
-                result.getData().equals(EQRResult.SUCCESS.toString()) ||
-                result.getData().equals(EQRResult.SKIP.toString()))) {
+        if (StringUtils.isNotEmpty(result.getData())
+                && (result.getData().equals(EQRResult.FAILED.toString())
+                || result.getData().equals(EQRResult.SUCCESS.toString())
+                || result.getData().equals(EQRResult.SKIP.toString()))) {
             taskNextDirectiveService.deleteNextDirective(taskid, EDirective.REQUIRE_QR.getText());
         }
         Map<String, Object> map = Maps.newHashMap();

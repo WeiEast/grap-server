@@ -14,24 +14,21 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- * Created by haojiahong on 2017/12/26.
+ * @author haojiahong on 2017/12/26.
  */
 @RestController
 @RequestMapping(value = {"/h5/email", "/grap/h5/email",})
 public class EmailH5Controller {
+
     private static final Logger logger = LoggerFactory.getLogger(EmailH5Controller.class);
 
     @Autowired
     private EmailLoginSimulationService emailLoginSimulationService;
 
-
-    //========QQ邮箱==========
+    //================================================ QQ邮箱 ================================================== //
 
     /**
      * 登陆(异步)
-     *
-     * @param param
-     * @return
      */
     @RequestMapping(value = {"/login/submit", "/qq/login/submit"}, method = {RequestMethod.POST})
     public Object login(CommonPluginParam param, String userIp) {
@@ -48,9 +45,6 @@ public class EmailH5Controller {
 
     /**
      * 刷新二维码(异步)
-     *
-     * @param param
-     * @return
      */
     @RequestMapping(value = {"/refresh/qr_code", "/qq/refresh/qr_code"}, method = {RequestMethod.POST})
     public Object refreshQRCode(CommonPluginParam param) {
@@ -83,13 +77,10 @@ public class EmailH5Controller {
         return result;
     }
 
-    //=====qq企业邮箱=====
+    //================================================ qq企业邮箱 ================================================== //
 
     /**
      * 登陆(异步)
-     *
-     * @param param
-     * @return
      */
     @RequestMapping(value = {"/qq/exmail/login/submit"}, method = {RequestMethod.POST})
     public Object loginForQQExMail(CommonPluginParam param, String userIp) {
@@ -106,9 +97,6 @@ public class EmailH5Controller {
 
     /**
      * 登陆初始化
-     *
-     * @param param
-     * @return
      */
     @RequestMapping(value = "/qq/exmail/login/init", method = {RequestMethod.POST})
     public Object loginInitForQQExMail(CommonPluginParam param) {
@@ -118,13 +106,10 @@ public class EmailH5Controller {
         return result;
     }
 
-    //=====163邮箱=====
+    //================================================ 163邮箱 ================================================== //
 
     /**
      * 登陆(异步)
-     *
-     * @param param
-     * @return
      */
     @RequestMapping(value = {"/163/login/submit"}, method = {RequestMethod.POST})
     public Object loginFor163(CommonPluginParam param, String userIp) {
@@ -141,9 +126,6 @@ public class EmailH5Controller {
 
     /**
      * 刷新二维码(异步)
-     *
-     * @param param
-     * @return
      */
     @RequestMapping(value = {"/163/refresh/qr_code"}, method = {RequestMethod.POST})
     public Object refreshQRCodeFor163(CommonPluginParam param) {
@@ -160,9 +142,6 @@ public class EmailH5Controller {
 
     /**
      * 查询二维码状态
-     *
-     * @param param
-     * @return
      */
     @RequestMapping(value = {"/163/qr_code/status"}, method = {RequestMethod.POST})
     public Object queryQRStatusFor163(CommonPluginParam param) {
@@ -176,13 +155,10 @@ public class EmailH5Controller {
         return result;
     }
 
-    //====126邮箱====
+    //================================================ 126邮箱 ================================================== //
 
     /**
      * 登陆(异步)
-     *
-     * @param param
-     * @return
      */
     @RequestMapping(value = {"/126/login/submit"}, method = {RequestMethod.POST})
     public Object loginFor126(CommonPluginParam param, String userIp) {
@@ -199,9 +175,6 @@ public class EmailH5Controller {
 
     /**
      * 刷新二维码(异步)
-     *
-     * @param param
-     * @return
      */
     @RequestMapping(value = {"/126/refresh/qr_code"}, method = {RequestMethod.POST})
     public Object refreshQRCodeFor126(CommonPluginParam param) {
@@ -218,9 +191,6 @@ public class EmailH5Controller {
 
     /**
      * 查询二维码状态
-     *
-     * @param param
-     * @return
      */
     @RequestMapping(value = {"/126/qr_code/status"}, method = {RequestMethod.POST})
     public Object queryQRStatusFor126(CommonPluginParam param) {
@@ -234,13 +204,10 @@ public class EmailH5Controller {
         return result;
     }
 
-    //======新浪邮箱=======
+    //================================================ 新浪邮箱 ================================================== //
 
     /**
      * 登陆初始化
-     *
-     * @param param
-     * @return
      */
     @RequestMapping(value = "/sina/login/init", method = {RequestMethod.POST})
     public Object loginInitForSina(CommonPluginParam param) {
@@ -252,9 +219,6 @@ public class EmailH5Controller {
 
     /**
      * 登陆(轮询,有可能需要验证码登录)
-     *
-     * @param param
-     * @return
      */
     @RequestMapping(value = "/sina/login/submit", method = {RequestMethod.POST})
     public Object loginForSina(CommonPluginParam param) {
@@ -271,9 +235,6 @@ public class EmailH5Controller {
 
     /**
      * 刷新图片验证码
-     *
-     * @param param
-     * @return
      */
     @RequestMapping(value = "/sina/refresh/picCode", method = RequestMethod.POST)
     public Object refreshPicCodeForSina(CommonPluginParam param) {
@@ -284,7 +245,7 @@ public class EmailH5Controller {
     }
 
 
-    //=============通用接口==============
+    //================================================ 通用接口 ================================================== //
 
     /**
      * 是否支持当前ip的省份代理(通用接口)
@@ -292,8 +253,7 @@ public class EmailH5Controller {
      * @return true:支持.false:不支持
      */
     @RequestMapping(value = "/support/province_proxy", method = {RequestMethod.POST})
-    public Object supportProvinceProxy(@RequestParam(required = false) CommonPluginParam param,
-                                       String userIp) {
+    public Object supportProvinceProxy(@RequestParam(required = false) CommonPluginParam param, String userIp) {
         if (StringUtils.isBlank(userIp)) {
             logger.info("邮箱账单:查询是否支持当前IP的省份代理,没有获取到当前用户的IP信息");
             return Results.newSuccessResult(false);
@@ -304,21 +264,17 @@ public class EmailH5Controller {
         param.setUserIp(userIp);
         logger.info("邮箱账单:查询是否支持当前IP的省份代理,传入参数,param={}", JSON.toJSONString(param));
         Object result = emailLoginSimulationService.supportProvinceProxy(param);
-        logger.info("邮箱账单:查询是否支持当前IP的省份代理,返回结果,param={},result={}", JSON.toJSONString(param), JSON.toJSONString(result));
+        logger.info("邮箱账单:查询是否支持当前IP的省份代理,返回结果,param={},result={}",
+                JSON.toJSONString(param), JSON.toJSONString(result));
         return result;
     }
 
 
     /**
      * 轮询处理状态接口(通用接口)
-     *
-     * @param processId
-     * @param taskId
-     * @return
      */
     @RequestMapping(value = "/process/status", method = {RequestMethod.POST})
-    public Object processStatus(@RequestParam("processId") Long processId,
-                                @RequestParam("taskId") Long taskId) {
+    public Object processStatus(@RequestParam("processId") Long processId, @RequestParam("taskId") Long taskId) {
         logger.info("邮箱账单:轮询处理状态,传入参数,processId={},taskId={}", processId, taskId);
         if (taskId == null) {
             logger.error("邮箱账单:轮询处理状态,参数缺失,taskId必传");
@@ -328,6 +284,5 @@ public class EmailH5Controller {
         logger.info("邮箱账单:轮询处理状态,返回结果,processId={},taskId={},result={}", processId, taskId, JSON.toJSONString(result));
         return result;
     }
-
 
 }

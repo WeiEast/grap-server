@@ -12,12 +12,11 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- * Created by haojiahong on 2017/10/17.
+ * @author haojiahong on 2017/10/17.
  */
 @RestController
 @RequestMapping(value = {"/grap/h5/demo"})
 public class DemoController {
-    private static final Logger logger = LoggerFactory.getLogger(DemoController.class);
 
     @Autowired
     private DemoService demoService;
@@ -36,7 +35,6 @@ public class DemoController {
     public Object getFundBillRecordList(@RequestParam("appid") String appId,
                                         @RequestParam("demoParams") String params,
                                         @RequestParam("pageNum") Integer pageNum) {
-
         if (StringUtils.isBlank(appId) || StringUtils.isBlank(params) || pageNum == null || pageNum < 0) {
             throw new IllegalArgumentException("Parameter is incorrect.");
         }

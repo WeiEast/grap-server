@@ -52,11 +52,13 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 /**
- * Created by haojiahong on 2017/9/15.
+ * @author haojiahong on 2017/9/15.
  */
 @Service
 public class MoxieBusinessService implements InitializingBean {
+
     protected final Logger logger = LoggerFactory.getLogger(getClass());
+
     private static String VERIFY_CODE_SMS_COUNT_PREFIX = "saas-grap-fund-verify-code-count";
 
     @Autowired
@@ -107,9 +109,6 @@ public class MoxieBusinessService implements InitializingBean {
 
     /**
      * 任务是否已经结束(即:任务是否已经为成功,失败或取消)
-     *
-     * @param taskId
-     * @return
      */
     private boolean isTaskDone(long taskId) {
         TaskDTO task = taskService.getById(taskId);
@@ -129,8 +128,6 @@ public class MoxieBusinessService implements InitializingBean {
 
     /**
      * 魔蝎账单通知业务处理
-     *
-     * @param eventNoticeDTO
      */
     @Transactional(rollbackFor = Exception.class)
     public void bill(MoxieTaskEventNoticeDTO eventNoticeDTO) {
@@ -140,9 +137,6 @@ public class MoxieBusinessService implements InitializingBean {
 
     /**
      * 魔蝎任务是否需要验证码处理
-     *
-     * @param taskId
-     * @return
      */
     private Map<String, Object> requireCaptcha(Long taskId) {
         Map<String, Object> map = Maps.newHashMap();
@@ -167,9 +161,10 @@ public class MoxieBusinessService implements InitializingBean {
                 moxieCaptchaDTO.setType(type);
                 moxieCaptchaDTO.setValue(value);
                 moxieCaptchaDTO.setWaitSeconds(waitSeconds);
-                //短信验证码需要自定义一个不同的value值,区分是两次不同的验证码请求,供前端轮询比较
+                // 短信验证码需要自定义一个不同的value值,区分是两次不同的验证码请求,供前端轮询比较
                 int inputCount = Optional.ofNullable(this.getVerifyCodeCount(taskId)).orElse(0);
-                if (StringUtils.equalsIgnoreCase(type, "sms")) {//需要短信验证码
+                // 需要短信验证码
+                if (StringUtils.equalsIgnoreCase(type, "sms")) {
                     moxieCaptchaDTO.setValue(inputCount + "");
                     map.put("directive", "require_sms");
                     map.put("information", moxieCaptchaDTO);
@@ -179,7 +174,8 @@ public class MoxieBusinessService implements InitializingBean {
                         taskLogService.insert(taskId, ETaskStep.WAITING_USER_INPUT_MESSAGE_CODE.getText(), new Date(), null);
                     }
                 }
-                if (StringUtils.equalsIgnoreCase(type, "img")) {//需要图片验证码
+                // 需要图片验证码
+                if (StringUtils.equalsIgnoreCase(type, "img")) {
                     map.put("directive", "require_picture");
                     map.put("information", moxieCaptchaDTO);
                     logger.info("魔蝎公积金任务需要图片验证码,moxieCaptchaDTO={},taskId={}", JSON.toJSONString(moxieCaptchaDTO), taskId);
@@ -196,8 +192,6 @@ public class MoxieBusinessService implements InitializingBean {
 
     /**
      * 获取魔蝎城市公积金列表
-     *
-     * @return
      */
     public List<MoxieCityInfoVO> getCityList() {
 
@@ -214,15 +208,10 @@ public class MoxieBusinessService implements InitializingBean {
 
     /**
      * 创建魔蝎任务,得到moxieTaskId
-     *
-     * @param taskId
-     * @param params
-     * @return
      */
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public Map<String, Object> createMoxieTask(Long taskId, MoxieLoginParamsDTO params) {
-
-        //1.轮询指令,已经提交过登录,获取魔蝎异步回调登录状态
+        // 1.轮询指令,已经提交过登录,获取魔蝎异步回调登录状态
         Map<String, Object> map = Maps.newHashMap();
         TaskAttribute attribute = taskAttributeService.findByName(taskId, ETaskAttribute.FUND_MOXIE_TASKID.getAttribute(), false);
         if (attribute != null && StringUtils.isNotBlank(attribute.getValue())) {
@@ -231,9 +220,8 @@ public class MoxieBusinessService implements InitializingBean {
             map = this.queryLoginStatusFromDirective(taskId, attribute.getValue());
             return map;
         }
-
-        //2.提交登录,调用魔蝎接口创建魔蝎任务,如果任务创建失败,返回登录失败及异常信息
-        String moxieId = null;
+        // 2.提交登录,调用魔蝎接口创建魔蝎任务,如果任务创建失败,返回登录失败及异常信息
+        String moxieId;
         try {
             moxieId = fundMoxieService.createTasks(params);
             logger.info("taskId={}创建魔蝎任务成功moxieTaskId={},params={}", moxieId, JSON.toJSONString(params));

@@ -26,14 +26,17 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.ModelAndView;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * @author unknown
+ * @date created this description at 2018/11/12
+ */
 @RestController
 @RequestMapping(value = {"/grap/h5/fund"})
 public class FundController {
+
     private static final Logger logger = LoggerFactory.getLogger(FundController.class);
 
     @Autowired
@@ -59,13 +62,9 @@ public class FundController {
 
     /**
      * 商户配置接口
-     *
-     * @param appid
-     * @param taskId
-     * @return
      */
     @RequestMapping(value = "/config", method = {RequestMethod.POST})
-    public Object getConfig(@RequestParam String appid, @RequestParam("taskid") Long taskId, HttpServletRequest request, HttpServletResponse response) {
+    public Object getConfig(@RequestParam String appid, @RequestParam("taskid") Long taskId) {
         if (StringUtils.isBlank(appid) || taskId == null) {
             logger.error("商户配置接口,输入参数appid,taskid为空appid={},taskid={}", appid, taskId);
             throw new IllegalArgumentException("Parameter 'appid' or 'taskid' is incorrect.");
@@ -92,21 +91,13 @@ public class FundController {
         return SimpleResult.successResult(result);
     }
 
-
     /**
      * 登录配置接口
-     *
-     * @param appid
-     * @param taskId
-     * @param request
-     * @param response
-     * @return
      */
     @RequestMapping(value = "/login/config", method = {RequestMethod.POST})
     public Object getLoginConfig(@RequestParam String appid,
                                  @RequestParam("taskid") Long taskId,
-                                 @RequestParam("area_code") String areaCode,
-                                 HttpServletRequest request, HttpServletResponse response) {
+                                 @RequestParam("area_code") String areaCode) {
         if (StringUtils.isBlank(appid) || taskId == null || StringUtils.isBlank(areaCode)) {
             logger.error("公积金获取登录配置输入参数为空,appid={},taskid={},area_code={}", appid, taskId, areaCode);
             throw new IllegalArgumentException("Parameter is incorrect.");
@@ -122,13 +113,6 @@ public class FundController {
 
     /**
      * 登录接口
-     *
-     * @param appId
-     * @param taskId
-     * @param uniqueId
-     * @param request
-     * @param response
-     * @return
      */
     @RequestMapping(value = "/login/submit", method = {RequestMethod.POST})
     public Object getLoginSubmit(@RequestParam("appid") String appId,
@@ -147,8 +131,7 @@ public class FundController {
                                  @RequestParam(value = "corp_account", required = false) String corpAccount,
                                  @RequestParam(value = "corp_name", required = false) String corpName,
                                  @RequestParam("origin") String origin,
-                                 @RequestParam(value = "ip", required = false) String ip,
-                                 HttpServletRequest request, HttpServletResponse response) {
+                                 @RequestParam(value = "ip", required = false) String ip) {
         if (StringUtils.isBlank(appId) || taskId == null || StringUtils.isBlank(uniqueId) || StringUtils.isBlank(areaCode)
                 || StringUtils.isBlank(account) || StringUtils.isBlank(loginType) || StringUtils.isBlank(origin)) {
             logger.error("公积金登录,输入参数为空,appid={},taskid={},uniqueid={},area_code={},account={},login_type={},origin={}",
@@ -165,13 +148,9 @@ public class FundController {
 
     /**
      * 输入图片验证码/短信
-     *
-     * @param taskId
-     * @return
      */
     @RequestMapping(value = "/verifycode", method = {RequestMethod.POST})
-    public Object submitTaskInput(@RequestParam("taskid") Long taskId,
-                                  @RequestParam("verifycode") String input) {
+    public Object submitTaskInput(@RequestParam("taskid") Long taskId, @RequestParam("verifycode") String input) {
         if (taskId == null || StringUtils.isBlank(input)) {
             logger.info("taskId={}公积金输入验证码输入参数为空,input={}", input);
             throw new IllegalArgumentException("Parameter is incorrect.");
@@ -188,17 +167,13 @@ public class FundController {
 
     /**
      * 轮询任务执行指令(魔蝎公积金)
-     *
-     * @param taskid
-     * @return
-     * @throws Exception
      */
     @RequestMapping(value = "/next_directive", method = {RequestMethod.POST})
     public Object nextMoxieDirective(@RequestParam("taskid") Long taskid) throws Exception {
         String content = taskNextDirectiveService.getNextDirective(taskid);
         Map<String, Object> map = Maps.newHashMap();
         if (StringUtils.isEmpty(content)) {
-            //轮询过程中，判断任务是否超时
+            // 轮询过程中，判断任务是否超时
             if (moxieTimeoutService.isTaskTimeout(taskid)) {
                 // 异步处理任务超时
                 moxieTimeoutService.handleTaskTimeout(taskid);
@@ -219,6 +194,5 @@ public class FundController {
         logger.info("taskId={}公积金指令轮询,下一指令信息={}", taskid, map);
         return SimpleResult.successResult(map);
     }
-
 
 }

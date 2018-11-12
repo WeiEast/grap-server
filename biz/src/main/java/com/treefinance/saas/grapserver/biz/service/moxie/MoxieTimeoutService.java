@@ -26,15 +26,17 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
 /**
- * Created by haojiahong on 2017/9/22.
+ * @author haojiahong on 2017/9/22.
  */
 @Service
 public class MoxieTimeoutService {
 
     private static final Logger logger = LoggerFactory.getLogger(MoxieTimeoutService.class);
 
-    private static int LOGIN_TIME_TIMEOUT = 90;//登录超时时间90s
-
+    /**
+     * 登录超时时间90s
+     */
+    private static int LOGIN_TIME_TIMEOUT = 90;
 
     @Autowired
     private AppBizTypeService appBizTypeService;
@@ -53,16 +55,12 @@ public class MoxieTimeoutService {
                 TaskRequest taskRequest = new TaskRequest();
                 taskRequest.setId(taskId);
                 TaskResult<TaskRO> rpcResult = taskFacade.getTaskByPrimaryKey(taskRequest);
-                Task task = DataConverterUtils.convert(rpcResult.getData(), Task.class);
-                return task;
+                return DataConverterUtils.convert(rpcResult.getData(), Task.class);
             }));
 
 
     /**
      * 登录是否超时,即等待魔蝎登录状态接口回调是否超时
-     *
-     * @param taskId
-     * @return
      */
     public boolean isLoginTaskTimeout(Long taskId) {
         Date date = this.getLoginTime(taskId);
@@ -82,8 +80,6 @@ public class MoxieTimeoutService {
 
     /**
      * 记录魔蝎任务创建时间,即开始登录时间.
-     *
-     * @param taskId
      */
     public void logLoginTime(Long taskId) {
         moxieTimeoutFacade.logLoginTime(taskId);
@@ -95,9 +91,6 @@ public class MoxieTimeoutService {
 
     /**
      * 获取登录时间
-     *
-     * @param taskId
-     * @return
      */
     public Date getLoginTime(Long taskId) {
         TaskResult<Date> rpcResult = moxieTimeoutFacade.getLoginTime(taskId);
@@ -109,13 +102,10 @@ public class MoxieTimeoutService {
 
     /**
      * 前端收到登录超时后,重置登录时间
-     *
-     * @param taskId
      */
     public void resetLoginTaskTimeOut(Long taskId) {
         this.logLoginTime(taskId);
     }
-
 
     public boolean isTaskTimeout(Long taskId) {
         try {
@@ -151,6 +141,6 @@ public class MoxieTimeoutService {
 
     public void handleLoginTimeout(Long taskId, String moxieTaskId) {
         moxieTimeoutFacade.handleLoginTimeout(taskId, moxieTaskId);
-
     }
+
 }

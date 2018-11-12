@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- * Created by haojiahong on 2018/1/11.
+ * @author haojiahong on 2018/1/11.
  */
 @RestController
 @RequestMapping(value = {"/h5/ecommerce", "/grap/h5/ecommerce"})
@@ -24,9 +24,6 @@ public class EcommerceH5Controller {
 
     /**
      * 获取二维码
-     *
-     * @param param
-     * @return
      */
     @RequestMapping(value = "/refresh/qr_code", method = {RequestMethod.POST})
     public Object refreshQRCode(CommonPluginParam param, String userIp) {
@@ -43,9 +40,6 @@ public class EcommerceH5Controller {
 
     /**
      * 轮询获取二维码状态
-     *
-     * @param param
-     * @return
      */
     @RequestMapping(value = "/qr_code/status", method = {RequestMethod.POST})
     public Object queryQRStatus(CommonPluginParam param) {

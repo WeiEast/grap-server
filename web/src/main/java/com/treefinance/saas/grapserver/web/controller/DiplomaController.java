@@ -14,11 +14,12 @@ import org.springframework.web.bind.annotation.RestController;
 
 /**
  * 学信网抓取
- * Created by haojiahong on 2017/12/11.
+ * @author haojiahong on 2017/12/11.
  */
 @RestController
 @RequestMapping(value = {"/diploma", "/h5/diploma", "/grap/h5/diploma", "/grap/diploma"})
 public class DiplomaController {
+
     private static final Logger logger = LoggerFactory.getLogger(DiplomaController.class);
 
     @Autowired
@@ -26,10 +27,6 @@ public class DiplomaController {
 
     /**
      * 获取配置
-     *
-     * @param appid
-     * @param taskId
-     * @return
      */
     @RequestMapping(value = "config", method = RequestMethod.POST)
     public Object getConfig(@RequestParam String appid,
@@ -45,12 +42,8 @@ public class DiplomaController {
         return result;
     }
 
-
     /**
      * 登陆初始化
-     *
-     * @param educationParam
-     * @return
      */
     @RequestMapping(value = "/login/init", method = {RequestMethod.POST})
     public Object loginInit(CommonPluginParam educationParam) {
@@ -62,9 +55,6 @@ public class DiplomaController {
 
     /**
      * 登陆
-     *
-     * @param param
-     * @return
      */
     @RequestMapping(value = "/login/submit", method = {RequestMethod.POST})
     public Object loginSubmit(CommonPluginParam param) {
@@ -78,12 +68,8 @@ public class DiplomaController {
         return result;
     }
 
-
     /**
      * 注册初始化
-     *
-     * @param educationParam
-     * @return
      */
     @RequestMapping(value = "/register/init", method = {RequestMethod.POST})
     public Object registerInit(CommonPluginParam educationParam) {
@@ -93,12 +79,8 @@ public class DiplomaController {
         return result;
     }
 
-
     /**
      * 注册时刷新图片验证码
-     *
-     * @param param
-     * @return
      */
     @RequestMapping(value = "/register/refresh/picCode", method = RequestMethod.POST)
     public Object registerRefreshPicCode(CommonPluginParam param) {
@@ -110,9 +92,6 @@ public class DiplomaController {
 
     /**
      * 注册时验证图片验证码并发送短信
-     *
-     * @param param
-     * @return
      */
     @RequestMapping(value = "/register/validate/picCode/send/smsCode", method = RequestMethod.POST)
     public Object registerValidatePicCodeAndSendSmsCode(CommonPluginParam param) {
@@ -124,9 +103,6 @@ public class DiplomaController {
 
     /**
      * 注册提交
-     *
-     * @param param
-     * @return
      */
     @RequestMapping(value = "/register/submit", method = RequestMethod.POST)
     public Object registerSubmit(CommonPluginParam param) {
@@ -138,9 +114,6 @@ public class DiplomaController {
 
     /**
      * 获取合作方属性值引用
-     *
-     * @param taskId
-     * @return
      */
     @RequestMapping(value = "/third/party/reference", method = RequestMethod.POST)
     public Object getThirdPartyReference(@RequestParam("taskid") Long taskId) {
@@ -153,6 +126,5 @@ public class DiplomaController {
         logger.info("学信网:获取合作方属性值引用,返回结果,taskId={},result={}", taskId, JSON.toJSONString(result));
         return result;
     }
-
 
 }

@@ -8,16 +8,19 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 /**
- * Created by luoyihua on 2017/5/10.
+ * @author luoyihua on 2017/5/10.
  */
 @Service
 public class AcquisitionService {
+
     private static final Logger logger = LoggerFactory.getLogger(AcquisitionService.class);
+
     @Autowired
     private AcquisitionFacade acquisitionFacade;
 
     public void acquisition(Long taskid, String header, String cookie, String url, String website, String accountNo, String topic) {
-        logger.info("acquisition : taskid={},header={},cookie={},url={},website={},accountNo={}", taskid, header, cookie, url, website, accountNo);
+        logger.info("acquisition : taskid={},header={},cookie={},url={},website={},accountNo={}",
+                taskid, header, cookie, url, website, accountNo);
         AcquisitionRequest rpcRequest = new AcquisitionRequest();
         rpcRequest.setTaskId(taskid);
         rpcRequest.setHeader(header);
