@@ -15,20 +15,20 @@ import java.util.List;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 /**
- * Created by yh-treefinance on 2017/6/20.
+ * @author yh-treefinance on 2017/6/20.
  */
 @Service
 public class MonitorService {
+
     private static final Logger logger = LoggerFactory.getLogger(MonitorService.class);
 
     private final ConcurrentLinkedQueue<HttpMonitorMessage> httpQueue = new ConcurrentLinkedQueue<HttpMonitorMessage>();
+
     @Autowired
     private HttpMonitorPlugin httpMonitorPlugin;
 
     /**
      * 发送http监控消息
-     *
-     * @param message
      */
     public void pushHttpMonitorMessage(HttpMonitorMessage message) {
         httpQueue.offer(message);

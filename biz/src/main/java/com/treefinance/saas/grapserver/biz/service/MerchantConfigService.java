@@ -27,11 +27,12 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
- * Created by luoyihua on 2017/5/5.
+ * @author by luoyihua on 2017/5/5.
  */
 @Service
 public class MerchantConfigService {
-    private static final Logger logger = LoggerFactory.getLogger(AppColorConfigService.class);
+
+    private static final Logger logger = LoggerFactory.getLogger(MerchantConfigService.class);
 
     @Autowired
     private DiamondConfig diamondConfig;

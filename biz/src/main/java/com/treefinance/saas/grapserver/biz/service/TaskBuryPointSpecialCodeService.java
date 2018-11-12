@@ -19,17 +19,17 @@ import java.util.Map;
 
 /**
  * 特殊任务埋点处理
- * Created by haojiahong on 2017/10/27.
+ * @author haojiahong on 2017/10/27.
  */
 @Service
 public class TaskBuryPointSpecialCodeService {
+
     private final static Logger logger = LoggerFactory.getLogger(TaskBuryPointSpecialCodeService.class);
 
     @Autowired
     private TaskAttributeService taskAttributeService;
     @Autowired
     private TaskBuryPointLogFacade taskBuryPointLogFacade;
-
 
     @Async
     public void doProcess(String code, Long taskId, String appId, String extra) {
@@ -78,12 +78,11 @@ public class TaskBuryPointSpecialCodeService {
             return;
         }
         String mobile = map.get("mobile") == null ? "" : String.valueOf(map.get("mobile"));
-        String operatorName = map.get("operatorName") == null ? "" : String.valueOf(map.get("operatorName"));
         if (StringUtils.isBlank(mobile)) {
             logger.error("运营商正在维护,记录用户信息,extra={}中未传入mobile信息", extra);
             return;
         }
         taskBuryPointLogFacade.logTaskOperatorMaintainUser(taskId, appId, extra);
-
     }
+
 }

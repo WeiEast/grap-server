@@ -34,7 +34,7 @@ import java.util.stream.Collectors;
 
 /**
  * H5界面演示系统业务处理类
- * Created by haojiahong on 2017/10/17.
+ * @author haojiahong on 2017/10/17.
  */
 @Service
 public class DemoService {
@@ -55,10 +55,6 @@ public class DemoService {
 
     /**
      * oss上获取数据,并做缓存
-     *
-     * @param appId
-     * @param params
-     * @return
      */
     private String getData(String appId, String params) {
 
@@ -75,7 +71,7 @@ public class DemoService {
             logger.error("decryptRSAData failed", e);
             throw new BizException("获取数据失败,请求非法");
         }
-        Map<String, Object> paramMap = JsonUtils.toJavaBean(params, Map.class);
+        Map paramMap = JsonUtils.toJavaBean(params, Map.class);
         if (!paramMap.containsKey("dataUrl")) {
             logger.error("获取demo数据:解密后的params没有dataUrl属性 paramsMap={}", JSON.toJSONString(paramMap));
             throw new BizException("获取数据失败,请求非法");
@@ -98,10 +94,6 @@ public class DemoService {
 
     /**
      * 获取公积金用户基本信息
-     *
-     * @param appId
-     * @param params
-     * @return
      */
     public Object getFundUserInfo(String appId, String params) {
         if (!checkIsDemoApp(appId)) {
@@ -157,11 +149,6 @@ public class DemoService {
 
     /**
      * 获取公积金缴存记录
-     *
-     * @param appId
-     * @param params
-     * @param pageNum
-     * @return
      */
     public Object getFundBillRecordList(String appId, String params, Integer pageNum) {
         if (!checkIsDemoApp(appId)) {
@@ -216,11 +203,6 @@ public class DemoService {
 
     /**
      * 获取公积金贷款信息
-     *
-     * @param appId
-     * @param params
-     * @param pageNum
-     * @return
      */
     public Object getFundLoanInfoList(String appId, String params, Integer pageNum) {
         if (!checkIsDemoApp(appId)) {
@@ -287,11 +269,6 @@ public class DemoService {
 
     /**
      * 获取公积金还款信息
-     *
-     * @param appId
-     * @param params
-     * @param pageNum
-     * @return
      */
     public Object getFundLoanRepayRecordList(String appId, String params, Integer pageNum) {
         if (!checkIsDemoApp(appId)) {
@@ -343,7 +320,6 @@ public class DemoService {
             return false;
         }
         List<String> demoAppIdList = Splitter.on(",").splitToList(demoAppIds);
-        boolean flag = demoAppIdList.contains(appId);
-        return flag;
+        return demoAppIdList.contains(appId);
     }
 }

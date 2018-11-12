@@ -3,7 +3,6 @@ package com.treefinance.saas.merchantcenter;
 
 import com.treefinance.saas.grapserver.biz.service.AppBizTypeService;
 import com.treefinance.saas.grapserver.biz.service.AppCallbackConfigService;
-import com.treefinance.saas.grapserver.biz.service.AppColorConfigService;
 import com.treefinance.saas.grapserver.biz.service.OperatorExtendLoginService;
 import com.treefinance.saas.grapserver.common.model.dto.AppCallbackConfigDTO;
 import com.treefinance.saas.grapserver.dao.entity.AppBizType;
@@ -38,10 +37,6 @@ public class MerchantCenterTest {
     @Autowired
     MerchantFacade merchantFacade;
 
-
-    @Autowired
-    AppColorConfigService appColorConfigService;
-
     @Autowired
     AppCallbackConfigService appCalllbackConfigService;
 
@@ -67,15 +62,6 @@ public class MerchantCenterTest {
         Byte bytes = new Byte("1");
         List<AppCallbackConfigDTO> dtoList = appCalllbackConfigService.getByAppIdAndBizType("bFRjwJJL1stVBrqP", bytes, EDataType.DELIVERY_ADDRESS);
         logger.info("测试AppCallbackConfig为{}", dtoList.toString());
-
-    }
-
-    @Test
-    public void TestAppColorback() {
-
-
-        AppColorConfig app = appColorConfigService.getByAppId("QATestabcdefghQA", "1");
-        logger.info("测试AppColorback为{}", app.toString());
 
     }
 

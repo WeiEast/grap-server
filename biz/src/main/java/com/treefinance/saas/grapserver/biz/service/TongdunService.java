@@ -22,13 +22,14 @@ import org.springframework.stereotype.Service;
 import java.util.*;
 
 /**
- * @author:guoguoyun
- * @date:Created in 2018/10/17下午2:22
+ * @author guoguoyun
+ * @date Created in 2018/10/17下午2:22
  */
 @Service
 public class TongdunService {
 
     private static final Logger logger = LoggerFactory.getLogger(TongdunService.class);
+
     @Autowired
     private TaskService taskService;
     @Autowired

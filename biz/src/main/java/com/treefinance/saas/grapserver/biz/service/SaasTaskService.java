@@ -29,18 +29,14 @@ import java.io.IOException;
 import java.util.List;
 
 /**
- * @author:guoguoyun
- * @date:Created in 2018/11/1下午3:32
+ * @author guoguoyun
+ * @date Created in 2018/11/1下午3:32
  */
 @Service("saasTaskService")
 public class SaasTaskService {
-    // logger
+
     protected final Logger logger = LoggerFactory.getLogger(getClass());
 
-    /**
-     * prefix
-     */
-    private final String prefix = "saas_gateway_task_account_uniqueid:";
     @Autowired
     private RedisTemplate<String, String> redisTemplate;
     @Autowired
@@ -52,15 +48,6 @@ public class SaasTaskService {
 
     /**
      * 创建任务
-     *
-     * @param uniqueId
-     * @param appId
-     * @param bizType
-     * @param extra
-     * @param website
-     * @param source
-     * @return
-     * @throws IOException
      */
     public Long createTask(String uniqueId, String appId, Byte bizType, String extra, String website, String source)
         throws ValidationException {
@@ -108,10 +95,6 @@ public class SaasTaskService {
 
     /**
      * uniqueId校验
-     *
-     * @param uniqueId
-     * @param appId
-     * @param bizType
      */
     private void checkUniqueId(String uniqueId, String appId, Byte bizType) {
         Integer maxCount = diamondConfig.getMaxCount();
@@ -125,15 +108,14 @@ public class SaasTaskService {
     }
 
     private String keyOfUniqueId(String uniqueId, String appId, Byte bizType) {
+       // prefix
+        String prefix = "saas_gateway_task_account_uniqueid:";
         return prefix + ":" + appId + ":" + bizType + ":" + uniqueId;
     }
 
 
     /**
      * 更新未完成任务
-     *
-     * @param task
-     * @return
      */
     private int updateUnfinishedTask(Task task) {
         TaskUpdateRequest taskUpdateRequest = DataConverterUtils.convert(task, TaskUpdateRequest.class);
@@ -176,9 +158,6 @@ public class SaasTaskService {
 
     /**
      * 任务是否完成
-     *
-     * @param task
-     * @return
      */
     public boolean isTaskCompleted(TaskDTO task) {
         if (task == null) {
@@ -208,10 +187,6 @@ public class SaasTaskService {
 
     /**
      * 更新AccountNo
-     *
-     * @param taskId
-     * @param accountNo
-     * @param webSite
      */
     public void updateTask(Long taskId, String accountNo, String webSite) {
         taskFacade.updateTask(taskId, accountNo, webSite);

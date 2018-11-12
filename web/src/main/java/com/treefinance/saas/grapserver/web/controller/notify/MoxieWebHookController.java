@@ -43,10 +43,6 @@ public class MoxieWebHookController {
     @Autowired
     private MoxieTaskEventNoticeService moxieTaskEventNoticeService;
 
-//    @Value("${moxie.signature.secret}")
-//    private String secret;
-
-
     /**
      * 回调接口, moxie通过此endpoint通知账单更新和任务状态更新
      */
@@ -56,13 +52,13 @@ public class MoxieWebHookController {
         HttpServletRequest httpServletRequest = (HttpServletRequest) request;
         HttpServletResponse httpServletResponse = (HttpServletResponse) response;
 
-        //事件类型：task or bill
+        // 事件类型：task or bill
         String eventName = httpServletRequest.getHeader(HEADER_MOXIE_EVENT);
 
-        //业务类型：email、bank、carrier 等
+        // 业务类型：email、bank、carrier 等
         String eventType = httpServletRequest.getHeader(HEADER_MOXIE_TYPE);
 
-        //body签名
+        // body签名
         String signature = httpServletRequest.getHeader(HEADER_MOXIE_SIGNATURE);
 
         if (Strings.isNullOrEmpty(eventName)) {
@@ -86,22 +82,14 @@ public class MoxieWebHookController {
             return;
         }
 
-        //验签，判断body是否被篡改
-//        if (!SignatureUtils.base64Hmac256(secret, body).equals(signature)) {
-//            writeMessage(httpServletResponse, HttpServletResponse.SC_BAD_REQUEST, "signature mismatch");
-//            return;
-//        }
-
-
         LOGGER.info("receive moxie eventName={},body={}", eventName.toLowerCase(), JSON.toJSONString(body));
-        //任务创建通知
+        // 任务创建通知
         if (StringUtils.equals(eventName.toLowerCase(), "task.submit")) {
-            //通知状态变更为 '认证中'
+            // 通知状态变更为 '认证中'
             LOGGER.info("task submit event,魔蝎回调,任务创建通知,认证中...body={}", JSON.toJSONString(body));
         }
 
-        //任务登录状态通知
-        //{"mobile":"15368098198","timestamp":1476084445670,"result":false,"message":"[CALO-22001-10]-服务密码错误，请确认正确后输入。","user_id":"374791","task_id":"fdda6b30-8eba-11e6-b7e9-00163e10b2cd"}
+        // 任务登录状态通知
         if (StringUtils.equals(eventName.toLowerCase(), "task")) {
             try {
                 Map<String, ?> map = body;
@@ -133,8 +121,8 @@ public class MoxieWebHookController {
             }
         }
 
-        //任务过程中的失败
-        //运营商的格式{"mobile":"13429801680","timestamp":1474641874728,"result":false,"message":"系统繁忙，请稍后再试","user_id":"1111","task_id":"3e9ff350-819c-11e6-b7fe-00163e004a23"}
+        // 任务过程中的失败
+        // 运营商的格式{"mobile":"13429801680","timestamp":1474641874728,"result":false,"message":"系统繁忙，请稍后再试","user_id":"1111","task_id":"3e9ff350-819c-11e6-b7fe-00163e004a23"}
         if (StringUtils.equals(eventName.toLowerCase(), "task.fail")) {
             try {
                 Map<String, ?> map = body;
@@ -146,7 +134,7 @@ public class MoxieWebHookController {
                     String result = map.get("result").toString();
                     String message = map.get("message") == null ? "未知异常" : map.get("message").toString();
                     if (StringUtils.equals(result, "false")) {
-                        //通知状态变更为 '任务采集失败'
+                        // 通知状态变更为 '任务采集失败'
                         moxieTaskEventNoticeService.taskFail(moxieTaskId, message);
                         LOGGER.info("task fail event.魔蝎回调,任务过程中失败,result={}, message={}, moxieTaskId={},body={}",
                                 result, message, moxieTaskId, JSON.toJSONString(body));
@@ -157,10 +145,10 @@ public class MoxieWebHookController {
             }
         }
 
-        //任务完成的通知处理，其中qq联系人的通知为sns，其它的都为bill
+        // 任务完成的通知处理，其中qq联系人的通知为sns，其它的都为bill
         if (StringUtils.equals(eventName.toLowerCase(), "bill") || StringUtils.equals(eventName.toLowerCase(), "allbill") || StringUtils.equals(eventName.toLowerCase(), "sns")) {
 
-            //通知状态变更为 '认证完成'
+            // 通知状态变更为 '认证完成'
             try {
                 Map<String, ?> map = body;
                 if (map.containsKey("result") && map.containsKey("task_id")) {

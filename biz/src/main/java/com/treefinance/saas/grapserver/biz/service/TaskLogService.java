@@ -17,7 +17,7 @@ import java.util.Date;
 import java.util.List;
 
 /**
- * Created by luoyihua on 2017/4/26.
+ * @author luoyihua on 2017/4/26.
  */
 @Service
 public class TaskLogService {
@@ -36,14 +36,8 @@ public class TaskLogService {
     @Autowired
     private TaskLogFacade taskLogFacade;
 
-
     /**
      * 添加一条日志记录
-     *
-     * @param taskId
-     * @param msg
-     * @param processTime
-     * @return
      */
     public Long insert(Long taskId, String msg, Date processTime, String errorMsg) {
         TaskResult<Long> rpcResult = taskLogFacade.insert(taskId, msg, processTime, errorMsg);
@@ -56,9 +50,6 @@ public class TaskLogService {
 
     /**
      * 记录任务超时
-     *
-     * @param taskId
-     * @return
      */
     public Long logTimeoutTask(Long taskId, String errorMessage) {
         return insert(taskId, TASK_TIMEOUT_LOG, new Date(), errorMessage);
@@ -66,11 +57,8 @@ public class TaskLogService {
 
     /**
      * 根据任务ID查询最新任务日志
-     *
-     * @param taskId
-     * @return
      */
-    public TaskLog queryLastestErrorLog(Long taskId) {
+    public TaskLog queryLatestErrorLog(Long taskId) {
         if (taskId == null) {
             return null;
         }
@@ -82,8 +70,7 @@ public class TaskLogService {
             return null;
 
         }
-        TaskLog taskLog = DataConverterUtils.convert(rpcResult.getData(), TaskLog.class);
-        return taskLog;
+        return DataConverterUtils.convert(rpcResult.getData(), TaskLog.class);
     }
 
     public List<TaskLog> queryTaskLog(Long taskId, String msg) {
@@ -94,8 +81,7 @@ public class TaskLogService {
         if (CollectionUtils.isEmpty(rpcResult.getData())) {
             return Lists.newArrayList();
         }
-        List<TaskLog> taskLogList = DataConverterUtils.convert(rpcResult.getData(), TaskLog.class);
-        return taskLogList;
+        return DataConverterUtils.convert(rpcResult.getData(), TaskLog.class);
     }
 
 

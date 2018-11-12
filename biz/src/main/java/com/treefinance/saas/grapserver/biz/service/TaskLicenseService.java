@@ -1,7 +1,6 @@
 package com.treefinance.saas.grapserver.biz.service;
 
 import com.alibaba.fastjson.JSON;
-import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 import com.treefinance.saas.grapserver.biz.config.DiamondConfig;
 import com.treefinance.saas.grapserver.common.enums.EBizType;
@@ -21,13 +20,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.regex.Pattern;
 
 /**
- * Created by luoyihua on 2017/5/10.
+ * @author luoyihua on 2017/5/10.
  */
 @Service
 public class TaskLicenseService {
+
     private static final Logger logger = LoggerFactory.getLogger(TaskLicenseService.class);
 
     @Autowired
@@ -40,9 +41,9 @@ public class TaskLicenseService {
     private MerchantBaseInfoFacade merchantBaseInfoFacade;
 
     public void verifyCreateTask(String appId, String uniqueId, EBizType bizType) {
-
         String pattern = "^" + diamondConfig.getAppIdEnvironmentPrefix() + "_" + "[0-9a-zA-Z]{16}";
-        String oldPattern = "[0-9a-zA-Z]{16}";//老商户是16位字符的appId
+        // 老商户是16位字符的appId
+        String oldPattern = "[0-9a-zA-Z]{16}";
         boolean isMatchOld = Pattern.matches(oldPattern, appId);
         boolean isMatch = Pattern.matches(pattern, appId);
         if (!isMatch && !isMatchOld) {
@@ -56,26 +57,14 @@ public class TaskLicenseService {
 
         boolean hasCreateTaskAuth = false;
         AppLicense appLicense = appLicenseService.getAppLicense(appId);
-        if (appLicense != null) {
-            List<AppBizLicense> appBizLicenseList = appBizLicenseService.getByAppId(appId);
-            if (!appBizLicenseList.isEmpty()) {
-                for (AppBizLicense appBizLicense : appBizLicenseList) {
-                    // 仅启用状态授权可用
-                    if (!Byte.valueOf("1").equals(appBizLicense.getIsValid())) {
-                        continue;
-                    }
-                    if (appBizLicense.getBizType().equals(bizType.getCode())) {
-                        hasCreateTaskAuth = true;
-                        break;
-                    }
-                }
-            }
-        }
+
+        hasCreateTaskAuth = isHasCreateTaskAuth(appId, bizType, hasCreateTaskAuth, appLicense);
+
         if (!hasCreateTaskAuth) {
             throw new ForbiddenException("Can not find license for app '" + appId + "' bizType '" + bizType + "'.");
         }
 
-        //商户是否禁用状态
+        // 商户是否禁用状态
         QueryMerchantByAppIdRequest request = new QueryMerchantByAppIdRequest();
         request.setAppIds(Lists.newArrayList(appId));
         MerchantResult<List<MerchantBaseResult>> rpcResult;
@@ -91,17 +80,19 @@ public class TaskLicenseService {
             throw new ForbiddenException("Can not find app , appId=" + appId);
         }
         MerchantBaseResult merchantBaseResult = rpcResult.getData().get(0);
-        if (Optional.fromNullable(merchantBaseResult.getIsActive()).or((byte) 0) == 0) {
+        if (Optional.ofNullable(merchantBaseResult.getIsActive()).orElse((byte) 0) == 0) {
             logger.info("商户被禁用,appId={},merchantBaseResult={}", appId, JSON.toJSONString(merchantBaseResult));
             throw new ForbiddenException("app is forbidden , appId=" + appId);
         }
     }
 
-    //新的saas服务走这一套
+    /**
+     * 新的saas服务走这一套
+     */
     public void verifyCreateSaasTask(String appId, String uniqueId, EBizType bizType) {
-
         String pattern = "^" + diamondConfig.getAppIdEnvironmentPrefix() + "_" + "[0-9a-zA-Z]{16}";
-        String oldPattern = "[0-9a-zA-Z]{16}";//老商户是16位字符的appId
+        // 老商户是16位字符的appId
+        String oldPattern = "[0-9a-zA-Z]{16}";
         boolean isMatchOld = Pattern.matches(oldPattern, appId);
         boolean isMatch = Pattern.matches(pattern, appId);
         if (!isMatch && !isMatchOld) {
@@ -115,26 +106,14 @@ public class TaskLicenseService {
 
         boolean hasCreateTaskAuth = false;
         AppLicense appLicense = appLicenseService.getAppLicense(appId);
-        if (appLicense != null) {
-            List<AppBizLicense> appBizLicenseList = appBizLicenseService.getByAppId(appId);
-            if (!appBizLicenseList.isEmpty()) {
-                for (AppBizLicense appBizLicense : appBizLicenseList) {
-                    // 仅启用状态授权可用
-                    if (!Byte.valueOf("1").equals(appBizLicense.getIsValid())) {
-                        continue;
-                    }
-                    if (appBizLicense.getBizType().equals(bizType.getCode())) {
-                        hasCreateTaskAuth = true;
-                        break;
-                    }
-                }
-            }
-        }
+
+        hasCreateTaskAuth = isHasCreateTaskAuth(appId, bizType, hasCreateTaskAuth, appLicense);
+
         if (!hasCreateTaskAuth) {
             throw new AppIdInvalidException();
         }
 
-        //商户是否禁用状态
+        // 商户是否禁用状态
         QueryMerchantByAppIdRequest request = new QueryMerchantByAppIdRequest();
         request.setAppIds(Lists.newArrayList(appId));
         MerchantResult<List<MerchantBaseResult>> rpcResult;
@@ -150,9 +129,28 @@ public class TaskLicenseService {
             throw new AppIdNoMessageException();
         }
         MerchantBaseResult merchantBaseResult = rpcResult.getData().get(0);
-        if (Optional.fromNullable(merchantBaseResult.getIsActive()).or((byte) 0) == 0) {
+        if (Optional.ofNullable(merchantBaseResult.getIsActive()).orElse((byte) 0) == 0) {
             logger.info("商户被禁用,appId={},merchantBaseResult={}", appId, JSON.toJSONString(merchantBaseResult));
             throw new AppIdNotActiveException();
         }
+    }
+
+    private boolean isHasCreateTaskAuth(String appId, EBizType bizType, boolean hasCreateTaskAuth, AppLicense appLicense) {
+        if (appLicense != null) {
+            List<AppBizLicense> appBizLicenseList = appBizLicenseService.getByAppId(appId);
+            if (!appBizLicenseList.isEmpty()) {
+                for (AppBizLicense appBizLicense : appBizLicenseList) {
+                    // 仅启用状态授权可用
+                    if (!Byte.valueOf("1").equals(appBizLicense.getIsValid())) {
+                        continue;
+                    }
+                    if (appBizLicense.getBizType().equals(bizType.getCode())) {
+                        hasCreateTaskAuth = true;
+                        break;
+                    }
+                }
+            }
+        }
+        return hasCreateTaskAuth;
     }
 }

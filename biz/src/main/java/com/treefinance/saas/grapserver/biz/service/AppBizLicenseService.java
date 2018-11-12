@@ -33,10 +33,11 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 /**
- * Created by luoyihua on 2017/5/10.
+ * @author luoyihua on 2017/5/10.
  */
 @Component
 public class AppBizLicenseService implements InitializingBean, VariableMessageHandler {
+
     /**
      * logger
      */
@@ -54,7 +55,8 @@ public class AppBizLicenseService implements InitializingBean, VariableMessageHa
             .build(CacheLoader.from(appid -> {
                 GetAppLicenseByAppIdRequest getAppLicenseByAppIdRequest = new GetAppLicenseByAppIdRequest();
                 getAppLicenseByAppIdRequest.setAppId(appid);
-                MerchantResult<List<AppBizLicenseResult>> listMerchantResult = appBizLicenseFacade.queryAppBizLicenseByAppId(getAppLicenseByAppIdRequest);
+                MerchantResult<List<AppBizLicenseResult>> listMerchantResult =
+                        appBizLicenseFacade.queryAppBizLicenseByAppId(getAppLicenseByAppIdRequest);
                 List<AppBizLicense> list = DataConverterUtils.convert(listMerchantResult.getData(), AppBizLicense.class);
                 if (!listMerchantResult.isSuccess()) {
                     logger.info("load local cache of applicense  false: error message={}", listMerchantResult.getRetMsg());
@@ -66,9 +68,6 @@ public class AppBizLicenseService implements InitializingBean, VariableMessageHa
 
     /**
      * 根据appId获取授权
-     *
-     * @param appId
-     * @return
      */
     public List<AppBizLicense> getByAppId(String appId) {
         List<AppBizLicense> list = Lists.newArrayList();
@@ -86,21 +85,19 @@ public class AppBizLicenseService implements InitializingBean, VariableMessageHa
 
     /**
      * 查询所有授权
-     *
-     * @return
      */
     public List<AppBizLicense> getAll() {
         List<AppBizLicense> licenses = Lists.newArrayList();
-        cache.asMap().values().forEach(list -> licenses.addAll(list));
+        cache.asMap().values().forEach(licenses::addAll);
         return licenses;
     }
 
     /**
      * 是否显示授权协议
      *
-     * @param appId
-     * @param type
-     * @return
+     * @param appId appId
+     * @param type  bizType
+     * @return      boolean
      */
     public boolean isShowLicense(String appId, String type) {
         Byte bizType = EBizType.getCode(type);
@@ -120,11 +117,11 @@ public class AppBizLicenseService implements InitializingBean, VariableMessageHa
     /**
      * 是否显示问卷调查表
      *
-     * @param appId
-     * @param type
-     * @return
+     * @param appId appId
+     * @param type  bizType
+     * @return      boolean
      */
-    public boolean isShowQuestionaire(String appId, String type) {
+    public boolean isShowQuestionnaire(String appId, String type) {
         Byte bizType = EBizType.getCode(type);
         if (bizType == null) {
             return false;
@@ -142,21 +139,21 @@ public class AppBizLicenseService implements InitializingBean, VariableMessageHa
             return false;
         }
         AppBizLicense appBizLicense = optional.get();
-        int questionaireRate = appBizLicense.getQuestionaireRate();
-        if (questionaireRate >= 100) {
+        int questionnaireRate = appBizLicense.getQuestionaireRate();
+        if (questionnaireRate >= 100) {
             return true;
         }
         int random = RandomUtils.nextInt(0, 101);
-        return questionaireRate >= random;
+        return questionnaireRate >= random;
     }
 
 
     /**
      * 是否显示意见反馈
      *
-     * @param appId
-     * @param type
-     * @return
+     * @param appId appId
+     * @param type  bizType
+     * @return      boolean
      */
     public boolean isShowFeedback(String appId, String type) {
         Byte bizType = EBizType.getCode(type);
@@ -184,15 +181,9 @@ public class AppBizLicenseService implements InitializingBean, VariableMessageHa
         return feedbackRate >= random;
     }
 
-
-    public static void main(String[] args) {
-        System.out.println(RandomUtils.nextBoolean());
-    }
-
-
     public Map<String, Boolean> isShowQuestionnaireOrFeedback(String appId, String type) {
         Map<String, Boolean> map = Maps.newHashMap();
-        boolean questionnaireFlag = this.isShowQuestionaire(appId, type);
+        boolean questionnaireFlag = this.isShowQuestionnaire(appId, type);
         boolean feedbackFlag = this.isShowFeedback(appId, type);
         if (questionnaireFlag && feedbackFlag) {
             boolean flag = RandomUtils.nextBoolean();
@@ -208,7 +199,6 @@ public class AppBizLicenseService implements InitializingBean, VariableMessageHa
 
     @Override
     public void afterPropertiesSet() throws Exception {
-
         BaseRequest request = new BaseRequest();
         MerchantResult<List<AppBizLicenseResult>> listMerchantResult = appBizLicenseFacade.queryAllAppBizLicense(request);
         List<AppBizLicense> licenses = DataConverterUtils.convert(listMerchantResult.getData(), AppBizLicense.class);
@@ -236,7 +226,8 @@ public class AppBizLicenseService implements InitializingBean, VariableMessageHa
         if (CollectionUtils.isEmpty(list)) {
             return "DEFAULT";
         }
-        List<AppBizLicense> filterList = list.stream().filter(appBizLicense -> bizType.equals(appBizLicense.getBizType())).collect(Collectors.toList());
+        List<AppBizLicense> filterList = list.stream()
+                .filter(appBizLicense -> bizType.equals(appBizLicense.getBizType())).collect(Collectors.toList());
         if (CollectionUtils.isEmpty(filterList)) {
             return "DEFAULT";
         }
@@ -245,7 +236,6 @@ public class AppBizLicenseService implements InitializingBean, VariableMessageHa
 
     @Override
     public void handleMessage(VariableMessage variableMessage) {
-
         logger.info("收到配置更新消息：config={}", JSON.toJSONString(variableMessage));
         String appId = variableMessage.getVariableId();
         if (StringUtils.isEmpty(appId)) {

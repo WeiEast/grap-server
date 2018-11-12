@@ -15,10 +15,11 @@ import org.springframework.stereotype.Service;
 import java.util.Date;
 
 /**
- * Created by haojiahong on 2018/1/11.
+ * @author haojiahong on 2018/1/11.
  */
 @Service
 public class EcommerceLoginSimulationService {
+
     private static final Logger logger = LoggerFactory.getLogger(EcommerceLoginSimulationService.class);
 
     @Autowired
@@ -28,9 +29,6 @@ public class EcommerceLoginSimulationService {
 
     /**
      * 获取二维码
-     *
-     * @param param
-     * @return
      */
     public Object refreshQRCode(CommonPluginParam param) {
         HttpResult<Object> result;
@@ -50,9 +48,6 @@ public class EcommerceLoginSimulationService {
 
     /**
      * 轮询获取二维码状态
-     *
-     * @param param
-     * @return
      */
     public Object queryQRStatus(CommonPluginParam param) {
         HttpResult<Object> result;
@@ -75,4 +70,5 @@ public class EcommerceLoginSimulationService {
         }
         return SimpleResult.successResult(result);
     }
+
 }

@@ -77,7 +77,7 @@ public class CarInfoService {
         map.put("modelNum", modelNum);
         String httpResult;
         try {
-            httpResult = HttpClientUtils.doPostWithTimoutAndRetryTimes(url, (byte) 60, (byte) 0, map);
+            httpResult = HttpClientUtils.doPostWithTimeoutAndRetryTimes(url, (byte) 60, (byte) 0, map);
         } catch (Exception e) {
             logger.error("调用爬数处理车辆信息采集任务异常:taskId={},modelNum={}", taskId, modelNum, e);
             processFailCollectTask(taskId, "调用爬数处理车辆信息采集任务异常");

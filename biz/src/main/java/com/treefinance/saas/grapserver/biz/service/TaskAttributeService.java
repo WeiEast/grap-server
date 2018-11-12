@@ -17,22 +17,18 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Created by chenjh on 2017/7/5.
+ * @author chenjh on 2017/7/5.
  * <p>
  * 任务拓展属性业务层
  */
 @Service
 public class TaskAttributeService {
+
     @Autowired
     private TaskAttributeFacade taskAttributeFacade;
 
-
     /**
      * 保存或更新属性
-     *
-     * @param taskId
-     * @param name
-     * @param value
      */
     public void insertOrUpdateSelective(Long taskId, String name, String value) {
         taskAttributeFacade.insertOrUpdateSelective(taskId, name, value);
@@ -41,10 +37,10 @@ public class TaskAttributeService {
     /**
      * 通过属性名查询属性值
      *
-     * @param taskId
+     * @param taskId  taskId
      * @param name    属性名
      * @param decrypt 是否要解密，true:是，false:否
-     * @return
+     * @return        拓展属性对象
      */
     public TaskAttribute findByName(Long taskId, String name, boolean decrypt) {
         TaskResult<TaskAttributeRO> rpcResult = taskAttributeFacade.findByName(taskId, name, decrypt);
@@ -55,17 +51,11 @@ public class TaskAttributeService {
         if (rpcResult.getData() == null) {
             return null;
         }
-        TaskAttribute taskAttribute = DataConverterUtils.convert(rpcResult.getData(), TaskAttribute.class);
-        return taskAttribute;
+        return DataConverterUtils.convert(rpcResult.getData(), TaskAttribute.class);
     }
 
     /**
      * 批量通过属性名查询属性值
-     *
-     * @param taskId
-     * @param decrypt
-     * @param names
-     * @return
      */
     public Map<String, TaskAttribute> findByNames(Long taskId, boolean decrypt, String... names) {
 
@@ -84,11 +74,6 @@ public class TaskAttributeService {
 
     /**
      * 通过属性名和属性值查询taskId
-     *
-     * @param name
-     * @param value
-     * @param encrypt
-     * @return
      */
     public TaskAttribute findByNameAndValue(String name, String value, boolean encrypt) {
 
@@ -99,23 +84,18 @@ public class TaskAttributeService {
         if (rpcResult.getData() == null) {
             return null;
         }
-        TaskAttribute taskAttribute = DataConverterUtils.convert(rpcResult.getData(), TaskAttribute.class);
-        return taskAttribute;
+        return DataConverterUtils.convert(rpcResult.getData(), TaskAttribute.class);
     }
 
     /**
      * 根据taskId查询所有属性
-     *
-     * @param taskId
-     * @return
      */
     public List<TaskAttribute> findByTaskId(Long taskId) {
         TaskResult<List<TaskAttributeRO>> rpcResult = taskAttributeFacade.findByTaskId(taskId);
         if (!rpcResult.isSuccess()) {
             throw new UnknownException("调用taskcenter失败");
         }
-        List<TaskAttribute> attributeList = DataConverterUtils.convert(rpcResult.getData(), TaskAttribute.class);
-        return attributeList;
+        return DataConverterUtils.convert(rpcResult.getData(), TaskAttribute.class);
     }
 
 }

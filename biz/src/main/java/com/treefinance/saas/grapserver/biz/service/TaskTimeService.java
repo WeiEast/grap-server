@@ -34,10 +34,11 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * 任务时间Service
- * Created by yh-treefinance on 2017/8/3.
+ * @author yh-treefinance on 2017/8/3.
  */
 @Service
 public class TaskTimeService {
+
     /**
      * logger
      */
@@ -68,17 +69,13 @@ public class TaskTimeService {
                     if (!rpcResult.isSuccess()) {
                         throw new UnknownException("调用taskcenter失败");
                     }
-                    Task task = DataConverterUtils.convert(rpcResult.getData(), Task.class);
-                    return task;
+                    return DataConverterUtils.convert(rpcResult.getData(), Task.class);
                 }
             }));
 
 
     /**
      * 更新登录时间
-     *
-     * @param taskId
-     * @param date
      */
     public void updateLoginTime(Long taskId, Date date) {
         if (taskId == null || date == null) {
@@ -89,9 +86,6 @@ public class TaskTimeService {
 
     /**
      * 获取登录时间
-     *
-     * @param taskId
-     * @return
      */
     public Date getLoginTime(Long taskId) {
         TaskResult<Date> rpcResult = taskTimeFacade.getLoginTime(taskId);
@@ -103,9 +97,6 @@ public class TaskTimeService {
 
     /**
      * 获取任务抓取超时时间
-     *
-     * @param taskId
-     * @return
      */
     public Date getCrawlerTimeoutTime(Long taskId) {
         Date loginTime = this.getLoginTime(taskId);
@@ -116,15 +107,11 @@ public class TaskTimeService {
         if (timeoutSeconds == null) {
             return null;
         }
-        Date timeoutDate = DateUtils.addSeconds(loginTime, timeoutSeconds);
-        return timeoutDate;
+        return DateUtils.addSeconds(loginTime, timeoutSeconds);
     }
 
     /**
      * 获取设置的任务抓取超时时长
-     *
-     * @param taskId
-     * @return
      */
     public Integer getCrawlerTimeoutSeconds(Long taskId) {
         Task task = null;
@@ -147,9 +134,6 @@ public class TaskTimeService {
 
     /**
      * 任务抓取是否超时
-     *
-     * @param taskId
-     * @return
      */
     public boolean isTaskTimeout(Long taskId) {
         Date current = new Date();
@@ -167,8 +151,6 @@ public class TaskTimeService {
 
     /**
      * 处理任务抓取超时
-     *
-     * @param taskId
      */
     public void handleTaskTimeout(Long taskId) {
         logger.info("任务抓取超时异步处理:taskId={}", taskId);
@@ -178,9 +160,6 @@ public class TaskTimeService {
 
     /**
      * 处理任务抓取超时
-     *
-     * @param taskId
-     * @param startTime
      */
     public void handleTaskAliveTimeout(Long taskId, Date startTime) {
         logger.info("任务活跃超时异步处理:taskId={}", taskId);
@@ -202,7 +181,8 @@ public class TaskTimeService {
                 return;
             }
             Date endTime = DateUtils.addMinutes(startTime, -60);
-            TaskResult<List<TaskRO>> rpcResult = taskFacade.selectRecentRunningTaskList(Byte.parseByte(Constants.SAAS_ENV_VALUE), startTime, endTime);
+            TaskResult<List<TaskRO>> rpcResult =
+                    taskFacade.selectRecentRunningTaskList(Byte.parseByte(Constants.SAAS_ENV_VALUE), startTime, endTime);
             List<Task> tasks = DataConverterUtils.convert(rpcResult.getData(), Task.class);
             for (Task task : tasks) {
                 if (this.isTaskTimeout(task.getId())) {
@@ -232,7 +212,8 @@ public class TaskTimeService {
                 return;
             }
             Date endTime = DateUtils.addMinutes(startTime, -60);
-            TaskResult<List<TaskRO>> rpcResult = taskFacade.selectRecentRunningTaskList(Byte.parseByte(Constants.SAAS_ENV_VALUE), startTime, endTime);
+            TaskResult<List<TaskRO>> rpcResult =
+                    taskFacade.selectRecentRunningTaskList(Byte.parseByte(Constants.SAAS_ENV_VALUE), startTime, endTime);
             List<Task> tasks = DataConverterUtils.convert(rpcResult.getData(), Task.class);
             for (Task task : tasks) {
                 this.handleTaskAliveTimeout(task.getId(), startTime);

@@ -29,11 +29,4 @@ public class AcquisitionService {
         acquisitionFacade.acquisition(rpcRequest);
     }
 
-    @Deprecated
-    //兴海:这个已经不用了
-    public void loginProcess(String directiveId, Long taskid, String html, String cookie) {
-//        HttpResult<Boolean> res = crawlerService.importAppCrawlResult(directiveId, taskid, html, cookie, null);
-//        taskNextDirectiveService.deleteNextDirective(taskid, EDirective.GRAB_URL.getText());
-//        logger.debug("taskId={}已发送sdk爬取结果={}", taskid, JSON.toJSONString(res));
-    }
 }

@@ -18,7 +18,6 @@ import java.util.Date;
  */
 @Service("taskAliveService")
 public class TaskAliveService {
-    private static final Logger logger = LoggerFactory.getLogger(TaskAliveService.class);
 
     @Autowired
     private TaskAliveFacade taskAliveFacade;
@@ -37,7 +36,6 @@ public class TaskAliveService {
      * 更新任务最近活跃时间
      *
      * @param taskId 任务id
-     * @param date
      */
 
     public void updateTaskActiveTime(Long taskId, Date date) {
@@ -46,9 +44,6 @@ public class TaskAliveService {
 
     /**
      * 获取任务最近活跃时间
-     *
-     * @param taskId
-     * @return
      */
     public String getTaskAliveTime(Long taskId) {
         TaskResult<String> rpcResult = taskAliveFacade.getTaskAliveTime(taskId);

@@ -17,10 +17,9 @@ import java.util.List;
  */
 @Configuration
 public class WebConfig extends WebMvcConfigurerAdapter {
+
     /**
      * json返回结果中,将Long转换为String.将BigDecimal转换成String
-     *
-     * @param converters
      */
     @Override
     public void configureMessageConverters(List<HttpMessageConverter<?>> converters) {
@@ -35,8 +34,6 @@ public class WebConfig extends WebMvcConfigurerAdapter {
         decimalSimpleModule.addSerializer(BigDecimal.class, ToStringSerializer.instance);
         objectMapper.registerModule(decimalSimpleModule);
 
-//        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-//        objectMapper.setDateFormat(dateFormat);
         jackson2HttpMessageConverter.setObjectMapper(objectMapper);
         converters.add(jackson2HttpMessageConverter);
     }

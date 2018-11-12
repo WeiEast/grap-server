@@ -14,20 +14,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 /**
- * Created by luoyihua on 2017/4/26.
+ * @author luoyihua on 2017/4/26.
  */
 @Service
 public class TaskNextDirectiveService {
-    private static final Logger logger = LoggerFactory.getLogger(TaskNextDirectiveService.class);
+
     @Autowired
     private TaskNextDirectiveFacade taskNextDirectiveFacade;
 
     /**
      * 添加一条指令记录
-     *
-     * @param taskId
-     * @param directive
-     * @return
      */
     public Long insert(Long taskId, String directive, String remark) {
         TaskResult<Long> rpcResult = taskNextDirectiveFacade.insert(taskId, directive, remark);
@@ -40,9 +36,6 @@ public class TaskNextDirectiveService {
 
     /**
      * 查询最近一条指令记录
-     *
-     * @param taskId
-     * @return
      */
     public TaskNextDirective queryRecentDirective(Long taskId) {
         TaskResult<TaskNextDirectiveRO> rpcResult = taskNextDirectiveFacade.queryRecentDirective(taskId);
@@ -52,16 +45,12 @@ public class TaskNextDirectiveService {
         if (rpcResult.getData() == null) {
             return null;
         }
-        TaskNextDirective taskNextDirective = DataConverterUtils.convert(rpcResult.getData(), TaskNextDirective.class);
-        return taskNextDirective;
+        return DataConverterUtils.convert(rpcResult.getData(), TaskNextDirective.class);
     }
 
 
     /**
      * 记录并缓存指令
-     *
-     * @param taskId
-     * @param directive
      */
     public void insertAndCacheNextDirective(Long taskId, DirectiveDTO directive) {
         TaskDirectiveRequest rpcRequest = DataConverterUtils.convert(directive, TaskDirectiveRequest.class);
@@ -70,12 +59,8 @@ public class TaskNextDirectiveService {
 
     /**
      * 获取指令
-     *
-     * @param taskId
-     * @return
      */
     public String getNextDirective(Long taskId) {
-
         TaskResult<String> rpcResult = taskNextDirectiveFacade.getNextDirective(taskId);
         if (!rpcResult.isSuccess()) {
             throw new UnknownException("调用taskcenter失败");
@@ -86,8 +71,6 @@ public class TaskNextDirectiveService {
     /**
      * 删除指令
      * 数据库中的指令是只插入的,所以这里的删除指插入waiting指令
-     *
-     * @param taskId
      */
     public void deleteNextDirective(Long taskId) {
         taskNextDirectiveFacade.deleteNextDirective(taskId);

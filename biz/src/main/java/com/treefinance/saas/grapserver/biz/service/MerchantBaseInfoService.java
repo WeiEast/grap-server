@@ -10,18 +10,16 @@ import org.springframework.util.CollectionUtils;
 import java.util.List;
 
 /**
- * Created by yh-treefinance on 2017/6/13.
+ * @author yh-treefinance on 2017/6/13.
  */
 @Service
 public class MerchantBaseInfoService {
+
     @Autowired
     private MerchantBaseInfoMapper merchantBaseInfoMapper;
 
     /**
      * 根据appId获取商户信息
-     *
-     * @param appId
-     * @return
      */
     public MerchantBaseInfo getMerchantBaseInfoByAppId(String appId) {
         MerchantBaseInfoCriteria criteria = new MerchantBaseInfoCriteria();
@@ -33,14 +31,4 @@ public class MerchantBaseInfoService {
         return list.get(0);
     }
 
-    /**
-     * 获取所有商户列表
-     *
-     * @return
-     */
-    public List<MerchantBaseInfo> getAllMerchant() {
-        MerchantBaseInfoCriteria criteria = new MerchantBaseInfoCriteria();
-        criteria.createCriteria();
-        return merchantBaseInfoMapper.selectByExample(criteria);
-    }
 }

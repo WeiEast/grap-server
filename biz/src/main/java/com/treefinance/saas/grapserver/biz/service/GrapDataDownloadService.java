@@ -25,15 +25,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.net.URLEncoder;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 /**
- * Created by yh-treefinance on 2018/2/7.
+ * @author yh-treefinance on 2018/2/7.
  */
 @Service
-public class GrapDataDowloadService {
+public class GrapDataDownloadService {
+
     /**
      * logger
      */
@@ -57,9 +58,6 @@ public class GrapDataDowloadService {
 
     /**
      * 获取加密的爬取数据
-     *
-     * @param taskId
-     * @return
      */
     public String getEncryptGrapData(String appId, String bizType, Long taskId) {
         TaskDTO taskDTO = taskService.getById(taskId);
@@ -101,9 +99,6 @@ public class GrapDataDowloadService {
 
     /**
      * 获取抓取数据
-     *
-     * @param taskDTO
-     * @return
      */
     protected Map<String, Object> getGrapDataMap(TaskDTO taskDTO) {
         Long taskId = taskDTO.getId();
@@ -117,13 +112,10 @@ public class GrapDataDowloadService {
                 taskCallbackLogList.stream().filter(taskCallbackLog -> Byte.valueOf("2").equals(taskCallbackLog.getType()))
                         .forEach(taskCallbackLog -> {
                             if (StringUtils.isNotEmpty(taskCallbackLog.getRequestParam())) {
-                                Map<String, Object> _dataMap = JSON.parseObject(taskCallbackLog.getRequestParam());
-                                if (MapUtils.isNotEmpty(_dataMap)) {
-                                    dataMap.putAll(_dataMap);
-                                }
+                                Map<String, Object> aDataMap = JSON.parseObject(taskCallbackLog.getRequestParam());
+                                dataMap.putAll(MapUtils.isNotEmpty(aDataMap) ? aDataMap : Maps.newHashMap());
                             }
                         });
-
             }
             // 后端回调:取主流程数据
             else {
@@ -132,10 +124,8 @@ public class GrapDataDowloadService {
                         Byte.valueOf("1").equals(taskCallbackLog.getType()) && configId.equals(taskCallbackLog.getConfigId()))
                         .forEach(taskCallbackLog -> {
                             if (StringUtils.isNotEmpty(taskCallbackLog.getRequestParam())) {
-                                Map<String, Object> _dataMap = JSON.parseObject(taskCallbackLog.getRequestParam());
-                                if (MapUtils.isNotEmpty(_dataMap)) {
-                                    dataMap.putAll(_dataMap);
-                                }
+                                Map<String, Object> aDataMap = JSON.parseObject(taskCallbackLog.getRequestParam());
+                                dataMap.putAll(MapUtils.isNotEmpty(aDataMap) ? aDataMap : Maps.newHashMap());
                             }
                         });
             }
@@ -145,8 +135,6 @@ public class GrapDataDowloadService {
 
     /**
      * 生成数据Map
-     *
-     * @return
      */
     protected Map<String, Object> fillDataMap(TaskDTO task, Map<String, Object> dataMap) {
         Long taskId = task.getId();
@@ -174,7 +162,7 @@ public class GrapDataDowloadService {
                 dataMap.put("taskErrorMsg", "");
             } else if (ETaskStatus.FAIL.getStatus().equals(task.getStatus())) {
                 // 任务失败消息
-                TaskLog log = taskLogService.queryLastestErrorLog(task.getId());
+                TaskLog log = taskLogService.queryLatestErrorLog(task.getId());
                 if (log != null) {
                     dataMap.put("taskErrorMsg", log.getMsg());
                 } else {
@@ -200,11 +188,11 @@ public class GrapDataDowloadService {
             if (EBizType.EMAIL.getCode().equals(task.getBizType())) {
                 dataMap.put("type", EBizType.EMAIL.getText().toLowerCase());
             } else {
-                dataMap.put("type", EBizType.getName(task.getBizType()).toLowerCase());
+                dataMap.put("type", Objects.requireNonNull(EBizType.getName(task.getBizType())).toLowerCase());
             }
         }
         if (!dataMap.containsKey("timestamp")) {
-            dataMap.put("timestamp", new Date().getTime());
+            dataMap.put("timestamp", System.currentTimeMillis());
         }
 
         // 如果是运营商数据

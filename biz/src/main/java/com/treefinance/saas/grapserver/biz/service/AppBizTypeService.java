@@ -29,7 +29,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 /**
- * Created by yh-treefinance on 2017/8/2.
+ * @author yh-treefinance on 2017/8/2.
  */
 @Service
 public class AppBizTypeService implements InitializingBean {
@@ -37,8 +37,6 @@ public class AppBizTypeService implements InitializingBean {
      * logger
      */
     private static final Logger logger = LoggerFactory.getLogger(AppBizTypeService.class);
-
-
 
     @Resource
     private AppBizTypeFacade appBizTypeFacade;
@@ -50,7 +48,6 @@ public class AppBizTypeService implements InitializingBean {
             .refreshAfterWrite(5, TimeUnit.MINUTES)
             .expireAfterWrite(5, TimeUnit.MINUTES)
             .build(CacheLoader.from(bizType -> {
-
                 GetAppBizTypeRequest getAppBizTypeRequest = new GetAppBizTypeRequest();
                 getAppBizTypeRequest.setBizType(bizType);
                 MerchantResult<List<AppBizTypeResult>>  merchantResult = appBizTypeFacade.queryAppBizTypeByBizType(getAppBizTypeRequest);
@@ -69,9 +66,6 @@ public class AppBizTypeService implements InitializingBean {
 
     /**
      * 获取类型
-     *
-     * @param bizType
-     * @return
      */
     public AppBizType getAppBizType(Byte bizType) {
         try {
@@ -84,8 +78,6 @@ public class AppBizTypeService implements InitializingBean {
 
     /**
      * 获取所有类型
-     *
-     * @return
      */
     public List<AppBizType> getAllAppBizType() {
         return Lists.newArrayList(cache.asMap().values());
@@ -93,7 +85,6 @@ public class AppBizTypeService implements InitializingBean {
 
     @Override
     public void afterPropertiesSet() throws Exception {
-
         BaseRequest getAppBizTypeRequest = new BaseRequest();
 
         MerchantResult<List<AppBizTypeResult>>  merchantResult = appBizTypeFacade.queryAllAppBizType(getAppBizTypeRequest);

@@ -35,16 +35,15 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 /**
- * Created by luoyihua on 2017/5/11.
+ * @author luoyihua on 2017/5/11.
  */
 @Service
 public class AppCallbackConfigService implements InitializingBean, VariableMessageHandler {
+
     /**
      * logger
      */
     private static final Logger logger = LoggerFactory.getLogger(AppCallbackConfigService.class);
-
-
 
     @Autowired
     private AppCallbackConfigFacade appCallbackConfigFacade;
@@ -60,10 +59,10 @@ public class AppCallbackConfigService implements InitializingBean, VariableMessa
             .expireAfterAccess(5, TimeUnit.MINUTES)
             .build(CacheLoader.from(appid -> {
 
-
                 GetAppCallBackConfigByIdRequest getAppCallBackConfigByIdRequest = new GetAppCallBackConfigByIdRequest();
                 getAppCallBackConfigByIdRequest.setAppId(appid);
-                MerchantResult<List<AppCallbackResult>> listMerchantResult = appCallbackConfigFacade.queryAppCallBackConfigByAppId(getAppCallBackConfigByIdRequest);
+                MerchantResult<List<AppCallbackResult>> listMerchantResult =
+                        appCallbackConfigFacade.queryAppCallBackConfigByAppId(getAppCallBackConfigByIdRequest);
                 List<AppCallbackConfig> list = DataConverterUtils.convert(listMerchantResult.getData(), AppCallbackConfig.class);
 
                 if (!listMerchantResult.isSuccess()) {
@@ -83,9 +82,11 @@ public class AppCallbackConfigService implements InitializingBean, VariableMessa
             .refreshAfterWrite(5, TimeUnit.MINUTES)
             .expireAfterAccess(5, TimeUnit.MINUTES)
             .build(CacheLoader.from(callbackId -> {
+
                 GetAppCallBackBizByCallbackIdRequest getAppCallBackBizByCallbackIdRequest = new GetAppCallBackBizByCallbackIdRequest();
                 getAppCallBackBizByCallbackIdRequest.setCallbackId(callbackId);
-                MerchantResult<List<AppCallbackBizResult>> listMerchantResult = appCallBackBizFacade.queryAppCallBackByCallbackId(getAppCallBackBizByCallbackIdRequest);
+                MerchantResult<List<AppCallbackBizResult>> listMerchantResult =
+                        appCallBackBizFacade.queryAppCallBackByCallbackId(getAppCallBackBizByCallbackIdRequest);
                 List<AppCallbackBiz> list = DataConverterUtils.convert(listMerchantResult.getData(),AppCallbackBiz.class);
                 if (!listMerchantResult.isSuccess()) {
                     logger.info("load local cache of callback-types  false: error message={}", listMerchantResult.getRetMsg());
@@ -97,9 +98,6 @@ public class AppCallbackConfigService implements InitializingBean, VariableMessa
 
     /**
      * 根据appId获取
-     *
-     * @param appId
-     * @return
      */
     public List<AppCallbackConfig> getByAppId(String appId) {
         List<AppCallbackConfig> list = Lists.newArrayList();
@@ -117,9 +115,6 @@ public class AppCallbackConfigService implements InitializingBean, VariableMessa
 
     /**
      * 根据ID获取
-     *
-     * @param callbackIds
-     * @return
      */
     public List<AppCallbackBiz> getCallbackTypeList(List<Integer> callbackIds) {
         List<AppCallbackBiz> list = Lists.newArrayList();
@@ -145,10 +140,6 @@ public class AppCallbackConfigService implements InitializingBean, VariableMessa
     /**
      * 获取指定业务类型的回调配置：
      * 如果有配置该业务类型，则使用该业务类型；没有则使用全局配置
-     *
-     * @param appId
-     * @param bizType
-     * @return
      */
     public List<AppCallbackConfigDTO> getByAppIdAndBizType(String appId, Byte bizType, EDataType dataType) {
         // 1.查询所有回调
@@ -162,7 +153,6 @@ public class AppCallbackConfigService implements InitializingBean, VariableMessa
                 .filter(config -> config != null && dataType.getType().equals(config.getDataType()))
                 .map(AppCallbackConfig::getId)
                 .collect(Collectors.toList());
-
 
         List<AppCallbackBiz> callbackBizs = getCallbackTypeList(callbackIds)
                 .stream()

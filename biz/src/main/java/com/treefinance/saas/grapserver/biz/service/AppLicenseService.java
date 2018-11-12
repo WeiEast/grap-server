@@ -47,17 +47,7 @@ public class AppLicenseService {
 
     private static final Logger logger = LoggerFactory.getLogger(AppBizLicenseService.class);
 
-    /**
-     * APP密钥
-     */
-    private final static String APPID_SUFFIX = "saas_gateway_app_license:";
-    /**
-     * 回调密钥
-     */
-    private final static String CALLBACK_SUFFIX = "saas_gateway_callback_license:";
-
     public AppLicense getAppLicense(String appId) {
-
         GetAppLicenseRequest request = new GetAppLicenseRequest();
         request.setAppId(appId);
         MerchantResult<AppLicenseResult> result;
@@ -70,37 +60,13 @@ public class AppLicenseService {
         if (!result.isSuccess()) {
             return null;
         }
-
         AppLicenseResult appLicenseResult = result.getData();
         AppLicense appLicense = new AppLicense();
 
         BeanUtils.copyProperties(appLicenseResult, appLicense);
 
         logger.info(JSON.toJSONString(appLicense));
-
         return appLicense;
-    }
-
-    public String setAppLicense(AppLicense appLicense) {
-
-        SetAppLicenseRequest request = new SetAppLicenseRequest();
-
-        BeanUtils.copyProperties(appLicense, request);
-
-        MerchantResult<SetAppLicenseResult> result;
-        try {
-            result = appLicenseFacade.setAppLicense(request);
-        } catch (RpcException e) {
-            logger.error("获取appLicense失败，错误信息：{}", e.getMessage());
-            return null;
-        }
-        if (!result.isSuccess()) {
-            return null;
-        }
-
-        SetAppLicenseResult appLicenseResult = result.getData();
-
-        return appLicenseResult.getKey();
     }
 
     public String getDataKey(String appId) {
@@ -111,39 +77,4 @@ public class AppLicenseService {
         return appLicense.getDataSecretKey();
     }
 
-    /**
-     * 获取回调配置
-     *
-     * @param callbackId
-     * @return
-     */
-    public CallBackLicenseDTO getCallbackLicense(Integer callbackId) {
-
-        GetCallbackLicenseRequest request = new GetCallbackLicenseRequest();
-
-        request.setCallbackId(callbackId);
-
-        MerchantResult<CallbackLicenseResult> result;
-        try {
-            result = appLicenseFacade.getCallbackLicense(request);
-        } catch (RpcException e) {
-            logger.error("获取appLicense失败，错误信息：{}", e.getMessage());
-            return null;
-        }
-        if (!result.isSuccess()) {
-            return null;
-        }
-
-        CallbackLicenseResult appLicenseResult = result.getData();
-
-
-        CallBackLicenseDTO dto = new CallBackLicenseDTO();
-        BeanUtils.copyProperties(appLicenseResult, dto);
-
-        logger.info(JSON.toJSONString(dto));
-
-        return dto;
-
-
-    }
 }
