@@ -22,6 +22,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -47,11 +48,13 @@ public class MerchantConfigService {
         GetAppColorConfigRequest getAppColorConfigRequest = new GetAppColorConfigRequest();
         getAppColorConfigRequest.setAppId(appId);
         getAppColorConfigRequest.setStyle(style);
-        MerchantResult<AppColorConfigResult> merchantColorConfigResult = appColorConfigFacade.queryAppColorConfig(getAppColorConfigRequest);
+        MerchantResult<AppColorConfigResult> merchantColorConfigResult =
+            appColorConfigFacade.queryAppColorConfig(getAppColorConfigRequest);
 
         Map<String, Object> map = Maps.newHashMap();
         if (merchantColorConfigResult.isSuccess()) {
-            AppColorConfig merchantColorConfig = DataConverterUtils.convert(merchantColorConfigResult.getData(), AppColorConfig.class);
+            AppColorConfig merchantColorConfig =
+                DataConverterUtils.convert(merchantColorConfigResult.getData(), AppColorConfig.class);
             map.put("main", merchantColorConfig.getMain());
             map.put("assist", merchantColorConfig.getAssist());
             map.put("assistError", merchantColorConfig.getAssistError());
@@ -90,8 +93,8 @@ public class MerchantConfigService {
             throw e;
         }
         if (!rpcResult.isSuccess()) {
-            logger.info("获取商户消息提示配置:调用商户中心获取消息提示配置失败,request={},result={}",
-                    JSON.toJSONString(rpcRequest), JSON.toJSONString(rpcResult));
+            logger.info("获取商户消息提示配置:调用商户中心获取消息提示配置失败,request={},result={}", JSON.toJSONString(rpcRequest),
+                JSON.toJSONString(rpcResult));
             throw new BizException(rpcResult.getRetMsg(), rpcResult.getRetCode());
         }
         List<AppH5TipsResult> rpcData = rpcResult.getData();
@@ -99,19 +102,22 @@ public class MerchantConfigService {
             return null;
         }
         AppH5TipsVO result = new AppH5TipsVO();
-        Map<String, List<AppH5TipsResult>> map = rpcData.stream().collect(Collectors.groupingBy(data -> data.getTipsType().toString()));
-        //如果包含弹框提示,则只显示弹框提示
+        Map<String, List<AppH5TipsResult>> map =
+            rpcData.stream().collect(Collectors.groupingBy(data -> data.getTipsType().toString()));
+        // 如果包含弹框提示,则只显示弹框提示
         if (CollectionUtils.isNotEmpty(map.get("1"))) {
             List<AppH5TipsResult> dialogList = map.get("1");
-            result.setTipsType((byte) 1);
-            List<String> contentList = dialogList.stream().map(AppH5TipsResult::getTipsContent).collect(Collectors.toList());
+            result.setTipsType((byte)1);
+            List<String> contentList =
+                dialogList.stream().map(AppH5TipsResult::getTipsContent).collect(Collectors.toList());
             String content = Joiner.on(" ").join(contentList);
             result.setTipsContent(content);
             return result;
         } else {
             List<AppH5TipsResult> scrollList = map.get("0");
-            result.setTipsType((byte) 0);
-            List<String> contentList = scrollList.stream().map(AppH5TipsResult::getTipsContent).collect(Collectors.toList());
+            result.setTipsType((byte)0);
+            List<String> contentList =
+                scrollList.stream().map(AppH5TipsResult::getTipsContent).collect(Collectors.toList());
             String content = Joiner.on(" ").join(contentList);
             result.setTipsContent(content);
             return result;

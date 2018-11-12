@@ -24,11 +24,10 @@ import java.util.Optional;
 import java.util.regex.Pattern;
 
 /**
- * @author luoyihua on 2017/5/10.
+ * Created by luoyihua on 2017/5/10.
  */
 @Service
 public class TaskLicenseService {
-
     private static final Logger logger = LoggerFactory.getLogger(TaskLicenseService.class);
 
     @Autowired

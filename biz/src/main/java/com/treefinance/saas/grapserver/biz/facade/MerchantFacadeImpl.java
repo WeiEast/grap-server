@@ -4,7 +4,6 @@ import com.alibaba.fastjson.JSON;
 import com.treefinance.saas.grapserver.common.utils.BeanUtils;
 import com.treefinance.saas.grapserver.common.utils.DataConverterUtils;
 import com.treefinance.saas.grapserver.dao.entity.MerchantBaseInfo;
-import com.treefinance.saas.grapserver.dao.entity.MerchantBaseInfoCriteria;
 import com.treefinance.saas.grapserver.dao.entity.Task;
 import com.treefinance.saas.grapserver.facade.model.MerchantBaseInfoRO;
 import com.treefinance.saas.grapserver.facade.service.MerchantFacade;
