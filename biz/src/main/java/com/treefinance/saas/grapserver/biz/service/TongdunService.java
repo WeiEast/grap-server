@@ -19,6 +19,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.xml.bind.ValidationException;
 import java.util.*;
 
 /**
@@ -31,7 +32,7 @@ public class TongdunService {
     private static final Logger logger = LoggerFactory.getLogger(TongdunService.class);
 
     @Autowired
-    private TaskService taskService;
+    private SaasTaskService saasTaskService;
     @Autowired
     private TaskFacade taskFacade;
     @Autowired
@@ -45,16 +46,16 @@ public class TongdunService {
     @Autowired
     private DiamondConfig diamondConfig;
 
-    public Long startCollectTask(String appId, TongdunRequest tongdunRequest) {
+    public Long startCollectTask(String appId, TongdunRequest tongdunRequest) throws ValidationException {
         // 使用身份证号当作uniqueId
-        taskLicenseService.verifyCreateTask(appId, tongdunRequest.getIdCard(), EBizType.TONGDUN);
-        return taskService.createTask(tongdunRequest.getIdCard(), appId, EBizType.TONGDUN.getCode(), null, null, null);
+        taskLicenseService.verifyCreateSaasTask(appId, tongdunRequest.getIdCard(), EBizType.TONGDUN);
+        return saasTaskService.createTask(tongdunRequest.getIdCard(), appId, EBizType.TONGDUN.getCode(), null, null, null);
     }
 
-    public Long startCollectDetailTask(String appId, TongdunRequest tongdunRequest) {
+    public Long startCollectDetailTask(String appId, TongdunRequest tongdunRequest) throws ValidationException {
         // 使用身份证号当作uniqueId
-        taskLicenseService.verifyCreateTask(appId, tongdunRequest.getIdCard(), EBizType.TONGDUN_KANIU);
-        return taskService.createTask(tongdunRequest.getIdCard(), appId, EBizType.TONGDUN_KANIU.getCode(), null, null,
+        taskLicenseService.verifyCreateSaasTask(appId, tongdunRequest.getIdCard(), EBizType.TONGDUN_KANIU);
+        return saasTaskService.createTask(tongdunRequest.getIdCard(), appId, EBizType.TONGDUN_KANIU.getCode(), null, null,
             null);
     }
 
@@ -116,7 +117,7 @@ public class TongdunService {
     }
 
     public Object processCollectDetailTask(Long taskId, String appId, TongdunRequest tongdunRequest) {
-        String url = "https://risk-third-party.99gfd.com/td/saas/ext/query";
+        String url = diamondConfig.getTongdunUrlCollect();
         JSONObject data = JSON.parseObject(JSON.toJSONString(tongdunRequest));
         Map<String, Object> map = new HashMap<>(1);
         map.put("data", data);
