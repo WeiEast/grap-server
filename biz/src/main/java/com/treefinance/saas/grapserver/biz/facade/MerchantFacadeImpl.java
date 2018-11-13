@@ -59,10 +59,6 @@ public class MerchantFacadeImpl implements MerchantFacade {
 
 
         Task task = DataConverterUtils.convert(rpcResult.getData(), Task.class);
-
-        MerchantBaseInfoCriteria merchantBaseInfoCriteria = new MerchantBaseInfoCriteria();
-        merchantBaseInfoCriteria.createCriteria().andAppIdEqualTo(task.getAppId());
-
         QueryMerchantByAppIdRequest queryMerchantByTaskIdRequest = new QueryMerchantByAppIdRequest();
         List<String> stringList = new ArrayList<String>();
         stringList.add(task.getAppId());
