@@ -3,13 +3,26 @@ package com.treefinance.saas.grapserver.common.model.dto.moxie;
 import java.io.Serializable;
 
 /**
- * Created by haojiahong on 2017/9/15.
+ * @author haojiahong on 2017/9/15.
  */
 public class MoxieCaptchaDTO implements Serializable {
+
     private static final long serialVersionUID = -8202304211634485703L;
+
     private String type;
+
     private String value;
+
     private Long waitSeconds;
+
+    @Override
+    public String toString() {
+        return "MoxieCaptchaDTO{" +
+                "type='" + type + '\'' +
+                ", value='" + value + '\'' +
+                ", waitSeconds=" + waitSeconds +
+                '}';
+    }
 
     public String getType() {
         return type;
@@ -34,4 +47,5 @@ public class MoxieCaptchaDTO implements Serializable {
     public void setWaitSeconds(Long waitSeconds) {
         this.waitSeconds = waitSeconds;
     }
+
 }

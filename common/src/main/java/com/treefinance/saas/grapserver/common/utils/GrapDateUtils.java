@@ -7,14 +7,12 @@ import java.time.format.DateTimeFormatter;
 import java.util.Date;
 
 /**
- * Created by haojiahong on 2017/9/22.
+ * @author haojiahong on 2017/9/22.
  */
 public class GrapDateUtils {
 
     /**
      * 获取当前时间的字符串(格式为yyyy-MM-dd HH:mm:ss)
-     *
-     * @return
      */
     public static String nowDateTimeStr() {
         LocalDateTime now = LocalDateTime.now();
@@ -24,8 +22,6 @@ public class GrapDateUtils {
 
     /**
      * 获取当前时间
-     *
-     * @return
      */
     public static Date nowDateTime() {
         return new Date();
@@ -33,22 +29,15 @@ public class GrapDateUtils {
 
     /**
      * 将时间字符串转换为Date
-     *
-     * @param dateStr
-     * @return
      */
     public static Date getDateByStr(String dateStr) {
         DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
         LocalDateTime localDateTime = LocalDateTime.parse(dateStr, dateTimeFormatter);
-        Date date = Date.from(localDateTime.atZone(ZoneId.systemDefault()).toInstant());
-        return date;
+        return Date.from(localDateTime.atZone(ZoneId.systemDefault()).toInstant());
     }
 
     /**
      * 时间转字符串(格式为yyyy-MM-dd HH:mm:ss)
-     *
-     * @param date
-     * @return
      */
     public static String getDateStrByDate(Date date) {
         Instant instant = date.toInstant();
@@ -67,13 +56,5 @@ public class GrapDateUtils {
         return localDateTime.format(dateTimeFormatter);
 
     }
-
-
-    public static void main(String[] args) {
-        System.out.println(GrapDateUtils.getDateStrByDate(new Date(), "HH:mm"));
-        System.out.println(System.currentTimeMillis());
-        System.out.println(GrapDateUtils.getDateStrByDate(new Date(1524474151193L)));
-    }
-
 
 }

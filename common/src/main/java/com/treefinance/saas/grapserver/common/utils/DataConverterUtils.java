@@ -9,19 +9,14 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * Created by luoyihua on 2017/5/10.
+ * @author luoyihua on 2017/5/10.
  */
 public final class DataConverterUtils {
+
     private static final Pattern PATTERN = Pattern.compile("1[3578]\\d-?\\d{4}-?\\d{4}");
-    private DataConverterUtils() {
 
-    }
+    private DataConverterUtils() {}
 
-    /**
-     *
-     * @param sourceList
-     * @return
-     */
     public static <F, T> List<T> convert(List<F> sourceList, Class<T> targetClz) {
         if (CollectionUtils.isNotEmpty(sourceList)) {
             List<T> ret = Lists.newArrayListWithExpectedSize(sourceList.size());
@@ -52,4 +47,5 @@ public final class DataConverterUtils {
         }
         return null;
     }
+
 }

@@ -3,9 +3,10 @@ package com.treefinance.saas.grapserver.common.model.dto.moxie;
 import java.io.Serializable;
 
 /**
- * Created by haojiahong on 2017/9/21.
+ * @author haojiahong on 2017/9/21.
  */
 public class MoxieLoginParamsDTO implements Serializable {
+
     private static final long serialVersionUID = 2496811170928273528L;
 
     private String taskId;
@@ -24,10 +25,28 @@ public class MoxieLoginParamsDTO implements Serializable {
     private String origin;
     private String ip;
 
-
-    public MoxieLoginParamsDTO() {
-
+    @Override
+    public String toString() {
+        return "MoxieLoginParamsDTO{" +
+                "taskId='" + taskId + '\'' +
+                ", areaCode='" + areaCode + '\'' +
+                ", account='" + account + '\'' +
+                ", password='" + password + '\'' +
+                ", loginType='" + loginType + '\'' +
+                ", idCard='" + idCard + '\'' +
+                ", mobile='" + mobile + '\'' +
+                ", realName='" + realName + '\'' +
+                ", subArea='" + subArea + '\'' +
+                ", loanAccount='" + loanAccount + '\'' +
+                ", loanPassword='" + loanPassword + '\'' +
+                ", corpAccount='" + corpAccount + '\'' +
+                ", corpName='" + corpName + '\'' +
+                ", origin='" + origin + '\'' +
+                ", ip='" + ip + '\'' +
+                '}';
     }
+
+    public MoxieLoginParamsDTO() {}
 
     public MoxieLoginParamsDTO(String taskId, String areaCode, String account, String password, String loginType,
                                String idCard, String mobile, String realName, String subArea, String loanAccount,
@@ -169,4 +188,5 @@ public class MoxieLoginParamsDTO implements Serializable {
     public void setIp(String ip) {
         this.ip = ip;
     }
+
 }

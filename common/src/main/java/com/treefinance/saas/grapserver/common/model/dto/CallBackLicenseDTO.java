@@ -3,9 +3,12 @@ package com.treefinance.saas.grapserver.common.model.dto;
 import com.treefinance.saas.grapserver.common.model.dto.base.BaseDTO;
 
 /**
- * Created by yh-treefinance on 2017/7/7.
+ * @author yh-treefinance on 2017/7/7.
  */
 public class CallBackLicenseDTO extends BaseDTO {
+
+    private static final long serialVersionUID = -7728805234789955772L;
+
     /**
      * ID
      */
@@ -20,6 +23,15 @@ public class CallBackLicenseDTO extends BaseDTO {
      * AES 数据密钥
      */
     private String dataSecretKey;
+
+    @Override
+    public String toString() {
+        return "CallBackLicenseDTO{" +
+                "callBackConfigId=" + callBackConfigId +
+                ", appId='" + appId + '\'' +
+                ", dataSecretKey='" + dataSecretKey + '\'' +
+                '}';
+    }
 
     public Integer getCallBackConfigId() {
         return callBackConfigId;
@@ -44,4 +56,5 @@ public class CallBackLicenseDTO extends BaseDTO {
     public void setDataSecretKey(String dataSecretKey) {
         this.dataSecretKey = dataSecretKey;
     }
+
 }

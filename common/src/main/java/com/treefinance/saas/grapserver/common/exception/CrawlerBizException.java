@@ -4,11 +4,14 @@
 package com.treefinance.saas.grapserver.common.exception;
 
 /**
- * Created by chenjh on 2017/6/23.
+ * @author chenjh on 2017/6/23.
  * <p>
  * 爬虫接口失败异常
  */
 public class CrawlerBizException extends BizException {
+
+    private static final long serialVersionUID = -8261835387737450392L;
+
     public CrawlerBizException() {
         super();
     }
@@ -32,4 +35,5 @@ public class CrawlerBizException extends BizException {
     protected CrawlerBizException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
         super(message, cause, enableSuppression, writableStackTrace);
     }
+
 }

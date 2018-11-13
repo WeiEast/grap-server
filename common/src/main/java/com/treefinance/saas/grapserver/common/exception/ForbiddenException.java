@@ -22,6 +22,8 @@ package com.treefinance.saas.grapserver.common.exception;
  */
 public class ForbiddenException extends RuntimeException {
 
+    private static final long serialVersionUID = -6527877383344172844L;
+
     public ForbiddenException() {
         super();
     }
@@ -29,9 +31,5 @@ public class ForbiddenException extends RuntimeException {
     public ForbiddenException(String message) {
         super(message);
     }
-
-
-
-
 
 }

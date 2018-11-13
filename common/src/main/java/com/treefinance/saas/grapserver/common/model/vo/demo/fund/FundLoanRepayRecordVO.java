@@ -4,7 +4,7 @@ import java.io.Serializable;
 import java.math.BigDecimal;
 
 /**
- * Created by haojiahong on 2017/10/17.
+ * @author haojiahong on 2017/10/17.
  */
 public class FundLoanRepayRecordVO implements Serializable {
 
@@ -44,6 +44,19 @@ public class FundLoanRepayRecordVO implements Serializable {
      * 贷款合同号
      */
     private String contractNumber;
+
+    @Override
+    public String toString() {
+        return "FundLoanRepayRecordVO{" +
+                "repayDate='" + repayDate + '\'' +
+                ", accountingDate='" + accountingDate + '\'' +
+                ", repayAmount=" + repayAmount +
+                ", repayCapital=" + repayCapital +
+                ", repayInterest=" + repayInterest +
+                ", repayPenalty=" + repayPenalty +
+                ", contractNumber='" + contractNumber + '\'' +
+                '}';
+    }
 
     public String getRepayDate() {
         return repayDate;
@@ -100,4 +113,5 @@ public class FundLoanRepayRecordVO implements Serializable {
     public void setRepayPenalty(BigDecimal repayPenalty) {
         this.repayPenalty = repayPenalty;
     }
+
 }

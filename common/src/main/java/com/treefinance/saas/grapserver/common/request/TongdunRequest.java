@@ -1,19 +1,22 @@
 package com.treefinance.saas.grapserver.common.request;
 
 /**
- * @author:guoguoyun
- * @date:Created in 2018/10/18上午10:08
+ * @author guoguoyun
+ * @date Created in 2018/10/18上午10:08
  */
 public class TongdunRequest {
+
     /**姓名**/
     private String userName;
+
     /**身份证号**/
     private String idCard;
+
     /**手机号**/
     private String telNum;
+
     /**邮箱**/
     private String accountEmail;
-
 
     public String getUserName() {
         return userName;
@@ -51,4 +54,5 @@ public class TongdunRequest {
         return "TongdunRequest{" + "userName='" + userName + '\'' + ", idCard='" + idCard + '\'' + ", telNum='" + telNum
             + '\'' + ", accountEmail='" + accountEmail + '\'' + '}';
     }
+
 }

@@ -1,10 +1,14 @@
 package com.treefinance.saas.grapserver.common.exception;
 
 /**
- * Created by luoyihua on 2017/5/12.
+ * @author luoyihua on 2017/5/12.
  */
 public class BizException extends RuntimeException {
+
+    private static final long serialVersionUID = 2024058202556452918L;
+
     private int code;
+
     private Object[] args;
 
     public BizException() {}
@@ -88,4 +92,5 @@ public class BizException extends RuntimeException {
     public Object[] getArgs() {
         return args;
     }
+
 }

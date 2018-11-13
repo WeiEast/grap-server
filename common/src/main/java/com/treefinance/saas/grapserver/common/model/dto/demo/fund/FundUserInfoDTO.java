@@ -3,7 +3,7 @@ package com.treefinance.saas.grapserver.common.model.dto.demo.fund;
 import java.io.Serializable;
 
 /**
- * Created by haojiahong on 2017/10/17.
+ * @author haojiahong on 2017/10/17.
  */
 public class FundUserInfoDTO implements Serializable {
 
@@ -143,6 +143,39 @@ public class FundUserInfoDTO implements Serializable {
      * 最新缴存时间
      */
     private String lastPayDate;
+
+    @Override
+    public String toString() {
+        return "FundUserInfoDTO{" +
+                "name='" + name + '\'' +
+                ", sex='" + sex + '\'' +
+                ", birthday='" + birthday + '\'' +
+                ", mobile='" + mobile + '\'' +
+                ", email='" + email + '\'' +
+                ", customerNumber='" + customerNumber + '\'' +
+                ", gjjNumber='" + gjjNumber + '\'' +
+                ", balance=" + balance +
+                ", fundBalance=" + fundBalance +
+                ", subsidyBalance=" + subsidyBalance +
+                ", subsidyIncome=" + subsidyIncome +
+                ", payStatus='" + payStatus + '\'' +
+                ", idCard='" + idCard + '\'' +
+                ", cardType='" + cardType + '\'' +
+                ", homeAddress='" + homeAddress + '\'' +
+                ", corporationNumber='" + corporationNumber + '\'' +
+                ", corporationName='" + corporationName + '\'' +
+                ", monthlyCorporationIncome=" + monthlyCorporationIncome +
+                ", monthlyCustomerIncome=" + monthlyCustomerIncome +
+                ", monthlyTotalIncome=" + monthlyTotalIncome +
+                ", corporationRatio='" + corporationRatio + '\'' +
+                ", customerRatio='" + customerRatio + '\'' +
+                ", subsidyCustomerRatio='" + subsidyCustomerRatio + '\'' +
+                ", subsidyCorporationRatio='" + subsidyCorporationRatio + '\'' +
+                ", baseNumber=" + baseNumber +
+                ", beginDate='" + beginDate + '\'' +
+                ", lastPayDate='" + lastPayDate + '\'' +
+                '}';
+    }
 
     public String getName() {
         return name;
@@ -359,4 +392,5 @@ public class FundUserInfoDTO implements Serializable {
     public void setLastPayDate(String lastPayDate) {
         this.lastPayDate = lastPayDate;
     }
+
 }

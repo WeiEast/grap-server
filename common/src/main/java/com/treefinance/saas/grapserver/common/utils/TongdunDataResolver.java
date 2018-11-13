@@ -6,13 +6,12 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 
 /**
- * @author:guoguoyun
- * @date:Created in 2018/10/18下午4:40
+ * @author guoguoyun
+ * @date Created in 2018/10/18下午4:40
  */
 public final class TongdunDataResolver {
 
-    private TongdunDataResolver() {
-    }
+    private TongdunDataResolver() {}
 
     public static String encode(Integer val) {
         if (val == null) {
@@ -65,4 +64,5 @@ public final class TongdunDataResolver {
 
         return Float.toString(output);
     }
+
 }

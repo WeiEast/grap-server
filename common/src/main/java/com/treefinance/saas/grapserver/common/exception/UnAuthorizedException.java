@@ -1,10 +1,12 @@
 package com.treefinance.saas.grapserver.common.exception;
 
 /**
- * @author:guoguoyun
- * @date:Created in 2018/10/31下午3:38
+ * @author guoguoyun
+ * @date Created in 2018/10/31下午3:38
  */
 public class UnAuthorizedException extends  RuntimeException{
+
+    private static final long serialVersionUID = -8210918888367319225L;
 
     public UnAuthorizedException() {
         super();

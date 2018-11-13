@@ -25,7 +25,6 @@ public class RedisKeyUtils {
      * 获取登录锁redis key
      *
      * @param taskId 任务id
-     * @return
      */
     public static String genLoginLockKey(Long taskId) {
         return String.format(PREFIX_LOGIN_LOCK_KEY, taskId);
@@ -47,7 +46,6 @@ public class RedisKeyUtils {
      * 获取任务最近活跃时间redis key
      *
      * @param taskId 任务id
-     * @return
      */
     public static String genTaskActiveTimeKey(Long taskId) {
         return String.format(PREFIX_TASK_ACTIVE_TIME_KEY, taskId);
@@ -59,7 +57,6 @@ public class RedisKeyUtils {
      * @param appId    商户id
      * @param uniqueId 用户id
      * @param bizType  业务类型
-     * @return
      */
     public static String genCreateTaskUserLockKey(String appId, String uniqueId, String bizType) {
         return Joiner.on(":").join(PREFIX_CREATE_TASK_USER_LOCK_KEY, appId, uniqueId, bizType);
@@ -67,22 +64,9 @@ public class RedisKeyUtils {
 
     /**
      * 获取记录任务登录时间的redis key
-     *
-     * @param taskId
-     * @return
      */
     public static String genTaskLoginTimeKey(Long taskId) {
         return PREFIX_TASK_LOGIN_TIME_KEY + taskId;
     }
-
-    /**
-     * 获取记录已登录成功的任务集合的redis key
-     *
-     * @return
-     */
-//    public static String genLoginedTaskSetKey() {
-//        return PREFIX_LOGIN_TASK_SET_KEY;
-//    }
-
 
 }

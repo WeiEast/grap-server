@@ -4,7 +4,7 @@ import java.io.Serializable;
 import java.math.BigDecimal;
 
 /**
- * Created by haojiahong on 2017/10/17.
+ * @author haojiahong on 2017/10/17.
  */
 public class FundBillRecordVO implements Serializable {
 
@@ -79,6 +79,25 @@ public class FundBillRecordVO implements Serializable {
      */
     private BigDecimal additionalIncome;
 
+    @Override
+    public String toString() {
+        return "FundBillRecordVO{" +
+                "outcome=" + outcome +
+                ", income=" + income +
+                ", description='" + description + '\'' +
+                ", subsidyIncome=" + subsidyIncome +
+                ", subsidyOutcome=" + subsidyOutcome +
+                ", balance=" + balance +
+                ", dealTime='" + dealTime + '\'' +
+                ", month='" + month + '\'' +
+                ", corporationName='" + corporationName + '\'' +
+                ", corporationIncome=" + corporationIncome +
+                ", customerIncome=" + customerIncome +
+                ", corporationRatio='" + corporationRatio + '\'' +
+                ", customerRatio='" + customerRatio + '\'' +
+                ", additionalIncome=" + additionalIncome +
+                '}';
+    }
 
     public String getDescription() {
         return description;
@@ -191,4 +210,5 @@ public class FundBillRecordVO implements Serializable {
     public void setAdditionalIncome(BigDecimal additionalIncome) {
         this.additionalIncome = additionalIncome;
     }
+
 }

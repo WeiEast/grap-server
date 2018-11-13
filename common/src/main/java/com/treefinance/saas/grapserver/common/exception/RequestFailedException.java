@@ -2,18 +2,22 @@ package com.treefinance.saas.grapserver.common.exception;
 
 /**
  * 请求失败异常
- * Created by yh-treefinance on 2017/5/18.
+ * @author yh-treefinance on 2017/5/18.
  */
 public class RequestFailedException extends RuntimeException {
+
     private static final long serialVersionUID = -290315695168000010L;
+
     /**
      * 请求地址
      */
     private String requestUrl;
+
     /**
      * http 状态码
      */
     private int statusCode;
+
     /**
      * 返回结果
      */
@@ -25,10 +29,6 @@ public class RequestFailedException extends RuntimeException {
 
     /**
      * 异常创建
-     *
-     * @param requestUrl
-     * @param statusCode
-     * @param result
      */
     public RequestFailedException(String requestUrl, int statusCode, String result) {
         super("httpCode = " + statusCode + ",result=" + result);
@@ -39,11 +39,6 @@ public class RequestFailedException extends RuntimeException {
 
     /**
      * 异常创建
-     *
-     * @param requestUrl
-     * @param statusCode
-     * @param result
-     * @param cause
      */
     public RequestFailedException(String requestUrl, int statusCode, String result, Throwable cause) {
         super("httpCode = " + statusCode + ",result=" + result, cause);
@@ -63,4 +58,5 @@ public class RequestFailedException extends RuntimeException {
     public String getResult() {
         return result;
     }
+
 }

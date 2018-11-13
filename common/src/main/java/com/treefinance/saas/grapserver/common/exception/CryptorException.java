@@ -22,11 +22,14 @@ package com.treefinance.saas.grapserver.common.exception;
  */
 public class CryptorException extends RuntimeException {
 
-  public CryptorException(String message) {
-    super(message);
-  }
+    private static final long serialVersionUID = -737992918433947839L;
 
-  public CryptorException(String message, Throwable cause) {
-    super(message, cause);
-  }
+    public CryptorException(String message) {
+        super(message);
+    }
+
+    public CryptorException(String message, Throwable cause) {
+        super(message, cause);
+    }
+
 }

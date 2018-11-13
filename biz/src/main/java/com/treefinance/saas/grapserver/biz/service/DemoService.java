@@ -16,7 +16,7 @@ import com.treefinance.saas.grapserver.common.model.vo.demo.fund.FundLoanRepayRe
 import com.treefinance.saas.grapserver.common.model.vo.demo.fund.FundUserInfoVO;
 import com.treefinance.saas.grapserver.common.utils.BeanUtils;
 import com.treefinance.saas.grapserver.common.utils.JsonUtils;
-import com.treefinance.saas.grapserver.common.utils.RemoteDataDownloadUtils;
+import com.treefinance.saas.grapserver.common.utils.AbstractRemoteDataDownloadUtils;
 import com.treefinance.saas.grapserver.dao.entity.AppLicense;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -78,7 +78,7 @@ public class DemoService {
         String data = redisTemplate.opsForValue().get(key);
         if (StringUtils.isBlank(data)) {
             try {
-                byte[] result = RemoteDataDownloadUtils.download(paramMap.get("dataUrl").toString(), byte[].class);
+                byte[] result = AbstractRemoteDataDownloadUtils.download(paramMap.get("dataUrl").toString(), byte[].class);
                 // 数据体默认使用商户密钥加密
                 data = callbackSecureHandler.decryptByAES(result, appLicense.getDataSecretKey());
             } catch (Exception e) {

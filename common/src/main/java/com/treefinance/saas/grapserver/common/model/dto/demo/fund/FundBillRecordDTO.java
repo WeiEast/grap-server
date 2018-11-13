@@ -3,7 +3,7 @@ package com.treefinance.saas.grapserver.common.model.dto.demo.fund;
 import java.io.Serializable;
 
 /**
- * Created by haojiahong on 2017/10/17.
+ * @author haojiahong on 2017/10/17.
  */
 public class FundBillRecordDTO implements Serializable {
 
@@ -77,6 +77,26 @@ public class FundBillRecordDTO implements Serializable {
      * 补缴
      */
     private Integer additionalIncome;
+
+    @Override
+    public String toString() {
+        return "FundBillRecordDTO{" +
+                "outcome=" + outcome +
+                ", income=" + income +
+                ", description='" + description + '\'' +
+                ", subsidyIncome=" + subsidyIncome +
+                ", subsidyOutcome=" + subsidyOutcome +
+                ", balance=" + balance +
+                ", dealTime='" + dealTime + '\'' +
+                ", month='" + month + '\'' +
+                ", corporationName='" + corporationName + '\'' +
+                ", corporationIncome=" + corporationIncome +
+                ", customerIncome=" + customerIncome +
+                ", corporationRatio='" + corporationRatio + '\'' +
+                ", customerRatio='" + customerRatio + '\'' +
+                ", additionalIncome=" + additionalIncome +
+                '}';
+    }
 
     public Integer getOutcome() {
         return outcome;
@@ -189,4 +209,5 @@ public class FundBillRecordDTO implements Serializable {
     public void setAdditionalIncome(Integer additionalIncome) {
         this.additionalIncome = additionalIncome;
     }
+
 }

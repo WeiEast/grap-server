@@ -18,10 +18,12 @@ import java.io.IOException;
 
 /**
  * 数据下载器
+ *
+ * @author hanif
  */
-public abstract class RemoteDataDownloadUtils {
+public abstract class AbstractRemoteDataDownloadUtils {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(RemoteDataDownloadUtils.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(AbstractRemoteDataDownloadUtils.class);
 
     private static final CloseableHttpClient CLIENT = HttpClientFactory.create();
 

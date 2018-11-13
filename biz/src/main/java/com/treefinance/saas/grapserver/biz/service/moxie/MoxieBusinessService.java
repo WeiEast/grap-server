@@ -43,10 +43,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
@@ -156,7 +153,6 @@ public class MoxieBusinessService implements InitializingBean {
                 String value = object.getJSONObject("input").getString("value");
                 Long waitSeconds = object.getJSONObject("input").getLong("wait_seconds");
 
-
                 MoxieCaptchaDTO moxieCaptchaDTO = new MoxieCaptchaDTO();
                 moxieCaptchaDTO.setType(type);
                 moxieCaptchaDTO.setValue(value);
@@ -205,7 +201,6 @@ public class MoxieBusinessService implements InitializingBean {
 
     }
 
-
     /**
      * 创建魔蝎任务,得到moxieTaskId
      */
@@ -252,10 +247,6 @@ public class MoxieBusinessService implements InitializingBean {
 
     /**
      * 查询指令,获取公积金账户登录状态
-     *
-     * @param taskId
-     * @param moxieTaskId
-     * @return
      */
     private Map<String, Object> queryLoginStatusFromDirective(Long taskId, String moxieTaskId) {
         Map<String, Object> map = Maps.newHashMap();
@@ -307,8 +298,6 @@ public class MoxieBusinessService implements InitializingBean {
 
     /**
      * 拼装获取的城市列表信息为所需格式
-     *
-     * @return
      */
     private List<MoxieCityInfoVO> queryCityList() {
         List<MoxieCityInfoVO> result = Lists.newArrayList();
@@ -328,7 +317,6 @@ public class MoxieBusinessService implements InitializingBean {
             }
             map.put(moxieCityInfoDTO.getProvince(), items);
         }
-//        Map<String, List<MoxieCityInfoDTO>> map = list.stream().collect(Collectors.groupingBy(MoxieCityInfoDTO::getProvince));
         for (Map.Entry<String, List<MoxieCityInfoDTO>> entry : map.entrySet()) {
             MoxieCityInfoVO vo = new MoxieCityInfoVO();
             vo.setLabel(entry.getKey());
@@ -337,17 +325,17 @@ public class MoxieBusinessService implements InitializingBean {
             List<MoxieCityInfoDTO> dtoList = entry.getValue();
             for (MoxieCityInfoDTO dto : dtoList) {
                 MoxieCityInfoVO sonVO = new MoxieCityInfoVO();
-                sonVO.setLabel(dto.getCity_name());
-                sonVO.setValue(dto.getArea_code());
-                sonVO.setSpell(convertToPinyinString(dto.getCity_name()));
+                sonVO.setLabel(dto.getCityName());
+                sonVO.setValue(dto.getAreaCode());
+                sonVO.setSpell(convertToPinyinString(dto.getCityName()));
                 sonVO.setStatus(dto.getStatus());
                 sonList.add(sonVO);
             }
-            sonList = sonList.stream().sorted((o1, o2) -> o1.getSpell().compareTo(o2.getSpell())).collect(Collectors.toList());
+            sonList = sonList.stream().sorted(Comparator.comparing(MoxieCityInfoVO::getSpell)).collect(Collectors.toList());
             vo.setList(sonList);
             result.add(vo);
         }
-        result = result.stream().sorted((o1, o2) -> o1.getSpell().compareTo(o2.getSpell())).collect(Collectors.toList());
+        result = result.stream().sorted(Comparator.comparing(MoxieCityInfoVO::getSpell)).collect(Collectors.toList());
         return result;
     }
 
@@ -374,7 +362,7 @@ public class MoxieBusinessService implements InitializingBean {
 
     }
 
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     private Integer incrVerifyCodeCount(Long taskId) {
         int count = 1;
         TaskAttribute taskAttribute = taskAttributeService.findByName(taskId, ETaskAttribute.FUND_MOXIE_VERIFY_CODE_COUNT.getAttribute(), false);
@@ -440,8 +428,6 @@ public class MoxieBusinessService implements InitializingBean {
 
     /**
      * 魔蝎任务采集失败业务处理
-     *
-     * @param eventNoticeDTO
      */
     public void grabFail(MoxieTaskEventNoticeDTO eventNoticeDTO) {
         MoxieTaskEventNoticeRequest request = DataConverterUtils.convert(eventNoticeDTO, MoxieTaskEventNoticeRequest.class);

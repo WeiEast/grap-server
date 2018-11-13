@@ -4,17 +4,32 @@ import java.io.Serializable;
 import java.util.List;
 
 /**
- * Created by haojiahong on 2017/9/13.
+ * @author haojiahong on 2017/9/13.
  */
 public class MoxieCityInfoVO implements Serializable {
 
     private static final long serialVersionUID = -8737716430802940041L;
 
     private String spell;
+
     private String label;
+
     private String value;
+
     private String status;
+
     private List<MoxieCityInfoVO> list;
+
+    @Override
+    public String toString() {
+        return "MoxieCityInfoVO{" +
+                "spell='" + spell + '\'' +
+                ", label='" + label + '\'' +
+                ", value='" + value + '\'' +
+                ", status='" + status + '\'' +
+                ", list=" + list +
+                '}';
+    }
 
     public String getSpell() {
         return spell;
@@ -55,4 +70,5 @@ public class MoxieCityInfoVO implements Serializable {
     public void setList(List<MoxieCityInfoVO> list) {
         this.list = list;
     }
+
 }

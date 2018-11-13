@@ -3,14 +3,29 @@ package com.treefinance.saas.grapserver.common.model.vo;
 import java.io.Serializable;
 
 /**
- * Created by yh-treefinance on 2018/7/3.
+ * @author yh-treefinance on 2018/7/3.
  */
 public class AppQuestionnaireResultRequest implements Serializable {
+
+    private static final long serialVersionUID = -3044345595052488113L;
+
     private String appId;
+
     private Long questionnaireId;
+
     private String questionnaireDesc;
 
     private String detailIds;
+
+    @Override
+    public String toString() {
+        return "AppQuestionnaireResultRequest{" +
+                "appId='" + appId + '\'' +
+                ", questionnaireId=" + questionnaireId +
+                ", questionnaireDesc='" + questionnaireDesc + '\'' +
+                ", detailIds='" + detailIds + '\'' +
+                '}';
+    }
 
     public String getAppId() {
         return appId;
@@ -43,4 +58,5 @@ public class AppQuestionnaireResultRequest implements Serializable {
     public void setDetailIds(String detailIds) {
         this.detailIds = detailIds;
     }
+
 }

@@ -15,37 +15,27 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Created by yh-treefinance on 2017/7/6.
+ * @author yh-treefinance on 2017/7/6.
  */
 public class JsonUtils {
 
     private static final Logger logger = LoggerFactory.getLogger(JsonUtils.class);
 
-
     /**
      * 转JSON，剔除某些字段
-     *
-     * @param obj
-     * @param excludeProperties
-     * @return
      */
     public static String toJsonString(Object obj, String... excludeProperties) {
-
-        return JSON.toJSONString(obj, new PropertyFilter() {
-            @Override
-            public boolean apply(Object obj, String name, Object value) {
-                if (excludeProperties != null && excludeProperties.length > 0) {
-                    for (String property : excludeProperties) {
-                        if (name.equalsIgnoreCase(property)) {
-                            return false;
-                        }
+        return JSON.toJSONString(obj, (PropertyFilter) (obj1, name, value) -> {
+            if (excludeProperties != null && excludeProperties.length > 0) {
+                for (String property : excludeProperties) {
+                    if (name.equalsIgnoreCase(property)) {
+                        return false;
                     }
                 }
-                return true;
             }
+            return true;
         });
     }
-
 
     public static <T> List<T> toJavaBeanList(String jsonStr, Class<T> cls) {
         List<T> list = new ArrayList<T>();
@@ -69,10 +59,8 @@ public class JsonUtils {
 
 
     public static Object toJsonObject(String jsonStr) {
-        JSONObject jsonObject = JSONObject.parseObject(jsonStr);
-        return jsonObject;
+        return JSONObject.parseObject(jsonStr);
     }
-
 
     public static Object[] toJsonObjects(String jsonStr) {
         JSONArray jsonArray = JSON.parseArray(jsonStr);
@@ -86,23 +74,12 @@ public class JsonUtils {
     }
 
     public static List<Object> toJsonObjectList(String jsonStr) {
-        List<Object> objectList = Lists.newArrayList();
         Object[] objects = JsonUtils.toJsonObjects(jsonStr);
-        objectList = new ArrayList<>(Arrays.asList(objects));
-        return objectList;
+        return new ArrayList<>(Arrays.asList(objects));
     }
 
     public static <K, V> Map<K, V> toMap(String jsonStr, Class<K> kClass, Class<V> vClass) {
-        Map<K, V> map = JSON.parseObject(jsonStr, new TypeReference<Map<K, V>>() {
-        });
-        return map;
+        return JSON.parseObject(jsonStr, new TypeReference<Map<K, V>>() {});
     }
 
-    public static void main(String[] args) {
-//        String str = "{\"test1\":{\"name\":\"zhangsan\"},\"test2\":{\"name\":\"lisi\"},\"test3\":{\"name\":\"wanger\"}}";
-        String str = "{\"test1\":\"zhangsan\",\"test2\":\"lisi\",\"test3\":\"wanger\"}";
-        Map<String, String> map = JsonUtils.toMap(str, String.class, String.class);
-        System.out.println(map);
-
-    }
 }

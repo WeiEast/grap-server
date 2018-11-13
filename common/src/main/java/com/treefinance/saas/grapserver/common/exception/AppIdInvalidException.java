@@ -1,10 +1,12 @@
 package com.treefinance.saas.grapserver.common.exception;
 
 /**
- * @author:guoguoyun
- * @date:Created in 2018/10/31下午5:31
+ * @author guoguoyun
+ * @date Created in 2018/10/31下午5:31
  */
 public class AppIdInvalidException extends  UnAuthorizedException {
+
+    private static final long serialVersionUID = 7294549782874086612L;
 
     public AppIdInvalidException() {
         super();
@@ -26,4 +28,5 @@ public class AppIdInvalidException extends  UnAuthorizedException {
         boolean writableStackTrace) {
         super(message, cause, enableSuppression, writableStackTrace);
     }
+
 }

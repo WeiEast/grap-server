@@ -1,12 +1,13 @@
 package com.treefinance.saas.grapserver.common.exception;
 
 /**
- * Created by luoyihua on 2017/5/12.
+ * @author luoyihua on 2017/5/12.
  */
 public class ParamsCheckException extends RuntimeException {
 
-    public ParamsCheckException() {
-    }
+    private static final long serialVersionUID = -4606174100558456104L;
+
+    public ParamsCheckException() {}
 
     public ParamsCheckException(String message) {
         super(message);
@@ -24,4 +25,5 @@ public class ParamsCheckException extends RuntimeException {
                                 boolean writableStackTrace) {
         super(message, cause, enableSuppression, writableStackTrace);
     }
+
 }

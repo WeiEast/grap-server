@@ -4,9 +4,12 @@ import java.io.Serializable;
 import java.util.Date;
 
 /**
- * Created by yh-treefinance on 2017/7/7.
+ * @author yh-treefinance on 2017/7/7.
  */
 public class BaseDTO implements Serializable {
+
+    private static final long serialVersionUID = 7062953110657722204L;
+
     /**
      * 创建时间
      */
@@ -16,6 +19,14 @@ public class BaseDTO implements Serializable {
      * 最后更新时间
      */
     private Date lastUpdateTime;
+
+    @Override
+    public String toString() {
+        return "BaseDTO{" +
+                "createTime=" + createTime +
+                ", lastUpdateTime=" + lastUpdateTime +
+                '}';
+    }
 
     public Date getCreateTime() {
         return createTime;
@@ -32,4 +43,5 @@ public class BaseDTO implements Serializable {
     public void setLastUpdateTime(Date lastUpdateTime) {
         this.lastUpdateTime = lastUpdateTime;
     }
+
 }

@@ -7,14 +7,17 @@ import com.datatrees.toolkits.util.crypto.exception.CryptoException;
 import com.datatrees.toolkits.util.json.Jackson;
 
 /**
- * @author:guoguoyun
- * @date:Created in 2018/10/18下午10:27
+ * @author guoguoyun
+ * @date Created in 2018/10/18下午10:27
  */
+@SuppressWarnings("unchecked")
 public class SaasResult<T> {
 
     private String msg;
-    private T data;
+
     private Integer code;
+
+    private T data;
 
     public String getMsg() {
         return msg;
@@ -80,15 +83,12 @@ public class SaasResult<T> {
     }
 
     public static <T> SaasResult<T> failResult(T data, String msg,int code) {
-        SaasResult<T> result = new SaasResult(msg,data,code);
-
-        return result;
+        return (SaasResult<T>) new SaasResult(msg,data,code);
     }
 
     public static <T> SaasResult<String> failEncryptByRSAResult(T data, String errorMsg, String rsaPublicKey) {
         String encryptData = SaasResult.EncryptHelper.encryptResult(data, rsaPublicKey);
-        SaasResult<String> result = new SaasResult(errorMsg, encryptData);
-        return result;
+        return (SaasResult<String>) new SaasResult(errorMsg, encryptData);
     }
 
     private static class EncryptHelper {
@@ -112,4 +112,5 @@ public class SaasResult<T> {
             }
         }
     }
+
 }

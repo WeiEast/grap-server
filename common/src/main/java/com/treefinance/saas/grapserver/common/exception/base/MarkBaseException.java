@@ -2,9 +2,12 @@ package com.treefinance.saas.grapserver.common.exception.base;
 
 /**
  * 基于标签
- * Created by yh-treefinance on 2017/9/1.
+ * @author yh-treefinance on 2017/9/1.
  */
 public class MarkBaseException extends RuntimeException {
+
+    private static final long serialVersionUID = -6814848795038449472L;
+
     /**
      * 标记
      */
@@ -35,4 +38,5 @@ public class MarkBaseException extends RuntimeException {
     public String getErrorMsg() {
         return errorMsg;
     }
+
 }

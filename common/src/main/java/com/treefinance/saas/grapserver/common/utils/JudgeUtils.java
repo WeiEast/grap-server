@@ -1,16 +1,13 @@
 package com.treefinance.saas.grapserver.common.utils;
 
 /**
- * @author:guoguoyun
- * @date:Created in 2018/10/29下午7:11
+ * @author guoguoyun
+ * @date Created in 2018/10/29下午7:11
  */
 public class JudgeUtils {
 
     /**
      * 判断输入密码是否为纯数字
-     *
-     * @param str
-     * @return
      */
     public static boolean isPassword(String str) {
         return str.matches("^[0-9]*$");
@@ -18,9 +15,6 @@ public class JudgeUtils {
 
     /**
      * 判断输入身份证号码是否正确
-     *
-     * @param str
-     * @return
      */
     public static boolean isIdCard(String str) {
         return str.matches("^[1-9]\\d{5}(18|19|([23]\\d))\\d{2}((0[1-9])|(10|11|12))(([0-2][1-9])|10|20|30|31)\\d{3}[0-9Xx]$");
@@ -28,26 +22,16 @@ public class JudgeUtils {
 
     /**
      * 简单判断是否为手机号
-     * @param str
-     * @return
      */
     public static boolean isCellNumber(String str) {
         return str.matches("^(1)[0-9]{10}$");
     }
 
     /**
-     * 简单判断是否为手机号
-     * @param str
-     * @return
+     * 简单判断是否为邮箱地址
      */
     public static boolean isEmail(String str) {
         return str.matches("^[a-z0-9A-Z]+[- | a-z0-9A-Z . _]+@([a-z0-9A-Z]+(-[a-z0-9A-Z]+)?\\.)+[a-z]{2,}$");
     }
-
-
-
-
-
-
 
 }

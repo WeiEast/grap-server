@@ -4,7 +4,7 @@ import java.io.Serializable;
 import java.math.BigDecimal;
 
 /**
- * Created by haojiahong on 2017/10/17.
+ * @author haojiahong on 2017/10/17.
  */
 public class FundUserInfoVO implements Serializable {
 
@@ -144,6 +144,39 @@ public class FundUserInfoVO implements Serializable {
      * 最新缴存时间
      */
     private String lastPayDate;
+
+    @Override
+    public String toString() {
+        return "FundUserInfoVO{" +
+                "name='" + name + '\'' +
+                ", sex='" + sex + '\'' +
+                ", birthday='" + birthday + '\'' +
+                ", mobile='" + mobile + '\'' +
+                ", email='" + email + '\'' +
+                ", customerNumber='" + customerNumber + '\'' +
+                ", gjjNumber='" + gjjNumber + '\'' +
+                ", balance=" + balance +
+                ", fundBalance=" + fundBalance +
+                ", subsidyBalance=" + subsidyBalance +
+                ", subsidyIncome=" + subsidyIncome +
+                ", payStatus='" + payStatus + '\'' +
+                ", idCard='" + idCard + '\'' +
+                ", cardType='" + cardType + '\'' +
+                ", homeAddress='" + homeAddress + '\'' +
+                ", corporationNumber='" + corporationNumber + '\'' +
+                ", corporationName='" + corporationName + '\'' +
+                ", monthlyCorporationIncome=" + monthlyCorporationIncome +
+                ", monthlyCustomerIncome=" + monthlyCustomerIncome +
+                ", monthlyTotalIncome=" + monthlyTotalIncome +
+                ", corporationRatio='" + corporationRatio + '\'' +
+                ", customerRatio='" + customerRatio + '\'' +
+                ", subsidyCustomerRatio='" + subsidyCustomerRatio + '\'' +
+                ", subsidyCorporationRatio='" + subsidyCorporationRatio + '\'' +
+                ", baseNumber=" + baseNumber +
+                ", beginDate='" + beginDate + '\'' +
+                ", lastPayDate='" + lastPayDate + '\'' +
+                '}';
+    }
 
     public String getName() {
         return name;
@@ -360,4 +393,5 @@ public class FundUserInfoVO implements Serializable {
     public void setBaseNumber(BigDecimal baseNumber) {
         this.baseNumber = baseNumber;
     }
+
 }
