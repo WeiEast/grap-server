@@ -8,8 +8,6 @@ import com.treefinance.saas.taskcenter.facade.request.TaskDirectiveRequest;
 import com.treefinance.saas.taskcenter.facade.result.TaskNextDirectiveRO;
 import com.treefinance.saas.taskcenter.facade.result.common.TaskResult;
 import com.treefinance.saas.taskcenter.facade.service.TaskNextDirectiveFacade;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -79,4 +77,5 @@ public class TaskNextDirectiveService {
     public void deleteNextDirective(Long taskId, String directive) {
         taskNextDirectiveFacade.deleteNextDirective(taskId, directive);
     }
+
 }

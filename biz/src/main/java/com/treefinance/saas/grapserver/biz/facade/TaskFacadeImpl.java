@@ -15,10 +15,11 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 
 /**
- * Created by haojiahong on 2017/12/22.
+ * @author haojiahong on 2017/12/22.
  */
 @Component("grapTaskFacade")
 public class TaskFacadeImpl implements TaskFacade {
+
     @Autowired
     private com.treefinance.saas.taskcenter.facade.service.TaskFacade taskFacade;
 
@@ -43,4 +44,5 @@ public class TaskFacadeImpl implements TaskFacade {
         result.setBizTypeName(EBizType.getName(rpcResult.getData().getBizType()));
         return Results.newSuccessResult(result);
     }
+
 }

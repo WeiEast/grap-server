@@ -53,7 +53,6 @@ public class TaskTimeService {
     @Autowired
     private RedisDao redisDao;
 
-
     /**
      * 本地任务缓存
      */
@@ -131,7 +130,6 @@ public class TaskTimeService {
         return bizType.getTimeout();
     }
 
-
     /**
      * 任务抓取是否超时
      */
@@ -157,7 +155,6 @@ public class TaskTimeService {
         taskTimeFacade.handleTaskTimeout(taskId);
     }
 
-
     /**
      * 处理任务抓取超时
      */
@@ -165,7 +162,6 @@ public class TaskTimeService {
         logger.info("任务活跃超时异步处理:taskId={}", taskId);
         taskTimeFacade.handleTaskAliveTimeout(taskId, startTime);
     }
-
 
     /**
      * 处理登录后抓取任务超时(注意区分环境)
@@ -196,7 +192,6 @@ public class TaskTimeService {
         }
     }
 
-
     /**
      * 处理任务活跃时间超时(任务10分钟不活跃则取消任务)
      * (注意区分环境)
@@ -222,6 +217,5 @@ public class TaskTimeService {
             redisDao.releaseLock(lockKey, lockMap, 60 * 1000L);
         }
     }
-
 
 }

@@ -126,4 +126,5 @@ public class TaskDeviceService {
         }
         return Boolean.parseBoolean(obj.toString());
     }
+
 }

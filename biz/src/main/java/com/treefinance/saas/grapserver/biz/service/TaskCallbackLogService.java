@@ -6,8 +6,6 @@ import com.treefinance.saas.grapserver.dao.entity.TaskCallbackLog;
 import com.treefinance.saas.taskcenter.facade.result.TaskCallbackLogRO;
 import com.treefinance.saas.taskcenter.facade.result.common.TaskResult;
 import com.treefinance.saas.taskcenter.facade.service.TaskCallbackLogFacade;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -32,4 +30,5 @@ public class TaskCallbackLogService {
         }
         return DataConverterUtils.convert(rpcResult.getData(), TaskCallbackLog.class);
     }
+
 }

@@ -29,10 +29,11 @@ public class SpringUtils implements ApplicationContextAware {
      * 根据Bean名称获取实例
      *
      * @param name Bean注册名称
-     * @return bean实例
+     * @return     Bean实例
      * @throws org.springframework.beans.BeansException
      */
     public static Object getBean(String name) throws BeansException {
         return applicationContext.getBean(name);
     }
+
 }

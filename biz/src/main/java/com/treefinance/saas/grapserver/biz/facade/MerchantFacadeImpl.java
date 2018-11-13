@@ -28,19 +28,18 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Created by haojiahong on 2017/10/20.
+ * @author haojiahong on 2017/10/20.
  */
 @Service("merchantFacade")
 public class MerchantFacadeImpl implements MerchantFacade {
-    private static final Logger logger = LoggerFactory.getLogger(MerchantFacade.class);
 
+    private static final Logger logger = LoggerFactory.getLogger(MerchantFacade.class);
 
     @Autowired
     private TaskFacade taskFacade;
 
     @Autowired
     private MerchantBaseInfoFacade merchantBaseInfoFacade;
-
 
     @Override
     public SaasResult<MerchantBaseInfoRO> getMerchantBaseInfoByTaskId(Long taskId) {
@@ -56,7 +55,6 @@ public class MerchantFacadeImpl implements MerchantFacade {
             logger.info("通过taskId查询商户基本信息,未查询到taskId={}的任务信息", taskId);
             return Results.newSuccessResult(null);
         }
-
 
         Task task = DataConverterUtils.convert(rpcResult.getData(), Task.class);
         QueryMerchantByAppIdRequest queryMerchantByTaskIdRequest = new QueryMerchantByAppIdRequest();
@@ -77,4 +75,5 @@ public class MerchantFacadeImpl implements MerchantFacade {
         logger.info("通过taskId={}查询商户基本信息result={}", taskId, JSON.toJSONString(ro));
         return Results.newSuccessResult(ro);
     }
+
 }

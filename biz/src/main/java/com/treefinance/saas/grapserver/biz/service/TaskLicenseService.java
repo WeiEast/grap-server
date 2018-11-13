@@ -24,7 +24,7 @@ import java.util.Optional;
 import java.util.regex.Pattern;
 
 /**
- * Created by luoyihua on 2017/5/10.
+ * @author luoyihua on 2017/5/10.
  */
 @Service
 public class TaskLicenseService {
@@ -152,4 +152,5 @@ public class TaskLicenseService {
         }
         return hasCreateTaskAuth;
     }
+
 }

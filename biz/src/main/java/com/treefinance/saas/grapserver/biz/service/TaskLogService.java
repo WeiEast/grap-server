@@ -84,5 +84,4 @@ public class TaskLogService {
         return DataConverterUtils.convert(rpcResult.getData(), TaskLog.class);
     }
 
-
 }

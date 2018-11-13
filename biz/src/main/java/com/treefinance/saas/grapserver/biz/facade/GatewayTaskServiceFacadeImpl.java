@@ -16,7 +16,7 @@ import java.util.List;
 
 /**
  * 兼容老的任务服务
- * Created by yh-treefinance on 2017/9/19.
+ * @author yh-treefinance on 2017/9/19.
  */
 @Service("gatewayTaskServiceFacade")
 public class GatewayTaskServiceFacadeImpl implements TaskService {
@@ -50,4 +50,5 @@ public class GatewayTaskServiceFacadeImpl implements TaskService {
         }
         return result;
     }
+
 }

@@ -357,7 +357,6 @@ public class EmailLoginSimulationService {
         return SimpleResult.successResult(result.getData());
     }
 
-
     /**
      * 新浪邮箱登录
      */
@@ -390,7 +389,6 @@ public class EmailLoginSimulationService {
                     }
                 }
                 return SimpleResult.successResult(result);
-
             }
             throw new CrawlerBizException(Constants.REDIS_LOCK_ERROR_MSG);
         } finally {
@@ -430,11 +428,11 @@ public class EmailLoginSimulationService {
             boolean hasKey = redisDao.getRedisTemplate().hasKey(key);
             if (hasKey) {
                 Map<Object, Object> map = redisDao.getRedisTemplate().opsForHash().entries(key);
-                //记录账号
+                // 记录账号
                 taskService.setAccountNo(Long.valueOf(map.get("taskId").toString()), map.get("userName").toString());
-                //记录webSite
+                // 记录webSite
                 taskService.updateWebSite(Long.valueOf(map.get("taskId").toString()), map.get("webSite").toString());
-                //更新登录成功时间
+                // 更新登录成功时间
                 taskTimeService.updateLoginTime(Long.valueOf(map.get("taskId").toString()), new Date());
             }
 

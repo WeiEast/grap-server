@@ -6,8 +6,9 @@ import com.treefinance.basicservice.security.crypto.facade.ISecurityCryptoServic
 import com.treefinance.saas.assistant.model.Constants;
 import com.treefinance.saas.grapserver.biz.config.DiamondConfig;
 import com.treefinance.saas.grapserver.common.enums.ETaskStatus;
-import com.treefinance.saas.grapserver.common.exception.*;
-import com.treefinance.saas.grapserver.common.exception.base.MarkBaseException;
+import com.treefinance.saas.grapserver.common.exception.ParamsCheckException;
+import com.treefinance.saas.grapserver.common.exception.UniqueidMaxException;
+import com.treefinance.saas.grapserver.common.exception.UnknownException;
 import com.treefinance.saas.grapserver.common.model.dto.TaskDTO;
 import com.treefinance.saas.grapserver.common.utils.DataConverterUtils;
 import com.treefinance.saas.grapserver.dao.entity.Task;
@@ -25,7 +26,6 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
 import javax.xml.bind.ValidationException;
-import java.io.IOException;
 import java.util.List;
 
 /**
@@ -164,12 +164,9 @@ public class SaasTaskService {
             return false;
         }
         Byte status = task.getStatus();
-        if (ETaskStatus.CANCEL.getStatus().equals(status)
-            || ETaskStatus.FAIL.getStatus().equals(status)
-            || ETaskStatus.SUCCESS.getStatus().equals(status)) {
-            return true;
-        }
-        return false;
+        return ETaskStatus.CANCEL.getStatus().equals(status)
+                || ETaskStatus.FAIL.getStatus().equals(status)
+                || ETaskStatus.SUCCESS.getStatus().equals(status);
     }
 
 
@@ -180,8 +177,7 @@ public class SaasTaskService {
         if (!rpcResult.isSuccess()) {
             throw new UnknownException();
         }
-        TaskDTO result = DataConverterUtils.convert(rpcResult.getData(), TaskDTO.class);
-        return result;
+        return DataConverterUtils.convert(rpcResult.getData(), TaskDTO.class);
     }
 
 

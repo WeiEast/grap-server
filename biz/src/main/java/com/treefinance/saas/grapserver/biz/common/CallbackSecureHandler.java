@@ -19,6 +19,7 @@ import org.springframework.stereotype.Service;
  */
 @Service
 public class CallbackSecureHandler {
+
     private static final Logger logger = LoggerFactory.getLogger(CallbackSecureHandler.class);
 
     /**

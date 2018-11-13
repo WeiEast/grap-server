@@ -1,17 +1,8 @@
 # Created by .ignore support plugin (hsz.mobi)
-.gitignore
 .idea/
-biz/grap-server-biz.iml
-biz/src/test/
-biz/target/
-common/grap-server-common.iml
-common/src/main/java/com/treefinance/saas/grapserver/common/utils/HoneRSAUtil.java
-common/target/
-dao/grap-server-dao.iml
-dao/target/
-facade/grap-server-facade.iml
-facade/target/
-grap-server.iml
-web/grap-server-web.iml
-web/src/test/com/treefinance/saas/grapserver/Test.java
-web/target/
+**/*.iml
+**/target
+**/out
+**/gen
+**/*.jar
+**/*.war

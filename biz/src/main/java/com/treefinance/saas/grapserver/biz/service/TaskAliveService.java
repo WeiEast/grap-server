@@ -49,4 +49,5 @@ public class TaskAliveService {
         TaskResult<String> rpcResult = taskAliveFacade.getTaskAliveTime(taskId);
         return rpcResult.getData();
     }
+
 }

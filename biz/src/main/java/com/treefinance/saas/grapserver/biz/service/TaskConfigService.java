@@ -67,7 +67,6 @@ public class TaskConfigService {
         return merge(supportedList, websiteConf, supportType);
     }
 
-
     private List<Map<String, Object>> merge(List<TaskSupport> supportedList,
                                             List<WebsiteConf> configs, EBizType type) {
         if (type == EBizType.OPERATOR) {
@@ -122,7 +121,6 @@ public class TaskConfigService {
                 iterator.remove();
             }
         }
-
         return loginConfig == null ? Collections.emptyMap() : loginConfig;
     }
 
@@ -144,4 +142,5 @@ public class TaskConfigService {
         }
         return loginConfig;
     }
+
 }

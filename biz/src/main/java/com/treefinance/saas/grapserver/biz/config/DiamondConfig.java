@@ -14,12 +14,13 @@ import org.springframework.stereotype.Component;
 import java.util.Map;
 
 /**
- * Created by luoyihua on 2017/5/4.
+ * @author luoyihua on 2017/5/4.
  */
 @Component("diamondConfig")
 @Scope
 @DResource
 public class DiamondConfig {
+
     private static final Logger logger = LoggerFactory.getLogger(DiamondConfig.class);
 
     @DAttribute(key = "default.merchant.color.config")
@@ -276,4 +277,5 @@ public class DiamondConfig {
     public void setTongdunUrlCollect(String tongdunUrlCollect) {
         this.tongdunUrlCollect = tongdunUrlCollect;
     }
+
 }

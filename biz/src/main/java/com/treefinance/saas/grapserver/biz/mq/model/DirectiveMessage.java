@@ -7,13 +7,10 @@ import java.io.Serializable;
 import static org.apache.commons.lang3.builder.ToStringStyle.SHORT_PREFIX_STYLE;
 
 /**
- * Created by luoyihua on 2017/4/26.
+ * @author by luoyihua on 2017/4/26.
  */
 public class DirectiveMessage implements Serializable {
 
-    /**
-     *
-     */
     private static final long serialVersionUID = 1L;
 
     private String directiveId;
@@ -53,6 +50,7 @@ public class DirectiveMessage implements Serializable {
     public void setDirectiveId(String directiveId) {
         this.directiveId = directiveId;
     }
+
     @Override
     public String toString() {
         return ToStringBuilder.reflectionToString(this, SHORT_PREFIX_STYLE);
