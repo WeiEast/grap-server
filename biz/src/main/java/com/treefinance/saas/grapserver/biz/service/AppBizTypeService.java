@@ -5,6 +5,7 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.google.common.collect.Lists;
+import com.treefinance.saas.grapserver.biz.common.QueryBizTypeConverter;
 import com.treefinance.saas.grapserver.common.utils.DataConverterUtils;
 import com.treefinance.saas.grapserver.dao.entity.AppBizType;
 import com.treefinance.saas.merchant.center.facade.request.common.BaseRequest;
@@ -43,22 +44,9 @@ public class AppBizTypeService implements InitializingBean {
     private final LoadingCache<Byte, AppBizType> cache = CacheBuilder.newBuilder()
             .refreshAfterWrite(5, TimeUnit.MINUTES)
             .expireAfterWrite(5, TimeUnit.MINUTES)
-            .build(CacheLoader.from(bizType -> {
-                GetAppBizTypeRequest getAppBizTypeRequest = new GetAppBizTypeRequest();
-                getAppBizTypeRequest.setBizType(bizType);
-                MerchantResult<List<AppBizTypeResult>>  merchantResult = appBizTypeFacade.queryAppBizTypeByBizType(getAppBizTypeRequest);
-                List<AppBizType> list = DataConverterUtils.convert(merchantResult.getData(),AppBizType.class);
-                if(merchantResult.isSuccess())
-                {
-                    logger.info("load local cache of appbiztype : appid={},data={}", bizType, JSON.toJSONString(list));
-
-                }
-                else{
-                    logger.info("load local cache of appbiztype false：error message {}",merchantResult.getRetMsg());
-                }
-
-                return list.get(0);
-            }));
+            .build(CacheLoader.from(bizType ->
+                 QueryBizTypeConverter.queryAppBizTypeByBizType(bizType).get(0)
+            ));
 
     /**
      * 获取类型
