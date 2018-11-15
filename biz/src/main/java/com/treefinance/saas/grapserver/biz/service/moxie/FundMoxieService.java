@@ -71,6 +71,18 @@ public class FundMoxieService {
     }
 
     /**
+     * 获取公积金采集任务执行状态
+     */
+    public Object queryTaskStatus(String moxieTaskId) {
+        String url = diamondConfig.getMoxieUrlFundGetTasksStatus();
+        url = url.replaceAll("\\{task_id\\}", moxieTaskId);
+        Map<String, String> headers = Maps.newHashMap();
+        wrapperApiKeyHeaders(headers);
+        String data = HttpClientUtils.doGetWithHeaders(url, headers);
+        return JsonUtils.toJsonObject(data);
+    }
+
+    /**
      * 创建公积金采集任务
      */
     public String createTasks(MoxieLoginParamsDTO moxieLoginParams) {
@@ -81,23 +93,7 @@ public class FundMoxieService {
         wrapperApiKeyHeaders(headers);
         String data = HttpClientUtils.doPostWithHeaders(url, params, headers);
         JSONObject result = (JSONObject) JsonUtils.toJsonObject(data);
-        String taskId = result.getString("task_id");
-        if (taskId != null) {
-            return taskId;
-        }
-        return null;
-    }
-
-    /**
-     * 获取公积金采集任务执行状态
-     */
-    public Object queryTaskStatus(String moxieTaskId) {
-        String url = diamondConfig.getMoxieUrlFundGetTasksStatus();
-        url = url.replaceAll("\\{task_id\\}", moxieTaskId);
-        Map<String, String> headers = Maps.newHashMap();
-        wrapperApiKeyHeaders(headers);
-        String data = HttpClientUtils.doGetWithHeaders(url, headers);
-        return JsonUtils.toJsonObject(data);
+        return result.getString("task_id");
     }
 
     /**

@@ -16,24 +16,20 @@
 
 package com.treefinance.saas.grapserver.biz.service;
 
-import com.alibaba.dubbo.rpc.RpcException;
-import com.alibaba.fastjson.JSON;
-import com.treefinance.saas.grapserver.common.model.dto.CallBackLicenseDTO;
-import com.treefinance.saas.grapserver.dao.entity.AppLicense;
-import com.treefinance.saas.merchant.center.facade.request.grapserver.GetAppLicenseRequest;
-import com.treefinance.saas.merchant.center.facade.request.grapserver.GetCallbackLicenseRequest;
-import com.treefinance.saas.merchant.center.facade.request.grapserver.SetAppLicenseRequest;
-import com.treefinance.saas.merchant.center.facade.result.console.MerchantResult;
-import com.treefinance.saas.merchant.center.facade.result.grapsever.AppLicenseResult;
-import com.treefinance.saas.merchant.center.facade.result.grapsever.CallbackLicenseResult;
-import com.treefinance.saas.merchant.center.facade.result.grapsever.SetAppLicenseResult;
-import com.treefinance.saas.merchant.center.facade.service.AppLicenseFacade;
+import javax.annotation.Resource;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.Resource;
+import com.alibaba.dubbo.rpc.RpcException;
+import com.alibaba.fastjson.JSON;
+import com.treefinance.saas.grapserver.dao.entity.AppLicense;
+import com.treefinance.saas.merchant.center.facade.request.grapserver.GetAppLicenseRequest;
+import com.treefinance.saas.merchant.center.facade.result.console.MerchantResult;
+import com.treefinance.saas.merchant.center.facade.result.grapsever.AppLicenseResult;
+import com.treefinance.saas.merchant.center.facade.service.AppLicenseFacade;
 
 /**
  * @author Jerry

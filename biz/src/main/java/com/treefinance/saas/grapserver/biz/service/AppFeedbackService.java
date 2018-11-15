@@ -37,8 +37,7 @@ public class AppFeedbackService {
         if (appFeedbackResultDTO.getBizType() == null) {
             throw new BizException("bizType不能为空");
         }
-        SaveAppFeedbackRequest request
-                = DataConverterUtils.convert(appFeedbackResultDTO, SaveAppFeedbackRequest.class);
+        SaveAppFeedbackRequest request = DataConverterUtils.convert(appFeedbackResultDTO, SaveAppFeedbackRequest.class);
         appFeedbackFacade.addAppFeedbackResult(request);
     }
 

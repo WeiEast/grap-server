@@ -1,5 +1,21 @@
 package com.treefinance.saas.grapserver.biz.service;
 
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
+
+import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.RandomUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.InitializingBean;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
+
 import com.alibaba.fastjson.JSON;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
@@ -13,25 +29,9 @@ import com.treefinance.saas.grapserver.common.enums.EBizType;
 import com.treefinance.saas.grapserver.common.utils.DataConverterUtils;
 import com.treefinance.saas.grapserver.dao.entity.AppBizLicense;
 import com.treefinance.saas.merchant.center.facade.request.common.BaseRequest;
-import com.treefinance.saas.merchant.center.facade.request.grapserver.GetAppLicenseByAppIdRequest;
 import com.treefinance.saas.merchant.center.facade.result.console.AppBizLicenseResult;
 import com.treefinance.saas.merchant.center.facade.result.console.MerchantResult;
 import com.treefinance.saas.merchant.center.facade.service.AppBizLicenseFacade;
-import org.apache.commons.lang.StringUtils;
-import org.apache.commons.lang3.RandomUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.InitializingBean;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-import org.springframework.util.CollectionUtils;
-
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 
 /**
  * @author luoyihua on 2017/5/10.
@@ -50,9 +50,10 @@ public class AppBizLicenseService implements InitializingBean, VariableMessageHa
     /**
      * 本地缓存
      */
-    private final LoadingCache<String, List<AppBizLicense>> cache =
-        CacheBuilder.newBuilder().refreshAfterWrite(5, TimeUnit.MINUTES).expireAfterWrite(5, TimeUnit.MINUTES)
-            .build(CacheLoader.from(appid -> QueryAppBizLicenseConverter.queryAppBizLicenseByAppId(appid)));
+    private final LoadingCache<String, List<AppBizLicense>> cache = CacheBuilder.newBuilder()
+            .refreshAfterWrite(5, TimeUnit.MINUTES)
+            .expireAfterWrite(5, TimeUnit.MINUTES)
+            .build(CacheLoader.from(QueryAppBizLicenseConverter::queryAppBizLicenseByAppId));
 
     /**
      * 根据appId获取授权

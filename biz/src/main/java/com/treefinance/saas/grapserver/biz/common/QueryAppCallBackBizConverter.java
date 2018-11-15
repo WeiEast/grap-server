@@ -18,11 +18,12 @@ import com.treefinance.saas.merchant.center.facade.result.grapsever.AppCallbackB
 import com.treefinance.saas.merchant.center.facade.service.AppCallBackBizFacade;
 
 /**
- * @author:guoguoyun
- * @date:Created in 2018/11/15下午3:31
+ * @author guoguoyun
+ * @date Created in 2018/11/15下午3:31
  */
 @Component
 public class QueryAppCallBackBizConverter {
+
     private static final Logger logger = LoggerFactory.getLogger(QueryBizTypeConverter.class);
 
     @Resource
@@ -34,11 +35,9 @@ public class QueryAppCallBackBizConverter {
         getAppCallBackBizByCallbackIdRequest.setCallbackId(callbackId);
         MerchantResult<List<AppCallbackBizResult>> listMerchantResult =
             appCallBackBizFacade.queryAppCallBackByCallbackId(getAppCallBackBizByCallbackIdRequest);
-        List<AppCallbackBiz> list =
-            DataConverterUtils.convert(listMerchantResult.getData(), AppCallbackBiz.class);
+        List<AppCallbackBiz> list = DataConverterUtils.convert(listMerchantResult.getData(), AppCallbackBiz.class);
         if (!listMerchantResult.isSuccess()) {
-            logger.info("load local cache of callback-types  false: error message={}",
-                listMerchantResult.getRetMsg());
+            logger.info("load local cache of callback-types  false: error message={}", listMerchantResult.getRetMsg());
             list = Lists.newArrayList();
         }
         logger.info("load local cache of callback-types : callbackId={}, callbackType={}", callbackId,
@@ -46,17 +45,5 @@ public class QueryAppCallBackBizConverter {
         return list;
 
     }
-
-
-
-
-
-
-
-
-
-
-
-
 
 }

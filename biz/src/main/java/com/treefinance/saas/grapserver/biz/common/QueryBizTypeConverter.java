@@ -15,8 +15,8 @@ import javax.annotation.Resource;
 import java.util.List;
 
 /**
- * @author:guoguoyun
- * @date:Created in 2018/11/15下午2:52
+ * @author guoguoyun
+ * @date Created in 2018/11/15下午2:52
  */
 @Component
 public class QueryBizTypeConverter {
@@ -27,7 +27,6 @@ public class QueryBizTypeConverter {
     private static AppBizTypeFacade appBizTypeFacade;
 
     public static List<AppBizType> queryAppBizTypeByBizType(Byte bizType) {
-
         GetAppBizTypeRequest getAppBizTypeRequest = new GetAppBizTypeRequest();
         getAppBizTypeRequest.setBizType(bizType);
         MerchantResult<List<AppBizTypeResult>> merchantResult =
@@ -41,4 +40,5 @@ public class QueryBizTypeConverter {
         }
         return list;
     }
+
 }

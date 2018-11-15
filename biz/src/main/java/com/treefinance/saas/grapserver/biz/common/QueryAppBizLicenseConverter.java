@@ -17,8 +17,8 @@ import com.treefinance.saas.merchant.center.facade.result.console.MerchantResult
 import com.treefinance.saas.merchant.center.facade.service.AppBizLicenseFacade;
 
 /**
- * @author:guoguoyun
- * @date:Created in 2018/11/15下午3:13
+ * @author guoguoyun
+ * @date Created in 2018/11/15下午3:13
  */
 @Component
 public class QueryAppBizLicenseConverter {
@@ -41,4 +41,5 @@ public class QueryAppBizLicenseConverter {
         logger.info("load local cache of applicense : appid={}, license={}", appid, JSON.toJSONString(list));
         return list;
     }
+
 }

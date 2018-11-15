@@ -73,9 +73,7 @@ public class DiplomaLoginSimulationService {
             throw new CrawlerBizException(Constants.REDIS_LOCK_ERROR_MSG);
         } finally {
             redisDao.releaseLock(key, lockMap, 60 * 1000L);
-
         }
-
     }
 
     /**
@@ -113,7 +111,6 @@ public class DiplomaLoginSimulationService {
         } finally {
             redisDao.releaseLock(key, lockMap, 60 * 1000L);
         }
-
     }
 
     /**
@@ -207,7 +204,6 @@ public class DiplomaLoginSimulationService {
         } finally {
             redisDao.releaseLock(key, lockMap, 60 * 1000L);
         }
-
     }
 
     /**
@@ -234,4 +230,5 @@ public class DiplomaLoginSimulationService {
         }
         return SimpleResult.successResult(map);
     }
+
 }

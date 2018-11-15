@@ -18,18 +18,18 @@ import com.treefinance.saas.merchant.center.facade.result.grapsever.AppCallbackR
 import com.treefinance.saas.merchant.center.facade.service.AppCallbackConfigFacade;
 
 /**
- * @author:guoguoyun
- * @date:Created in 2018/11/15下午3:22
+ * @author guoguoyun
+ * @date Created in 2018/11/15下午3:22
  */
 @Component
 public class QueryAppCallbackConfigConverter {
+
     private static final Logger logger = LoggerFactory.getLogger(QueryBizTypeConverter.class);
 
     @Resource
     private static AppCallbackConfigFacade appCallbackConfigFacade;
 
     public static List<AppCallbackConfig> queryAppCallBackConfigByAppId(String appid) {
-
         GetAppCallBackConfigByIdRequest getAppCallBackConfigByIdRequest = new GetAppCallBackConfigByIdRequest();
         getAppCallBackConfigByIdRequest.setAppId(appid);
         MerchantResult<List<AppCallbackResult>> listMerchantResult =
