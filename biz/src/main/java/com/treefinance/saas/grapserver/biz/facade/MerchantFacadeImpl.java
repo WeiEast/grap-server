@@ -61,7 +61,8 @@ public class MerchantFacadeImpl implements MerchantFacade {
         List<String> stringList = new ArrayList<String>();
         stringList.add(task.getAppId());
         queryMerchantByTaskIdRequest.setAppIds(stringList);
-        MerchantResult<List<MerchantBaseResult>> listMerchantResult = merchantBaseInfoFacade.queryMerchantBaseListByAppId(queryMerchantByTaskIdRequest);
+        MerchantResult<List<MerchantBaseResult>> listMerchantResult =
+                merchantBaseInfoFacade.queryMerchantBaseListByAppId(queryMerchantByTaskIdRequest);
         List<MerchantBaseInfo> infoList = DataConverterUtils.convert(listMerchantResult.getData(), MerchantBaseInfo.class);
         if (CollectionUtils.isEmpty(infoList)) {
             logger.info("通过taskId查询商户基本信息,未查询到taskId={},appId={}的商户信息", taskId, task.getAppId());

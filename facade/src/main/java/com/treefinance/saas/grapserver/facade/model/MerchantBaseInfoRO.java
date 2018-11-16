@@ -4,9 +4,10 @@ import java.io.Serializable;
 import java.util.Date;
 
 /**
- * Created by haojiahong on 2017/10/20.
+ * @author haojiahong on 2017/10/20.
  */
 public class MerchantBaseInfoRO implements Serializable {
+
     private static final long serialVersionUID = 6394903432168886204L;
 
     /**
@@ -183,4 +184,5 @@ public class MerchantBaseInfoRO implements Serializable {
                 ", lastUpdateTime=" + lastUpdateTime +
                 '}';
     }
+
 }

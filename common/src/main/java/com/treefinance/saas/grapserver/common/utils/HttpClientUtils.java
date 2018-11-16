@@ -177,6 +177,9 @@ public class HttpClientUtils {
         return doGet(url, Maps.newHashMap());
     }
 
+    /**
+     * @return 方法出现异常时可能会返回【null】
+     */
     public static String doGetWithHeaders(String url, Map<String, String> headers) {
         return doGetWithHeaders(url, Maps.newHashMap(), headers);
     }
@@ -331,7 +334,7 @@ public class HttpClientUtils {
      * @param timeOut    秒
      * @param retryTimes 重试次数
      * @param params     参数
-     * @return           responseEntity
+     * @return           responseEntity，方法出现异常时返回【""】（空字符串）
      */
     public static String doPostWithTimeoutAndRetryTimes(String url, Byte timeOut, Byte retryTimes, Map<String, Object> params) {
         long start = System.currentTimeMillis();

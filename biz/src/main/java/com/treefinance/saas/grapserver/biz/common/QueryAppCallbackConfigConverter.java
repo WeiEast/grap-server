@@ -2,10 +2,9 @@ package com.treefinance.saas.grapserver.biz.common;
 
 import java.util.List;
 
-import javax.annotation.Resource;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.alibaba.fastjson.JSON;
@@ -26,7 +25,7 @@ public class QueryAppCallbackConfigConverter {
 
     private static final Logger logger = LoggerFactory.getLogger(QueryBizTypeConverter.class);
 
-    @Resource
+    @Autowired
     private static AppCallbackConfigFacade appCallbackConfigFacade;
 
     public static List<AppCallbackConfig> queryAppCallBackConfigByAppId(String appid) {

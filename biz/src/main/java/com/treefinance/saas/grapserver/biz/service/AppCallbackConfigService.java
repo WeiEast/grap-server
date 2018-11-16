@@ -132,7 +132,7 @@ public class AppCallbackConfigService implements InitializingBean, VariableMessa
 
         List<AppCallbackBiz> callbackBizs = getCallbackTypeList(callbackIds).stream()
             .filter(appCallbackBiz -> bizType.equals(appCallbackBiz.getBizType())
-                || defaultType.equals(appCallbackBiz.getBizType()))
+                    || defaultType.equals(appCallbackBiz.getBizType()))
             .collect(Collectors.toList());
         if (CollectionUtils.isEmpty(callbackBizs)) {
             return null;
@@ -141,19 +141,9 @@ public class AppCallbackConfigService implements InitializingBean, VariableMessa
         Map<Byte, List<AppCallbackBiz>> callbackBizMap =
             callbackBizs.stream().collect(Collectors.groupingBy(AppCallbackBiz::getBizType));
         if (callbackBizMap.containsKey(bizType)) {
-            List<Integer> bizCallbackIds =
-                callbackBizMap.get(bizType).stream().map(AppCallbackBiz::getCallbackId).collect(Collectors.toList());
-            List<AppCallbackConfig> bizConfigs =
-                list.stream().filter(config -> bizCallbackIds.contains(config.getId())).collect(Collectors.toList());
-            logger.info("根据业务类型匹配回调配置结果:bizConfigs={}", JSON.toJSONString(bizConfigs));
-            return DataConverterUtils.convert(bizConfigs, AppCallbackConfigDTO.class);
+            return listAppCallbackConfigDTOS(list, bizType, callbackBizMap);
         } else if (callbackBizMap.containsKey(defaultType)) {
-            List<Integer> bizCallbackIds = callbackBizMap.get(defaultType).stream().map(AppCallbackBiz::getCallbackId)
-                .collect(Collectors.toList());
-            List<AppCallbackConfig> defaultConfigs =
-                list.stream().filter(config -> bizCallbackIds.contains(config.getId())).collect(Collectors.toList());
-            logger.info("根据业务类型匹配回调配置结果:defaultConfigs={}", JSON.toJSONString(defaultConfigs));
-            return DataConverterUtils.convert(defaultConfigs, AppCallbackConfigDTO.class);
+            return listAppCallbackConfigDTOS(list, defaultType, callbackBizMap);
         }
         return null;
     }
@@ -202,4 +192,15 @@ public class AppCallbackConfigService implements InitializingBean, VariableMessa
         }
         this.callbackCache.refresh(appId);
     }
+
+    private List<AppCallbackConfigDTO> listAppCallbackConfigDTOS(
+            List<AppCallbackConfig> list, Byte bizType, Map<Byte, List<AppCallbackBiz>> callbackBizMap) {
+        List<Integer> bizCallbackIds =
+                callbackBizMap.get(bizType).stream().map(AppCallbackBiz::getCallbackId).collect(Collectors.toList());
+        List<AppCallbackConfig> defaultConfigs =
+                list.stream().filter(config -> bizCallbackIds.contains(config.getId())).collect(Collectors.toList());
+        logger.info("根据业务类型匹配回调配置结果:defaultConfigs={}", JSON.toJSONString(defaultConfigs));
+        return DataConverterUtils.convert(defaultConfigs, AppCallbackConfigDTO.class);
+    }
+
 }

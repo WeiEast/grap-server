@@ -67,10 +67,7 @@ public class AppLicenseService {
 
     public String getDataKey(String appId) {
         AppLicense appLicense = this.getAppLicense(appId);
-        if (appLicense == null) {
-            return null;
-        }
-        return appLicense.getDataSecretKey();
+        return appLicense == null ? null : appLicense.getDataSecretKey();
     }
 
 }

@@ -1,5 +1,12 @@
 package com.treefinance.saas.grapserver.biz.common;
 
+import java.util.List;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
 import com.alibaba.fastjson.JSON;
 import com.treefinance.saas.grapserver.common.utils.DataConverterUtils;
 import com.treefinance.saas.grapserver.dao.entity.AppBizType;
@@ -7,12 +14,6 @@ import com.treefinance.saas.merchant.center.facade.request.grapserver.GetAppBizT
 import com.treefinance.saas.merchant.center.facade.result.console.AppBizTypeResult;
 import com.treefinance.saas.merchant.center.facade.result.console.MerchantResult;
 import com.treefinance.saas.merchant.center.facade.service.AppBizTypeFacade;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
-
-import javax.annotation.Resource;
-import java.util.List;
 
 /**
  * @author guoguoyun
@@ -23,7 +24,7 @@ public class QueryBizTypeConverter {
 
     private static final Logger logger = LoggerFactory.getLogger(QueryBizTypeConverter.class);
 
-    @Resource
+    @Autowired
     private static AppBizTypeFacade appBizTypeFacade;
 
     public static List<AppBizType> queryAppBizTypeByBizType(Byte bizType) {

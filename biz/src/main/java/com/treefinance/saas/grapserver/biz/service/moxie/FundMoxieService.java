@@ -43,7 +43,6 @@ public class FundMoxieService {
         wrapperApiKeyHeaders(headers);
         String data = HttpClientUtils.doGetWithHeaders(url, headers);
         return JsonUtils.toJavaBeanList(data, MoxieCityInfoDTO.class);
-
     }
 
     /**

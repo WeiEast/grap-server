@@ -98,7 +98,8 @@ public class CarInfoService {
     }
 
     public void updateCollectTaskStatusAndTaskLogAndSendMonitor(Long taskId, List<CarInfoCollectTaskLogDTO> logList) {
-        List<CarInfoCollectTaskLogRequest> carInfoCollectTaskLogRequestList = DataConverterUtils.convert(logList, CarInfoCollectTaskLogRequest.class);
+        List<CarInfoCollectTaskLogRequest> carInfoCollectTaskLogRequestList =
+                DataConverterUtils.convert(logList, CarInfoCollectTaskLogRequest.class);
         carInfoFacade.updateCollectTaskStatusAndTaskLogAndSendMonitor(taskId, carInfoCollectTaskLogRequestList);
     }
 
