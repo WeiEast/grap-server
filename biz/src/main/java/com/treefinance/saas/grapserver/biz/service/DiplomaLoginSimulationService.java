@@ -209,7 +209,7 @@ public class DiplomaLoginSimulationService {
     /**
      * 获取配置
      */
-    public Object getConfig(String appId, Long taskId, String style) {
+    public Object getConfig(String appId, String style) {
         Map colorMap = merchantConfigService.getColorConfig(appId, style);
         Map<String, Object> map = Maps.newHashMap();
         map.put("color", colorMap);

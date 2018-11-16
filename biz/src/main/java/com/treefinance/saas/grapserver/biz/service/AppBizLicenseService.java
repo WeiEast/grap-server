@@ -26,12 +26,7 @@ import com.treefinance.saas.assistant.variable.notify.client.VariableMessageHand
 import com.treefinance.saas.assistant.variable.notify.model.VariableMessage;
 import com.treefinance.saas.grapserver.biz.common.QueryAppBizLicenseConverter;
 import com.treefinance.saas.grapserver.common.enums.EBizType;
-import com.treefinance.saas.grapserver.common.utils.DataConverterUtils;
 import com.treefinance.saas.grapserver.dao.entity.AppBizLicense;
-import com.treefinance.saas.merchant.center.facade.request.common.BaseRequest;
-import com.treefinance.saas.merchant.center.facade.result.console.AppBizLicenseResult;
-import com.treefinance.saas.merchant.center.facade.result.console.MerchantResult;
-import com.treefinance.saas.merchant.center.facade.service.AppBizLicenseFacade;
 
 /**
  * @author luoyihua on 2017/5/10.
@@ -45,15 +40,14 @@ public class AppBizLicenseService implements InitializingBean, VariableMessageHa
     private static final Logger logger = LoggerFactory.getLogger(AppBizLicenseService.class);
 
     @Autowired
-    private AppBizLicenseFacade appBizLicenseFacade;
+    private QueryAppBizLicenseConverter queryAppBizLicenseConverter;
 
     /**
      * 本地缓存
      */
-    private final LoadingCache<String, List<AppBizLicense>> cache = CacheBuilder.newBuilder()
-            .refreshAfterWrite(5, TimeUnit.MINUTES)
-            .expireAfterWrite(5, TimeUnit.MINUTES)
-            .build(CacheLoader.from(QueryAppBizLicenseConverter::queryAppBizLicenseByAppId));
+    private final LoadingCache<String, List<AppBizLicense>> cache =
+        CacheBuilder.newBuilder().refreshAfterWrite(5, TimeUnit.MINUTES).expireAfterWrite(5, TimeUnit.MINUTES)
+            .build(CacheLoader.from(appid -> queryAppBizLicenseConverter.queryAppBizLicenseByAppId(appid)));
 
     /**
      * 根据appId获取授权
@@ -184,16 +178,10 @@ public class AppBizLicenseService implements InitializingBean, VariableMessageHa
 
     @Override
     public void afterPropertiesSet() throws Exception {
-        BaseRequest request = new BaseRequest();
-        MerchantResult<List<AppBizLicenseResult>> listMerchantResult =
-            appBizLicenseFacade.queryAllAppBizLicense(request);
-        List<AppBizLicense> licenses = DataConverterUtils.convert(listMerchantResult.getData(), AppBizLicense.class);
-
+        List<AppBizLicense> licenses = queryAppBizLicenseConverter.queryAllAppBizLicense();
         if (CollectionUtils.isEmpty(licenses)) {
-            logger.info("加载app授权信息  false: error message={}", listMerchantResult.getRetMsg());
             return;
         }
-        logger.info("加载app授权信息: licenses={}", JSON.toJSONString(licenses));
         this.cache.putAll(licenses.stream().collect(Collectors.groupingBy(AppBizLicense::getAppId)));
     }
 

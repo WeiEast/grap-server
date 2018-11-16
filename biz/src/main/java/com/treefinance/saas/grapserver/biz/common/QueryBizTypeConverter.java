@@ -2,6 +2,7 @@ package com.treefinance.saas.grapserver.biz.common;
 
 import java.util.List;
 
+import com.treefinance.saas.merchant.center.facade.request.common.BaseRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,6 +16,8 @@ import com.treefinance.saas.merchant.center.facade.result.console.AppBizTypeResu
 import com.treefinance.saas.merchant.center.facade.result.console.MerchantResult;
 import com.treefinance.saas.merchant.center.facade.service.AppBizTypeFacade;
 
+import javax.annotation.Resource;
+
 /**
  * @author guoguoyun
  * @date Created in 2018/11/15下午2:52
@@ -24,10 +27,10 @@ public class QueryBizTypeConverter {
 
     private static final Logger logger = LoggerFactory.getLogger(QueryBizTypeConverter.class);
 
-    @Autowired
-    private static AppBizTypeFacade appBizTypeFacade;
+    @Resource
+    private AppBizTypeFacade appBizTypeFacade;
 
-    public static List<AppBizType> queryAppBizTypeByBizType(Byte bizType) {
+    public List<AppBizType> queryAppBizTypeByBizType(Byte bizType) {
         GetAppBizTypeRequest getAppBizTypeRequest = new GetAppBizTypeRequest();
         getAppBizTypeRequest.setBizType(bizType);
         MerchantResult<List<AppBizTypeResult>> merchantResult =
@@ -39,6 +42,14 @@ public class QueryBizTypeConverter {
         } else {
             logger.info("load local cache of appbiztype false：error message {}", merchantResult.getRetMsg());
         }
+        return list;
+    }
+
+    public List<AppBizType> queryAllAppBizType() {
+        BaseRequest getAppBizTypeRequest = new BaseRequest();
+        MerchantResult<List<AppBizTypeResult>> merchantResult =
+            appBizTypeFacade.queryAllAppBizType(getAppBizTypeRequest);
+        List<AppBizType> list = DataConverterUtils.convert(merchantResult.getData(), AppBizType.class);
         return list;
     }
 

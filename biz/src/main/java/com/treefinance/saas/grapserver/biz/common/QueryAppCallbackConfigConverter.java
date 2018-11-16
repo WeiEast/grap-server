@@ -2,9 +2,11 @@ package com.treefinance.saas.grapserver.biz.common;
 
 import java.util.List;
 
+import javax.annotation.Resource;
+
+import com.treefinance.saas.merchant.center.facade.request.common.BaseRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.alibaba.fastjson.JSON;
@@ -17,18 +19,18 @@ import com.treefinance.saas.merchant.center.facade.result.grapsever.AppCallbackR
 import com.treefinance.saas.merchant.center.facade.service.AppCallbackConfigFacade;
 
 /**
- * @author guoguoyun
- * @date Created in 2018/11/15下午3:22
+ * @author:guoguoyun
+ * @date:Created in 2018/11/15下午3:22
  */
 @Component
 public class QueryAppCallbackConfigConverter {
+    private static final Logger logger = LoggerFactory.getLogger(QueryAppCallbackConfigConverter.class);
 
-    private static final Logger logger = LoggerFactory.getLogger(QueryBizTypeConverter.class);
+    @Resource
+    private AppCallbackConfigFacade appCallbackConfigFacade;
 
-    @Autowired
-    private static AppCallbackConfigFacade appCallbackConfigFacade;
+    public List<AppCallbackConfig> queryAppCallBackConfigByAppId(String appid) {
 
-    public static List<AppCallbackConfig> queryAppCallBackConfigByAppId(String appid) {
         GetAppCallBackConfigByIdRequest getAppCallBackConfigByIdRequest = new GetAppCallBackConfigByIdRequest();
         getAppCallBackConfigByIdRequest.setAppId(appid);
         MerchantResult<List<AppCallbackResult>> listMerchantResult =
@@ -45,4 +47,14 @@ public class QueryAppCallbackConfigConverter {
         return list;
 
     }
+
+    public List<AppCallbackConfig> queryAllAppCallBackConfig() {
+        BaseRequest request = new BaseRequest();
+        MerchantResult<List<AppCallbackResult>> listMerchantResult =
+            appCallbackConfigFacade.queryAllAppCallBackConfig(request);
+        List<AppCallbackConfig> list =
+            DataConverterUtils.convert(listMerchantResult.getData(), AppCallbackConfig.class);
+        return list;
+    }
+
 }

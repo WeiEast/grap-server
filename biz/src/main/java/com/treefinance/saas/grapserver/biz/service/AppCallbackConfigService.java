@@ -28,12 +28,6 @@ import com.treefinance.saas.grapserver.common.utils.DataConverterUtils;
 import com.treefinance.saas.grapserver.dao.entity.AppCallbackBiz;
 import com.treefinance.saas.grapserver.dao.entity.AppCallbackConfig;
 import com.treefinance.saas.grapserver.facade.enums.EDataType;
-import com.treefinance.saas.merchant.center.facade.request.common.BaseRequest;
-import com.treefinance.saas.merchant.center.facade.result.console.MerchantResult;
-import com.treefinance.saas.merchant.center.facade.result.grapsever.AppCallbackBizResult;
-import com.treefinance.saas.merchant.center.facade.result.grapsever.AppCallbackResult;
-import com.treefinance.saas.merchant.center.facade.service.AppCallBackBizFacade;
-import com.treefinance.saas.merchant.center.facade.service.AppCallbackConfigFacade;
 
 /**
  * @author luoyihua on 2017/5/11.
@@ -47,31 +41,27 @@ public class AppCallbackConfigService implements InitializingBean, VariableMessa
     private static final Logger logger = LoggerFactory.getLogger(AppCallbackConfigService.class);
 
     @Autowired
-    private AppCallbackConfigFacade appCallbackConfigFacade;
-
+    private QueryAppCallBackBizConverter queryAppCallBackBizConverter;
     @Autowired
-    private AppCallBackBizFacade appCallBackBizFacade;
+    private QueryAppCallbackConfigConverter queryAppCallbackConfigConverter;
 
     /**
      * 本地缓存<appId,callbackConfig>
      */
     private final LoadingCache<String, List<AppCallbackConfig>> callbackCache = CacheBuilder.newBuilder()
-            .refreshAfterWrite(5, TimeUnit.MINUTES)
-            .expireAfterAccess(5, TimeUnit.MINUTES)
-            .build(CacheLoader.from(appid -> {
-                List<AppCallbackConfig> list = QueryAppCallbackConfigConverter.queryAppCallBackConfigByAppId(appid);
-                // 刷新类型
-                list.forEach(appCallbackConfig -> this.callbackTypeCache.refresh(appCallbackConfig.getId()));
-                return list;
-            }));
+        .refreshAfterWrite(5, TimeUnit.MINUTES).expireAfterAccess(5, TimeUnit.MINUTES).build(CacheLoader.from(appid -> {
+            List<AppCallbackConfig> list = queryAppCallbackConfigConverter.queryAppCallBackConfigByAppId(appid);
+            // 刷新类型
+            list.forEach(appCallbackConfig -> this.callbackTypeCache.refresh(appCallbackConfig.getId()));
+            return list;
+        }));
 
     /**
      * 本地缓存<callbackId,callbackType>
      */
-    private final LoadingCache<Integer, List<AppCallbackBiz>> callbackTypeCache = CacheBuilder.newBuilder()
-            .refreshAfterWrite(5, TimeUnit.MINUTES)
-            .expireAfterAccess(5, TimeUnit.MINUTES)
-            .build(CacheLoader.from(QueryAppCallBackBizConverter::queryAppCallBackByCallbackId));
+    private final LoadingCache<Integer, List<AppCallbackBiz>> callbackTypeCache =
+        CacheBuilder.newBuilder().refreshAfterWrite(5, TimeUnit.MINUTES).expireAfterAccess(5, TimeUnit.MINUTES).build(
+            CacheLoader.from(callbackId -> queryAppCallBackBizConverter.queryAppCallBackByCallbackId(callbackId)));
 
     /**
      * 根据appId获取
@@ -132,7 +122,7 @@ public class AppCallbackConfigService implements InitializingBean, VariableMessa
 
         List<AppCallbackBiz> callbackBizs = getCallbackTypeList(callbackIds).stream()
             .filter(appCallbackBiz -> bizType.equals(appCallbackBiz.getBizType())
-                    || defaultType.equals(appCallbackBiz.getBizType()))
+                || defaultType.equals(appCallbackBiz.getBizType()))
             .collect(Collectors.toList());
         if (CollectionUtils.isEmpty(callbackBizs)) {
             return null;
@@ -151,23 +141,14 @@ public class AppCallbackConfigService implements InitializingBean, VariableMessa
     @Override
     public void afterPropertiesSet() throws Exception {
         // 1. 初始化appCallback
-        BaseRequest request = new BaseRequest();
-        MerchantResult<List<AppCallbackResult>> listMerchantResult =
-            appCallbackConfigFacade.queryAllAppCallBackConfig(request);
-        List<AppCallbackConfig> list =
-            DataConverterUtils.convert(listMerchantResult.getData(), AppCallbackConfig.class);
-
+        List<AppCallbackConfig> list = queryAppCallbackConfigConverter.queryAllAppCallBackConfig();
         logger.info("加载callback信息: callback={}", JSON.toJSONString(list));
         if (CollectionUtils.isEmpty(list)) {
             return;
         }
         this.callbackCache.putAll(list.stream().collect(Collectors.groupingBy(AppCallbackConfig::getAppId)));
         // 2. 初始化callBackType
-        BaseRequest baseRequest = new BaseRequest();
-        MerchantResult<List<AppCallbackBizResult>> listMerchantResult1 =
-            appCallBackBizFacade.queryAllAppCallBack(baseRequest);
-        List<AppCallbackBiz> appCallbackBizList =
-            DataConverterUtils.convert(listMerchantResult1.getData(), AppCallbackBiz.class);
+        List<AppCallbackBiz> appCallbackBizList = queryAppCallBackBizConverter.queryAllAppCallBack();
 
         logger.info("加载callbackType信息: callbackType={}", JSON.toJSONString(appCallbackBizList));
         if (CollectionUtils.isEmpty(appCallbackBizList)) {
@@ -193,12 +174,12 @@ public class AppCallbackConfigService implements InitializingBean, VariableMessa
         this.callbackCache.refresh(appId);
     }
 
-    private List<AppCallbackConfigDTO> listAppCallbackConfigDTOS(
-            List<AppCallbackConfig> list, Byte bizType, Map<Byte, List<AppCallbackBiz>> callbackBizMap) {
+    private List<AppCallbackConfigDTO> listAppCallbackConfigDTOS(List<AppCallbackConfig> list, Byte bizType,
+        Map<Byte, List<AppCallbackBiz>> callbackBizMap) {
         List<Integer> bizCallbackIds =
-                callbackBizMap.get(bizType).stream().map(AppCallbackBiz::getCallbackId).collect(Collectors.toList());
+            callbackBizMap.get(bizType).stream().map(AppCallbackBiz::getCallbackId).collect(Collectors.toList());
         List<AppCallbackConfig> defaultConfigs =
-                list.stream().filter(config -> bizCallbackIds.contains(config.getId())).collect(Collectors.toList());
+            list.stream().filter(config -> bizCallbackIds.contains(config.getId())).collect(Collectors.toList());
         logger.info("根据业务类型匹配回调配置结果:defaultConfigs={}", JSON.toJSONString(defaultConfigs));
         return DataConverterUtils.convert(defaultConfigs, AppCallbackConfigDTO.class);
     }

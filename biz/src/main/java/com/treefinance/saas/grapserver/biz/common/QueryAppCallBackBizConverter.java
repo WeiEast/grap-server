@@ -2,9 +2,11 @@ package com.treefinance.saas.grapserver.biz.common;
 
 import java.util.List;
 
+import javax.annotation.Resource;
+
+import com.treefinance.saas.merchant.center.facade.request.common.BaseRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.alibaba.fastjson.JSON;
@@ -17,18 +19,17 @@ import com.treefinance.saas.merchant.center.facade.result.grapsever.AppCallbackB
 import com.treefinance.saas.merchant.center.facade.service.AppCallBackBizFacade;
 
 /**
- * @author guoguoyun
- * @date Created in 2018/11/15下午3:31
+ * @author:guoguoyun
+ * @date:Created in 2018/11/15下午3:31
  */
 @Component
 public class QueryAppCallBackBizConverter {
+    private static final Logger logger = LoggerFactory.getLogger(QueryAppCallBackBizConverter.class);
 
-    private static final Logger logger = LoggerFactory.getLogger(QueryBizTypeConverter.class);
+    @Resource
+    private  AppCallBackBizFacade appCallBackBizFacade;
 
-    @Autowired
-    private static AppCallBackBizFacade appCallBackBizFacade;
-
-    public static List<AppCallbackBiz> queryAppCallBackByCallbackId(Integer callbackId) {
+    public  List<AppCallbackBiz> queryAppCallBackByCallbackId(Integer callbackId) {
         GetAppCallBackBizByCallbackIdRequest getAppCallBackBizByCallbackIdRequest =
             new GetAppCallBackBizByCallbackIdRequest();
         getAppCallBackBizByCallbackIdRequest.setCallbackId(callbackId);
@@ -43,6 +44,13 @@ public class QueryAppCallBackBizConverter {
             JSON.toJSONString(list));
         return list;
 
+    }
+    
+    public  List<AppCallbackBiz> queryAllAppCallBack(){
+        BaseRequest baseRequest = new BaseRequest();
+        MerchantResult<List<AppCallbackBizResult>> listMerchantResult = appCallBackBizFacade.queryAllAppCallBack(baseRequest);
+        List<AppCallbackBiz> appCallbackBizList = DataConverterUtils.convert(listMerchantResult.getData(), AppCallbackBiz.class);
+        return appCallbackBizList;
     }
 
 }

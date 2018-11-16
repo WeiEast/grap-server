@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSON;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Joiner;
 import com.google.common.collect.Maps;
+import com.treefinance.saas.grapserver.biz.common.GetAppColorConfigConverter;
 import com.treefinance.saas.grapserver.biz.config.DiamondConfig;
 import com.treefinance.saas.grapserver.common.exception.BizException;
 import com.treefinance.saas.grapserver.common.model.vo.task.AppH5TipsVO;
@@ -38,19 +39,14 @@ public class MerchantConfigService {
     @Autowired
     private DiamondConfig diamondConfig;
     @Autowired
-    private AppColorConfigFacade appColorConfigFacade;
+    private GetAppColorConfigConverter getAppColorConfigConverter;
     @Autowired
     private AppH5TipsFacade appH5TipsFacade;
 
     @SuppressWarnings("rawtypes")
     public Map getColorConfig(String appId, String style) {
 
-        GetAppColorConfigRequest getAppColorConfigRequest = new GetAppColorConfigRequest();
-        getAppColorConfigRequest.setAppId(appId);
-        getAppColorConfigRequest.setStyle(style);
-        MerchantResult<AppColorConfigResult> merchantColorConfigResult =
-            appColorConfigFacade.queryAppColorConfig(getAppColorConfigRequest);
-
+        MerchantResult<AppColorConfigResult> merchantColorConfigResult = getAppColorConfigConverter.queryAppColorConfig(appId, style);
         Map<String, Object> map = Maps.newHashMap();
         if (merchantColorConfigResult.isSuccess()) {
             AppColorConfig merchantColorConfig =
@@ -108,16 +104,14 @@ public class MerchantConfigService {
         if (CollectionUtils.isNotEmpty(map.get("1"))) {
             List<AppH5TipsResult> dialogList = map.get("1");
             result.setTipsType((byte)1);
-            List<String> contentList =
-                dialogList.stream().map(AppH5TipsResult::getTipsContent).collect(Collectors.toList());
+            List<String> contentList = dialogList.stream().map(AppH5TipsResult::getTipsContent).collect(Collectors.toList());
             String content = Joiner.on(" ").join(contentList);
             result.setTipsContent(content);
             return result;
         } else {
             List<AppH5TipsResult> scrollList = map.get("0");
             result.setTipsType((byte)0);
-            List<String> contentList =
-                scrollList.stream().map(AppH5TipsResult::getTipsContent).collect(Collectors.toList());
+            List<String> contentList = scrollList.stream().map(AppH5TipsResult::getTipsContent).collect(Collectors.toList());
             String content = Joiner.on(" ").join(contentList);
             result.setTipsContent(content);
             return result;

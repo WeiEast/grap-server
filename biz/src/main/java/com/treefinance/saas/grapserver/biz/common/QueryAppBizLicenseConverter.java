@@ -11,24 +11,27 @@ import com.alibaba.fastjson.JSON;
 import com.google.common.collect.Lists;
 import com.treefinance.saas.grapserver.common.utils.DataConverterUtils;
 import com.treefinance.saas.grapserver.dao.entity.AppBizLicense;
+import com.treefinance.saas.merchant.center.facade.request.common.BaseRequest;
 import com.treefinance.saas.merchant.center.facade.request.grapserver.GetAppLicenseByAppIdRequest;
 import com.treefinance.saas.merchant.center.facade.result.console.AppBizLicenseResult;
 import com.treefinance.saas.merchant.center.facade.result.console.MerchantResult;
 import com.treefinance.saas.merchant.center.facade.service.AppBizLicenseFacade;
 
+import javax.annotation.Resource;
+
 /**
- * @author guoguoyun
- * @date Created in 2018/11/15下午3:13
+ * @author:guoguoyun
+ * @date:Created in 2018/11/15下午3:13
  */
 @Component
 public class QueryAppBizLicenseConverter {
 
-    private static final Logger logger = LoggerFactory.getLogger(QueryBizTypeConverter.class);
+    private static final Logger logger = LoggerFactory.getLogger(QueryAppBizLicenseConverter.class);
 
-    @Autowired
-    private static AppBizLicenseFacade appBizLicenseFacade;
+    @Resource
+    private AppBizLicenseFacade appBizLicenseFacade;
 
-    public static List<AppBizLicense> queryAppBizLicenseByAppId(String appid) {
+    public List<AppBizLicense> queryAppBizLicenseByAppId(String appid) {
         GetAppLicenseByAppIdRequest getAppLicenseByAppIdRequest = new GetAppLicenseByAppIdRequest();
         getAppLicenseByAppIdRequest.setAppId(appid);
         MerchantResult<List<AppBizLicenseResult>> listMerchantResult =
@@ -42,4 +45,15 @@ public class QueryAppBizLicenseConverter {
         return list;
     }
 
+    public List<AppBizLicense> queryAllAppBizLicense() {
+        BaseRequest request = new BaseRequest();
+        MerchantResult<List<AppBizLicenseResult>> listMerchantResult =
+            appBizLicenseFacade.queryAllAppBizLicense(request);
+        List<AppBizLicense> licenses = DataConverterUtils.convert(listMerchantResult.getData(), AppBizLicense.class);
+        if (!listMerchantResult.isSuccess()) {
+            logger.info("load local cache of applicense  false: error message={}", listMerchantResult.getRetMsg());
+        }
+        logger.info("load local cache of applicense :  license={}" , JSON.toJSONString(licenses));
+        return licenses;
+    }
 }

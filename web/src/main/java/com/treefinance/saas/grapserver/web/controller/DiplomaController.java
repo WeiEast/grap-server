@@ -37,7 +37,7 @@ public class DiplomaController {
             throw new IllegalArgumentException("学信网:获取配置,参数缺失,appid,taskid必传");
         }
         logger.info("学信网:获取配置,传入参数,appid={},taskid={}", appid, taskId);
-        Object result = diplomaLoginSimulationService.getConfig(appid, taskId, style);
+        Object result = diplomaLoginSimulationService.getConfig(appid, style);
         logger.info("学信网:获取配置,返回结果,appid={},taskid={},result={}", appid, taskId, JSON.toJSONString(result));
         return result;
     }
