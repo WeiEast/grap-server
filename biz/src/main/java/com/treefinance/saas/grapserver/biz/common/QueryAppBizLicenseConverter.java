@@ -11,11 +11,11 @@ import com.alibaba.fastjson.JSON;
 import com.google.common.collect.Lists;
 import com.treefinance.saas.grapserver.common.utils.DataConverterUtils;
 import com.treefinance.saas.grapserver.dao.entity.AppBizLicense;
-import com.treefinance.saas.merchant.center.facade.request.common.BaseRequest;
-import com.treefinance.saas.merchant.center.facade.request.grapserver.GetAppLicenseByAppIdRequest;
-import com.treefinance.saas.merchant.center.facade.result.console.AppBizLicenseResult;
-import com.treefinance.saas.merchant.center.facade.result.console.MerchantResult;
-import com.treefinance.saas.merchant.center.facade.service.AppBizLicenseFacade;
+import com.treefinance.saas.merchant.facade.request.common.BaseRequest;
+import com.treefinance.saas.merchant.facade.request.grapserver.GetAppLicenseByAppIdRequest;
+import com.treefinance.saas.merchant.facade.result.console.AppBizLicenseResult;
+import com.treefinance.saas.merchant.facade.result.console.MerchantResult;
+import com.treefinance.saas.merchant.facade.service.AppBizLicenseFacade;
 
 import javax.annotation.Resource;
 

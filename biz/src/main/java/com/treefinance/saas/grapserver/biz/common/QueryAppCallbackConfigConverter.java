@@ -4,7 +4,8 @@ import java.util.List;
 
 import javax.annotation.Resource;
 
-import com.treefinance.saas.merchant.center.facade.request.common.BaseRequest;
+import com.treefinance.saas.merchant.facade.request.common.BaseRequest;
+import com.treefinance.saas.merchant.facade.request.grapserver.GetAppCallBackConfigByIdRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -13,10 +14,9 @@ import com.alibaba.fastjson.JSON;
 import com.google.common.collect.Lists;
 import com.treefinance.saas.grapserver.common.utils.DataConverterUtils;
 import com.treefinance.saas.grapserver.dao.entity.AppCallbackConfig;
-import com.treefinance.saas.merchant.center.facade.request.grapserver.GetAppCallBackConfigByIdRequest;
-import com.treefinance.saas.merchant.center.facade.result.console.MerchantResult;
-import com.treefinance.saas.merchant.center.facade.result.grapsever.AppCallbackResult;
-import com.treefinance.saas.merchant.center.facade.service.AppCallbackConfigFacade;
+import com.treefinance.saas.merchant.facade.result.console.MerchantResult;
+import com.treefinance.saas.merchant.facade.result.grapsever.AppCallbackResult;
+import com.treefinance.saas.merchant.facade.service.AppCallbackConfigFacade;
 
 /**
  * @author:guoguoyun

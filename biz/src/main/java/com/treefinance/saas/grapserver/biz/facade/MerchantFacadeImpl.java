@@ -1,5 +1,14 @@
 package com.treefinance.saas.grapserver.biz.facade;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
+
 import com.alibaba.fastjson.JSON;
 import com.treefinance.saas.grapserver.common.utils.BeanUtils;
 import com.treefinance.saas.grapserver.common.utils.DataConverterUtils;
@@ -10,22 +19,14 @@ import com.treefinance.saas.grapserver.facade.service.MerchantFacade;
 import com.treefinance.saas.knife.common.CommonStateCode;
 import com.treefinance.saas.knife.result.Results;
 import com.treefinance.saas.knife.result.SaasResult;
-import com.treefinance.saas.merchant.center.facade.request.grapserver.QueryMerchantByAppIdRequest;
-import com.treefinance.saas.merchant.center.facade.result.console.MerchantBaseResult;
-import com.treefinance.saas.merchant.center.facade.result.console.MerchantResult;
-import com.treefinance.saas.merchant.center.facade.service.MerchantBaseInfoFacade;
+import com.treefinance.saas.merchant.facade.request.grapserver.QueryMerchantByAppIdRequest;
+import com.treefinance.saas.merchant.facade.result.console.MerchantBaseResult;
+import com.treefinance.saas.merchant.facade.result.console.MerchantResult;
+import com.treefinance.saas.merchant.facade.service.MerchantBaseInfoFacade;
 import com.treefinance.saas.taskcenter.facade.request.TaskRequest;
 import com.treefinance.saas.taskcenter.facade.result.TaskRO;
 import com.treefinance.saas.taskcenter.facade.result.common.TaskResult;
 import com.treefinance.saas.taskcenter.facade.service.TaskFacade;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.util.CollectionUtils;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * @author haojiahong on 2017/10/20.

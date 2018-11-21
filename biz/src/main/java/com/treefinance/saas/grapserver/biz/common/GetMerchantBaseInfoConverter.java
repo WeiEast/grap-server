@@ -9,10 +9,10 @@ import org.springframework.util.CollectionUtils;
 
 import com.treefinance.saas.grapserver.common.utils.DataConverterUtils;
 import com.treefinance.saas.grapserver.dao.entity.MerchantBaseInfo;
-import com.treefinance.saas.merchant.center.facade.request.console.GetMerchantByAppIdRequest;
-import com.treefinance.saas.merchant.center.facade.result.console.MerchantBaseInfoResult;
-import com.treefinance.saas.merchant.center.facade.result.console.MerchantResult;
-import com.treefinance.saas.merchant.center.facade.service.MerchantBaseInfoFacade;
+import com.treefinance.saas.merchant.facade.request.console.GetMerchantByAppIdRequest;
+import com.treefinance.saas.merchant.facade.result.console.MerchantBaseInfoResult;
+import com.treefinance.saas.merchant.facade.result.console.MerchantResult;
+import com.treefinance.saas.merchant.facade.service.MerchantBaseInfoFacade;
 
 /**
  * @author:guoguoyun
@@ -28,7 +28,7 @@ public class GetMerchantBaseInfoConverter {
     public MerchantBaseInfo getBaseInfoByAppId(String appId) {
         GetMerchantByAppIdRequest request = new GetMerchantByAppIdRequest();
         request.setAppId(appId);
-        MerchantResult<List<MerchantBaseInfoResult>> merchantResult = merchantBaseInfoFacade.getBaseInfoByAppId(request);
+        MerchantResult<List<MerchantBaseInfoResult>> merchantResult = merchantBaseInfoFacade.queryMerchantBaseByAppId(request);
         List<MerchantBaseInfo> list = DataConverterUtils.convert(merchantResult.getData(), MerchantBaseInfo.class);
         return CollectionUtils.isEmpty(list) ? null : list.get(0);
     }

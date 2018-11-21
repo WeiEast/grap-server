@@ -1,5 +1,20 @@
 package com.treefinance.saas.grapserver.biz.service;
 
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+import com.treefinance.saas.merchant.facade.request.grapserver.GetAppH5TipsRequest;
+import com.treefinance.saas.merchant.facade.result.console.AppH5TipsResult;
+import com.treefinance.saas.merchant.facade.result.console.MerchantResult;
+import com.treefinance.saas.merchant.facade.result.grapsever.AppColorConfigResult;
+import com.treefinance.saas.merchant.facade.service.AppH5TipsFacade;
+import org.apache.commons.collections.CollectionUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
 import com.alibaba.fastjson.JSON;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Joiner;
@@ -10,23 +25,6 @@ import com.treefinance.saas.grapserver.common.exception.BizException;
 import com.treefinance.saas.grapserver.common.model.vo.task.AppH5TipsVO;
 import com.treefinance.saas.grapserver.common.utils.DataConverterUtils;
 import com.treefinance.saas.grapserver.dao.entity.AppColorConfig;
-import com.treefinance.saas.merchant.center.facade.request.grapserver.GetAppColorConfigRequest;
-import com.treefinance.saas.merchant.center.facade.request.grapserver.GetAppH5TipsRequest;
-import com.treefinance.saas.merchant.center.facade.result.console.AppH5TipsResult;
-import com.treefinance.saas.merchant.center.facade.result.console.MerchantResult;
-import com.treefinance.saas.merchant.center.facade.result.grapsever.AppColorConfigResult;
-import com.treefinance.saas.merchant.center.facade.service.AppColorConfigFacade;
-import com.treefinance.saas.merchant.center.facade.service.AppH5TipsFacade;
-import org.apache.commons.collections.CollectionUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 /**
  * @author by luoyihua on 2017/5/5.
@@ -46,7 +44,8 @@ public class MerchantConfigService {
     @SuppressWarnings("rawtypes")
     public Map getColorConfig(String appId, String style) {
 
-        MerchantResult<AppColorConfigResult> merchantColorConfigResult = getAppColorConfigConverter.queryAppColorConfig(appId, style);
+        MerchantResult<AppColorConfigResult>
+            merchantColorConfigResult = getAppColorConfigConverter.queryAppColorConfig(appId, style);
         Map<String, Object> map = Maps.newHashMap();
         if (merchantColorConfigResult.isSuccess()) {
             AppColorConfig merchantColorConfig =
