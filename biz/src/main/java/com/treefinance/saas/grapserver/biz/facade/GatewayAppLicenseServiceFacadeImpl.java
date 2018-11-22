@@ -6,10 +6,11 @@ import org.springframework.stereotype.Service;
 
 /**
  * 兼容老的AppLicenseService
- * Created by yh-treefinance on 2017/9/19.
+ * @author yh-treefinance on 2017/9/19.
  */
 @Service("gatewayAppLicenseServiceFacade")
 public class GatewayAppLicenseServiceFacadeImpl implements AppLicenseService {
+
     @Autowired
     private com.treefinance.saas.grapserver.biz.service.AppLicenseService appLicenseService;
 
@@ -17,4 +18,5 @@ public class GatewayAppLicenseServiceFacadeImpl implements AppLicenseService {
     public String getDataKey(String appId) {
         return appLicenseService.getDataKey(appId);
     }
+
 }

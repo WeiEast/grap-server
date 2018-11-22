@@ -28,7 +28,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Created by haojiahong on 2017/11/29.
+ * @author haojiahong on 2017/11/29.
  */
 @Service
 public class OperatorExtendLoginService {
@@ -54,9 +54,6 @@ public class OperatorExtendLoginService {
 
     /**
      * 根据输入号码查找该号码的归属地
-     *
-     * @param mobile
-     * @return
      */
     public Map<String, Object> getMobileAttribution(String mobile) {
         MobileAttributionDTO mobileAttributionDTO = mobileAttributionService.lookupMobileAttribution(mobile);
@@ -77,15 +74,17 @@ public class OperatorExtendLoginService {
 
     private String getOperator(String operatorName, String province) {
         operatorName = StringUtils.remove(operatorName, "中国");
-        province = province.replace("省", "").replace("市", "").replace("自治区", "").replace("维吾尔", "").replace("壮族", "")
+        province = province.replace("省", "")
+                .replace("市", "")
+                .replace("自治区", "")
+                .replace("维吾尔", "")
+                .replace("壮族", "")
                 .replace("回族", "");
         return province + operatorName;
     }
 
     /**
      * 登陆初始化,获取基本信息
-     *
-     * @param operatorParam
      */
     public Object prepare(OperatorParam operatorParam) {
         HttpResult<Map<String, Object>> result;
@@ -113,9 +112,6 @@ public class OperatorExtendLoginService {
 
     /**
      * 刷新图片验证码
-     *
-     * @param operatorParam
-     * @return
      */
     public Object refreshPicCode(OperatorParam operatorParam) {
         HttpResult<Map<String, Object>> result;
@@ -135,9 +131,6 @@ public class OperatorExtendLoginService {
 
     /**
      * 刷新短信验证码
-     *
-     * @param operatorParam
-     * @return
      */
     public Object refreshSmsCode(OperatorParam operatorParam) {
         HttpResult<Map<String, Object>> result;
@@ -157,9 +150,6 @@ public class OperatorExtendLoginService {
 
     /**
      * 登陆
-     *
-     * @param operatorParam
-     * @return
      */
     public Object login(OperatorParam operatorParam) {
         Map<String, Object> lockMap = Maps.newHashMap();
@@ -195,14 +185,9 @@ public class OperatorExtendLoginService {
 
     /**
      * 获取商户配置与运营商分组信息
-     *
-     * @param appId
-     * @param taskId
-     * @param style
-     * @return
      */
     public Object getConfigAndGroups(String appId, Long taskId, String style) {
-        Map<String, Object> colorMap = merchantConfigService.getColorConfig(appId, style);
+        Map colorMap = merchantConfigService.getColorConfig(appId, style);
         HttpResult<List<Map<String, List<OperatorGroup>>>> result;
         try {
             result = operatorApi.queryGroups();
@@ -229,9 +214,6 @@ public class OperatorExtendLoginService {
 
     /**
      * 获取运营商登陆配置信息
-     *
-     * @param operatorParam
-     * @return
      */
     public Object preLoginConfig(OperatorParam operatorParam) {
         HttpResult<OperatorLoginConfig> result;
@@ -262,4 +244,5 @@ public class OperatorExtendLoginService {
         taskAttributeService.insertOrUpdateSelective(taskId, ETaskAttribute.OPERATOR_GROUP_NAME.getAttribute(), groupName);
         return SimpleResult.successResult(result.getData());
     }
+
 }

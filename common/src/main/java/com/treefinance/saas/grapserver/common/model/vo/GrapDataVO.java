@@ -3,13 +3,23 @@ package com.treefinance.saas.grapserver.common.model.vo;
 import java.io.Serializable;
 
 /**
- * Created by yh-treefinance on 2018/2/7.
+ * @author yh-treefinance on 2018/2/7.
  */
 public class GrapDataVO implements Serializable {
+
+    private static final long serialVersionUID = 1395289788598719233L;
 
     private String appid;
 
     private Long taskId;
+
+    @Override
+    public String toString() {
+        return "GrapDataVO{" +
+                "appid='" + appid + '\'' +
+                ", taskId=" + taskId +
+                '}';
+    }
 
     public String getAppid() {
         return appid;
@@ -26,4 +36,5 @@ public class GrapDataVO implements Serializable {
     public void setTaskId(Long taskId) {
         this.taskId = taskId;
     }
+
 }

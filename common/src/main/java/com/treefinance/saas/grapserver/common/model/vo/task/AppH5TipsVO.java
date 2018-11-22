@@ -21,6 +21,13 @@ public class AppH5TipsVO implements Serializable {
      */
     private String tipsContent;
 
+    @Override
+    public String toString() {
+        return "AppH5TipsVO{" +
+                "tipsType=" + tipsType +
+                ", tipsContent='" + tipsContent + '\'' +
+                '}';
+    }
 
     public Byte getTipsType() {
         return tipsType;
@@ -37,4 +44,5 @@ public class AppH5TipsVO implements Serializable {
     public void setTipsContent(String tipsContent) {
         this.tipsContent = tipsContent;
     }
+
 }

@@ -10,20 +10,30 @@ import java.util.Date;
  * @date 2018/6/3
  */
 public class CarInfoCollectTaskLogDTO implements Serializable {
+
     private static final long serialVersionUID = -3558126448590095421L;
+
     private String msg;
+
     private Date occurTime;
+
     private String errorMsg;
 
-
-    public CarInfoCollectTaskLogDTO() {
-
-    }
+    public CarInfoCollectTaskLogDTO() {}
 
     public CarInfoCollectTaskLogDTO(String msg, String errorMsg, Date occurTime) {
         this.msg = msg;
         this.errorMsg = errorMsg;
         this.occurTime = occurTime;
+    }
+
+    @Override
+    public String toString() {
+        return "CarInfoCollectTaskLogDTO{" +
+                "msg='" + msg + '\'' +
+                ", occurTime=" + occurTime +
+                ", errorMsg='" + errorMsg + '\'' +
+                '}';
     }
 
     public String getMsg() {
@@ -49,4 +59,5 @@ public class CarInfoCollectTaskLogDTO implements Serializable {
     public void setErrorMsg(String errorMsg) {
         this.errorMsg = errorMsg;
     }
+
 }

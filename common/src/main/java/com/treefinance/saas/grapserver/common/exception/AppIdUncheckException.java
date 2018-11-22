@@ -1,9 +1,11 @@
 package com.treefinance.saas.grapserver.common.exception;
 
 /**
- * Created by haojiahong on 2017/8/31.
+ * @author haojiahong on 2017/8/31.
  */
 public class AppIdUncheckException extends RuntimeException {
+
+    private static final long serialVersionUID = 1685701930804628971L;
 
     public int getMark() {
         return mark;

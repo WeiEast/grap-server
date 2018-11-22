@@ -29,7 +29,7 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * 邮箱账单模拟登陆
- * Created by haojiahong on 2017/12/26.
+ * @author haojiahong on 2017/12/26.
  */
 @Service
 public class EmailLoginSimulationService {
@@ -37,6 +37,12 @@ public class EmailLoginSimulationService {
     private static final Logger logger = LoggerFactory.getLogger(EmailLoginSimulationService.class);
 
     private static final String EMAIL_LOGIN_PROCESS_KEY_PREFIX = "email_login_key";
+    
+    private static final String SUCCESS = "SUCCESS";
+    
+    private static final String DIRECTIVE = "directive";
+    
+    private static final String LOGIN_SUCCESS = "login_success";
 
     @Autowired
     private MailServiceApiForQQ mailServiceApiForQQ;
@@ -61,9 +67,6 @@ public class EmailLoginSimulationService {
 
     /**
      * QQ邮箱登陆(异步)
-     *
-     * @param param
-     * @return
      */
     public Object login(CommonPluginParam param) {
         HttpResult<Object> result;
@@ -82,9 +85,6 @@ public class EmailLoginSimulationService {
 
     /**
      * QQ邮箱刷新二维码(异步)
-     *
-     * @param param
-     * @return
      */
     public Object refreshQRCode(CommonPluginParam param) {
         HttpResult<Object> result;
@@ -106,9 +106,6 @@ public class EmailLoginSimulationService {
 
     /**
      * QQ邮箱查询二维码状态
-     *
-     * @param param
-     * @return
      */
     public Object queryQRStatus(CommonPluginParam param) {
         HttpResult<Object> result;
@@ -125,7 +122,7 @@ public class EmailLoginSimulationService {
                 throw new CrawlerBizException(result.getMessage());
             }
         }
-        if (result.getData() != null && StringUtils.equals("SUCCESS", String.valueOf(result.getData()))) {
+        if (result.getData() != null && StringUtils.equals(SUCCESS, String.valueOf(result.getData()))) {
             taskService.updateWebSite(param.getTaskId(), "qq.com");
             taskTimeService.updateLoginTime(param.getTaskId(), new Date());
         }
@@ -136,7 +133,6 @@ public class EmailLoginSimulationService {
      * qq企业邮箱登录初始化
      *
      * @param param taskId必传
-     * @return
      */
     public Object loginInitForQQExMail(CommonPluginParam param) {
         HttpResult<Object> result;
@@ -156,8 +152,6 @@ public class EmailLoginSimulationService {
 
     /**
      * qq企业邮箱登录
-     *
-     * @param param
      */
     public Object loginForQQExMail(CommonPluginParam param) {
         Map<String, Object> lockMap = Maps.newHashMap();
@@ -177,8 +171,8 @@ public class EmailLoginSimulationService {
                 }
                 if (result.getData() != null) {
                     Map<String, Object> map = JSONObject.parseObject(JSON.toJSONString(result.getData()));
-                    if (MapUtils.isNotEmpty(map) && map.get("directive") != null) {
-                        if (StringUtils.equalsIgnoreCase("login_success", map.get("directive").toString())) {
+                    if (MapUtils.isNotEmpty(map) && map.get(DIRECTIVE) != null) {
+                        if (StringUtils.equalsIgnoreCase(LOGIN_SUCCESS, map.get(DIRECTIVE).toString())) {
                             if (StringUtils.isNotEmpty(param.getUsername())) {
                                 taskService.setAccountNo(param.getTaskId(), param.getUsername());
                             }
@@ -209,9 +203,6 @@ public class EmailLoginSimulationService {
 
     /**
      * 163邮箱登陆(异步)
-     *
-     * @param param
-     * @return
      */
     public Object loginFor163(CommonPluginParam param) {
         HttpResult<Object> result;
@@ -230,9 +221,6 @@ public class EmailLoginSimulationService {
 
     /**
      * 163邮箱刷新二维码
-     *
-     * @param param
-     * @return
      */
     public Object refreshQRCodeFor163(CommonPluginParam param) {
         HttpResult<Object> result;
@@ -254,9 +242,6 @@ public class EmailLoginSimulationService {
 
     /**
      * 163邮箱查询二维码状态
-     *
-     * @param param
-     * @return
      */
     public Object queryQRStatusFor163(CommonPluginParam param) {
         HttpResult<Object> result;
@@ -273,7 +258,7 @@ public class EmailLoginSimulationService {
                 throw new CrawlerBizException(result.getMessage());
             }
         }
-        if (result.getData() != null && StringUtils.equals("SUCCESS", String.valueOf(result.getData()))) {
+        if (result.getData() != null && StringUtils.equals(SUCCESS, String.valueOf(result.getData()))) {
             taskService.updateWebSite(param.getTaskId(), "163.com");
             taskTimeService.updateLoginTime(param.getTaskId(), new Date());
         }
@@ -283,9 +268,6 @@ public class EmailLoginSimulationService {
 
     /**
      * 126邮箱登陆(异步)
-     *
-     * @param param
-     * @return
      */
     public Object loginFor126(CommonPluginParam param) {
         HttpResult<Object> result;
@@ -310,9 +292,6 @@ public class EmailLoginSimulationService {
 
     /**
      * 126邮箱刷新二维码
-     *
-     * @param param
-     * @return
      */
     public Object refreshQRCodeFor126(CommonPluginParam param) {
         HttpResult<Object> result;
@@ -334,9 +313,6 @@ public class EmailLoginSimulationService {
 
     /**
      * 126邮箱查询二维码状态
-     *
-     * @param param
-     * @return
      */
     public Object queryQRStatusFor126(CommonPluginParam param) {
         HttpResult<Object> result;
@@ -353,7 +329,7 @@ public class EmailLoginSimulationService {
                 throw new CrawlerBizException(result.getMessage());
             }
         }
-        if (result.getData() != null && StringUtils.equals("SUCCESS", String.valueOf(result.getData()))) {
+        if (result.getData() != null && StringUtils.equals(SUCCESS, String.valueOf(result.getData()))) {
             taskService.updateWebSite(param.getTaskId(), "126.com");
             taskTimeService.updateLoginTime(param.getTaskId(), new Date());
         }
@@ -364,7 +340,6 @@ public class EmailLoginSimulationService {
      * 新浪邮箱登录初始化
      *
      * @param param taskId必传
-     * @return
      */
     public Object loginInitForSina(CommonPluginParam param) {
         HttpResult<Object> result;
@@ -382,12 +357,8 @@ public class EmailLoginSimulationService {
         return SimpleResult.successResult(result.getData());
     }
 
-
     /**
      * 新浪邮箱登录
-     *
-     * @param param
-     * @return
      */
     public Object loginForSina(CommonPluginParam param) {
         Map<String, Object> lockMap = Maps.newHashMap();
@@ -407,8 +378,8 @@ public class EmailLoginSimulationService {
                 }
                 if (result.getData() != null) {
                     Map<String, Object> map = JSONObject.parseObject(JSON.toJSONString(result.getData()));
-                    if (MapUtils.isNotEmpty(map) && map.get("directive") != null) {
-                        if (StringUtils.equalsIgnoreCase("login_success", map.get("directive").toString())) {
+                    if (MapUtils.isNotEmpty(map) && map.get(DIRECTIVE) != null) {
+                        if (StringUtils.equalsIgnoreCase(LOGIN_SUCCESS, map.get(DIRECTIVE).toString())) {
                             if (StringUtils.isNotEmpty(param.getUsername())) {
                                 taskService.setAccountNo(param.getTaskId(), param.getUsername());
                             }
@@ -418,7 +389,6 @@ public class EmailLoginSimulationService {
                     }
                 }
                 return SimpleResult.successResult(result);
-
             }
             throw new CrawlerBizException(Constants.REDIS_LOCK_ERROR_MSG);
         } finally {
@@ -444,10 +414,6 @@ public class EmailLoginSimulationService {
 
     /**
      * 轮询处理状态(通用接口)
-     *
-     * @param processId
-     * @param taskId
-     * @return
      */
     public Object processStatus(Long processId, Long taskId) {
         ProcessResult result;
@@ -457,16 +423,16 @@ public class EmailLoginSimulationService {
             logger.error("邮箱账单:调用爬数邮箱账单轮询处理状态异常,processId={},taskId={}", processId, taskId, e);
             throw e;
         }
-        if (StringUtils.equalsIgnoreCase("SUCCESS", result.getProcessStatus())) {
+        if (StringUtils.equalsIgnoreCase(SUCCESS, result.getProcessStatus())) {
             String key = Joiner.on(":").join(EMAIL_LOGIN_PROCESS_KEY_PREFIX, processId);
             boolean hasKey = redisDao.getRedisTemplate().hasKey(key);
             if (hasKey) {
                 Map<Object, Object> map = redisDao.getRedisTemplate().opsForHash().entries(key);
-                //记录账号
+                // 记录账号
                 taskService.setAccountNo(Long.valueOf(map.get("taskId").toString()), map.get("userName").toString());
-                //记录webSite
+                // 记录webSite
                 taskService.updateWebSite(Long.valueOf(map.get("taskId").toString()), map.get("webSite").toString());
-                //更新登录成功时间
+                // 更新登录成功时间
                 taskTimeService.updateLoginTime(Long.valueOf(map.get("taskId").toString()), new Date());
             }
 
@@ -477,12 +443,9 @@ public class EmailLoginSimulationService {
 
     /**
      * 是否支持当前ip的省份代理(通用接口)
-     *
-     * @param param
-     * @return
      */
     public Object supportProvinceProxy(CommonPluginParam param) {
-        Boolean flag = false;
+        Boolean flag;
         try {
             flag = proxyProvider.supportProvinceName(param.getUserIp(), null);
         } catch (Exception e) {
@@ -495,11 +458,6 @@ public class EmailLoginSimulationService {
 
     /**
      * 账号密码登录,记录登录信息
-     *
-     * @param taskId
-     * @param userName
-     * @param webSite
-     * @param result
      */
     private void logEmailLoginInfo(Long taskId, String userName, String webSite, Object result) {
         try {

@@ -22,4 +22,5 @@ public class FundMoxieFacadeImpl implements FundMoxieFacade {
         String result = fundMoxieService.queryFundsEx(moxieTaskId);
         return Results.newSuccessResult(result);
     }
+
 }

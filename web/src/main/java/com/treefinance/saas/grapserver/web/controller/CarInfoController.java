@@ -28,7 +28,6 @@ public class CarInfoController {
     @Autowired
     private CarInfoService carInfoService;
 
-
     /**
      * 车辆信息采集
      *

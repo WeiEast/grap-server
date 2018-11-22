@@ -1,6 +1,10 @@
 package com.treefinance.saas.grapserver.common.exception;
 
+/**
+ * @author guoguoyun
+ */
 public class TaskTimeOutException extends RuntimeException {
+
     private static final long serialVersionUID = -290315695168000010L;
 
     public TaskTimeOutException() {

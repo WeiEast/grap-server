@@ -3,13 +3,29 @@ package com.treefinance.saas.grapserver.common.model.dto.moxie;
 import java.io.Serializable;
 
 /**
- * Created by haojiahong on 2017/9/21.
+ * @author haojiahong on 2017/9/21.
  */
 public class MoxieTaskEventNoticeDTO implements Serializable {
+
     private static final long serialVersionUID = 3646957264685997957L;
 
-    private String moxieTaskId;//魔蝎回调通知对应的魔蝎任务id
-    private String message;//魔蝎回调通知对应的回调信息
+    /**
+     * 魔蝎回调通知对应的魔蝎任务id
+     */
+    private String moxieTaskId;
+
+    /**
+     * 魔蝎回调通知对应的回调信息
+     */
+    private String message;
+
+    @Override
+    public String toString() {
+        return "MoxieTaskEventNoticeDTO{" +
+                "moxieTaskId='" + moxieTaskId + '\'' +
+                ", message='" + message + '\'' +
+                '}';
+    }
 
     public String getMoxieTaskId() {
         return moxieTaskId;
@@ -26,4 +42,5 @@ public class MoxieTaskEventNoticeDTO implements Serializable {
     public void setMessage(String message) {
         this.message = message;
     }
+
 }

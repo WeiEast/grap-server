@@ -10,10 +10,11 @@ import java.util.function.Consumer;
 
 /**
  * 异步执行器
- * Created by yh-treefinance on 2017/7/10.
+ * @author yh-treefinance on 2017/7/10.
  */
 @Component
 public class AsycExcutor {
+
     /**
      * logger
      */
@@ -21,10 +22,6 @@ public class AsycExcutor {
 
     /**
      * 异步执行数据
-     *
-     * @param t
-     * @param consumer
-     * @param <T>
      */
     @Async
     public <T> void runAsyc(T t, Consumer<T> consumer) {
@@ -33,4 +30,5 @@ public class AsycExcutor {
         }
         consumer.accept(t);
     }
+
 }

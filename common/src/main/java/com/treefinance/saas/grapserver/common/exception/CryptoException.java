@@ -22,11 +22,14 @@ package com.treefinance.saas.grapserver.common.exception;
  */
 public class CryptoException extends Exception {
 
-  public CryptoException(String message) {
-    super(message);
-  }
+    private static final long serialVersionUID = 2404224586010630913L;
 
-  public CryptoException(String message, Throwable cause) {
-    super(message, cause);
-  }
+    public CryptoException(String message) {
+        super(message);
+    }
+
+    public CryptoException(String message, Throwable cause) {
+        super(message, cause);
+    }
+
 }

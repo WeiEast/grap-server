@@ -6,7 +6,7 @@ import java.util.Date;
 import java.util.Map;
 
 /**
- * Created by luoyihua on 2017/5/10.
+ * @author luoyihua on 2017/5/10.
  */
 public class TaskDTO implements Serializable {
 
@@ -23,7 +23,26 @@ public class TaskDTO implements Serializable {
 
     private Date createTime;
     private Date lastUpdateTime;
+
     private static final long serialVersionUID = 1L;
+
+    @Override
+    public String toString() {
+        return "TaskDTO{" +
+                "id=" + id +
+                ", uniqueId='" + uniqueId + '\'' +
+                ", appId='" + appId + '\'' +
+                ", accountNo='" + accountNo + '\'' +
+                ", bizType=" + bizType +
+                ", saasEnv=" + saasEnv +
+                ", status=" + status +
+                ", webSite='" + webSite + '\'' +
+                ", stepCode='" + stepCode + '\'' +
+                ", attributes=" + attributes +
+                ", createTime=" + createTime +
+                ", lastUpdateTime=" + lastUpdateTime +
+                '}';
+    }
 
     public Long getId() {
         return id;
@@ -120,4 +139,5 @@ public class TaskDTO implements Serializable {
     public void setSaasEnv(Byte saasEnv) {
         this.saasEnv = saasEnv;
     }
+
 }

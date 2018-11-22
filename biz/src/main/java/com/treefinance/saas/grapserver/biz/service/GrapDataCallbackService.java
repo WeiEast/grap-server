@@ -16,7 +16,7 @@ import java.util.stream.Collectors;
 
 /**
  * 爬取数据回调Service
- * Created by yh-treefinance on 2017/12/25.
+ * @author yh-treefinance on 2017/12/25.
  */
 @Service
 public class GrapDataCallbackService {
@@ -30,8 +30,6 @@ public class GrapDataCallbackService {
 
     /**
      * 获取回调配置
-     *
-     * @return
      */
     public List<AppCallbackConfigDTO> getCallbackConfigs(TaskDTO taskDTO, EDataType dataType) {
         String appId = taskDTO.getAppId();

@@ -3,17 +3,29 @@ package com.treefinance.saas.grapserver.common.model.dto.moxie;
 import java.io.Serializable;
 
 /**
- * Created by haojiahong on 2017/9/13.
+ * @author haojiahong on 2017/9/13.
  */
 public class MoxieCityInfoDTO implements Serializable {
-
 
     private static final long serialVersionUID = -2896899478417809806L;
 
     private String status;
-    private String area_code;
-    private String city_name;
+
+    private String areaCode;
+
+    private String cityName;
+
     private String province;
+
+    @Override
+    public String toString() {
+        return "MoxieCityInfoDTO{" +
+                "status='" + status + '\'' +
+                ", areaCode='" + areaCode + '\'' +
+                ", cityName='" + cityName + '\'' +
+                ", province='" + province + '\'' +
+                '}';
+    }
 
     public String getStatus() {
         return status;
@@ -23,20 +35,20 @@ public class MoxieCityInfoDTO implements Serializable {
         this.status = status;
     }
 
-    public String getArea_code() {
-        return area_code;
+    public String getAreaCode() {
+        return areaCode;
     }
 
-    public void setArea_code(String area_code) {
-        this.area_code = area_code;
+    public void setAreaCode(String areaCode) {
+        this.areaCode = areaCode;
     }
 
-    public String getCity_name() {
-        return city_name;
+    public String getCityName() {
+        return cityName;
     }
 
-    public void setCity_name(String city_name) {
-        this.city_name = city_name;
+    public void setCityName(String cityName) {
+        this.cityName = cityName;
     }
 
     public String getProvince() {
@@ -46,4 +58,5 @@ public class MoxieCityInfoDTO implements Serializable {
     public void setProvince(String province) {
         this.province = province;
     }
+
 }

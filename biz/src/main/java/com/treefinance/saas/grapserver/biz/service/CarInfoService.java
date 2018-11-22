@@ -53,13 +53,11 @@ public class CarInfoService {
      *
      * @param appId    商户id
      * @param modelNum 车型编码
-     * @return
      */
     public Long startCollectTask(String appId, String modelNum) {
-        //使用车型编码当作uniqueId
+        // 使用车型编码当作uniqueId
         taskLicenseService.verifyCreateTask(appId, modelNum, EBizType.CAR_INFO);
-        Long taskId = taskService.createTask(modelNum, appId, EBizType.CAR_INFO.getCode(), null, null, null);
-        return taskId;
+        return taskService.createTask(modelNum, appId, EBizType.CAR_INFO.getCode(), null, null, null);
     }
 
     /**
@@ -68,7 +66,6 @@ public class CarInfoService {
      * @param taskId   任务id
      * @param appId    商户id
      * @param modelNum 车型编码
-     * @return
      */
     public Object processCollectTask(Long taskId, String appId, String modelNum) {
         String url = diamondConfig.getCrawlerUrlCarInfoCollect();
@@ -77,7 +74,7 @@ public class CarInfoService {
         map.put("modelNum", modelNum);
         String httpResult;
         try {
-            httpResult = HttpClientUtils.doPostWithTimoutAndRetryTimes(url, (byte) 60, (byte) 0, map);
+            httpResult = HttpClientUtils.doPostWithTimeoutAndRetryTimes(url, (byte) 60, (byte) 0, map);
         } catch (Exception e) {
             logger.error("调用爬数处理车辆信息采集任务异常:taskId={},modelNum={}", taskId, modelNum, e);
             processFailCollectTask(taskId, "调用爬数处理车辆信息采集任务异常");
@@ -101,17 +98,14 @@ public class CarInfoService {
     }
 
     public void updateCollectTaskStatusAndTaskLogAndSendMonitor(Long taskId, List<CarInfoCollectTaskLogDTO> logList) {
-        List<CarInfoCollectTaskLogRequest> carInfoCollectTaskLogRequestList = DataConverterUtils.convert(logList, CarInfoCollectTaskLogRequest.class);
+        List<CarInfoCollectTaskLogRequest> carInfoCollectTaskLogRequestList =
+                DataConverterUtils.convert(logList, CarInfoCollectTaskLogRequest.class);
         carInfoFacade.updateCollectTaskStatusAndTaskLogAndSendMonitor(taskId, carInfoCollectTaskLogRequestList);
     }
-
 
     /**
      * 校验调用爬数处理车辆信息采集任务返回值中任务日志信息是否存在问题
      * 若日志列表中,没有表明任务结束的日志,则存在问题
-     *
-     * @param resultLog
-     * @return
      */
     private boolean checkResultLog(String resultLog) {
         List<CarInfoCollectTaskLogDTO> logList = JSON.parseArray(resultLog, CarInfoCollectTaskLogDTO.class);
@@ -141,6 +135,5 @@ public class CarInfoService {
         }
         return false;
     }
-
 
 }

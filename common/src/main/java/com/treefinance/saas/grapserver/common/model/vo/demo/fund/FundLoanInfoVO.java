@@ -4,7 +4,7 @@ import java.io.Serializable;
 import java.math.BigDecimal;
 
 /**
- * Created by haojiahong on 2017/10/17.
+ * @author haojiahong on 2017/10/17.
  */
 public class FundLoanInfoVO implements Serializable {
 
@@ -185,6 +185,47 @@ public class FundLoanInfoVO implements Serializable {
      * 逾期天数
      */
     private Integer overdueDays;
+
+    @Override
+    public String toString() {
+        return "FundLoanInfoVO{" +
+                "name='" + name + '\'' +
+                ", idCard='" + idCard + '\'' +
+                ", phone='" + phone + '\'' +
+                ", mailingAddress='" + mailingAddress + '\'' +
+                ", contractNumber='" + contractNumber + '\'' +
+                ", status='" + status + '\'' +
+                ", loanAmount=" + loanAmount +
+                ", periods=" + periods +
+                ", houseAddress='" + houseAddress + '\'' +
+                ", bank='" + bank + '\'' +
+                ", loanType='" + loanType + '\'' +
+                ", startDate='" + startDate + '\'' +
+                ", endDate='" + endDate + '\'' +
+                ", repayType='" + repayType + '\'' +
+                ", deductDay=" + deductDay +
+                ", monthlyRepayAmount=" + monthlyRepayAmount +
+                ", bankAccount='" + bankAccount + '\'' +
+                ", bankAccountName='" + bankAccountName + '\'' +
+                ", loanInterestPercent='" + loanInterestPercent + '\'' +
+                ", penaltyInterestPercent='" + penaltyInterestPercent + '\'' +
+                ", commercialContractNumber='" + commercialContractNumber + '\'' +
+                ", commercialBank='" + commercialBank + '\'' +
+                ", commercialAmount=" + commercialAmount +
+                ", secondBankAccount='" + secondBankAccount + '\'' +
+                ", secondBankAccountName='" + secondBankAccountName + '\'' +
+                ", secondIdCard='" + secondIdCard + '\'' +
+                ", secondPhone='" + secondPhone + '\'' +
+                ", secondCorporationName='" + secondCorporationName + '\'' +
+                ", remainAmount=" + remainAmount +
+                ", remainPeriods=" + remainPeriods +
+                ", lastRepayDate='" + lastRepayDate + '\'' +
+                ", overdueCapital=" + overdueCapital +
+                ", overdueInterest=" + overdueInterest +
+                ", overduePenalty=" + overduePenalty +
+                ", overdueDays=" + overdueDays +
+                '}';
+    }
 
     public String getName() {
         return name;
@@ -465,4 +506,5 @@ public class FundLoanInfoVO implements Serializable {
     public void setOverduePenalty(BigDecimal overduePenalty) {
         this.overduePenalty = overduePenalty;
     }
+
 }

@@ -2,7 +2,14 @@ package com.treefinance.saas.grapserver.common.model.dto;
 
 import com.treefinance.saas.grapserver.common.model.dto.base.BaseDTO;
 
+/**
+ * @author henengqiang modefied on:
+ * @date 2018/11/13
+ */
 public class AppCallbackConfigDTO extends BaseDTO {
+
+    private static final long serialVersionUID = -3832771592115022214L;
+
     /** */
     private Integer id;
 
@@ -187,4 +194,5 @@ public class AppCallbackConfigDTO extends BaseDTO {
                 ", dataType=" + dataType +
                 '}';
     }
+
 }

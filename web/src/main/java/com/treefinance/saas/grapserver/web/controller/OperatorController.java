@@ -17,19 +17,23 @@ import org.springframework.web.servlet.ModelAndView;
 
 import java.util.Map;
 
+/**
+ * @author hanif
+ * @date created this description at 2018/11/12
+ */
 @RestController
 @RequestMapping(value = {"/operator", "/h5/operator", "/grap/h5/operator", "/grap/operator"})
 public class OperatorController {
+
     private static final Logger logger = LoggerFactory.getLogger(OperatorController.class);
 
     @Autowired
     private OperatorExtendLoginService operatorExtendLoginService;
 
-
     /**
      * 创建任务
      *
-     * @return
+     * @return  返回视图
      */
     @RequestMapping(value = "/start", method = {RequestMethod.POST})
     public ModelAndView createTask() {
@@ -44,7 +48,7 @@ public class OperatorController {
      * @param appid  商户id
      * @param taskId 任务id
      * @param style  颜色风格配置
-     * @return
+     * @return       com.treefinance.saas.knife.result.SimpleResult
      */
     @RequestMapping(value = "/config/groups", method = {RequestMethod.POST})
     public Object getConfigAndGroups(@RequestParam String appid,
@@ -61,9 +65,6 @@ public class OperatorController {
 
     /**
      * 获取运营商登陆配置信息
-     *
-     * @param operatorParam
-     * @return
      */
     @RequestMapping(value = "/config/prelogin", method = {RequestMethod.POST})
     public Object preLoginConfig(OperatorParam operatorParam) {
@@ -73,12 +74,8 @@ public class OperatorController {
         return result;
     }
 
-
     /**
      * 根据输入号码查找该号码的归属地
-     *
-     * @param mobile
-     * @return
      */
     @RequestMapping(value = "/mobile/attribution", method = {RequestMethod.POST})
     public Object mobileAttribution(@RequestParam("mobile") String mobile) {
@@ -88,9 +85,6 @@ public class OperatorController {
 
     /**
      * 准备登陆(登陆初始化)
-     *
-     * @param operatorParam
-     * @return
      */
     @RequestMapping(value = "/loginpage/prepare", method = {RequestMethod.POST})
     public Object prepare(OperatorParam operatorParam) {
@@ -109,9 +103,6 @@ public class OperatorController {
 
     /**
      * 刷新图片验证码
-     *
-     * @param operatorParam
-     * @return
      */
     @RequestMapping(value = "/loginpage/pic/captcha", method = {RequestMethod.POST})
     public Object picCaptcha(OperatorParam operatorParam) {
@@ -123,9 +114,6 @@ public class OperatorController {
 
     /**
      * 刷新短信验证码
-     *
-     * @param operatorParam
-     * @return
      */
     @RequestMapping(value = "/loginpage/sms/captcha", method = {RequestMethod.POST})
     public Object smsCaptcha(OperatorParam operatorParam) {
@@ -135,12 +123,8 @@ public class OperatorController {
         return result;
     }
 
-
     /**
      * 登陆
-     *
-     * @param operatorParam
-     * @return
      */
     @RequestMapping(value = "/loginpage/submit", method = {RequestMethod.POST})
     public Object login(OperatorParam operatorParam) {
@@ -153,4 +137,5 @@ public class OperatorController {
         logger.info("运营商:登陆,返回结果,operatorParam={},result={}", JSON.toJSONString(operatorParam), JSON.toJSONString(result));
         return result;
     }
+
 }

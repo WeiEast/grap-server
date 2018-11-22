@@ -25,10 +25,11 @@ import java.util.Map;
 
 /**
  * 学信网
- * Created by haojiahong on 2017/12/11.
+ * @author haojiahong on 2017/12/11.
  */
 @Service
 public class DiplomaLoginSimulationService {
+
     private static final Logger logger = LoggerFactory.getLogger(DiplomaLoginSimulationService.class);
 
     @Autowired
@@ -46,12 +47,8 @@ public class DiplomaLoginSimulationService {
     @Autowired
     private RedisDao redisDao;
 
-
     /**
      * 登陆初始化
-     *
-     * @param educationParam
-     * @return
      */
     public Object loginInit(CommonPluginParam educationParam) {
         Map<String, Object> lockMap = Maps.newHashMap();
@@ -76,16 +73,11 @@ public class DiplomaLoginSimulationService {
             throw new CrawlerBizException(Constants.REDIS_LOCK_ERROR_MSG);
         } finally {
             redisDao.releaseLock(key, lockMap, 60 * 1000L);
-
         }
-
     }
 
     /**
      * 登陆
-     *
-     * @param param
-     * @return
      */
     public Object loginSubmit(CommonPluginParam param) {
         Map<String, Object> lockMap = Maps.newHashMap();
@@ -119,14 +111,10 @@ public class DiplomaLoginSimulationService {
         } finally {
             redisDao.releaseLock(key, lockMap, 60 * 1000L);
         }
-
     }
 
     /**
      * 注册初始化
-     *
-     * @param educationParam
-     * @return
      */
     public Object registerInit(CommonPluginParam educationParam) {
         Map<String, Object> lockMap = Maps.newHashMap();
@@ -152,15 +140,10 @@ public class DiplomaLoginSimulationService {
         } finally {
             redisDao.releaseLock(key, lockMap, 60 * 1000L);
         }
-
-
     }
 
     /**
      * 注册时刷新图片验证码
-     *
-     * @param param
-     * @return
      */
     public Object registerRefreshPicCode(CommonPluginParam param) {
         HttpResult<Object> result;
@@ -179,9 +162,6 @@ public class DiplomaLoginSimulationService {
 
     /**
      * 注册时验证图片验证码并发送短信
-     *
-     * @param param
-     * @return
      */
     public Object registerValidatePicCodeAndSendSmsCode(CommonPluginParam param) {
         HttpResult<Object> result;
@@ -200,9 +180,6 @@ public class DiplomaLoginSimulationService {
 
     /**
      * 注册提交
-     *
-     * @param param
-     * @return
      */
     public Object registerSubmit(CommonPluginParam param) {
         Map<String, Object> lockMap = Maps.newHashMap();
@@ -227,19 +204,13 @@ public class DiplomaLoginSimulationService {
         } finally {
             redisDao.releaseLock(key, lockMap, 60 * 1000L);
         }
-
     }
 
     /**
      * 获取配置
-     *
-     * @param appId
-     * @param taskId
-     * @param style
-     * @return
      */
-    public Object getConfig(String appId, Long taskId, String style) {
-        Map<String, Object> colorMap = merchantConfigService.getColorConfig(appId, style);
+    public Object getConfig(String appId, String style) {
+        Map colorMap = merchantConfigService.getColorConfig(appId, style);
         Map<String, Object> map = Maps.newHashMap();
         map.put("color", colorMap);
         map.put("license", appBizLicenseService.isShowLicense(appId, EBizType.DIPLOMA.getText()));
@@ -248,9 +219,6 @@ public class DiplomaLoginSimulationService {
 
     /**
      * 获取合作方属性值引用
-     *
-     * @param taskId
-     * @return
      */
     public Object getThirdPartyReference(Long taskId) {
         Map<String, TaskAttribute> taskAttributeMap
@@ -262,4 +230,5 @@ public class DiplomaLoginSimulationService {
         }
         return SimpleResult.successResult(map);
     }
+
 }

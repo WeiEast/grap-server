@@ -26,21 +26,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
-import java.io.IOException;
 import java.util.List;
 
 /**
- *
+ * @author hanif
  */
 @Service("taskService")
 public class TaskService {
-    // logger
+
     protected final Logger logger = LoggerFactory.getLogger(getClass());
 
-    /**
-     * prefix
-     */
-    private final String prefix = "saas_gateway_task_account_uniqueid:";
     @Autowired
     private RedisTemplate<String, String> redisTemplate;
     @Autowired
@@ -52,15 +47,6 @@ public class TaskService {
 
     /**
      * 创建任务
-     *
-     * @param uniqueId
-     * @param appId
-     * @param bizType
-     * @param extra
-     * @param website
-     * @param source
-     * @return
-     * @throws IOException
      */
     public Long createTask(String uniqueId, String appId, Byte bizType, String extra, String website, String source) {
         if (StringUtils.isBlank(appId)) {
@@ -107,10 +93,6 @@ public class TaskService {
 
     /**
      * uniqueId校验
-     *
-     * @param uniqueId
-     * @param appId
-     * @param bizType
      */
     private void checkUniqueId(String uniqueId, String appId, Byte bizType) {
         Integer maxCount = diamondConfig.getMaxCount();
@@ -124,15 +106,14 @@ public class TaskService {
     }
 
     private String keyOfUniqueId(String uniqueId, String appId, Byte bizType) {
+        // prefix
+        String prefix = "saas_gateway_task_account_uniqueid:";
         return prefix + ":" + appId + ":" + bizType + ":" + uniqueId;
     }
 
 
     /**
      * 更新未完成任务
-     *
-     * @param task
-     * @return
      */
     private int updateUnfinishedTask(Task task) {
         TaskUpdateRequest taskUpdateRequest = DataConverterUtils.convert(task, TaskUpdateRequest.class);
@@ -175,21 +156,15 @@ public class TaskService {
 
     /**
      * 任务是否完成
-     *
-     * @param task
-     * @return
      */
     public boolean isTaskCompleted(TaskDTO task) {
         if (task == null) {
             return false;
         }
         Byte status = task.getStatus();
-        if (ETaskStatus.CANCEL.getStatus().equals(status)
+        return ETaskStatus.CANCEL.getStatus().equals(status)
                 || ETaskStatus.FAIL.getStatus().equals(status)
-                || ETaskStatus.SUCCESS.getStatus().equals(status)) {
-            return true;
-        }
-        return false;
+                || ETaskStatus.SUCCESS.getStatus().equals(status);
     }
 
 
@@ -200,35 +175,27 @@ public class TaskService {
         if (!rpcResult.isSuccess()) {
             throw new UnknownException("调用taskcenter失败");
         }
-        TaskDTO result = DataConverterUtils.convert(rpcResult.getData(), TaskDTO.class);
-        return result;
+        return DataConverterUtils.convert(rpcResult.getData(), TaskDTO.class);
     }
 
 
     /**
      * 更新AccountNo
-     *
-     * @param taskId
-     * @param accountNo
-     * @param webSite
      */
     public void updateTask(Long taskId, String accountNo, String webSite) {
         taskFacade.updateTask(taskId, accountNo, webSite);
     }
 
     public String cancelTaskWithStep(Long taskId) {
-
         TaskResult<String> rpcResult = taskFacade.cancelTaskWithStep(taskId);
         if (!rpcResult.isSuccess()) {
             throw new UnknownException("调用taskcenter失败");
         }
         return rpcResult.getData();
-
     }
 
 
     public String failTaskWithStep(Long taskId) {
-
         TaskResult<String> rpcResult = taskFacade.failTaskWithStep(taskId);
         if (!rpcResult.isSuccess()) {
             throw new UnknownException("调用taskcenter失败");
@@ -238,7 +205,6 @@ public class TaskService {
 
 
     public String updateTaskStatusWithStep(Long taskId, Byte status) {
-
         TaskResult<String> rpcResult = taskFacade.updateTaskStatusWithStep(taskId, status);
         if (!rpcResult.isSuccess()) {
             throw new UnknownException("调用taskcenter失败");

@@ -4,8 +4,6 @@ import com.treefinance.saas.grapserver.biz.service.AcquisitionService;
 import com.treefinance.saas.grapserver.common.enums.EBizType;
 import com.treefinance.saas.grapserver.common.enums.ESpiderTopic;
 import com.treefinance.saas.knife.result.SimpleResult;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -14,42 +12,14 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.ModelAndView;
 
 /**
- * Created by luoyihua on 2017/5/4.
+ * @author luoyihua on 2017/5/4.
  */
 @RestController
 @RequestMapping(value = {"/email", "/grap/email"})
 public class EmailController {
-    private static final Logger logger = LoggerFactory.getLogger(EmailController.class);
 
-    //    @Autowired
-//    private TaskService taskServiceImpl;
-//    @Autowired
-//    private MerchantConfigService merchantConfigService;
-//    @Autowired
-//    private TaskDeviceService taskDeviceService;
     @Autowired
     private AcquisitionService acquisitionService;
-//    @Autowired
-//    private TaskLicenseService taskLicenseService;
-//    @Autowired
-//    private DiamondConfig diamondConfig;
-
-//    @RequestMapping(value = "/start", method = {RequestMethod.POST})
-//    public Object createTask(@RequestParam("appid") String appid, @RequestParam("uniqueId") String uniqueId,
-//                             @RequestParam(name = "coorType", required = false) String coorType, @RequestParam("deviceInfo") String deviceInfo,
-//                             @RequestParam(name = "extra", required = false) String extra,
-//                             HttpServletRequest request) throws ForbiddenException {
-//        logger.info("createTask : appid={},uniqueId={},coorType={},deviceInfo={},extra={}", appid, uniqueId, coorType, deviceInfo, extra);
-//        taskLicenseService.verifyCreateTask(appid, EBizType.EMAIL);
-//        Long taskId = taskServiceImpl.createTask(uniqueId, appid, EBizType.EMAIL.getCode());
-//        Map<String, Object> map = Maps.newHashMap();
-//        map.put("taskid", taskId);
-//        map.put("color", merchantConfigService.getColorConfig(appid));
-//        map.put("title", diamondConfig.getSdkTitle(EBizType.EMAIL));
-//        String ipAddress = IpUtils.getIpAddress(request);
-//        taskDeviceService.create(deviceInfo, ipAddress, coorType, taskId);
-//        return new SimpleResult<>(map);
-//    }
 
     @RequestMapping(value = "/start", method = {RequestMethod.POST})
     public ModelAndView createTask() {
@@ -67,16 +37,4 @@ public class EmailController {
         return new SimpleResult<>();
     }
 
-//    @RequestMapping(value = "/acquisition/process", method = {RequestMethod.POST})
-//    public Object loginProcess(@RequestParam("taskid") Long taskid,
-//                               @RequestParam("directiveId") String directiveId,
-//                               @RequestParam(value = "html", required = false) String html,
-//                               @RequestParam(value = "cookie", required = false) String cookie) throws Exception {
-//        if (StringUtils.isEmpty(html) && StringUtils.isEmpty(cookie)) {
-//            throw new Exception("html和cookie不能同时为空");
-//        }
-//        logger.info("邮箱-loginProcess: taskid={},directiveId={},html={},cookie={}", taskid, directiveId, cookie, html, cookie);
-//        acquisitionService.loginProcess(directiveId, taskid, html, cookie);
-//        return new SimpleResult<>();
-//    }
 }

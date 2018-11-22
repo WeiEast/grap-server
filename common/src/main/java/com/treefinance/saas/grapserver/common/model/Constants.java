@@ -2,6 +2,9 @@ package com.treefinance.saas.grapserver.common.model;
 
 import com.datatrees.common.conf.PropertiesConfiguration;
 
+/**
+ * @author hanif
+ */
 public interface Constants {
 
     String PREFIX_KEY = "saas-gateway:";
@@ -46,4 +49,5 @@ public interface Constants {
      * 错误信息字段名
      */
     String ERROR_MSG_NAME = "errorMsg";
+
 }

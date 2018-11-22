@@ -25,12 +25,12 @@ import javax.validation.ValidationException;
 import java.util.Map;
 
 /**
- * Created by luyuan on 2017/4/26.
+ * @author luyuan on 2017/4/26.
  */
-
 @RestController
 @RequestMapping(value = {"/task", "/h5/task", "grap/h5/task", "/grap/task"})
 public class TaskController {
+
     private static final Logger logger = LoggerFactory.getLogger(TaskController.class);
 
     @Autowired
@@ -58,7 +58,7 @@ public class TaskController {
      * 获取配置,电商在用
      *
      * @param appid
-     * @param type
+     * @param type  分类
      * @param id    过滤task_support表中的id字段
      * @param style
      * @param name  过滤task_support表中的type字段
@@ -73,7 +73,7 @@ public class TaskController {
         if (StringUtils.isBlank(type)) {
             throw new IllegalArgumentException("Parameter 'type' is incorrect.");
         }
-        Map<String, Object> colorMap = merchantConfigService.getColorConfig(appid, style);
+        Map colorMap = merchantConfigService.getColorConfig(appid, style);
         Object defaultConfig = taskConfigService.getTaskConfig(type, id, name);
         Map<String, Object> map = Maps.newHashMap();
         map.put("config", defaultConfig);
@@ -89,7 +89,6 @@ public class TaskController {
      *
      * @param appId 商户appId
      * @param type  业务类型
-     * @return
      */
     @RequestMapping(value = "/tips", method = {RequestMethod.POST})
     public Object getAgreement(@RequestParam("appid") String appId, @RequestParam String type) {
@@ -97,7 +96,7 @@ public class TaskController {
             throw new IllegalArgumentException("Parameter 'type' is incorrect.");
         }
         EBizType bizType = EBizType.of(type);
-        Object result = merchantConfigService.getTips(appId, bizType.getCode());
+        Object result = merchantConfigService.getTips(appId, bizType != null ? bizType.getCode() : null);
         return new SimpleResult<>(result);
     }
 
@@ -121,19 +120,14 @@ public class TaskController {
         return new SimpleResult<>(map);
     }
 
-
     /**
      * 轮询任务执行指令
-     *
-     * @param taskid
-     * @return
-     * @throws Exception
      */
     @RequestMapping(value = "/next_directive", method = {RequestMethod.POST})
     public Object nextDirective(@RequestParam("taskid") Long taskid) throws Exception {
         String content = taskNextDirectiveService.getNextDirective(taskid);
         Map<String, Object> map = Maps.newHashMap();
-        //刚登陆成功,未收到任何指令
+        // 刚登陆成功,未收到任何指令
         if (StringUtils.isEmpty(content)) {
             // 轮询过程中，判断任务是否超时
             if (taskTimeService.isTaskTimeout(taskid)) {
@@ -163,7 +157,6 @@ public class TaskController {
             } else {
                 map.put("information", directiveMessage.getRemark());
             }
-            //taskNextDirectiveService.deleteNextDirective(taskid);
         }
         logger.info("taskId={}下一指令信息={}", taskid, map);
         return new SimpleResult<>(map);
@@ -172,12 +165,6 @@ public class TaskController {
 
     /**
      * 发送验证码
-     *
-     * @param taskid
-     * @param type
-     * @param code
-     * @return
-     * @throws Exception
      */
     @RequestMapping(value = "/verification/code", method = {RequestMethod.POST})
     public Object verifyCode(@RequestParam() String directiveId,
@@ -194,10 +181,6 @@ public class TaskController {
 
     /**
      * 取消爬取任务
-     *
-     * @param taskid
-     * @return
-     * @throws Exception
      */
     @RequestMapping(value = "/cancel", method = {RequestMethod.POST})
     public Object cancelTask(@RequestParam Long taskid) throws Exception {
@@ -207,12 +190,6 @@ public class TaskController {
 
     /**
      * 埋点记录
-     *
-     * @param taskId
-     * @param appId
-     * @param code
-     * @param extra
-     * @return
      */
     @RequestMapping(value = "/bury/point/log", method = {RequestMethod.POST})
     public Object buryPointLog(@RequestParam("taskid") Long taskId,
@@ -233,4 +210,5 @@ public class TaskController {
         taskBuryPointSpecialCodeService.doProcess(code, taskId, appId, extra);
         return SimpleResult.successResult(null);
     }
+
 }

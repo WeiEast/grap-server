@@ -4,15 +4,29 @@ import java.io.Serializable;
 import java.util.List;
 
 /**
- * Created by haojiahong on 2017/10/17.
+ * @author haojiahong on 2017/10/17.
  */
 public class FundDataDTO implements Serializable {
+
     private static final long serialVersionUID = -3265819176978912680L;
 
     private List<FundBillRecordDTO> billRecordList;
+
     private List<FundLoanInfoDTO> loanInfoList;
+
     private List<FundLoanRepayRecordDTO> loanRepayRecordList;
+
     private FundUserInfoDTO userInfo;
+
+    @Override
+    public String toString() {
+        return "FundDataDTO{" +
+                "billRecordList=" + billRecordList +
+                ", loanInfoList=" + loanInfoList +
+                ", loanRepayRecordList=" + loanRepayRecordList +
+                ", userInfo=" + userInfo +
+                '}';
+    }
 
     public List<FundBillRecordDTO> getBillRecordList() {
         return billRecordList;
@@ -45,4 +59,5 @@ public class FundDataDTO implements Serializable {
     public void setUserInfo(FundUserInfoDTO userInfo) {
         this.userInfo = userInfo;
     }
+
 }

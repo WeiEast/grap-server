@@ -38,6 +38,7 @@ import java.util.stream.Collectors;
  */
 @Service
 public class TaskConfigService {
+
     private static final Logger logger = LoggerFactory.getLogger(TaskDeviceService.class);
 
     @Autowired
@@ -49,11 +50,7 @@ public class TaskConfigService {
      * 获取配置信息
      *
      * @param type 分类
-     * @param id
-     * @param name
-     * @return
      */
-//  @Cacheable(value = "DAY", key = "'saas_crawler_task_config:'+#type")
     public Object getTaskConfig(String type, Integer id, String name) {
         EBizType supportType = EBizType.from(type);
 
@@ -69,7 +66,6 @@ public class TaskConfigService {
         List<WebsiteConf> websiteConf = spiderTaskApi.getWebsiteConf(list);
         return merge(supportedList, websiteConf, supportType);
     }
-
 
     private List<Map<String, Object>> merge(List<TaskSupport> supportedList,
                                             List<WebsiteConf> configs, EBizType type) {
@@ -89,7 +85,6 @@ public class TaskConfigService {
 
             return configList;
         } else {
-
             return merge(supportedList, configs);
         }
     }
@@ -107,7 +102,6 @@ public class TaskConfigService {
 
             list.add(map);
         }
-
         return list;
     }
 
@@ -127,7 +121,6 @@ public class TaskConfigService {
                 iterator.remove();
             }
         }
-
         return loginConfig == null ? Collections.emptyMap() : loginConfig;
     }
 
@@ -147,7 +140,7 @@ public class TaskConfigService {
             loginConfig.put("resetURL", conf.getResetURL());
             loginConfig.put("resetTip", conf.getResetTip());
         }
-
         return loginConfig;
     }
+
 }

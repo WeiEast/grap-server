@@ -43,20 +43,19 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 /**
- * Created by haojiahong on 2017/9/15.
+ * @author haojiahong on 2017/9/15.
  */
 @Service
 public class MoxieBusinessService implements InitializingBean {
+
     protected final Logger logger = LoggerFactory.getLogger(getClass());
+
     private static String VERIFY_CODE_SMS_COUNT_PREFIX = "saas-grap-fund-verify-code-count";
 
     @Autowired
@@ -98,18 +97,11 @@ public class MoxieBusinessService implements InitializingBean {
     public void afterPropertiesSet() throws Exception {
         List<MoxieCityInfoVO> cityList = this.queryCityList();
         logger.info("获取魔蝎城市公积金列表: cityList={}", JSON.toJSONString(cityList));
-        if (CollectionUtils.isEmpty(cityList)) {
-            this.cache.put("citys", Lists.newArrayList());
-            return;
-        }
-        this.cache.put("citys", cityList);
+        this.cache.put("citys", CollectionUtils.isEmpty(cityList) ? Lists.newArrayList() : cityList);
     }
 
     /**
      * 任务是否已经结束(即:任务是否已经为成功,失败或取消)
-     *
-     * @param taskId
-     * @return
      */
     private boolean isTaskDone(long taskId) {
         TaskDTO task = taskService.getById(taskId);
@@ -129,8 +121,6 @@ public class MoxieBusinessService implements InitializingBean {
 
     /**
      * 魔蝎账单通知业务处理
-     *
-     * @param eventNoticeDTO
      */
     @Transactional(rollbackFor = Exception.class)
     public void bill(MoxieTaskEventNoticeDTO eventNoticeDTO) {
@@ -140,13 +130,11 @@ public class MoxieBusinessService implements InitializingBean {
 
     /**
      * 魔蝎任务是否需要验证码处理
-     *
-     * @param taskId
-     * @return
      */
     private Map<String, Object> requireCaptcha(Long taskId) {
         Map<String, Object> map = Maps.newHashMap();
-        TaskAttribute taskAttribute = taskAttributeService.findByName(taskId, ETaskAttribute.FUND_MOXIE_TASKID.getAttribute(), false);
+        TaskAttribute taskAttribute =
+                taskAttributeService.findByName(taskId, ETaskAttribute.FUND_MOXIE_TASKID.getAttribute(), false);
         if (taskAttribute == null) {
             logger.error("handle moxie business error : taskId={} doesn't have moxieTaskId matched in task_attribute", taskId);
             return map;
@@ -162,14 +150,14 @@ public class MoxieBusinessService implements InitializingBean {
                 String value = object.getJSONObject("input").getString("value");
                 Long waitSeconds = object.getJSONObject("input").getLong("wait_seconds");
 
-
                 MoxieCaptchaDTO moxieCaptchaDTO = new MoxieCaptchaDTO();
                 moxieCaptchaDTO.setType(type);
                 moxieCaptchaDTO.setValue(value);
                 moxieCaptchaDTO.setWaitSeconds(waitSeconds);
-                //短信验证码需要自定义一个不同的value值,区分是两次不同的验证码请求,供前端轮询比较
+                // 短信验证码需要自定义一个不同的value值,区分是两次不同的验证码请求,供前端轮询比较
                 int inputCount = Optional.ofNullable(this.getVerifyCodeCount(taskId)).orElse(0);
-                if (StringUtils.equalsIgnoreCase(type, "sms")) {//需要短信验证码
+                // 需要短信验证码
+                if (StringUtils.equalsIgnoreCase(type, "sms")) {
                     moxieCaptchaDTO.setValue(inputCount + "");
                     map.put("directive", "require_sms");
                     map.put("information", moxieCaptchaDTO);
@@ -179,7 +167,8 @@ public class MoxieBusinessService implements InitializingBean {
                         taskLogService.insert(taskId, ETaskStep.WAITING_USER_INPUT_MESSAGE_CODE.getText(), new Date(), null);
                     }
                 }
-                if (StringUtils.equalsIgnoreCase(type, "img")) {//需要图片验证码
+                // 需要图片验证码
+                if (StringUtils.equalsIgnoreCase(type, "img")) {
                     map.put("directive", "require_picture");
                     map.put("information", moxieCaptchaDTO);
                     logger.info("魔蝎公积金任务需要图片验证码,moxieCaptchaDTO={},taskId={}", JSON.toJSONString(moxieCaptchaDTO), taskId);
@@ -189,18 +178,15 @@ public class MoxieBusinessService implements InitializingBean {
                     }
                 }
             }
-
         }
         return map;
     }
 
     /**
      * 获取魔蝎城市公积金列表
-     *
-     * @return
+     * @return 获取数据则失败返回空的List
      */
     public List<MoxieCityInfoVO> getCityList() {
-
         List<MoxieCityInfoVO> list = Lists.newArrayList();
         try {
             list = cache.get("citys");
@@ -208,32 +194,25 @@ public class MoxieBusinessService implements InitializingBean {
             logger.error("获取魔蝎城市公积金列表缓存信息失败", e);
         }
         return list;
-
     }
-
 
     /**
      * 创建魔蝎任务,得到moxieTaskId
-     *
-     * @param taskId
-     * @param params
-     * @return
      */
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public Map<String, Object> createMoxieTask(Long taskId, MoxieLoginParamsDTO params) {
-
-        //1.轮询指令,已经提交过登录,获取魔蝎异步回调登录状态
+        // 1.轮询指令,已经提交过登录,获取魔蝎异步回调登录状态
         Map<String, Object> map = Maps.newHashMap();
-        TaskAttribute attribute = taskAttributeService.findByName(taskId, ETaskAttribute.FUND_MOXIE_TASKID.getAttribute(), false);
+        TaskAttribute attribute =
+                taskAttributeService.findByName(taskId, ETaskAttribute.FUND_MOXIE_TASKID.getAttribute(), false);
         if (attribute != null && StringUtils.isNotBlank(attribute.getValue())) {
             logger.info("taskId={}已生成魔蝎任务moxieTaskId={},执行查询指令(验证登录是否超时,判断登录是否需要验证码,等待回调登录成功失败状态),等待魔蝎异步回调登录状态...",
                     taskId, attribute.getValue());
             map = this.queryLoginStatusFromDirective(taskId, attribute.getValue());
             return map;
         }
-
-        //2.提交登录,调用魔蝎接口创建魔蝎任务,如果任务创建失败,返回登录失败及异常信息
-        String moxieId = null;
+        // 2.提交登录,调用魔蝎接口创建魔蝎任务,如果任务创建失败,返回登录失败及异常信息
+        String moxieId;
         try {
             moxieId = fundMoxieService.createTasks(params);
             logger.info("taskId={}创建魔蝎任务成功moxieTaskId={},params={}", moxieId, JSON.toJSONString(params));
@@ -248,13 +227,12 @@ public class MoxieBusinessService implements InitializingBean {
                 map.put("information", "登录失败,请重试");
             }
             return map;
-
         }
-        //3.魔蝎任务创建成功,写入task_attribute,开始轮询此接口,等待魔蝎回调登录状态信息
+        // 3.魔蝎任务创建成功,写入task_attribute,开始轮询此接口,等待魔蝎回调登录状态信息
         taskAttributeService.insertOrUpdateSelective(taskId, ETaskAttribute.FUND_MOXIE_TASKID.getAttribute(), moxieId);
-        //魔蝎任务创建成功,记录登录account,登录失败重试会更新accountNo
+        // 魔蝎任务创建成功,记录登录account,登录失败重试会更新accountNo
         taskService.updateTask(taskId, params.getAccount(), null);
-        //魔蝎任务创建成功,记录任务创建时间,查询登录状态时判断登录是否超时.
+        // 魔蝎任务创建成功,记录任务创建时间,查询登录状态时判断登录是否超时.
         moxieTimeoutService.logLoginTime(taskId);
         map.put("directive", "waiting");
         map.put("information", "请等待");
@@ -264,10 +242,6 @@ public class MoxieBusinessService implements InitializingBean {
 
     /**
      * 查询指令,获取公积金账户登录状态
-     *
-     * @param taskId
-     * @param moxieTaskId
-     * @return
      */
     private Map<String, Object> queryLoginStatusFromDirective(Long taskId, String moxieTaskId) {
         Map<String, Object> map = Maps.newHashMap();
@@ -279,10 +253,10 @@ public class MoxieBusinessService implements InitializingBean {
                 map.put("information", "登录超时,请重试");
                 moxieTimeoutService.handleLoginTimeout(taskId, moxieTaskId);
             } else {
-                //如果还未收到登录状态的指令,判断是否需要验证码
+                // 如果还未收到登录状态的指令,判断是否需要验证码
                 Map<String, Object> captchaMap = this.requireCaptcha(taskId);
                 if (!MapUtils.isEmpty(captchaMap)) {
-                    //为了防止用户输入验证码过慢导致登录超时,若要输入验证码,则重置登录时间,重新计时90s
+                    // 为了防止用户输入验证码过慢导致登录超时,若要输入验证码,则重置登录时间,重新计时90s
                     moxieTimeoutService.resetLoginTaskTimeOut(taskId);
                     return captchaMap;
                 } else {
@@ -301,7 +275,7 @@ public class MoxieBusinessService implements InitializingBean {
                 if (directive.getStepCode() == 1) {
                     map.put("directive", directiveMessage.getDirective());
                     map.put("information", directiveMessage.getRemark());
-                    //如果是登录成功或失败,删掉指令,下一个页面轮询/next_derictive的时候转为waiting
+                    // 如果是登录成功或失败,删掉指令,下一个页面轮询/next_derictive的时候转为waiting
                     taskNextDirectiveService.deleteNextDirective(taskId, directiveMessage.getDirective());
                     if (StringUtils.equals(directiveMessage.getDirective(), EMoxieDirective.LOGIN_FAIL.getText())) {
                         // 登录失败(如用户名密码错误),需删除task_attribute中此taskId对应的moxieTaskId,重新登录时,可正常轮询/login/submit接口
@@ -319,8 +293,6 @@ public class MoxieBusinessService implements InitializingBean {
 
     /**
      * 拼装获取的城市列表信息为所需格式
-     *
-     * @return
      */
     private List<MoxieCityInfoVO> queryCityList() {
         List<MoxieCityInfoVO> result = Lists.newArrayList();
@@ -340,7 +312,6 @@ public class MoxieBusinessService implements InitializingBean {
             }
             map.put(moxieCityInfoDTO.getProvince(), items);
         }
-//        Map<String, List<MoxieCityInfoDTO>> map = list.stream().collect(Collectors.groupingBy(MoxieCityInfoDTO::getProvince));
         for (Map.Entry<String, List<MoxieCityInfoDTO>> entry : map.entrySet()) {
             MoxieCityInfoVO vo = new MoxieCityInfoVO();
             vo.setLabel(entry.getKey());
@@ -349,17 +320,17 @@ public class MoxieBusinessService implements InitializingBean {
             List<MoxieCityInfoDTO> dtoList = entry.getValue();
             for (MoxieCityInfoDTO dto : dtoList) {
                 MoxieCityInfoVO sonVO = new MoxieCityInfoVO();
-                sonVO.setLabel(dto.getCity_name());
-                sonVO.setValue(dto.getArea_code());
-                sonVO.setSpell(convertToPinyinString(dto.getCity_name()));
+                sonVO.setLabel(dto.getCityName());
+                sonVO.setValue(dto.getAreaCode());
+                sonVO.setSpell(convertToPinyinString(dto.getCityName()));
                 sonVO.setStatus(dto.getStatus());
                 sonList.add(sonVO);
             }
-            sonList = sonList.stream().sorted((o1, o2) -> o1.getSpell().compareTo(o2.getSpell())).collect(Collectors.toList());
+            sonList = sonList.stream().sorted(Comparator.comparing(MoxieCityInfoVO::getSpell)).collect(Collectors.toList());
             vo.setList(sonList);
             result.add(vo);
         }
-        result = result.stream().sorted((o1, o2) -> o1.getSpell().compareTo(o2.getSpell())).collect(Collectors.toList());
+        result = result.stream().sorted(Comparator.comparing(MoxieCityInfoVO::getSpell)).collect(Collectors.toList());
         return result;
     }
 
@@ -382,11 +353,9 @@ public class MoxieBusinessService implements InitializingBean {
         logger.info("taskId={}公积金输入验证码moxieTaskId={},input={}", taskId, moxieTaskId, input);
         Integer count = this.incrVerifyCodeCount(taskId);
         logger.info("公积金taskId={}输入验证码次数+1,count={}", taskId, count);
-
-
     }
 
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     private Integer incrVerifyCodeCount(Long taskId) {
         int count = 1;
         TaskAttribute taskAttribute = taskAttributeService.findByName(taskId, ETaskAttribute.FUND_MOXIE_VERIFY_CODE_COUNT.getAttribute(), false);
@@ -452,8 +421,6 @@ public class MoxieBusinessService implements InitializingBean {
 
     /**
      * 魔蝎任务采集失败业务处理
-     *
-     * @param eventNoticeDTO
      */
     public void grabFail(MoxieTaskEventNoticeDTO eventNoticeDTO) {
         MoxieTaskEventNoticeRequest request = DataConverterUtils.convert(eventNoticeDTO, MoxieTaskEventNoticeRequest.class);

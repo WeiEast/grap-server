@@ -3,7 +3,7 @@ package com.treefinance.saas.grapserver.common.model.dto.demo.fund;
 import java.io.Serializable;
 
 /**
- * Created by haojiahong on 2017/10/17.
+ * @author haojiahong on 2017/10/17.
  */
 public class FundLoanRepayRecordDTO implements Serializable {
 
@@ -43,6 +43,19 @@ public class FundLoanRepayRecordDTO implements Serializable {
      * 贷款合同号
      */
     private String contractNumber;
+
+    @Override
+    public String toString() {
+        return "FundLoanRepayRecordDTO{" +
+                "repayDate='" + repayDate + '\'' +
+                ", accountingDate='" + accountingDate + '\'' +
+                ", repayAmount=" + repayAmount +
+                ", repayCapital=" + repayCapital +
+                ", repayInterest=" + repayInterest +
+                ", repayPenalty=" + repayPenalty +
+                ", contractNumber='" + contractNumber + '\'' +
+                '}';
+    }
 
     public String getRepayDate() {
         return repayDate;
@@ -99,4 +112,5 @@ public class FundLoanRepayRecordDTO implements Serializable {
     public void setContractNumber(String contractNumber) {
         this.contractNumber = contractNumber;
     }
+
 }

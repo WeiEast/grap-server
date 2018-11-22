@@ -5,8 +5,11 @@ import java.util.Date;
 
 /**
  * taskRO
+ *
+ * @author haojiahong
  */
 public class TaskRO implements Serializable {
+
     private Long id;
     private String uniqueId;
     private String appId;
@@ -21,7 +24,25 @@ public class TaskRO implements Serializable {
     private String stepCode;
     private Date createTime;
     private Date lastUpdateTime;
+
     private static final long serialVersionUID = 1L;
+
+    @Override
+    public String toString() {
+        return "TaskRO{" +
+                "id=" + id +
+                ", uniqueId='" + uniqueId + '\'' +
+                ", appId='" + appId + '\'' +
+                ", accountNo='" + accountNo + '\'' +
+                ", bizType=" + bizType +
+                ", bizTypeName='" + bizTypeName + '\'' +
+                ", status=" + status +
+                ", webSite='" + webSite + '\'' +
+                ", stepCode='" + stepCode + '\'' +
+                ", createTime=" + createTime +
+                ", lastUpdateTime=" + lastUpdateTime +
+                '}';
+    }
 
     public Long getId() {
         return id;
@@ -110,4 +131,5 @@ public class TaskRO implements Serializable {
     public void setBizTypeName(String bizTypeName) {
         this.bizTypeName = bizTypeName;
     }
+
 }

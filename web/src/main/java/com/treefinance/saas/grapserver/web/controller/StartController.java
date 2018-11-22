@@ -27,12 +27,14 @@ import java.util.Map;
 
 /**
  * start接口
- * Created by yh-treefinance on 2017/10/9.
+ * @author yh-treefinance on 2017/10/9.
  */
 @RestController
 @RequestMapping(value = {"/", "/grap", "/h5", "/grap/h5"})
 public class StartController {
+
     private static final Logger logger = LoggerFactory.getLogger(EcommerceController.class);
+
     @Autowired
     private TaskService taskService;
     @Autowired
@@ -48,18 +50,6 @@ public class StartController {
 
     /**
      * 创建任务接口
-     *
-     * @param appid
-     * @param uniqueId
-     * @param coorType
-     * @param deviceInfo
-     * @param extra
-     * @param source
-     * @param bizType
-     * @param style
-     * @param website
-     * @param request
-     * @return
      */
     @RequestMapping(value = "/start", method = {RequestMethod.POST})
     public Object start(@RequestParam("appid") String appid,
@@ -84,7 +74,7 @@ public class StartController {
                         appid, uniqueId, coorType, deviceInfo, extra, bizType, source);
                 EBizType  eBizType = EBizType.of(bizType);
                 taskLicenseService.verifyCreateTask(appid, uniqueId, eBizType);
-                Long taskId = taskService.createTask(uniqueId, appid, eBizType.getCode(), extra, website, source);
+                Long taskId = taskService.createTask(uniqueId, appid, eBizType != null ? eBizType.getCode() : null, extra, website, source);
                 Map<String, Object> map = Maps.newHashMap();
                 map.put("taskid", String.valueOf(taskId));
                 map.put("color", merchantConfigService.getColorConfig(appid, style));
@@ -99,4 +89,5 @@ public class StartController {
             redisDao.releaseLock(key, lockMap, 60 * 1000L);
         }
     }
+
 }

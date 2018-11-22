@@ -16,7 +16,7 @@ import com.treefinance.saas.grapserver.common.model.vo.demo.fund.FundLoanRepayRe
 import com.treefinance.saas.grapserver.common.model.vo.demo.fund.FundUserInfoVO;
 import com.treefinance.saas.grapserver.common.utils.BeanUtils;
 import com.treefinance.saas.grapserver.common.utils.JsonUtils;
-import com.treefinance.saas.grapserver.common.utils.RemoteDataDownloadUtils;
+import com.treefinance.saas.grapserver.common.utils.AbstractRemoteDataDownloadUtils;
 import com.treefinance.saas.grapserver.dao.entity.AppLicense;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -34,7 +34,7 @@ import java.util.stream.Collectors;
 
 /**
  * H5界面演示系统业务处理类
- * Created by haojiahong on 2017/10/17.
+ * @author haojiahong on 2017/10/17.
  */
 @Service
 public class DemoService {
@@ -52,16 +52,10 @@ public class DemoService {
     @Autowired
     private DiamondConfig diamondConfig;
 
-
     /**
      * oss上获取数据,并做缓存
-     *
-     * @param appId
-     * @param params
-     * @return
      */
     private String getData(String appId, String params) {
-
         AppLicense appLicense = appLicenseService.getAppLicense(appId);
         if (appLicense == null) {
             logger.error("获取demo数据:通过appId={}查询密钥信息空", appId);
@@ -75,7 +69,7 @@ public class DemoService {
             logger.error("decryptRSAData failed", e);
             throw new BizException("获取数据失败,请求非法");
         }
-        Map<String, Object> paramMap = JsonUtils.toJavaBean(params, Map.class);
+        Map paramMap = JsonUtils.toJavaBean(params, Map.class);
         if (!paramMap.containsKey("dataUrl")) {
             logger.error("获取demo数据:解密后的params没有dataUrl属性 paramsMap={}", JSON.toJSONString(paramMap));
             throw new BizException("获取数据失败,请求非法");
@@ -84,7 +78,7 @@ public class DemoService {
         String data = redisTemplate.opsForValue().get(key);
         if (StringUtils.isBlank(data)) {
             try {
-                byte[] result = RemoteDataDownloadUtils.download(paramMap.get("dataUrl").toString(), byte[].class);
+                byte[] result = AbstractRemoteDataDownloadUtils.download(paramMap.get("dataUrl").toString(), byte[].class);
                 // 数据体默认使用商户密钥加密
                 data = callbackSecureHandler.decryptByAES(result, appLicense.getDataSecretKey());
             } catch (Exception e) {
@@ -98,10 +92,6 @@ public class DemoService {
 
     /**
      * 获取公积金用户基本信息
-     *
-     * @param appId
-     * @param params
-     * @return
      */
     public Object getFundUserInfo(String appId, String params) {
         if (!checkIsDemoApp(appId)) {
@@ -125,30 +115,14 @@ public class DemoService {
         }
         FundUserInfoVO vo = new FundUserInfoVO();
         BeanUtils.copyProperties(userInfo, vo);
-        if (userInfo.getBalance() != null) {
-            vo.setBalance(new BigDecimal(userInfo.getBalance()).divide(new BigDecimal(100), 2, BigDecimal.ROUND_HALF_UP));
-        }
-        if (userInfo.getFundBalance() != null) {
-            vo.setFundBalance(new BigDecimal(userInfo.getFundBalance()).divide(new BigDecimal(100), 2, BigDecimal.ROUND_HALF_UP));
-        }
-        if (userInfo.getSubsidyBalance() != null) {
-            vo.setSubsidyBalance(new BigDecimal(userInfo.getSubsidyBalance()).divide(new BigDecimal(100), 2, BigDecimal.ROUND_HALF_UP));
-        }
-        if (userInfo.getSubsidyIncome() != null) {
-            vo.setSubsidyIncome(new BigDecimal(userInfo.getSubsidyIncome()).divide(new BigDecimal(100), 2, BigDecimal.ROUND_HALF_UP));
-        }
-        if (userInfo.getMonthlyCorporationIncome() != null) {
-            vo.setMonthlyCorporationIncome(new BigDecimal(userInfo.getMonthlyCorporationIncome()).divide(new BigDecimal(100), 2, BigDecimal.ROUND_HALF_UP));
-        }
-        if (userInfo.getMonthlyCustomerIncome() != null) {
-            vo.setMonthlyCustomerIncome(new BigDecimal(userInfo.getMonthlyCustomerIncome()).divide(new BigDecimal(100), 2, BigDecimal.ROUND_HALF_UP));
-        }
-        if (userInfo.getMonthlyTotalIncome() != null) {
-            vo.setMonthlyTotalIncome(new BigDecimal(userInfo.getMonthlyTotalIncome()).divide(new BigDecimal(100), 2, BigDecimal.ROUND_HALF_UP));
-        }
-        if (userInfo.getBaseNumber() != null) {
-            vo.setBaseNumber(new BigDecimal(userInfo.getBaseNumber()).divide(new BigDecimal(100), 2, BigDecimal.ROUND_HALF_UP));
-        }
+        vo.setBalance(calculatePrecision(userInfo.getBalance()));
+        vo.setFundBalance(calculatePrecision(userInfo.getFundBalance()));
+        vo.setSubsidyBalance(calculatePrecision(userInfo.getSubsidyBalance()));
+        vo.setSubsidyIncome(calculatePrecision(userInfo.getSubsidyIncome()));
+        vo.setMonthlyCorporationIncome(calculatePrecision(userInfo.getMonthlyCorporationIncome()));
+        vo.setMonthlyCustomerIncome(calculatePrecision(userInfo.getMonthlyCustomerIncome()));
+        vo.setMonthlyTotalIncome(calculatePrecision(userInfo.getMonthlyTotalIncome()));
+        vo.setBaseNumber(calculatePrecision(userInfo.getBaseNumber()));
 
         List<FundUserInfoVO> userInfoList = Lists.newArrayList();
         userInfoList.add(vo);
@@ -157,11 +131,6 @@ public class DemoService {
 
     /**
      * 获取公积金缴存记录
-     *
-     * @param appId
-     * @param params
-     * @param pageNum
-     * @return
      */
     public Object getFundBillRecordList(String appId, String params, Integer pageNum) {
         if (!checkIsDemoApp(appId)) {
@@ -185,30 +154,14 @@ public class DemoService {
         for (FundBillRecordDTO dto : subList) {
             FundBillRecordVO vo = new FundBillRecordVO();
             BeanUtils.copyProperties(dto, vo);
-            if (dto.getOutcome() != null) {
-                vo.setOutcome(new BigDecimal(dto.getOutcome()).divide(new BigDecimal(100), 2, BigDecimal.ROUND_HALF_UP));
-            }
-            if (dto.getIncome() != null) {
-                vo.setIncome(new BigDecimal(dto.getIncome()).divide(new BigDecimal(100), 2, BigDecimal.ROUND_HALF_UP));
-            }
-            if (dto.getSubsidyIncome() != null) {
-                vo.setSubsidyIncome(new BigDecimal(dto.getSubsidyIncome()).divide(new BigDecimal(100), 2, BigDecimal.ROUND_HALF_UP));
-            }
-            if (dto.getSubsidyOutcome() != null) {
-                vo.setSubsidyOutcome(new BigDecimal(dto.getSubsidyOutcome()).divide(new BigDecimal(100), 2, BigDecimal.ROUND_HALF_UP));
-            }
-            if (dto.getBalance() != null) {
-                vo.setBalance(new BigDecimal(dto.getBalance()).divide(new BigDecimal(100), 2, BigDecimal.ROUND_HALF_UP));
-            }
-            if (dto.getCorporationIncome() != null) {
-                vo.setCorporationIncome(new BigDecimal(dto.getCorporationIncome()).divide(new BigDecimal(100), 2, BigDecimal.ROUND_HALF_UP));
-            }
-            if (dto.getCustomerIncome() != null) {
-                vo.setCustomerIncome(new BigDecimal(dto.getCustomerIncome()).divide(new BigDecimal(100), 2, BigDecimal.ROUND_HALF_UP));
-            }
-            if (dto.getAdditionalIncome() != null) {
-                vo.setAdditionalIncome(new BigDecimal(dto.getAdditionalIncome()).divide(new BigDecimal(100), 2, BigDecimal.ROUND_HALF_UP));
-            }
+            vo.setIncome(calculatePrecision(dto.getIncome()));
+            vo.setOutcome(calculatePrecision(dto.getOutcome()));
+            vo.setSubsidyIncome(calculatePrecision(dto.getSubsidyIncome()));
+            vo.setSubsidyOutcome(calculatePrecision(dto.getSubsidyOutcome()));
+            vo.setBalance(calculatePrecision(dto.getBalance()));
+            vo.setCorporationIncome(calculatePrecision(dto.getCorporationIncome()));
+            vo.setCustomerIncome(calculatePrecision(dto.getCustomerIncome()));
+            vo.setAdditionalIncome(calculatePrecision(dto.getAdditionalIncome()));
             result.add(vo);
         }
         return result;
@@ -216,11 +169,6 @@ public class DemoService {
 
     /**
      * 获取公积金贷款信息
-     *
-     * @param appId
-     * @param params
-     * @param pageNum
-     * @return
      */
     public Object getFundLoanInfoList(String appId, String params, Integer pageNum) {
         if (!checkIsDemoApp(appId)) {
@@ -258,40 +206,21 @@ public class DemoService {
 
             FundLoanInfoVO vo = new FundLoanInfoVO();
             BeanUtils.copyProperties(info, vo);
-            if (info.getLoanAmount() != null) {
-                vo.setLoanAmount(new BigDecimal(info.getLoanAmount()).divide(new BigDecimal(100), 2, BigDecimal.ROUND_HALF_UP));
-            }
-            if (info.getMonthlyRepayAmount() != null) {
-                vo.setMonthlyRepayAmount(new BigDecimal(info.getMonthlyRepayAmount()).divide(new BigDecimal(100), 2, BigDecimal.ROUND_HALF_UP));
-            }
-            if (info.getCommercialAmount() != null) {
-                vo.setCommercialAmount(new BigDecimal(info.getCommercialAmount()).divide(new BigDecimal(100), 2, BigDecimal.ROUND_HALF_UP));
-            }
-            if (info.getRemainAmount() != null) {
-                vo.setRemainAmount(new BigDecimal(info.getRemainAmount()).divide(new BigDecimal(100), 2, BigDecimal.ROUND_HALF_UP));
-            }
-            if (info.getOverdueCapital() != null) {
-                vo.setOverdueCapital(new BigDecimal(info.getOverdueCapital()).divide(new BigDecimal(100), 2, BigDecimal.ROUND_HALF_UP));
-            }
-            if (info.getOverdueInterest() != null) {
-                vo.setOverdueInterest(new BigDecimal(info.getOverdueInterest()).divide(new BigDecimal(100), 2, BigDecimal.ROUND_HALF_UP));
-            }
-            if (info.getOverduePenalty() != null) {
-                vo.setOverduePenalty(new BigDecimal(info.getOverduePenalty()).divide(new BigDecimal(100), 2, BigDecimal.ROUND_HALF_UP));
-            }
-            result.add(vo);
 
+            vo.setLoanAmount(calculatePrecision(info.getLoanAmount()));
+            vo.setMonthlyRepayAmount(calculatePrecision(info.getMonthlyRepayAmount()));
+            vo.setCommercialAmount(calculatePrecision(info.getCommercialAmount()));
+            vo.setRemainAmount(calculatePrecision(info.getRemainAmount()));
+            vo.setOverdueCapital(calculatePrecision(info.getOverdueCapital()));
+            vo.setOverdueInterest(calculatePrecision(info.getOverdueInterest()));
+            vo.setOverduePenalty(calculatePrecision(info.getOverduePenalty()));
+            result.add(vo);
         }
         return result;
     }
 
     /**
      * 获取公积金还款信息
-     *
-     * @param appId
-     * @param params
-     * @param pageNum
-     * @return
      */
     public Object getFundLoanRepayRecordList(String appId, String params, Integer pageNum) {
         if (!checkIsDemoApp(appId)) {
@@ -319,21 +248,23 @@ public class DemoService {
         for (FundLoanRepayRecordDTO dto : subList) {
             FundLoanRepayRecordVO vo = new FundLoanRepayRecordVO();
             BeanUtils.copyProperties(dto, vo);
-            if (dto.getRepayAmount() != null) {
-                vo.setRepayAmount(new BigDecimal(dto.getRepayAmount()).divide(new BigDecimal(100), 2, BigDecimal.ROUND_HALF_UP));
-            }
-            if (dto.getRepayCapital() != null) {
-                vo.setRepayCapital(new BigDecimal(dto.getRepayCapital()).divide(new BigDecimal(100), 2, BigDecimal.ROUND_HALF_UP));
-            }
-            if (dto.getRepayInterest() != null) {
-                vo.setRepayInterest(new BigDecimal(dto.getRepayInterest()).divide(new BigDecimal(100), 2, BigDecimal.ROUND_HALF_UP));
-            }
-            if (dto.getRepayPenalty() != null) {
-                vo.setRepayPenalty(new BigDecimal(dto.getRepayPenalty()).divide(new BigDecimal(100), 2, BigDecimal.ROUND_HALF_UP));
-            }
+            vo.setRepayAmount(calculatePrecision(dto.getRepayAmount()));
+            vo.setRepayCapital(calculatePrecision(dto.getRepayCapital()));
+            vo.setRepayInterest(calculatePrecision(dto.getRepayInterest()));
+            vo.setRepayPenalty(calculatePrecision(dto.getRepayPenalty()));
             result.add(vo);
         }
         return result;
+    }
+
+    /**
+     * 计算，输入除以100，保留小数点后两位
+     * @param sourceValue   输入值 -> Integer
+     * @return              输入为null时返回null -> BigDecimal
+     */
+    private BigDecimal calculatePrecision(Integer sourceValue) {
+        return sourceValue == null ? null : new BigDecimal(sourceValue)
+                .divide(new BigDecimal(100), 2, BigDecimal.ROUND_HALF_UP);
     }
 
     private Boolean checkIsDemoApp(String appId) {
@@ -343,7 +274,6 @@ public class DemoService {
             return false;
         }
         List<String> demoAppIdList = Splitter.on(",").splitToList(demoAppIds);
-        boolean flag = demoAppIdList.contains(appId);
-        return flag;
+        return demoAppIdList.contains(appId);
     }
 }

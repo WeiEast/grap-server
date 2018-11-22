@@ -1,34 +1,22 @@
 package com.treefinance.saas.grapserver.common.utils;
 
-import org.apache.commons.io.IOUtils;
-import org.springframework.core.io.UrlResource;
+import java.security.NoSuchAlgorithmException;
+import java.util.Base64;
 
 import javax.crypto.Cipher;
 import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
-import java.security.NoSuchAlgorithmException;
-import java.util.Base64;
 
-
+/**
+ * @author hanif
+ * @date 2018/11/13
+ */
 public class AESUtils {
-
-    public static void main(String[] args) throws Exception {
-        String url = "http://saas-taskdata.oss-cn-shanghai.aliyuncs.com/dev/QATestabcdefghQA/20171225/OPERATOR/129970009018494976/netDetails?Expires=1516952210&OSSAccessKeyId=v2V12KRXo6GNjZuu&Signature=FoDqSmP%2Bdr9nVlYSZwvBGVA8R3w%3D";
-        String key = "UocOo3tWNrc2p28PXgf1ow==";
-        UrlResource resource = new UrlResource(url);
-        byte[] data = IOUtils.toByteArray(resource.getInputStream());
-        System.out.println(decrytData(data, key));
-    }
 
     /**
      * 解密数据
-     *
-     * @param data
-     * @param key
-     * @return
-     * @throws Exception
      */
     public static String decrytData(byte[] data, String key) throws Exception {
         // 1.aes解密
@@ -47,7 +35,6 @@ public class AESUtils {
         private static final byte[] IV = {0x30, 0x31, 0x30, 0x32, 0x30, 0x33, 0x30, 0x34, 0x30, 0x35,
                 0x30, 0x36, 0x30, 0x37,
                 0x30, 0x38};
-
 
         private static final String TEST_TXT = "Hello, world;---Hello, world;---";
 
@@ -77,11 +64,6 @@ public class AESUtils {
 
         /**
          * 加密数据
-         *
-         * @param data
-         * @param key
-         * @return
-         * @throws Exception
          */
         private static byte[] decrypt(byte[] data, String key) throws Exception {
             SecretKeySpec secretKeySpec = getSecretKey(key);
@@ -92,11 +74,6 @@ public class AESUtils {
 
         /**
          * 解密数据
-         *
-         * @param data
-         * @param key
-         * @return
-         * @throws Exception
          */
         private byte[] encrypt(byte[] data, String key) throws Exception {
             SecretKeySpec secretKeySpec = getSecretKey(key);

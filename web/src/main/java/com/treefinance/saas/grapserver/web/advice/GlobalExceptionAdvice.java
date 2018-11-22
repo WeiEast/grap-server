@@ -42,7 +42,7 @@ import java.util.Map;
  * @version 1.0
  * @since 2017年3月06日 上午10:12:41
  */
-@ControllerAdvice
+@ControllerAdvice("com.treefinance.saas.grapserver.web.controller")
 public class GlobalExceptionAdvice extends ResponseEntityExceptionHandler {
     private static final Logger logger = LoggerFactory.getLogger(GlobalExceptionAdvice.class);
 

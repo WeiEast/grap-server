@@ -1,11 +1,10 @@
 package com.treefinance.saas.grapserver.common.result;
 
-import java.util.List;
 import java.util.Map;
 
 /**
- * @author:guoguoyun
- * @date:Created in 2018/10/25上午11:13
+ * @author guoguoyun
+ * @date Created in 2018/10/25上午11:13
  */
 public class TongdunDetailResult {
 
@@ -14,12 +13,10 @@ public class TongdunDetailResult {
      */
     private String id;
 
-
     /**
      * 对应规则的数值
      */
     private String value;
-
 
     /**
      * 对应具体详细的结果
@@ -53,4 +50,5 @@ public class TongdunDetailResult {
     @Override public String toString() {
         return "TongdunDetailResult{" + "id='" + id + '\'' + ", value='" + value + '\'' + ", details=" + details + '}';
     }
+
 }

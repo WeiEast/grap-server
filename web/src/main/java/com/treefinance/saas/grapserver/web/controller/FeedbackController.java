@@ -25,7 +25,6 @@ public class FeedbackController {
 
     private static final Logger logger = LoggerFactory.getLogger(FeedbackController.class);
 
-
     @Autowired
     private AppFeedbackService appFeedbackService;
 
@@ -49,7 +48,6 @@ public class FeedbackController {
         appFeedbackResultDTO.setFeedbackDesc(feedbackValue);
         appFeedbackService.save(appFeedbackResultDTO);
         return SimpleResult.successResult(true);
-
     }
 
 }

@@ -13,15 +13,17 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * Created by luoyihua on 2017/5/2.
+ * @author luoyihua on 2017/5/2.
  */
 public final class IpUtils {
+
     private static final Logger logger = LoggerFactory.getLogger(IpUtils.class);
 
     private static final Pattern IP_PATTERN = Pattern.compile("([0-9]{1,3}\\.){3}[0-9]{1,3}");
+    
+    private static final String UNKNOWN = "unknown";
 
-    private IpUtils() {
-    }
+    private IpUtils() {}
 
     /**
      * 从请求头中提取请求来源IP
@@ -43,15 +45,15 @@ public final class IpUtils {
             }
         }
 
-        if (StringUtils.isBlank(ip) || "unknown".equalsIgnoreCase(ip)) {
+        if (StringUtils.isBlank(ip) || UNKNOWN.equalsIgnoreCase(ip)) {
             ip = request.getHeader("Proxy-Client-IP");
         }
 
-        if (StringUtils.isBlank(ip) || "unknown".equalsIgnoreCase(ip)) {
+        if (StringUtils.isBlank(ip) || UNKNOWN.equalsIgnoreCase(ip)) {
             ip = request.getHeader("WL-Proxy-Client-IP");
         }
 
-        if (StringUtils.isBlank(ip) || "unknown".equalsIgnoreCase(ip)) {
+        if (StringUtils.isBlank(ip) || UNKNOWN.equalsIgnoreCase(ip)) {
             ip = request.getRemoteAddr();
         }
 
@@ -60,31 +62,26 @@ public final class IpUtils {
 
     /**
      * 获取服务器IP地址
-     *
-     * @return
      */
-    @SuppressWarnings("unchecked")
     public static String getServerIp() {
-        String SERVER_IP = null;
+        String serverIp = null;
         try {
             Enumeration netInterfaces = NetworkInterface.getNetworkInterfaces();
-            InetAddress ip = null;
+            InetAddress ip;
             while (netInterfaces.hasMoreElements()) {
                 NetworkInterface ni = (NetworkInterface) netInterfaces.nextElement();
-                ip = (InetAddress) ni.getInetAddresses().nextElement();
-                SERVER_IP = ip.getHostAddress();
+                ip = ni.getInetAddresses().nextElement();
+                serverIp = ip.getHostAddress();
                 if (!ip.isSiteLocalAddress() && !ip.isLoopbackAddress()
-                        && ip.getHostAddress().indexOf(":") == -1) {
-                    SERVER_IP = ip.getHostAddress();
+                        && !ip.getHostAddress().contains(":")) {
+                    serverIp = ip.getHostAddress();
                     break;
-                } else {
-                    ip = null;
                 }
             }
         } catch (SocketException e) {
             logger.error("getServerIp exception ", e);
         }
-
-        return SERVER_IP;
+        return serverIp;
     }
+    
 }

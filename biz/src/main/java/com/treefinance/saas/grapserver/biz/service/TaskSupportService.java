@@ -37,13 +37,12 @@ public class TaskSupportService {
     @Autowired
     private TaskSupportFacade taskSupportFacade;
 
-
     public List<TaskSupport> getSupportedList(String supportType, Integer id, String name) {
         TaskResult<List<TaskSupportRO>> rpcResult = taskSupportFacade.getSupportedList(supportType, id, name);
         if (!rpcResult.isSuccess()) {
             throw new UnknownException("调用taskcenter失败");
         }
-        List<TaskSupport> list = DataConverterUtils.convert(rpcResult.getData(), TaskSupport.class);
-        return list;
+        return DataConverterUtils.convert(rpcResult.getData(), TaskSupport.class);
     }
+
 }

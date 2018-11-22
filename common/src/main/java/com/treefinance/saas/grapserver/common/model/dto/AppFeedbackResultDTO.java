@@ -11,10 +11,25 @@ public class AppFeedbackResultDTO implements Serializable {
     private static final long serialVersionUID = -6502289982033697840L;
 
     private String appId;
+
     private Byte bizType;
+
     private Long taskId;
+
     private String uniqueId;
+
     private String feedbackDesc;
+
+    @Override
+    public String toString() {
+        return "AppFeedbackResultDTO{" +
+                "appId='" + appId + '\'' +
+                ", bizType=" + bizType +
+                ", taskId=" + taskId +
+                ", uniqueId='" + uniqueId + '\'' +
+                ", feedbackDesc='" + feedbackDesc + '\'' +
+                '}';
+    }
 
     public String getAppId() {
         return appId;
@@ -55,4 +70,5 @@ public class AppFeedbackResultDTO implements Serializable {
     public void setFeedbackDesc(String feedbackDesc) {
         this.feedbackDesc = feedbackDesc;
     }
+
 }

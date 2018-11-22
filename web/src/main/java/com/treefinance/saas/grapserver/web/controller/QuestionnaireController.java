@@ -6,12 +6,12 @@ import com.treefinance.saas.grapserver.common.enums.EBizType;
 import com.treefinance.saas.grapserver.common.exception.BizException;
 import com.treefinance.saas.grapserver.common.model.vo.AppQuestionnaireResultRequest;
 import com.treefinance.saas.knife.result.SimpleResult;
-import com.treefinance.saas.merchant.center.facade.request.grapserver.GetAppQuestionnaireRequest;
-import com.treefinance.saas.merchant.center.facade.request.grapserver.SaveAppQuestionnaireResultRequest;
-import com.treefinance.saas.merchant.center.facade.result.console.MerchantResult;
-import com.treefinance.saas.merchant.center.facade.result.grapsever.AppQuestionnaireRO;
-import com.treefinance.saas.merchant.center.facade.result.grapsever.AppQuestionnaireResultDetailRO;
-import com.treefinance.saas.merchant.center.facade.service.AppQuestionnaireFacade;
+import com.treefinance.saas.merchant.facade.request.grapserver.GetAppQuestionnaireRequest;
+import com.treefinance.saas.merchant.facade.request.grapserver.SaveAppQuestionnaireResultRequest;
+import com.treefinance.saas.merchant.facade.result.console.MerchantResult;
+import com.treefinance.saas.merchant.facade.result.grapsever.AppQuestionnaireRO;
+import com.treefinance.saas.merchant.facade.result.grapsever.AppQuestionnaireResultDetailRO;
+import com.treefinance.saas.merchant.facade.service.AppQuestionnaireFacade;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,11 +21,12 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 /**
- * Created by yh-treefinance on 2018/6/29.
+ * @author yh-treefinance on 2018/6/29.
  */
 @RestController
 @RequestMapping(value = {"/grap", "/grap/h5/"})
 public class QuestionnaireController {
+
     private static final Logger logger = LoggerFactory.getLogger(QuestionnaireController.class);
 
     @Autowired
@@ -33,9 +34,6 @@ public class QuestionnaireController {
 
     /**
      * 查询问卷
-     *
-     * @param bizType
-     * @return
      */
     @RequestMapping(value = "/{bizType}/questionnaire/get", method = {RequestMethod.POST})
     public Object getQuestionnaire(@PathVariable(name = "bizType") String bizType,
@@ -51,10 +49,6 @@ public class QuestionnaireController {
 
     /**
      * 保存问卷结果
-     *
-     * @param bizType
-     * @param request
-     * @return
      */
     @RequestMapping(value = "/{bizType}/questionnaire/save", method = {RequestMethod.POST})
     public Object saveResult(@PathVariable(name = "bizType") String bizType,

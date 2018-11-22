@@ -22,23 +22,14 @@ package com.treefinance.saas.grapserver.common.exception;
  */
 public class ForbiddenException extends RuntimeException {
 
-    public int getMark() {
-        return mark;
-    }
+    private static final long serialVersionUID = -6527877383344172844L;
 
-    public void setMark(int mark) {
-        this.mark = mark;
+    public ForbiddenException() {
+        super();
     }
-
-    private int mark;
 
     public ForbiddenException(String message) {
         super(message);
-    }
-
-    public ForbiddenException(String message, int mark) {
-        super(message);
-        this.mark = mark;
     }
 
 }

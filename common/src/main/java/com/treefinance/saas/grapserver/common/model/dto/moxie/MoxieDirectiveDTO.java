@@ -3,7 +3,7 @@ package com.treefinance.saas.grapserver.common.model.dto.moxie;
 import com.treefinance.saas.grapserver.common.model.dto.DirectiveDTO;
 
 /**
- * Created by haojiahong on 2017/9/14.
+ * @author haojiahong on 2017/9/14.
  */
 public class MoxieDirectiveDTO extends DirectiveDTO {
 
@@ -18,4 +18,5 @@ public class MoxieDirectiveDTO extends DirectiveDTO {
     public void setMoxieTaskId(String moxieTaskId) {
         this.moxieTaskId = moxieTaskId;
     }
+
 }

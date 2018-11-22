@@ -25,7 +25,8 @@
 
     <tx:annotation-driven transaction-manager="transactionManager" proxy-target-class="true" mode="aspectj"/>
 
-    <bean id="sqlSessionFactoryMonitor" class="org.mybatis.spring.SqlSessionFactoryBean">
+    <!-- xml文件和mapper文件没有被使用到 -->
+    <!--<bean id="sqlSessionFactoryMonitor" class="org.mybatis.spring.SqlSessionFactoryBean">
         <property name="dataSource" ref="dataSource"/>
         <property name="mapperLocations" value="classpath:sqlmap/**/*.xml"></property>
     </bean>
@@ -33,6 +34,6 @@
     <bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
         <property name="sqlSessionFactoryBeanName" value="sqlSessionFactoryMonitor"/>
         <property name="basePackage" value="com.treefinance.saas.grapserver.dao.mapper"/>
-    </bean>
+    </bean>-->
 
 </beans>
