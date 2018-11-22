@@ -17,9 +17,6 @@
 package com.treefinance.saas.grapserver.web.filter;
 
 import com.alibaba.fastjson.JSON;
-import com.datatrees.toolkits.util.http.servlet.ServletRequestUtils;
-import com.datatrees.toolkits.util.http.servlet.ServletResponseUtils;
-import com.datatrees.toolkits.util.json.Jackson;
 import com.google.common.collect.Maps;
 import com.treefinance.saas.assistant.model.HttpMonitorMessage;
 import com.treefinance.saas.grapserver.biz.config.DiamondConfig;
@@ -30,22 +27,24 @@ import com.treefinance.saas.grapserver.common.exception.ForbiddenException;
 import com.treefinance.saas.grapserver.common.model.AppLicenseKey;
 import com.treefinance.saas.grapserver.common.model.Constants;
 import com.treefinance.saas.grapserver.common.model.WebContext;
-import com.treefinance.saas.grapserver.common.utils.IpUtils;
 import com.treefinance.saas.grapserver.dao.entity.AppLicense;
 import com.treefinance.saas.grapserver.web.request.WrappedHttpServletRequest;
 import com.treefinance.saas.knife.result.SimpleResult;
-import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import javax.servlet.FilterChain;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import com.treefinance.toolkit.util.http.servlet.ServletRequests;
+import com.treefinance.toolkit.util.http.servlet.ServletResponses;
+import com.treefinance.toolkit.util.json.Jackson;
+import com.treefinance.toolkit.util.net.IpUtils;
 import java.io.IOException;
 import java.util.Date;
 import java.util.Map;
 import java.util.regex.Pattern;
+import javax.servlet.FilterChain;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author Jerry
@@ -92,7 +91,7 @@ public class WebContextFilter extends AbstractRequestFilter {
 
             String ip = null;
             try {
-                ip = ServletRequestUtils.getIP(request);
+                ip = ServletRequests.getIP(request);
             } catch (Exception e) {
                 logger.error(String
                         .format("@[%s;%s] >> appId: %s", request.getRequestURI(), request.getMethod(), appId), e);
@@ -126,14 +125,14 @@ public class WebContextFilter extends AbstractRequestFilter {
      */
     private void appIdUncheck(HttpServletRequest request, HttpServletResponse response, AppIdUncheckException e) {
         logger.error(String.format("@[%s;%s;%s] >> %s", request.getRequestURI(), request.getMethod(),
-                ServletRequestUtils.getIP(request), e.getMessage()));
+                ServletRequests.getIP(request), e.getMessage()));
 
         Map map = Maps.newHashMap();
         map.put("mark", 0);
         SimpleResult result = new SimpleResult(map);
         result.setErrorMsg("appId非法");
         String responseBody = Jackson.toJSONString(result);
-        ServletResponseUtils.responseJson(response, 400, responseBody);
+        ServletResponses.responseJson(response, 400, responseBody);
     }
 
     /**
@@ -173,14 +172,14 @@ public class WebContextFilter extends AbstractRequestFilter {
     private void forbidden(HttpServletRequest request, HttpServletResponse response,
                            ForbiddenException e) {
         logger.error(String.format("@[%s;%s;%s] >> %s", request.getRequestURI(), request.getMethod(),
-                ServletRequestUtils.getIP(request), e.getMessage()));
+                ServletRequests.getIP(request), e.getMessage()));
 
         Map map = Maps.newHashMap();
         map.put("mark", 0);
         SimpleResult result = new SimpleResult(map);
         result.setErrorMsg("用户未授权");
         String responseBody = Jackson.toJSONString(result);
-        ServletResponseUtils.responseJson(response, 403, responseBody);
+        ServletResponses.responseJson(response, 403, responseBody);
     }
 
 
@@ -197,9 +196,9 @@ public class WebContextFilter extends AbstractRequestFilter {
         message.setHttpCode(response.getStatus());
         message.setCompleteTime(new Date());
         message.setCostTime(System.currentTimeMillis() - startTime);
-        message.setRequestIp(ServletRequestUtils.getIP(request));
+        message.setRequestIp(IpUtils.getIp(request));
         message.setRequestUrl(request.getRequestURI());
-        message.setServerIp(IpUtils.getServerIp());
+        message.setServerIp(IpUtils.getLocalHost());
         monitorService.pushHttpMonitorMessage(message);
     }
 }

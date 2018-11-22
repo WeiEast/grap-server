@@ -1,18 +1,17 @@
 package com.treefinance.saas.grapserver.biz.common;
 
-import java.util.List;
-
-import javax.annotation.Resource;
-
-import org.springframework.stereotype.Component;
-import org.springframework.util.CollectionUtils;
-
 import com.treefinance.saas.grapserver.common.utils.DataConverterUtils;
 import com.treefinance.saas.grapserver.dao.entity.MerchantBaseInfo;
 import com.treefinance.saas.merchant.facade.request.console.GetMerchantByAppIdRequest;
 import com.treefinance.saas.merchant.facade.result.console.MerchantBaseInfoResult;
 import com.treefinance.saas.merchant.facade.result.console.MerchantResult;
 import com.treefinance.saas.merchant.facade.service.MerchantBaseInfoFacade;
+import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
+
+import javax.annotation.Resource;
+
+import java.util.List;
 
 /**
  * @author:guoguoyun

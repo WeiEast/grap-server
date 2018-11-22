@@ -122,7 +122,6 @@ public class MoxieBusinessService implements InitializingBean {
     /**
      * 魔蝎账单通知业务处理
      */
-    @Transactional(rollbackFor = Exception.class)
     public void bill(MoxieTaskEventNoticeDTO eventNoticeDTO) {
         MoxieTaskEventNoticeRequest request = DataConverterUtils.convert(eventNoticeDTO, MoxieTaskEventNoticeRequest.class);
         moxieTaskEventNoticeFacade.bill(request);
@@ -199,7 +198,6 @@ public class MoxieBusinessService implements InitializingBean {
     /**
      * 创建魔蝎任务,得到moxieTaskId
      */
-    @Transactional(rollbackFor = Exception.class)
     public Map<String, Object> createMoxieTask(Long taskId, MoxieLoginParamsDTO params) {
         // 1.轮询指令,已经提交过登录,获取魔蝎异步回调登录状态
         Map<String, Object> map = Maps.newHashMap();
@@ -355,7 +353,6 @@ public class MoxieBusinessService implements InitializingBean {
         logger.info("公积金taskId={}输入验证码次数+1,count={}", taskId, count);
     }
 
-    @Transactional(rollbackFor = Exception.class)
     private Integer incrVerifyCodeCount(Long taskId) {
         int count = 1;
         TaskAttribute taskAttribute = taskAttributeService.findByName(taskId, ETaskAttribute.FUND_MOXIE_VERIFY_CODE_COUNT.getAttribute(), false);

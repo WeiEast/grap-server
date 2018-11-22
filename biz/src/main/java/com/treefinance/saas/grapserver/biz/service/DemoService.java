@@ -1,7 +1,6 @@
 package com.treefinance.saas.grapserver.biz.service;
 
 import com.alibaba.fastjson.JSON;
-import com.datatrees.common.util.DateUtils;
 import com.google.common.base.Splitter;
 import com.google.common.collect.Lists;
 import com.treefinance.basicservice.security.crypto.facade.EncryptionIntensityEnum;
@@ -16,8 +15,9 @@ import com.treefinance.saas.grapserver.common.model.vo.demo.fund.FundLoanRepayRe
 import com.treefinance.saas.grapserver.common.model.vo.demo.fund.FundUserInfoVO;
 import com.treefinance.saas.grapserver.common.utils.BeanUtils;
 import com.treefinance.saas.grapserver.common.utils.JsonUtils;
-import com.treefinance.saas.grapserver.common.utils.AbstractRemoteDataDownloadUtils;
+import com.treefinance.saas.grapserver.common.utils.RemoteDataDownloadUtils;
 import com.treefinance.saas.grapserver.dao.entity.AppLicense;
+import com.treefinance.toolkit.util.DateUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -78,7 +78,8 @@ public class DemoService {
         String data = redisTemplate.opsForValue().get(key);
         if (StringUtils.isBlank(data)) {
             try {
-                byte[] result = AbstractRemoteDataDownloadUtils.download(paramMap.get("dataUrl").toString(), byte[].class);
+                byte[] result = RemoteDataDownloadUtils
+                    .download(paramMap.get("dataUrl").toString(), byte[].class);
                 // 数据体默认使用商户密钥加密
                 data = callbackSecureHandler.decryptByAES(result, appLicense.getDataSecretKey());
             } catch (Exception e) {
@@ -182,8 +183,8 @@ public class DemoService {
         FundDataDTO fundData = JsonUtils.toJavaBean(data, FundDataDTO.class);
         List<FundLoanInfoDTO> list = fundData.getLoanInfoList();
         list = list.stream()
-                .sorted((o1, o2) -> DateUtils.parseDate(o2.getStartDate(), "yyyy-MM-dd")
-                        .compareTo(DateUtils.parseDate(o1.getStartDate(), "yyyy-MM-dd")))
+                .sorted((o1, o2) -> DateUtils.parse(o2.getStartDate(), "yyyy-MM-dd")
+                        .compareTo(DateUtils.parse(o1.getStartDate(), "yyyy-MM-dd")))
                 .collect(Collectors.toList());
         int total = list.size();
         int start = pageNum * 10;
@@ -234,8 +235,8 @@ public class DemoService {
         FundDataDTO fundData = JsonUtils.toJavaBean(data, FundDataDTO.class);
         List<FundLoanRepayRecordDTO> list = fundData.getLoanRepayRecordList();
         list = list.stream()
-                .sorted((o1, o2) -> DateUtils.parseDate(o2.getRepayDate(), "yyyy-MM-dd")
-                        .compareTo(DateUtils.parseDate(o1.getRepayDate(), "yyyy-MM-dd")))
+                .sorted((o1, o2) -> DateUtils.parse(o2.getRepayDate(), "yyyy-MM-dd")
+                        .compareTo(DateUtils.parse(o1.getRepayDate(), "yyyy-MM-dd")))
                 .collect(Collectors.toList());
         int total = list.size();
         int start = pageNum * 10;

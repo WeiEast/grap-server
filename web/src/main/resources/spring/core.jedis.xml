@@ -1,9 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
-       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-       xmlns:cache="http://www.springframework.org/schema/cache"
-       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
-            http://www.springframework.org/schema/cache http://www.springframework.org/schema/cache/spring-cache.xsd">
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
 
     <bean id="poolConfig" class="redis.clients.jedis.JedisPoolConfig">
         <property name="maxIdle" value="${core.redis.maxIdle:50}"/>
@@ -18,39 +16,6 @@
         <property name="port" value="${core.redis.port:6379}"/>
         <property name="password" value="${core.redis.password:}"/>
         <property name="poolConfig" ref="poolConfig"/>
-    </bean>
-
-    <bean id="redisTemplate"
-          class="com.treefinance.saas.grapserver.biz.cache.redis.MoreRedisTemplate">
-        <property name="keySerializer">
-            <bean class="org.springframework.data.redis.serializer.StringRedisSerializer"/>
-        </property>
-        <property name="connectionFactory" ref="connectionFactory"/>
-    </bean>
-
-    <!-- declare Redis Cache Manager -->
-    <bean id="defaultCacheManager" class="org.springframework.data.redis.cache.RedisCacheManager">
-        <constructor-arg name="redisOperations" ref="redisTemplate"/>
-        <property name="expires">
-            <map>
-                <entry key="PERSIST" value="0"/>
-                <entry key="TEMP" value="60"/>
-                <entry key="MIN#5" value="300"/>
-                <entry key="MIN#10" value="600"/>
-                <entry key="HOUR" value="3600"/>
-                <entry key="HOUR#12" value="43200"/>
-                <entry key="DAY" value="86400"/>
-                <entry key="MONTH" value="2678400"/>
-            </map>
-        </property>
-    </bean>
-    <bean id="cacheKeyGenerator" class="com.treefinance.saas.grapserver.biz.cache.CacheKeyGenerator"/>
-    <!-- turn on declarative caching -->
-    <cache:annotation-driven cache-manager="defaultCacheManager" key-generator="cacheKeyGenerator"
-                             mode="aspectj"/>
-
-    <bean id="stringRedisTemplate" class="org.springframework.data.redis.core.StringRedisTemplate">
-        <property name="connectionFactory" ref="connectionFactory"/>
     </bean>
 
 </beans>

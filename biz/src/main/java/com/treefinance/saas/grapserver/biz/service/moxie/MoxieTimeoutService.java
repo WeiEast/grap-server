@@ -6,7 +6,7 @@ import com.google.common.cache.LoadingCache;
 import com.treefinance.saas.grapserver.biz.service.AppBizTypeService;
 import com.treefinance.saas.grapserver.common.exception.UnknownException;
 import com.treefinance.saas.grapserver.common.utils.DataConverterUtils;
-import com.treefinance.saas.grapserver.common.utils.GrapDateUtils;
+import com.treefinance.saas.grapserver.common.utils.SystemUtils;
 import com.treefinance.saas.grapserver.dao.entity.AppBizType;
 import com.treefinance.saas.grapserver.dao.entity.Task;
 import com.treefinance.saas.taskcenter.facade.request.TaskRequest;
@@ -14,7 +14,7 @@ import com.treefinance.saas.taskcenter.facade.result.TaskRO;
 import com.treefinance.saas.taskcenter.facade.result.common.TaskResult;
 import com.treefinance.saas.taskcenter.facade.service.MoxieTimeoutFacade;
 import com.treefinance.saas.taskcenter.facade.service.TaskFacade;
-import org.apache.commons.lang3.time.DateUtils;
+import com.treefinance.toolkit.util.DateUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,7 +36,7 @@ public class MoxieTimeoutService {
     /**
      * 登录超时时间90s
      */
-    private static int LOGIN_TIME_TIMEOUT = 90;
+    private static final int LOGIN_TIME_TIMEOUT = 90;
 
     @Autowired
     private AppBizTypeService appBizTypeService;
@@ -68,11 +68,11 @@ public class MoxieTimeoutService {
             logger.info("公积金登录超时,taskId={}未查询到登录时间,需检查魔蝎登录状态回调接口是否异常", taskId);
             return true;
         }
-        Date timeoutDate = DateUtils.addSeconds(date, LOGIN_TIME_TIMEOUT);
-        Date nowDate = GrapDateUtils.nowDateTime();
+        Date timeoutDate = DateUtils.plusSeconds(date, LOGIN_TIME_TIMEOUT);
+        Date nowDate = SystemUtils.now();
         if (nowDate.after(timeoutDate)) {
             logger.info("公积金登录超时,taskId={}登录时间超过{}s,登录时间为value={},需检查魔蝎登录状态回调接口是否异常",
-                    taskId, LOGIN_TIME_TIMEOUT, GrapDateUtils.getDateStrByDate(date));
+                taskId, LOGIN_TIME_TIMEOUT, DateUtils.format(date));
             return true;
         }
         return false;
@@ -83,10 +83,6 @@ public class MoxieTimeoutService {
      */
     public void logLoginTime(Long taskId) {
         moxieTimeoutFacade.logLoginTime(taskId);
-    }
-
-    public void logLoginTime(Long taskId, Date date) {
-        moxieTimeoutFacade.logLoginTime(taskId, date);
     }
 
     /**
@@ -121,10 +117,10 @@ public class MoxieTimeoutService {
                 return false;
             }
             // 未超时: 登录时间+超时时间 < 当前时间
-            Date timeoutDate = DateUtils.addSeconds(loginTime, timeout);
-            Date current = GrapDateUtils.nowDateTime();
+            Date timeoutDate = DateUtils.plusSeconds(loginTime, timeout);
+            Date current = SystemUtils.now();
             logger.info("moxie isTaskTimeout: taskId={}，loginTime={},current={},timeout={}",
-                    taskId, GrapDateUtils.getDateStrByDate(loginTime), GrapDateUtils.getDateStrByDate(current), timeout);
+                taskId, DateUtils.format(loginTime), DateUtils.format(current), timeout);
             if (timeoutDate.after(current)) {
                 return false;
             }

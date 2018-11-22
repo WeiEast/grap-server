@@ -17,19 +17,19 @@
 package com.treefinance.saas.grapserver.biz.cache;
 
 import com.treefinance.saas.grapserver.common.model.Constants;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Component;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.TimeUnit;
 
 @Component("redisDao")
 public class RedisDaoImpl implements RedisDao {
@@ -38,7 +38,7 @@ public class RedisDaoImpl implements RedisDao {
 
 
     @Autowired
-    RedisTemplate<String, String> redisTemplate;
+    private StringRedisTemplate redisTemplate;
 
     @Override
     public RedisTemplate<String, String> getRedisTemplate() {
@@ -81,16 +81,14 @@ public class RedisDaoImpl implements RedisDao {
 
     @Override
     public boolean saveString2List(final String key, final String value) {
-        List list = new ArrayList<String>();
-        list.add(value);
-        return saveListString(key, list);
+        return saveListString(key, Collections.singletonList(value));
     }
 
     @Override
     public boolean saveListString(final String key, final List<String> valueList) {
         Long result = redisTemplate.opsForList().rightPushAll(key, valueList.toArray(new String[valueList.size()]));
         redisTemplate.expire(key, Constants.REDIS_KEY_TIMEOUT, TimeUnit.SECONDS);
-        return result != null ? true : false;
+        return result != null;
     }
 
     @Override
@@ -168,7 +166,7 @@ public class RedisDaoImpl implements RedisDao {
             String oldValueStr = redisTemplate.opsForValue().get(lockKey);
             if (oldValueStr != null) {
                 // 竞争的 redis.getSet 导致其时间跟原有的由误差，若误差在 超时范围内，说明仍旧是 原来的锁
-                Long diff = Long.parseLong(lockExpiresStr) - Long.parseLong(oldValueStr);
+                long diff = Long.parseLong(lockExpiresStr) - Long.parseLong(oldValueStr);
                 if (diff < expireMsecs) {
                     redisTemplate.delete(lockKey);
                 } else {

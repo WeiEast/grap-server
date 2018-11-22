@@ -10,9 +10,9 @@ import com.treefinance.saas.grapserver.biz.service.TaskService;
 import com.treefinance.saas.grapserver.common.enums.EBizType;
 import com.treefinance.saas.grapserver.common.exception.BizException;
 import com.treefinance.saas.grapserver.common.model.Constants;
-import com.treefinance.saas.grapserver.common.utils.IpUtils;
 import com.treefinance.saas.grapserver.common.utils.RedisKeyUtils;
 import com.treefinance.saas.knife.result.SimpleResult;
+import com.treefinance.toolkit.util.net.IpUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,6 +23,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
+
 import java.util.Map;
 
 /**
@@ -79,7 +80,7 @@ public class StartController {
                 map.put("taskid", String.valueOf(taskId));
                 map.put("color", merchantConfigService.getColorConfig(appid, style));
                 map.put("title", diamondConfig.getSdkTitle(eBizType));
-                String ipAddress = IpUtils.getIpAddress(request);
+                String ipAddress = IpUtils.getIp(request);
                 taskDeviceService.create(deviceInfo, ipAddress, coorType, taskId);
                 return new SimpleResult<>(map);
             }

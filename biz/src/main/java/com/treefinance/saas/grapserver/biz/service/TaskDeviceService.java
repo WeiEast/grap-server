@@ -6,7 +6,7 @@ import com.google.common.collect.Maps;
 import com.google.common.primitives.Doubles;
 import com.google.common.primitives.Ints;
 import com.treefinance.commonservice.facade.location.*;
-import com.treefinance.commonservice.uid.UidGenerator;
+import com.treefinance.commonservice.uid.UidService;
 import com.treefinance.saas.grapserver.common.utils.DataConverterUtils;
 import com.treefinance.saas.grapserver.dao.entity.TaskDevice;
 import com.treefinance.saas.taskcenter.facade.request.TaskDeviceRequest;
@@ -39,6 +39,8 @@ public class TaskDeviceService {
     private IpLocationService ipLocationService;
     @Autowired
     private ThreadPoolTaskExecutor threadPoolExecutor;
+    @Autowired
+    private UidService uidService;
 
     private Map<String, String> geoCoordSysTypeMap = Maps.newHashMap();
 
@@ -56,7 +58,7 @@ public class TaskDeviceService {
             try {
                 Map cardInfoMap = objectMapper.readValue(deviceInfo, Map.class);
                 TaskDevice record = new TaskDevice();
-                record.setId(UidGenerator.getId());
+                record.setId(uidService.getId());
                 record.setTaskId(taskId);
                 // 增加经纬度校验
                 String positionData = (String) cardInfoMap.get("positionData");

@@ -1,25 +1,16 @@
 package com.treefinance.saas.grapserver.common.utils;
 
-import org.junit.Test;
-
-import java.util.Date;
-import java.util.Map;
-
 import static com.treefinance.saas.grapserver.common.utils.RSAUtils.decrytData;
 import static com.treefinance.saas.grapserver.common.utils.RSAUtils.encryptData;
+
+import java.util.Map;
+import org.junit.Test;
 
 /**
  * @author henengqiang
  * @date 2018/11/13
  */
 public class UtilsTests {
-
-    @Test
-    public void GrapDateUtilsTest() {
-        System.out.println(GrapDateUtils.getDateStrByDate(new Date(), "HH:mm"));
-        System.out.println(System.currentTimeMillis());
-        System.out.println(GrapDateUtils.getDateStrByDate(new Date(1524474151193L)));
-    }
 
     @Test
     public void JsonUtilsTest() {

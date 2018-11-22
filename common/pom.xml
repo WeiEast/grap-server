@@ -10,56 +10,44 @@
     <artifactId>grap-server-common</artifactId>
 
     <dependencies>
+        <dependency>
+            <groupId>com.treefinance.toolkit</groupId>
+            <artifactId>toolkit</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.tomcat.embed</groupId>
+            <artifactId>tomcat-embed-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.github.stuxuhai</groupId>
+            <artifactId>jpinyin</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.alibaba</groupId>
+            <artifactId>fastjson</artifactId>
+        </dependency>
 
         <dependency>
-            <groupId>com.datatrees.common</groupId>
-            <artifactId>common-util</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.datatrees.toolkits</groupId>
-            <artifactId>toolkits</artifactId>
+            <groupId>com.treefinance.b2b.saas</groupId>
+            <artifactId>b2b-saas-context</artifactId>
         </dependency>
 
         <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-web</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>com.github.diamond</groupId>
-            <artifactId>super-diamond-client</artifactId>
+            <groupId>com.treefinance.commonservice</groupId>
+            <artifactId>common-service-facade</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.treefinance.saas</groupId>
-            <artifactId>assistant-monitor</artifactId>
+            <groupId>com.treefinance.commonservice</groupId>
+            <artifactId>guid-service-facade</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.treefinance.basicservice.security</groupId>
+            <artifactId>security-crypto-facade</artifactId>
         </dependency>
     </dependencies>
 
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <configuration>
-                    <source>${java.version}</source>
-                    <target>${java.version}</target>
-                    <encoding>${project.build.sourceEncoding}</encoding>
-                    <showWarnings>true</showWarnings>
-                </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-source-plugin</artifactId>
-                <version>2.4</version>
-                <executions>
-                    <execution>
-                        <id>attach-sources</id>
-                        <goals>
-                            <goal>jar-no-fork</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-        </plugins>
-    </build>
 </project>

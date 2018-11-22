@@ -16,253 +16,30 @@
 
     <name>grap-server</name>
 
-    <prerequisites>
-        <maven>3.0</maven>
-    </prerequisites>
-
-    <distributionManagement>
-        <snapshotRepository>
-            <id>Snapshots</id>
-            <name>User Porject Snapshot</name>
-            <url>http://192.168.5.252:8081/nexus/content/repositories/snapshots/</url>
-            <uniqueVersion>true</uniqueVersion>
-        </snapshotRepository>
-        <repository>
-            <id>Releases</id>
-            <name>User Porject Release</name>
-            <url>http://192.168.5.252:8081/nexus/content/repositories/releases/</url>
-        </repository>
-    </distributionManagement>
-
     <parent>
-        <groupId>org.springframework.boot</groupId>
-        <artifactId>spring-boot-starter-parent</artifactId>
-        <version>1.5.3.RELEASE</version>
+        <groupId>com.treefinance.b2b.saas</groupId>
+        <artifactId>b2b-saas-data-parent</artifactId>
+        <version>1.0.0-SNAPSHOT</version>
         <relativePath/>
     </parent>
 
     <properties>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-        <java.version>1.8</java.version>
-
-        <mybatis.version>3.4.4</mybatis.version>
-        <mybatis-spring.version>1.3.1</mybatis-spring.version>
-        <maven.build.timestamp.format>yyyyMMddHHmm</maven.build.timestamp.format>
-        <elastic.job.lite.version>2.1.3</elastic.job.lite.version>
-        <grap-server.version>1.0.0-SNAPSHOT</grap-server.version>
-        <grap-server-facade.version>1.1.0-SNAPSHOT</grap-server-facade.version>
-        <assistant.version>1.0.10</assistant.version>
-        <assistant-monitor.version>1.1.0-SNAPSHOT</assistant-monitor.version>
         <merchant-center.version>1.1.0-SNAPSHOT</merchant-center.version>
-        <taskcenter.version>1.0.0-SNAPSHOT</taskcenter.version>
-
+        <taskcenter.version>1.1.0-SNAPSHOT</taskcenter.version>
     </properties>
 
     <dependencyManagement>
         <dependencies>
-            <dependency>
-                <groupId>com.treefinance.saas</groupId>
-                <artifactId>grap-server-common</artifactId>
-                <version>${grap-server.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.treefinance.saas</groupId>
-                <artifactId>grap-server-dao</artifactId>
-                <version>${grap-server.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.treefinance.saas</groupId>
-                <artifactId>grap-server-facade</artifactId>
-                <version>${grap-server-facade.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.treefinance.saas</groupId>
-                <artifactId>grap-server-biz</artifactId>
-                <version>${grap-server.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>com.google.guava</groupId>
-                <artifactId>guava</artifactId>
-                <version>19.0</version>
-            </dependency>
-
-            <dependency>
-                <groupId>com.github.stuxuhai</groupId>
-                <artifactId>jpinyin</artifactId>
-                <version>1.1.8</version>
-            </dependency>
-
-            <dependency>
-                <groupId>com.datatrees.toolkits</groupId>
-                <artifactId>toolkits</artifactId>
-                <version>2.3.2-SNAPSHOT</version>
-            </dependency>
-
-            <dependency>
-                <groupId>com.datatrees.common</groupId>
-                <artifactId>common-util</artifactId>
-                <version>2.0.0-SNAPSHOT</version>
-            </dependency>
-
-            <dependency>
-                <groupId>com.datatrees.basisdata</groupId>
-                <artifactId>basisdata-operator-common-facade</artifactId>
-                <version>2.2.8-SNAPSHOT</version>
-            </dependency>
-            <dependency>
-                <groupId>com.treefinance.commonservice</groupId>
-                <artifactId>common-service-facade</artifactId>
-                <version>1.7.0</version>
-            </dependency>
-            <dependency>
-                <groupId>com.treefinance.commonservice</groupId>
-                <artifactId>uid-worker</artifactId>
-                <version>1.7.0</version>
-            </dependency>
-
-            <!-- 配置中心 -->
-            <dependency>
-                <groupId>com.github.diamond</groupId>
-                <artifactId>super-diamond-client</artifactId>
-                <version>2.0.0</version>
-            </dependency>
-            <!-- dubbo服务 -->
-            <dependency>
-                <groupId>com.alibaba</groupId>
-                <artifactId>dubbo</artifactId>
-                <version>2.5.3</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>org.springframework</groupId>
-                        <artifactId>spring</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>org.jboss.netty</groupId>
-                        <artifactId>netty</artifactId>
-                    </exclusion>
-                </exclusions>
-            </dependency>
-            <dependency>
-                <groupId>com.101tec</groupId>
-                <artifactId>zkclient</artifactId>
-                <version>0.10</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.zookeeper</groupId>
-                <artifactId>zookeeper</artifactId>
-                <version>3.4.9</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>org.slf4j</groupId>
-                        <artifactId>slf4j-log4j12</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>log4j</groupId>
-                        <artifactId>log4j</artifactId>
-                    </exclusion>
-                </exclusions>
-            </dependency>
-            <!-- MQ -->
-            <dependency>
-                <groupId>com.alibaba.rocketmq</groupId>
-                <artifactId>rocketmq-client</artifactId>
-                <version>3.5.8</version>
-            </dependency>
-            <!-- mybatis -->
-            <dependency>
-                <groupId>org.mybatis</groupId>
-                <artifactId>mybatis</artifactId>
-                <version>${mybatis.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.mybatis</groupId>
-                <artifactId>mybatis-spring</artifactId>
-                <version>${mybatis-spring.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>com.alibaba</groupId>
-                <artifactId>fastjson</artifactId>
-                <version>1.2.31</version>
-            </dependency>
-
-            <dependency>
-                <groupId>com.treefinance.saas</groupId>
-                <artifactId>assistant-monitor</artifactId>
-                <version>${assistant-monitor.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>com.treefinance.saas</groupId>
-                <artifactId>assistant-variable-notify</artifactId>
-                <version>${assistant.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>com.treefinance.saas</groupId>
-                <artifactId>assistant-httpinvoker</artifactId>
-                <version>${assistant.version}</version>
-            </dependency>
-
             <dependency>
                 <groupId>com.treefinance.saas.processor.thirdparty</groupId>
                 <artifactId>processor-thirdparty-facade</artifactId>
                 <version>1.1.3</version>
             </dependency>
 
-            <!--elastic-job lite core -->
-            <dependency>
-                <groupId>com.dangdang</groupId>
-                <artifactId>elastic-job-lite-core</artifactId>
-                <version>${elastic.job.lite.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.dangdang</groupId>
-                <artifactId>elastic-job-lite-spring</artifactId>
-                <version>${elastic.job.lite.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.dangdang</groupId>
-                <artifactId>elastic-job-common-core</artifactId>
-                <version>${elastic.job.lite.version}</version>
-            </dependency>
-
             <dependency>
                 <groupId>com.treefinance.proxy</groupId>
                 <artifactId>proxy-api</artifactId>
                 <version>2.2.0</version>
-                <exclusions>
-                    <exclusion>
-                        <artifactId>slf4j-log4j12</artifactId>
-                        <groupId>org.slf4j</groupId>
-                    </exclusion>
-                    <exclusion>
-                        <artifactId>ibatis-sqlmap</artifactId>
-                        <groupId>org.apache.ibatis</groupId>
-                    </exclusion>
-                    <exclusion>
-                        <artifactId>AbstractPlugin</artifactId>
-                        <groupId>com.datatrees.rawdata</groupId>
-                    </exclusion>
-                    <exclusion>
-                        <artifactId>spring-ibatis</artifactId>
-                        <groupId>org.springframework</groupId>
-                    </exclusion>
-                    <exclusion>
-                        <artifactId>*</artifactId>
-                        <groupId>org.jfrog.jade.plugins.common</groupId>
-                    </exclusion>
-                    <exclusion>
-                        <artifactId>log4j</artifactId>
-                        <groupId>log4j</groupId>
-                    </exclusion>
-                    <exclusion>
-                        <artifactId>crawler-core</artifactId>
-                        <groupId>com.datatrees.crawler</groupId>
-                    </exclusion>
-                </exclusions>
             </dependency>
 
             <dependency>
@@ -295,22 +72,24 @@
                 <version>3.0.7-SNAPSHOT</version>
             </dependency>
 
+            <dependency>
+                <groupId>com.treefinance.saas</groupId>
+                <artifactId>merchant-center-facade</artifactId>
+                <version>${merchant-center.version}</version>
+            </dependency>
 
+            <dependency>
+                <groupId>com.treefinance.saas</groupId>
+                <artifactId>taskcenter-facade</artifactId>
+                <version>${taskcenter.version}</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
     <dependencies>
-
         <dependency>
-            <groupId>com.treefinance.saas</groupId>
-            <artifactId>merchant-center-facade</artifactId>
-            <version>${merchant-center.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>com.treefinance.saas</groupId>
-            <artifactId>taskcenter-facade</artifactId>
-            <version>${taskcenter.version}</version>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
         </dependency>
 
         <dependency>
@@ -318,135 +97,6 @@
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
         </dependency>
-        <dependency>
-            <groupId>org.easymock</groupId>
-            <artifactId>easymock</artifactId>
-            <version>3.4</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.powermock</groupId>
-            <artifactId>powermock-module-junit4</artifactId>
-            <version>1.6.6</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.powermock</groupId>
-            <artifactId>powermock-api-easymock</artifactId>
-            <version>1.6.6</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.powermock</groupId>
-            <artifactId>powermock-api-mockito</artifactId>
-            <version>1.6.6</version>
-            <scope>test</scope>
-        </dependency>
-
     </dependencies>
 
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.6.0</version>
-                <configuration>
-                    <source>${java.version}</source>
-                    <target>${java.version}</target>
-                    <encoding>${project.build.sourceEncoding}</encoding>
-                    <showWarnings>true</showWarnings>
-                    <optimize>true</optimize>
-                </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-surefire-plugin</artifactId>
-                <version>2.19.1</version>
-                <configuration>
-                    <argLine>-Dfile.encoding=UTF-8</argLine>
-                </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-jar-plugin</artifactId>
-                <version>3.0.2</version>
-                <configuration>
-                    <archive>
-                        <manifest>
-                            <addClasspath>true</addClasspath>
-                        </manifest>
-                    </archive>
-                </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-source-plugin</artifactId>
-                <version>3.0.1</version>
-                <executions>
-                    <execution>
-                        <id>attach-sources</id>
-                        <goals>
-                            <goal>jar-no-fork</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-        </plugins>
-        <pluginManagement>
-            <plugins>
-                <plugin>
-                    <groupId>org.codehaus.mojo</groupId>
-                    <artifactId>aspectj-maven-plugin</artifactId>
-                    <version>1.8</version>
-                    <configuration>
-                        <includes>
-                            <include>**/*.java</include>
-                            <include>**/*.aj</include>
-                        </includes>
-                        <complianceLevel>${java.version}</complianceLevel>
-                        <encoding>UTF-8</encoding>
-                        <showWeaveInfo>true</showWeaveInfo>
-                        <forceAjcCompile>true</forceAjcCompile>
-                        <sources/>
-                        <aspectDirectory>src/main/aspect</aspectDirectory>
-                        <weaveDirectories>
-                            <weaveDirectory>${project.build.directory}/classes</weaveDirectory>
-                        </weaveDirectories>
-                        <source>${java.version}</source>
-                        <target>${java.version}</target>
-                        <aspectLibraries>
-                            <aspectLibrary>
-                                <groupId>org.springframework</groupId>
-                                <artifactId>spring-aspects</artifactId>
-                            </aspectLibrary>
-                        </aspectLibraries>
-                    </configuration>
-                    <executions>
-                        <execution>
-                            <id>process-classes</id>
-                            <phase>process-classes</phase>
-                            <goals>
-                                <goal>compile</goal>
-                            </goals>
-                        </execution>
-                        <execution>
-                            <id>process-test-classes</id>
-                            <phase>process-test-classes</phase>
-                            <goals>
-                                <goal>compile</goal>
-                            </goals>
-                        </execution>
-                    </executions>
-                    <dependencies>
-                        <dependency>
-                            <groupId>org.aspectj</groupId>
-                            <artifactId>aspectjtools</artifactId>
-                            <version>${aspectj.version}</version>
-                        </dependency>
-                    </dependencies>
-                </plugin>
-            </plugins>
-        </pluginManagement>
-    </build>
 </project>

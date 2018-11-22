@@ -1,26 +1,25 @@
 package com.treefinance.saas.grapserver.web.filter;
 
 import com.alibaba.fastjson.JSON;
-import com.datatrees.toolkits.util.http.servlet.ServletRequestUtils;
-import com.datatrees.toolkits.util.http.servlet.ServletResponseUtils;
-import com.datatrees.toolkits.util.json.Jackson;
 import com.google.common.collect.Maps;
 import com.treefinance.saas.grapserver.biz.config.DiamondConfig;
 import com.treefinance.saas.grapserver.biz.service.TaskAliveService;
 import com.treefinance.saas.grapserver.common.exception.TaskTimeOutException;
-import com.treefinance.saas.grapserver.common.utils.GrapDateUtils;
 import com.treefinance.saas.knife.result.SimpleResult;
-import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
+import com.treefinance.toolkit.util.DateUtils;
+import com.treefinance.toolkit.util.http.servlet.ServletRequests;
+import com.treefinance.toolkit.util.http.servlet.ServletResponses;
+import com.treefinance.toolkit.util.json.Jackson;
+import java.io.IOException;
+import java.util.Date;
+import java.util.Map;
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
-import java.util.Date;
-import java.util.Map;
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Buddha Bless , No Bug !
@@ -63,8 +62,8 @@ public class TaskAliveFilter extends AbstractRequestFilter {
                 long diff = diamondConfig.getTaskMaxAliveTime();
                 if (now - lastActiveTime > diff) {
                     throw new TaskTimeOutException("task time out taskId=" + taskId
-                            + ",lastActiveTime=" + GrapDateUtils.getDateStrByDate(new Date(lastActiveTime))
-                            + ",now=" + GrapDateUtils.getDateStrByDate(new Date(now)));
+                            + ",lastActiveTime=" + DateUtils.format(new Date(lastActiveTime))
+                            + ",now=" + DateUtils.format(new Date(now)));
                 }
                 taskAliveService.updateTaskActiveTime(taskId);
             }
@@ -86,12 +85,12 @@ public class TaskAliveFilter extends AbstractRequestFilter {
      */
     private void taskTimeout(HttpServletRequest request, HttpServletResponse response, TaskTimeOutException e) {
         logger.error(String.format("@[%s;%s;%s] >> %s", request.getRequestURI(), request.getMethod(),
-                ServletRequestUtils.getIP(request), e.getMessage()));
+                ServletRequests.getIP(request), e.getMessage()));
         Map<String, Integer> map = Maps.newHashMap();
         map.put("mark", 2);
         SimpleResult<Map<String, Integer>> result = new SimpleResult<>(map);
         result.setErrorMsg("任务失效");
         String responseBody = Jackson.toJSONString(result);
-        ServletResponseUtils.responseJson(response, 400, responseBody);
+        ServletResponses.responseJson(response, 400, responseBody);
     }
 }

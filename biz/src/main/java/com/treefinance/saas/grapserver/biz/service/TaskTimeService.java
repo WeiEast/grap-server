@@ -18,8 +18,8 @@ import com.treefinance.saas.taskcenter.facade.result.TaskRO;
 import com.treefinance.saas.taskcenter.facade.result.common.TaskResult;
 import com.treefinance.saas.taskcenter.facade.service.TaskFacade;
 import com.treefinance.saas.taskcenter.facade.service.TaskTimeFacade;
+import com.treefinance.toolkit.util.DateUtils;
 import org.apache.commons.collections.MapUtils;
-import org.apache.commons.lang3.time.DateUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -106,7 +106,7 @@ public class TaskTimeService {
         if (timeoutSeconds == null) {
             return null;
         }
-        return DateUtils.addSeconds(loginTime, timeoutSeconds);
+        return DateUtils.plusSeconds(loginTime, timeoutSeconds);
     }
 
     /**
@@ -176,7 +176,7 @@ public class TaskTimeService {
             if (MapUtils.isEmpty(lockMap)) {
                 return;
             }
-            Date endTime = DateUtils.addMinutes(startTime, -60);
+            Date endTime = DateUtils.minusMinutes(startTime, 60);
             TaskResult<List<TaskRO>> rpcResult =
                     taskFacade.selectRecentRunningTaskList(Byte.parseByte(Constants.SAAS_ENV_VALUE), startTime, endTime);
             List<Task> tasks = DataConverterUtils.convert(rpcResult.getData(), Task.class);
@@ -206,7 +206,7 @@ public class TaskTimeService {
             if (MapUtils.isEmpty(lockMap)) {
                 return;
             }
-            Date endTime = DateUtils.addMinutes(startTime, -60);
+            Date endTime = DateUtils.minusMinutes(startTime, 60);
             TaskResult<List<TaskRO>> rpcResult =
                     taskFacade.selectRecentRunningTaskList(Byte.parseByte(Constants.SAAS_ENV_VALUE), startTime, endTime);
             List<Task> tasks = DataConverterUtils.convert(rpcResult.getData(), Task.class);
