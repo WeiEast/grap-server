@@ -4,7 +4,11 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.treefinance.saas.grapserver.biz.config.DiamondConfig;
-import com.treefinance.saas.grapserver.common.enums.*;
+import com.treefinance.saas.grapserver.common.enums.EBizType;
+import com.treefinance.saas.grapserver.common.enums.ETaskStatus;
+import com.treefinance.saas.grapserver.common.enums.ETongdunData;
+import com.treefinance.saas.grapserver.common.enums.ETongdunDetailData;
+import com.treefinance.saas.grapserver.common.enums.ETongdunType;
 import com.treefinance.saas.grapserver.common.request.TongdunRequest;
 import com.treefinance.saas.grapserver.common.result.SaasResult;
 import com.treefinance.saas.grapserver.common.result.TongdunData;
@@ -20,7 +24,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.xml.bind.ValidationException;
-import java.util.*;
+
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 
 /**
  * @author guoguoyun
@@ -49,15 +59,13 @@ public class TongdunService {
     public Long startCollectTask(String appId, TongdunRequest tongdunRequest) throws ValidationException {
         // 使用身份证号当作uniqueId
         taskLicenseService.verifyCreateSaasTask(appId, tongdunRequest.getIdCard(), EBizType.TONGDUN);
-        return saasTaskService.createTask(tongdunRequest.getIdCard(), appId, EBizType.TONGDUN.getCode(), null, null,
-            null);
+        return saasTaskService.createTask(tongdunRequest.getIdCard(), appId, EBizType.TONGDUN.getCode(), null, null, null);
     }
 
     public Long startCollectDetailTask(String appId, TongdunRequest tongdunRequest) throws ValidationException {
         // 使用身份证号当作uniqueId
         taskLicenseService.verifyCreateSaasTask(appId, tongdunRequest.getIdCard(), EBizType.TONGDUN_KANIU);
-        return saasTaskService.createTask(tongdunRequest.getIdCard(), appId, EBizType.TONGDUN_KANIU.getCode(), null,
-            null, null);
+        return saasTaskService.createTask(tongdunRequest.getIdCard(), appId, EBizType.TONGDUN_KANIU.getCode(), null, null, null);
     }
 
     public Object processCollectTask(Long taskId, String appId, TongdunRequest tongdunRequest) {
@@ -82,8 +90,7 @@ public class TongdunService {
             logger.error(e.getMessage(), e);
         }
         if (result == null) {
-            logger.error("调用功夫贷同盾采集任务返回值中任务日志信息存在问题:taskId={},tongdunRequest={},httpResult={}", taskId, tongdunRequest,
-                httpResult);
+            logger.error("调用功夫贷同盾采集任务返回值中任务日志信息存在问题:taskId={},tongdunRequest={},httpResult={}", taskId, tongdunRequest, httpResult);
             taskLogFacade.insert(taskId, "调用功夫贷同盾采集任务返回值中任务日志信息存在问题", new Date(), "调用功夫贷同盾采集任务返回值中任务日志信息存在问题");
             taskFacade.updateTaskStatusWithStep(taskId, ETaskStatus.FAIL.getStatus());
             // 错误日志中
@@ -139,8 +146,7 @@ public class TongdunService {
             logger.error(e.getMessage(), e);
         }
         if (result == null) {
-            logger.error("调用功夫贷同盾采集详细任务返回值中任务日志信息存在问题:taskId={},tongdunRequest={},httpResult={}", taskId,
-                tongdunRequest, httpResult);
+            logger.error("调用功夫贷同盾采集详细任务返回值中任务日志信息存在问题:taskId={},tongdunRequest={},httpResult={}", taskId, tongdunRequest, httpResult);
             taskLogFacade.insert(taskId, "调用功夫贷同盾采集详细任务返回值中任务日志信息存在问题", new Date(), "调用功夫贷同盾采集任务返回值中任务日志信息存在问题");
             taskFacade.updateTaskStatusWithStep(taskId, ETaskStatus.FAIL.getStatus());
             // 错误日志中
@@ -160,8 +166,7 @@ public class TongdunService {
                     TongdunDetailResult tongdunDetailResult = new TongdunDetailResult();
                     JSONObject item = detail.getJSONObject(ETongdunData.getText((byte)i));
                     tongdunDetailResult.setId(ETongdunData.getName((byte)i));
-                    tongdunDetailResult
-                        .setValue(TongdunDataResolver.to(summary.getInteger(ETongdunData.getText((byte)i))));
+                    tongdunDetailResult.setValue(TongdunDataResolver.to(summary.getInteger(ETongdunData.getText((byte)i))));
                     Map<String, Map> firstmap = new HashMap<>();
                     for (ETongdunType eTongdunType : types) {
 
@@ -177,11 +182,9 @@ public class TongdunService {
                         for (ETongdunDetailData eTongdunDetailData : ETongdunDetailData.values()) {
 
                             if (!Objects.isNull(jsonType.get(eTongdunDetailData.getText()))) {
-                                secondmap.put(eTongdunDetailData.getName(),
-                                    TongdunDataResolver.to(jsonType.getInteger(eTongdunDetailData.getText())));
-                            }else{
-                                secondmap.put(ETongdunDetailData.LevelZ.getName(),
-                                    TongdunDataResolver.to(jsonType.getInteger(eTongdunDetailData.getText())));
+                                secondmap.put(eTongdunDetailData.getName(), TongdunDataResolver.to(jsonType.getInteger(eTongdunDetailData.getText())));
+                            } else {
+                                secondmap.put(ETongdunDetailData.LevelZ.getName(), TongdunDataResolver.to(jsonType.getInteger(eTongdunDetailData.getText())));
                             }
                         }
                         firstmap.put(eTongdunType.getName(), secondmap);

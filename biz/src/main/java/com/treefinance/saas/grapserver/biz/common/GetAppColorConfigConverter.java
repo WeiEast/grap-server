@@ -26,9 +26,7 @@ public class GetAppColorConfigConverter {
         GetAppColorConfigRequest getAppColorConfigRequest = new GetAppColorConfigRequest();
         getAppColorConfigRequest.setAppId(appid);
         getAppColorConfigRequest.setStyle(style);
-        MerchantResult<AppColorConfigResult> merchantColorConfigResult =
-            appColorConfigFacade.queryAppColorConfig(getAppColorConfigRequest);
 
-        return merchantColorConfigResult;
+        return appColorConfigFacade.queryAppColorConfig(getAppColorConfigRequest);
     }
 }
