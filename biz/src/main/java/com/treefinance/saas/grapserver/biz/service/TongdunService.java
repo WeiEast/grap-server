@@ -49,14 +49,15 @@ public class TongdunService {
     public Long startCollectTask(String appId, TongdunRequest tongdunRequest) throws ValidationException {
         // 使用身份证号当作uniqueId
         taskLicenseService.verifyCreateSaasTask(appId, tongdunRequest.getIdCard(), EBizType.TONGDUN);
-        return saasTaskService.createTask(tongdunRequest.getIdCard(), appId, EBizType.TONGDUN.getCode(), null, null, null);
+        return saasTaskService.createTask(tongdunRequest.getIdCard(), appId, EBizType.TONGDUN.getCode(), null, null,
+            null);
     }
 
     public Long startCollectDetailTask(String appId, TongdunRequest tongdunRequest) throws ValidationException {
         // 使用身份证号当作uniqueId
         taskLicenseService.verifyCreateSaasTask(appId, tongdunRequest.getIdCard(), EBizType.TONGDUN_KANIU);
-        return saasTaskService.createTask(tongdunRequest.getIdCard(), appId, EBizType.TONGDUN_KANIU.getCode(), null, null,
-            null);
+        return saasTaskService.createTask(tongdunRequest.getIdCard(), appId, EBizType.TONGDUN_KANIU.getCode(), null,
+            null, null);
     }
 
     public Object processCollectTask(Long taskId, String appId, TongdunRequest tongdunRequest) {
