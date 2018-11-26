@@ -1,4 +1,4 @@
-package com.treefinance.saas.grapserver.biz.common;
+package com.treefinance.saas.grapserver.biz.adapter;
 
 import java.util.List;
 
@@ -23,12 +23,13 @@ import com.treefinance.saas.merchant.facade.service.AppCallbackConfigFacade;
  * @date:Created in 2018/11/15下午3:22
  */
 @Component
-public class QueryAppCallbackConfigConverter {
-    private static final Logger logger = LoggerFactory.getLogger(QueryAppCallbackConfigConverter.class);
+public class QueryAppCallbackConfigAdapterImpl implements  QueryAppCallbackConfigAdapter{
+    private static final Logger logger = LoggerFactory.getLogger(QueryAppCallbackConfigAdapterImpl.class);
 
     @Resource
     private AppCallbackConfigFacade appCallbackConfigFacade;
 
+    @Override
     public List<AppCallbackConfig> queryAppCallBackConfigByAppId(String appid) {
 
         GetAppCallBackConfigByIdRequest getAppCallBackConfigByIdRequest = new GetAppCallBackConfigByIdRequest();
@@ -47,7 +48,7 @@ public class QueryAppCallbackConfigConverter {
         return list;
 
     }
-
+    @Override
     public List<AppCallbackConfig> queryAllAppCallBackConfig() {
         BaseRequest request = new BaseRequest();
         MerchantResult<List<AppCallbackResult>> listMerchantResult =

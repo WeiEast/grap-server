@@ -1,10 +1,9 @@
-package com.treefinance.saas.grapserver.biz.common;
+package com.treefinance.saas.grapserver.biz.adapter;
 
 import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.alibaba.fastjson.JSON;
@@ -24,13 +23,14 @@ import javax.annotation.Resource;
  * @date:Created in 2018/11/15下午3:13
  */
 @Component
-public class QueryAppBizLicenseConverter {
+public class QueryAppBizLicenseAdapterImpl implements  QueryAppBizLicenseAdapter{
 
-    private static final Logger logger = LoggerFactory.getLogger(QueryAppBizLicenseConverter.class);
+    private static final Logger logger = LoggerFactory.getLogger(QueryAppBizLicenseAdapterImpl.class);
 
     @Resource
     private AppBizLicenseFacade appBizLicenseFacade;
 
+    @Override
     public List<AppBizLicense> queryAppBizLicenseByAppId(String appid) {
         GetAppLicenseByAppIdRequest getAppLicenseByAppIdRequest = new GetAppLicenseByAppIdRequest();
         getAppLicenseByAppIdRequest.setAppId(appid);
@@ -45,6 +45,7 @@ public class QueryAppBizLicenseConverter {
         return list;
     }
 
+    @Override
     public List<AppBizLicense> queryAllAppBizLicense() {
         BaseRequest request = new BaseRequest();
         MerchantResult<List<AppBizLicenseResult>> listMerchantResult =

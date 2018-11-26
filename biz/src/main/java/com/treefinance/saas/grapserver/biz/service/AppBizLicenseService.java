@@ -1,12 +1,16 @@
 package com.treefinance.saas.grapserver.biz.service;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
-
+import com.alibaba.fastjson.JSON;
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import com.treefinance.saas.assistant.variable.notify.client.VariableMessageHandler;
+import com.treefinance.saas.assistant.variable.notify.model.VariableMessage;
+import com.treefinance.saas.grapserver.biz.adapter.QueryAppBizLicenseAdapter;
+import com.treefinance.saas.grapserver.common.enums.EBizType;
+import com.treefinance.saas.grapserver.dao.entity.AppBizLicense;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang3.RandomUtils;
 import org.slf4j.Logger;
@@ -16,17 +20,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
-import com.alibaba.fastjson.JSON;
-import com.google.common.cache.CacheBuilder;
-import com.google.common.cache.CacheLoader;
-import com.google.common.cache.LoadingCache;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-import com.treefinance.saas.assistant.variable.notify.client.VariableMessageHandler;
-import com.treefinance.saas.assistant.variable.notify.model.VariableMessage;
-import com.treefinance.saas.grapserver.biz.common.QueryAppBizLicenseConverter;
-import com.treefinance.saas.grapserver.common.enums.EBizType;
-import com.treefinance.saas.grapserver.dao.entity.AppBizLicense;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 /**
  * @author luoyihua on 2017/5/10.
@@ -40,14 +39,14 @@ public class AppBizLicenseService implements InitializingBean, VariableMessageHa
     private static final Logger logger = LoggerFactory.getLogger(AppBizLicenseService.class);
 
     @Autowired
-    private QueryAppBizLicenseConverter queryAppBizLicenseConverter;
+    private QueryAppBizLicenseAdapter queryAppBizLicenseAdapter;
 
     /**
      * 本地缓存
      */
     private final LoadingCache<String, List<AppBizLicense>> cache =
         CacheBuilder.newBuilder().refreshAfterWrite(5, TimeUnit.MINUTES).expireAfterWrite(5, TimeUnit.MINUTES)
-            .build(CacheLoader.from(appid -> queryAppBizLicenseConverter.queryAppBizLicenseByAppId(appid)));
+            .build(CacheLoader.from(appid -> queryAppBizLicenseAdapter.queryAppBizLicenseByAppId(appid)));
 
     /**
      * 根据appId获取授权
@@ -178,7 +177,7 @@ public class AppBizLicenseService implements InitializingBean, VariableMessageHa
 
     @Override
     public void afterPropertiesSet() throws Exception {
-        List<AppBizLicense> licenses = queryAppBizLicenseConverter.queryAllAppBizLicense();
+        List<AppBizLicense> licenses = queryAppBizLicenseAdapter.queryAllAppBizLicense();
         if (CollectionUtils.isEmpty(licenses)) {
             return;
         }

@@ -1,9 +1,15 @@
 package com.treefinance.saas.grapserver.biz.service;
 
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-
+import com.alibaba.fastjson.JSON;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.base.Joiner;
+import com.google.common.collect.Maps;
+import com.treefinance.saas.grapserver.biz.adapter.GetAppColorConfigAdapter;
+import com.treefinance.saas.grapserver.biz.config.DiamondConfig;
+import com.treefinance.saas.grapserver.common.exception.BizException;
+import com.treefinance.saas.grapserver.common.model.vo.task.AppH5TipsVO;
+import com.treefinance.saas.grapserver.common.utils.DataConverterUtils;
+import com.treefinance.saas.grapserver.dao.entity.AppColorConfig;
 import com.treefinance.saas.merchant.facade.request.grapserver.GetAppH5TipsRequest;
 import com.treefinance.saas.merchant.facade.result.console.AppH5TipsResult;
 import com.treefinance.saas.merchant.facade.result.console.MerchantResult;
@@ -15,16 +21,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.alibaba.fastjson.JSON;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.base.Joiner;
-import com.google.common.collect.Maps;
-import com.treefinance.saas.grapserver.biz.common.GetAppColorConfigConverter;
-import com.treefinance.saas.grapserver.biz.config.DiamondConfig;
-import com.treefinance.saas.grapserver.common.exception.BizException;
-import com.treefinance.saas.grapserver.common.model.vo.task.AppH5TipsVO;
-import com.treefinance.saas.grapserver.common.utils.DataConverterUtils;
-import com.treefinance.saas.grapserver.dao.entity.AppColorConfig;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * @author by luoyihua on 2017/5/5.
@@ -37,7 +36,7 @@ public class MerchantConfigService {
     @Autowired
     private DiamondConfig diamondConfig;
     @Autowired
-    private GetAppColorConfigConverter getAppColorConfigConverter;
+    private GetAppColorConfigAdapter getAppColorConfigAdapter;
     @Autowired
     private AppH5TipsFacade appH5TipsFacade;
 
@@ -45,7 +44,7 @@ public class MerchantConfigService {
     public Map getColorConfig(String appId, String style) {
 
         MerchantResult<AppColorConfigResult>
-            merchantColorConfigResult = getAppColorConfigConverter.queryAppColorConfig(appId, style);
+            merchantColorConfigResult = getAppColorConfigAdapter.queryAppColorConfig(appId, style);
         Map<String, Object> map = Maps.newHashMap();
         if (merchantColorConfigResult.isSuccess()) {
             AppColorConfig merchantColorConfig =
