@@ -16,7 +16,7 @@ import com.treefinance.saas.grapserver.common.model.vo.demo.fund.FundUserInfoVO;
 import com.treefinance.saas.grapserver.common.utils.BeanUtils;
 import com.treefinance.saas.grapserver.common.utils.JsonUtils;
 import com.treefinance.saas.grapserver.common.utils.RemoteDataDownloadUtils;
-import com.treefinance.saas.grapserver.dao.entity.AppLicense;
+import com.treefinance.saas.grapserver.biz.dto.AppLicense;
 import com.treefinance.toolkit.util.DateUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;

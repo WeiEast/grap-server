@@ -8,7 +8,7 @@ import com.google.common.primitives.Ints;
 import com.treefinance.commonservice.facade.location.*;
 import com.treefinance.commonservice.uid.UidService;
 import com.treefinance.saas.grapserver.common.utils.DataConverterUtils;
-import com.treefinance.saas.grapserver.dao.entity.TaskDevice;
+import com.treefinance.saas.grapserver.biz.dto.TaskDevice;
 import com.treefinance.saas.taskcenter.facade.request.TaskDeviceRequest;
 import com.treefinance.saas.taskcenter.facade.service.TaskDeviceFacade;
 import org.apache.commons.collections.CollectionUtils;

@@ -27,7 +27,7 @@ import com.treefinance.saas.grapserver.common.exception.ForbiddenException;
 import com.treefinance.saas.grapserver.common.model.AppLicenseKey;
 import com.treefinance.saas.grapserver.common.model.Constants;
 import com.treefinance.saas.grapserver.common.model.WebContext;
-import com.treefinance.saas.grapserver.dao.entity.AppLicense;
+import com.treefinance.saas.grapserver.biz.dto.AppLicense;
 import com.treefinance.saas.grapserver.web.request.WrappedHttpServletRequest;
 import com.treefinance.saas.knife.result.SimpleResult;
 import com.treefinance.toolkit.util.http.servlet.ServletRequests;

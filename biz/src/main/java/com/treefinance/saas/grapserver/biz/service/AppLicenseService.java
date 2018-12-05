@@ -20,7 +20,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.treefinance.saas.grapserver.biz.adapter.GetAppLicenseAdapterImpl;
-import com.treefinance.saas.grapserver.dao.entity.AppLicense;
+import com.treefinance.saas.grapserver.biz.dto.AppLicense;
 
 /**
  * @author Jerry

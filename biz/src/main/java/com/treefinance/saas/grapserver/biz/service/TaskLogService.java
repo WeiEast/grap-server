@@ -3,7 +3,7 @@ package com.treefinance.saas.grapserver.biz.service;
 import com.google.common.collect.Lists;
 import com.treefinance.saas.grapserver.common.exception.UnknownException;
 import com.treefinance.saas.grapserver.common.utils.DataConverterUtils;
-import com.treefinance.saas.grapserver.dao.entity.TaskLog;
+import com.treefinance.saas.grapserver.biz.dto.TaskLog;
 import com.treefinance.saas.taskcenter.facade.result.TaskLogRO;
 import com.treefinance.saas.taskcenter.facade.result.common.TaskResult;
 import com.treefinance.saas.taskcenter.facade.service.TaskLogFacade;

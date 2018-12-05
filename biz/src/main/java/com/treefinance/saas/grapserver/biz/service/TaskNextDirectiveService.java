@@ -3,7 +3,7 @@ package com.treefinance.saas.grapserver.biz.service;
 import com.treefinance.saas.grapserver.common.exception.UnknownException;
 import com.treefinance.saas.grapserver.common.model.dto.DirectiveDTO;
 import com.treefinance.saas.grapserver.common.utils.DataConverterUtils;
-import com.treefinance.saas.grapserver.dao.entity.TaskNextDirective;
+import com.treefinance.saas.grapserver.biz.dto.TaskNextDirective;
 import com.treefinance.saas.taskcenter.facade.request.TaskDirectiveRequest;
 import com.treefinance.saas.taskcenter.facade.result.TaskNextDirectiveRO;
 import com.treefinance.saas.taskcenter.facade.result.common.TaskResult;

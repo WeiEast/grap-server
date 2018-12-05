@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component;
 
 import com.alibaba.dubbo.rpc.RpcException;
 import com.alibaba.fastjson.JSON;
-import com.treefinance.saas.grapserver.dao.entity.AppLicense;
+import com.treefinance.saas.grapserver.biz.dto.AppLicense;
 import com.treefinance.saas.merchant.facade.request.grapserver.GetAppLicenseRequest;
 import com.treefinance.saas.merchant.facade.result.console.MerchantResult;
 import com.treefinance.saas.merchant.facade.result.grapsever.AppLicenseResult;

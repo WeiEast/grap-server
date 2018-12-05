@@ -1,6 +1,6 @@
 package com.treefinance.saas.grapserver.biz.adapter;
 
-import com.treefinance.saas.grapserver.dao.entity.AppCallbackConfig;
+import com.treefinance.saas.grapserver.biz.dto.AppCallbackConfig;
 
 import java.util.List;
 

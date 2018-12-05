@@ -10,7 +10,7 @@ import com.treefinance.saas.assistant.variable.notify.client.VariableMessageHand
 import com.treefinance.saas.assistant.variable.notify.model.VariableMessage;
 import com.treefinance.saas.grapserver.biz.adapter.QueryAppBizLicenseAdapter;
 import com.treefinance.saas.grapserver.common.enums.EBizType;
-import com.treefinance.saas.grapserver.dao.entity.AppBizLicense;
+import com.treefinance.saas.grapserver.biz.dto.AppBizLicense;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang3.RandomUtils;
 import org.slf4j.Logger;

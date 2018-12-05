@@ -1,6 +1,6 @@
 package com.treefinance.saas.grapserver.biz.adapter;
 
-import com.treefinance.saas.grapserver.dao.entity.MerchantBaseInfo;
+import com.treefinance.saas.grapserver.biz.dto.MerchantBaseInfo;
 
 /**
  * @author:guoguoyun

@@ -1,7 +1,7 @@
 package com.treefinance.saas.grapserver.biz.adapter;
 
 import com.treefinance.saas.grapserver.common.utils.DataConverterUtils;
-import com.treefinance.saas.grapserver.dao.entity.MerchantBaseInfo;
+import com.treefinance.saas.grapserver.biz.dto.MerchantBaseInfo;
 import com.treefinance.saas.merchant.facade.request.console.GetMerchantByAppIdRequest;
 import com.treefinance.saas.merchant.facade.result.console.MerchantBaseInfoResult;
 import com.treefinance.saas.merchant.facade.result.console.MerchantResult;

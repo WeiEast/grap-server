@@ -21,7 +21,7 @@ import com.datatrees.spider.share.api.SpiderTaskApi;
 import com.datatrees.spider.share.domain.model.WebsiteConf;
 import com.treefinance.saas.grapserver.common.enums.EBizType;
 import com.treefinance.saas.grapserver.common.enums.EOperatorType;
-import com.treefinance.saas.grapserver.dao.entity.TaskSupport;
+import com.treefinance.saas.grapserver.biz.dto.TaskSupport;
 import com.treefinance.toolkit.util.json.Jackson;
 import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;

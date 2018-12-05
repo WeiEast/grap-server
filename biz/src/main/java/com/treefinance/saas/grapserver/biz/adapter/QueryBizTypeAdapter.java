@@ -1,6 +1,6 @@
 package com.treefinance.saas.grapserver.biz.adapter;
 
-import com.treefinance.saas.grapserver.dao.entity.AppBizType;
+import com.treefinance.saas.grapserver.biz.dto.AppBizType;
 
 import java.util.List;
 

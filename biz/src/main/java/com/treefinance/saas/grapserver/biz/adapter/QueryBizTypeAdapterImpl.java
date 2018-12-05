@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component;
 
 import com.alibaba.fastjson.JSON;
 import com.treefinance.saas.grapserver.common.utils.DataConverterUtils;
-import com.treefinance.saas.grapserver.dao.entity.AppBizType;
+import com.treefinance.saas.grapserver.biz.dto.AppBizType;
 import com.treefinance.saas.merchant.facade.request.common.BaseRequest;
 import com.treefinance.saas.merchant.facade.request.grapserver.GetAppBizTypeRequest;
 import com.treefinance.saas.merchant.facade.result.console.AppBizTypeResult;

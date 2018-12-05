@@ -4,8 +4,7 @@ import com.treefinance.saas.grapserver.biz.adapter.GetMerchantBaseInfoAdapter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.treefinance.saas.grapserver.biz.adapter.GetMerchantBaseInfoAdapterImpl;
-import com.treefinance.saas.grapserver.dao.entity.MerchantBaseInfo;
+import com.treefinance.saas.grapserver.biz.dto.MerchantBaseInfo;
 
 /**
  * @author yh-treefinance on 2017/6/13.

@@ -18,7 +18,7 @@ package com.treefinance.saas.grapserver.biz.service;
 
 import com.treefinance.saas.grapserver.common.exception.UnknownException;
 import com.treefinance.saas.grapserver.common.utils.DataConverterUtils;
-import com.treefinance.saas.grapserver.dao.entity.TaskSupport;
+import com.treefinance.saas.grapserver.biz.dto.TaskSupport;
 import com.treefinance.saas.taskcenter.facade.result.TaskSupportRO;
 import com.treefinance.saas.taskcenter.facade.result.common.TaskResult;
 import com.treefinance.saas.taskcenter.facade.service.TaskSupportFacade;

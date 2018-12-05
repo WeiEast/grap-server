@@ -9,7 +9,7 @@ import com.treefinance.saas.grapserver.biz.config.DiamondConfig;
 import com.treefinance.saas.grapserver.common.exception.BizException;
 import com.treefinance.saas.grapserver.common.model.vo.task.AppH5TipsVO;
 import com.treefinance.saas.grapserver.common.utils.DataConverterUtils;
-import com.treefinance.saas.grapserver.dao.entity.AppColorConfig;
+import com.treefinance.saas.grapserver.biz.dto.AppColorConfig;
 import com.treefinance.saas.merchant.facade.request.grapserver.GetAppH5TipsRequest;
 import com.treefinance.saas.merchant.facade.result.console.AppH5TipsResult;
 import com.treefinance.saas.merchant.facade.result.console.MerchantResult;
