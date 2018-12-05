@@ -1,4 +1,4 @@
-package com.treefinance.saas.grapserver.biz.common;
+package com.treefinance.saas.grapserver.biz.adapter;
 
 import java.util.List;
 
@@ -22,13 +22,14 @@ import com.treefinance.saas.merchant.facade.service.AppBizTypeFacade;
  * @date Created in 2018/11/15下午2:52
  */
 @Component
-public class QueryBizTypeConverter {
+public class QueryBizTypeAdapterImpl implements QueryBizTypeAdapter{
 
-    private static final Logger logger = LoggerFactory.getLogger(QueryBizTypeConverter.class);
+    private static final Logger logger = LoggerFactory.getLogger(QueryBizTypeAdapterImpl.class);
 
     @Resource
     private AppBizTypeFacade appBizTypeFacade;
 
+    @Override
     public List<AppBizType> queryAppBizTypeByBizType(Byte bizType) {
         GetAppBizTypeRequest getAppBizTypeRequest = new GetAppBizTypeRequest();
         getAppBizTypeRequest.setBizType(bizType);
@@ -44,6 +45,7 @@ public class QueryBizTypeConverter {
         return list;
     }
 
+    @Override
     public List<AppBizType> queryAllAppBizType() {
         BaseRequest getAppBizTypeRequest = new BaseRequest();
         MerchantResult<List<AppBizTypeResult>> merchantResult =

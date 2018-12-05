@@ -1,4 +1,4 @@
-package com.treefinance.saas.grapserver.biz.common;
+package com.treefinance.saas.grapserver.biz.adapter;
 
 import com.treefinance.saas.grapserver.common.utils.DataConverterUtils;
 import com.treefinance.saas.grapserver.dao.entity.MerchantBaseInfo;
@@ -18,12 +18,13 @@ import java.util.List;
  * @date:Created in 2018/11/16下午3:00
  */
 @Component
-public class GetMerchantBaseInfoConverter {
+public class GetMerchantBaseInfoAdapterImpl implements  GetMerchantBaseInfoAdapter{
 
 
     @Resource
     private MerchantBaseInfoFacade merchantBaseInfoFacade;
 
+    @Override
     public MerchantBaseInfo getBaseInfoByAppId(String appId) {
         GetMerchantByAppIdRequest request = new GetMerchantByAppIdRequest();
         request.setAppId(appId);

@@ -1,4 +1,4 @@
-package com.treefinance.saas.grapserver.biz.common;
+package com.treefinance.saas.grapserver.biz.adapter;
 
 import javax.annotation.Resource;
 
@@ -20,14 +20,15 @@ import com.treefinance.saas.merchant.facade.service.AppLicenseFacade;
  * @date:Created in 2018/11/15下午7:32
  */
 @Component
-public class GetAppLicenseConverter {
+public class GetAppLicenseAdapterImpl implements GetAppLicenseAdapter{
 
 
-    private static final Logger logger = LoggerFactory.getLogger(GetAppLicenseConverter.class);
+    private static final Logger logger = LoggerFactory.getLogger(GetAppLicenseAdapterImpl.class);
 
     @Resource
     private  AppLicenseFacade appLicenseFacade;
 
+    @Override
     public  AppLicense getAppLicenseByAppId(String appid) {
         GetAppLicenseRequest request = new GetAppLicenseRequest();
         request.setAppId(appid);

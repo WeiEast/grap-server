@@ -16,12 +16,10 @@
 
 package com.treefinance.saas.grapserver.biz.service;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.treefinance.saas.grapserver.biz.common.GetAppLicenseConverter;
+import com.treefinance.saas.grapserver.biz.adapter.GetAppLicenseAdapterImpl;
 import com.treefinance.saas.grapserver.dao.entity.AppLicense;
 
 /**
@@ -32,12 +30,11 @@ import com.treefinance.saas.grapserver.dao.entity.AppLicense;
 public class AppLicenseService {
 
 
-    @Autowired
-    GetAppLicenseConverter getAppLicenseConverter;
+    @Autowired GetAppLicenseAdapterImpl getAppLicenseAdapterImpl;
 
 
     public AppLicense getAppLicense(String appId) {
-        return getAppLicenseConverter.getAppLicenseByAppId(appId);
+        return getAppLicenseAdapterImpl.getAppLicenseByAppId(appId);
     }
 
     public String getDataKey(String appId) {

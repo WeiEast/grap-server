@@ -1,11 +1,19 @@
 package com.treefinance.saas.grapserver.biz.service;
 
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
-
+import com.alibaba.fastjson.JSON;
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
+import com.google.common.collect.Lists;
+import com.treefinance.saas.assistant.variable.notify.client.VariableMessageHandler;
+import com.treefinance.saas.assistant.variable.notify.model.VariableMessage;
+import com.treefinance.saas.grapserver.biz.adapter.QueryAppCallBackBizAdapter;
+import com.treefinance.saas.grapserver.biz.adapter.QueryAppCallbackConfigAdapter;
+import com.treefinance.saas.grapserver.common.model.dto.AppCallbackConfigDTO;
+import com.treefinance.saas.grapserver.common.utils.DataConverterUtils;
+import com.treefinance.saas.grapserver.dao.entity.AppCallbackBiz;
+import com.treefinance.saas.grapserver.dao.entity.AppCallbackConfig;
+import com.treefinance.saas.grapserver.facade.enums.EDataType;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,20 +22,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
-import com.alibaba.fastjson.JSON;
-import com.google.common.cache.CacheBuilder;
-import com.google.common.cache.CacheLoader;
-import com.google.common.cache.LoadingCache;
-import com.google.common.collect.Lists;
-import com.treefinance.saas.assistant.variable.notify.client.VariableMessageHandler;
-import com.treefinance.saas.assistant.variable.notify.model.VariableMessage;
-import com.treefinance.saas.grapserver.biz.common.QueryAppCallBackBizConverter;
-import com.treefinance.saas.grapserver.biz.common.QueryAppCallbackConfigConverter;
-import com.treefinance.saas.grapserver.common.model.dto.AppCallbackConfigDTO;
-import com.treefinance.saas.grapserver.common.utils.DataConverterUtils;
-import com.treefinance.saas.grapserver.dao.entity.AppCallbackBiz;
-import com.treefinance.saas.grapserver.dao.entity.AppCallbackConfig;
-import com.treefinance.saas.grapserver.facade.enums.EDataType;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 /**
  * @author luoyihua on 2017/5/11.
@@ -41,16 +40,16 @@ public class AppCallbackConfigService implements InitializingBean, VariableMessa
     private static final Logger logger = LoggerFactory.getLogger(AppCallbackConfigService.class);
 
     @Autowired
-    private QueryAppCallBackBizConverter queryAppCallBackBizConverter;
+    private QueryAppCallBackBizAdapter queryAppCallBackBizAdapter;
     @Autowired
-    private QueryAppCallbackConfigConverter queryAppCallbackConfigConverter;
+    private QueryAppCallbackConfigAdapter queryAppCallbackConfigAdapter;
 
     /**
      * 本地缓存<appId,callbackConfig>
      */
     private final LoadingCache<String, List<AppCallbackConfig>> callbackCache = CacheBuilder.newBuilder()
         .refreshAfterWrite(5, TimeUnit.MINUTES).expireAfterAccess(5, TimeUnit.MINUTES).build(CacheLoader.from(appid -> {
-            List<AppCallbackConfig> list = queryAppCallbackConfigConverter.queryAppCallBackConfigByAppId(appid);
+            List<AppCallbackConfig> list = queryAppCallbackConfigAdapter.queryAppCallBackConfigByAppId(appid);
             // 刷新类型
             list.forEach(appCallbackConfig -> this.callbackTypeCache.refresh(appCallbackConfig.getId()));
             return list;
@@ -61,7 +60,7 @@ public class AppCallbackConfigService implements InitializingBean, VariableMessa
      */
     private final LoadingCache<Integer, List<AppCallbackBiz>> callbackTypeCache =
         CacheBuilder.newBuilder().refreshAfterWrite(5, TimeUnit.MINUTES).expireAfterAccess(5, TimeUnit.MINUTES).build(
-            CacheLoader.from(callbackId -> queryAppCallBackBizConverter.queryAppCallBackByCallbackId(callbackId)));
+            CacheLoader.from(callbackId -> queryAppCallBackBizAdapter.queryAppCallBackByCallbackId(callbackId)));
 
     /**
      * 根据appId获取
@@ -141,14 +140,14 @@ public class AppCallbackConfigService implements InitializingBean, VariableMessa
     @Override
     public void afterPropertiesSet() throws Exception {
         // 1. 初始化appCallback
-        List<AppCallbackConfig> list = queryAppCallbackConfigConverter.queryAllAppCallBackConfig();
+        List<AppCallbackConfig> list = queryAppCallbackConfigAdapter.queryAllAppCallBackConfig();
         logger.info("加载callback信息: callback={}", JSON.toJSONString(list));
         if (CollectionUtils.isEmpty(list)) {
             return;
         }
         this.callbackCache.putAll(list.stream().collect(Collectors.groupingBy(AppCallbackConfig::getAppId)));
         // 2. 初始化callBackType
-        List<AppCallbackBiz> appCallbackBizList = queryAppCallBackBizConverter.queryAllAppCallBack();
+        List<AppCallbackBiz> appCallbackBizList = queryAppCallBackBizAdapter.queryAllAppCallBack();
 
         logger.info("加载callbackType信息: callbackType={}", JSON.toJSONString(appCallbackBizList));
         if (CollectionUtils.isEmpty(appCallbackBizList)) {
