@@ -17,7 +17,7 @@
 		</constructor-arg>
 	</bean>
 
-	<bean id="propertiesStorage" class="com.treefinance.b2b.saas.conf.ConfigurablePropertiesStorage">
+	<bean id="propertiesStorage" class="com.treefinance.b2b.saas.context.conf.ConfigurablePropertiesStorage">
 		<!-- first load locations properties -->
 		<property name="localOverride" value="true" />
 		<property name="properties" ref="propertiesConfiguration" />
@@ -28,7 +28,8 @@
 		</property>
 	</bean>
 
-	<bean class="com.treefinance.b2b.saas.conf.PropertiesConfiguration" factory-method="getInstance">
+	<bean class="com.treefinance.b2b.saas.context.conf.PropertiesConfiguration"
+		factory-method="getInstance">
 		<property name="storage" ref="propertiesStorage"/>
 	</bean>
 

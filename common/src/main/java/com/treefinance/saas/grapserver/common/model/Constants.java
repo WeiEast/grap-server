@@ -1,6 +1,6 @@
 package com.treefinance.saas.grapserver.common.model;
 
-import com.treefinance.b2b.saas.conf.PropertiesConfiguration;
+import com.treefinance.b2b.saas.context.conf.PropertiesConfiguration;
 
 /**
  * @author hanif

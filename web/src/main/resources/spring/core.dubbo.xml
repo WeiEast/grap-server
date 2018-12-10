@@ -15,6 +15,7 @@
     <dubbo:consumer check="false"/>
 
     <dubbo:reference interface="com.treefinance.commonservice.uid.UidService" id="uidService"/>
+
     <!--消费者 -->
     <dubbo:reference id="appLicenseFacade"
       interface="com.treefinance.saas.merchant.facade.service.AppLicenseFacade" version="1.0.0"/>
