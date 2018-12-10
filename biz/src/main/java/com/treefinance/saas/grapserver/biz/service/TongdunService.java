@@ -61,7 +61,7 @@ public class TongdunService {
         JSONObject data = JSON.parseObject(JSON.toJSONString(tongdunRequest));
         Map<String, Object> map = new HashMap<>(1);
         map.put("data", data);
-        String httpResult ;
+        String httpResult;
         try {
             httpResult = HttpClientUtils.doPost(url, map);
         } catch (Exception e) {
@@ -84,20 +84,11 @@ public class TongdunService {
             // 错误日志中
             return SaasResult.failResult("Unexpected exception!");
         }
-
-        Map<String, Integer> saasRuleScoreDTOMap = new HashMap<>(8);
         // 获取规则评分
-        JSONArray scores = result.getJSONArray("saasRuleScoreDTO");
-
-        for (int i = 0, size = scores.size(); i < size; i++) {
-            JSONObject item = scores.getJSONObject(i);
-            saasRuleScoreDTOMap.put(item.getString("ruleName"), item.getInteger("policyScore"));
-        }
+        Map<String, Integer> saasRuleScoreDTOMap = getsaasRuleScoreMapFromJson(result);
 
         // 获取关联手机 身份证 邮箱信息
-
         JSONObject associated3MDTO = result.getJSONObject("saasAssociated3MDTO");
-
         // 获取详细数值
         JSONObject summary = result.getJSONObject("saasSummaryDTO");
         ETongdunData[] values = ETongdunData.values();
@@ -108,13 +99,13 @@ public class TongdunService {
                 tongdunData.setId(item.getName());
                 tongdunData.setValue(TongdunDataResolver.to(summary.getInteger(item.getText())));
                 tongdunData.setScore(TongdunDataResolver.to(saasRuleScoreDTOMap.get(item.getText())));
-                if (("phoneAssociatedIdentity3MCntCopy").equals(item.getText())) {
+                if (ETongdunData.MI_MOBILE_3W.getText().equals(item.getText())) {
                     tongdunData.setAssociatedIdentity(associated3MDTO.getString("phoneAssociatedIdentity3M"));
                 }
-                if (("identityAssociatedMail3MCntCopy").equals(item.getText())) {
+                if (ETongdunData.ME_IDCARD_3M.getText().equals(item.getText())) {
                     tongdunData.setAssociatedMail(associated3MDTO.getString("identityAssociatedMail3M"));
                 }
-                if (("identityAssociatedPhone3MCntCopy").equals(item.getText())) {
+                if (ETongdunData.MM_IDCARD_3M.getText().equals(item.getText())) {
                     tongdunData.setAssociatedMobile(associated3MDTO.getString("identityAssociatedPhone3M"));
                 }
 
@@ -219,5 +210,15 @@ public class TongdunService {
         taskFacade.updateTaskStatusWithStep(taskId, ETaskStatus.SUCCESS.getStatus());
         return SaasResult.successEncryptByRSAResult(resultList, license.getServerPublicKey());
 
+    }
+
+    private Map<String, Integer> getsaasRuleScoreMapFromJson(JSONObject result) {
+        Map<String, Integer> saasRuleScoreDTOMap = new HashMap<>(8);
+        JSONArray scores = result.getJSONArray("saasRuleScoreDTO");
+        for (int i = 0, size = scores.size(); i < size; i++) {
+            JSONObject item = scores.getJSONObject(i);
+            saasRuleScoreDTOMap.put(item.getString("ruleName"), item.getInteger("policyScore"));
+        }
+        return saasRuleScoreDTOMap;
     }
 }
