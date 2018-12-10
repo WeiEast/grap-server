@@ -88,12 +88,20 @@ public class TongdunService {
         }
 
         Map<String, Integer> saasRuleScoreDTOMap = new HashMap<>(8);
+        Map<String, String> associated3MDTOMap = new HashMap<>(3);
         // 获取规则评分
         JSONArray scores = result.getJSONArray("saasRuleScoreDTO");
+
         for (int i = 0, size = scores.size(); i < size; i++) {
             JSONObject item = scores.getJSONObject(i);
             saasRuleScoreDTOMap.put(item.getString("ruleName"), item.getInteger("policyScore"));
         }
+
+        //获取关联手机 身份证 邮箱信息
+        JSONObject associated3MDTO = result.getJSONObject("saasAssociated3MDTO");
+        associated3MDTOMap.put("identityAssociatedMail3MCntCopy", associated3MDTO.getString("identityAssociatedMail3M"));
+        associated3MDTOMap.put("identityAssociatedPhone3MCntCopy", associated3MDTO.getString("identityAssociatedPhone3M"));
+        associated3MDTOMap.put("phoneAssociatedIdentity3MCntCopy", associated3MDTO.getString("phoneAssociatedIdentity3M"));
 
         // 获取详细数值
         JSONObject summary = result.getJSONObject("saasSummaryDTO");
@@ -105,6 +113,9 @@ public class TongdunService {
             tongdunData.setId(item.getName());
             tongdunData.setValue(TongdunDataResolver.to(summary.getInteger(item.getText())));
             tongdunData.setScore(TongdunDataResolver.to(saasRuleScoreDTOMap.get(item.getText())));
+            tongdunData.setAssociatedIdentity(associated3MDTOMap.get(item.getText()));
+            tongdunData.setAssociatedMail(associated3MDTOMap.get(item.getText()));
+            tongdunData.setAssociatedMobile(associated3MDTOMap.get(item.getText()));
             tongdunDataList.add(tongdunData);
         }
 

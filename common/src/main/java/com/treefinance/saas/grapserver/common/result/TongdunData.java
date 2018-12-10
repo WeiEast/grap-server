@@ -18,6 +18,21 @@ public class TongdunData {
      * 对应规则的评分
      */
     private String score;
+    /**
+     *关联借款人邮箱列表
+     */
+    private String associatedMail;
+    /**
+     * 关联借款人手机列表
+     */
+    private String associatedMobile;
+    /**
+     * 关联身份证列表
+     */
+    private String associatedIdentity;
+
+
+
 
     public String getId() {
         return id;
@@ -43,7 +58,33 @@ public class TongdunData {
         this.score = score;
     }
 
+    public String getAssociatedMail() {
+        return associatedMail;
+    }
+
+    public void setAssociatedMail(String associatedMail) {
+        this.associatedMail = associatedMail;
+    }
+
+    public String getAssociatedMobile() {
+        return associatedMobile;
+    }
+
+    public void setAssociatedMobile(String associatedMobile) {
+        this.associatedMobile = associatedMobile;
+    }
+
+    public String getAssociatedIdentity() {
+        return associatedIdentity;
+    }
+
+    public void setAssociatedIdentity(String associatedIdentity) {
+        this.associatedIdentity = associatedIdentity;
+    }
+
     @Override public String toString() {
-        return "TongdunData{" + "id='" + id + '\'' + ", value='" + value + '\'' + ", score='" + score + '\'' + '}';
+        return "TongdunData{" + "id='" + id + '\'' + ", value='" + value + '\'' + ", score='" + score + '\''
+            + ", associatedMail='" + associatedMail + '\'' + ", associatedMobile='" + associatedMobile + '\''
+            + ", associatedIdentity='" + associatedIdentity + '\'' + '}';
     }
 }
