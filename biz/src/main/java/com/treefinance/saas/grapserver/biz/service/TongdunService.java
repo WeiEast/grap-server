@@ -61,7 +61,7 @@ public class TongdunService {
         JSONObject data = JSON.parseObject(JSON.toJSONString(tongdunRequest));
         Map<String, Object> map = new HashMap<>(1);
         map.put("data", data);
-        String httpResult = null;
+        String httpResult ;
         try {
             httpResult = HttpClientUtils.doPost(url, map);
         } catch (Exception e) {
