@@ -10,7 +10,6 @@ import com.treefinance.toolkit.util.json.Jackson;
  * @author guoguoyun
  * @date Created in 2018/10/18下午10:27
  */
-@SuppressWarnings("unchecked")
 public class SaasResult<T> {
 
     private String msg;
@@ -62,7 +61,7 @@ public class SaasResult<T> {
     }
 
     public static <T> SaasResult<T> successResult(T data) {
-        SaasResult<T> result = new SaasResult(data);
+        SaasResult<T> result = new SaasResult<>(data);
         result.setCode(0);
         result.setMsg("success");
         return result;
@@ -74,7 +73,7 @@ public class SaasResult<T> {
     }
 
     public static <T> SaasResult<String> successEncryptByRSAResult(T data, String rsaPublicKey) {
-        String encryptData = SaasResult.EncryptHelper.encryptResult(data, rsaPublicKey);
+        String encryptData = EncryptHelper.encryptResult(data, rsaPublicKey);
         return successResult(encryptData);
     }
 
@@ -83,12 +82,12 @@ public class SaasResult<T> {
     }
 
     public static <T> SaasResult<T> failResult(T data, String msg,int code) {
-        return (SaasResult<T>) new SaasResult(msg,data,code);
+        return new SaasResult<>(msg,data,code);
     }
 
     public static <T> SaasResult<String> failEncryptByRSAResult(T data, String errorMsg, String rsaPublicKey) {
         String encryptData = SaasResult.EncryptHelper.encryptResult(data, rsaPublicKey);
-        return (SaasResult<String>) new SaasResult(errorMsg, encryptData);
+        return new SaasResult<>(errorMsg, encryptData);
     }
 
     private static class EncryptHelper {
@@ -101,7 +100,7 @@ public class SaasResult<T> {
         public static String encryptResult(Object data, String publicKey) {
             Encryptor encryptor = getEncryptor(publicKey);
             byte[] json = Jackson.toJSONByteArray(data);
-            String result = null;
+            String result;
 
             try {
                 result = encryptor.encryptAsBase64String(json);
@@ -112,5 +111,4 @@ public class SaasResult<T> {
             }
         }
     }
-
 }
