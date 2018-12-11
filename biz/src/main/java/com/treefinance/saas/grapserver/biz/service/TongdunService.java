@@ -19,6 +19,7 @@ import com.treefinance.saas.grapserver.common.utils.TongdunDataResolver;
 import com.treefinance.saas.grapserver.dao.entity.AppLicense;
 import com.treefinance.saas.taskcenter.facade.service.TaskFacade;
 import com.treefinance.saas.taskcenter.facade.service.TaskLogFacade;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,6 +27,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -128,26 +130,32 @@ public class TongdunService {
         TongdunDetailData detail = null;
         if (ETongdunData.MI_MOBILE_3W.equals(item)) {
             List<String> list = getList(associated3MDTO, "phoneAssociatedIdentity3M");
-
-            detail = new TongdunDetailData();
-            detail.setIdcardNos(list);
+            if (!list.isEmpty()) {
+                detail = new TongdunDetailData();
+                detail.setIdcardNos(list);
+            }
 
         } else if (ETongdunData.ME_IDCARD_3M.equals(item)) {
             List<String> list = getList(associated3MDTO, "identityAssociatedMail3M");
-
-            detail = new TongdunDetailData();
-            detail.setMails(list);
-
+            if (!list.isEmpty()) {
+                detail = new TongdunDetailData();
+                detail.setMails(list);
+            }
         } else if (ETongdunData.MM_IDCARD_3M.equals(item)) {
             List<String> list = getList(associated3MDTO, "identityAssociatedPhone3M");
-            detail = new TongdunDetailData();
-            detail.setMobiles(list);
+            if (!list.isEmpty()) {
+                detail = new TongdunDetailData();
+                detail.setMobiles(list);
+            }
         }
         return detail;
     }
 
     private List<String> getList(JSONObject associated3MDTO, String identityAssociatedMail3M) {
         String value = associated3MDTO.getString(identityAssociatedMail3M);
+        if (StringUtils.isEmpty(value)) {
+            return Collections.emptyList();
+        }
         return Arrays.asList(value.split(","));
     }
 
