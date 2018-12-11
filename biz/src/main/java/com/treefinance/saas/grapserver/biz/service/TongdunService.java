@@ -4,10 +4,15 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.treefinance.saas.grapserver.biz.config.DiamondConfig;
-import com.treefinance.saas.grapserver.common.enums.*;
+import com.treefinance.saas.grapserver.common.enums.EBizType;
+import com.treefinance.saas.grapserver.common.enums.ETaskStatus;
+import com.treefinance.saas.grapserver.common.enums.ETongdunData;
+import com.treefinance.saas.grapserver.common.enums.ETongdunDetailData;
+import com.treefinance.saas.grapserver.common.enums.ETongdunType;
 import com.treefinance.saas.grapserver.common.request.TongdunRequest;
 import com.treefinance.saas.grapserver.common.result.SaasResult;
 import com.treefinance.saas.grapserver.common.result.TongdunData;
+import com.treefinance.saas.grapserver.common.result.TongdunDetailData;
 import com.treefinance.saas.grapserver.common.result.TongdunDetailResult;
 import com.treefinance.saas.grapserver.common.utils.HttpClientUtils;
 import com.treefinance.saas.grapserver.common.utils.TongdunDataResolver;
@@ -19,7 +24,13 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 
 /**
  * @author:guoguoyun
@@ -58,9 +69,8 @@ public class TongdunService {
 
     public Object processCollectTask(Long taskId, String appId, TongdunRequest tongdunRequest) {
         String url = diamondConfig.getTongdunUrlCollect();
-        JSONObject data = JSON.parseObject(JSON.toJSONString(tongdunRequest));
         Map<String, Object> map = new HashMap<>(1);
-        map.put("data", data);
+        map.put("data", JSON.toJSONString(tongdunRequest));
         String httpResult;
         try {
             httpResult = HttpClientUtils.doPost(url, map);
@@ -85,7 +95,7 @@ public class TongdunService {
             return SaasResult.failResult("Unexpected exception!");
         }
         // 获取规则评分
-        Map<String, Integer> saasRuleScoreDTOMap = getsaasRuleScoreMapFromJson(result);
+        Map<String, Integer> saasRuleScoreDTOMap = getSaasRuleScoreMapFromJson(result);
 
         // 获取关联手机 身份证 邮箱信息
         JSONObject associated3MDTO = result.getJSONObject("saasAssociated3MDTO");
@@ -99,15 +109,7 @@ public class TongdunService {
                 tongdunData.setId(item.getName());
                 tongdunData.setValue(TongdunDataResolver.to(summary.getInteger(item.getText())));
                 tongdunData.setScore(TongdunDataResolver.to(saasRuleScoreDTOMap.get(item.getText())));
-                if (ETongdunData.MI_MOBILE_3W.getText().equals(item.getText())) {
-                    tongdunData.setAssociatedIdentity(associated3MDTO.getString("phoneAssociatedIdentity3M"));
-                }
-                if (ETongdunData.ME_IDCARD_3M.getText().equals(item.getText())) {
-                    tongdunData.setAssociatedMail(associated3MDTO.getString("identityAssociatedMail3M"));
-                }
-                if (ETongdunData.MM_IDCARD_3M.getText().equals(item.getText())) {
-                    tongdunData.setAssociatedMobile(associated3MDTO.getString("identityAssociatedPhone3M"));
-                }
+                tongdunData.setDetail(getTongdunDetailData(item, associated3MDTO));
 
                 tongdunDataList.add(tongdunData);
             }
@@ -120,6 +122,33 @@ public class TongdunService {
         taskLogService.insert(taskId, "任务成功", new Date(), "");
         taskFacade.updateTaskStatusWithStep(taskId, ETaskStatus.SUCCESS.getStatus());
         return SaasResult.successEncryptByRSAResult(tongdunDataList, license.getServerPublicKey());
+    }
+
+    private TongdunDetailData getTongdunDetailData(ETongdunData item, JSONObject associated3MDTO) {
+        TongdunDetailData detail = null;
+        if (ETongdunData.MI_MOBILE_3W.equals(item)) {
+            List<String> list = getList(associated3MDTO, "phoneAssociatedIdentity3M");
+
+            detail = new TongdunDetailData();
+            detail.setIdcardNos(list);
+
+        } else if (ETongdunData.ME_IDCARD_3M.equals(item)) {
+            List<String> list = getList(associated3MDTO, "identityAssociatedMail3M");
+
+            detail = new TongdunDetailData();
+            detail.setMails(list);
+
+        } else if (ETongdunData.MM_IDCARD_3M.equals(item)) {
+            List<String> list = getList(associated3MDTO, "identityAssociatedPhone3M");
+            detail = new TongdunDetailData();
+            detail.setMobiles(list);
+        }
+        return detail;
+    }
+
+    private List<String> getList(JSONObject associated3MDTO, String identityAssociatedMail3M) {
+        String value = associated3MDTO.getString(identityAssociatedMail3M);
+        return Arrays.asList(value.split(","));
     }
 
     public Object processCollectDetailTask(Long taskId, String appId, TongdunRequest tongdunRequest) {
@@ -212,7 +241,7 @@ public class TongdunService {
 
     }
 
-    private Map<String, Integer> getsaasRuleScoreMapFromJson(JSONObject result) {
+    private Map<String, Integer> getSaasRuleScoreMapFromJson(JSONObject result) {
         Map<String, Integer> saasRuleScoreDTOMap = new HashMap<>(8);
         JSONArray scores = result.getJSONArray("saasRuleScoreDTO");
         for (int i = 0, size = scores.size(); i < size; i++) {
