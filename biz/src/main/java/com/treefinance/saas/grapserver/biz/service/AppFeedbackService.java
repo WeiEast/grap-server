@@ -2,7 +2,7 @@ package com.treefinance.saas.grapserver.biz.service;
 
 import com.treefinance.saas.grapserver.common.exception.BizException;
 import com.treefinance.saas.grapserver.common.model.dto.AppFeedbackResultDTO;
-import com.treefinance.saas.grapserver.common.utils.DataConverterUtils;
+import com.treefinance.saas.grapserver.context.component.AbstractService;
 import com.treefinance.saas.merchant.facade.request.grapserver.SaveAppFeedbackRequest;
 import com.treefinance.saas.merchant.facade.service.AppFeedbackFacade;
 import org.apache.commons.lang3.StringUtils;
@@ -16,7 +16,7 @@ import org.springframework.stereotype.Service;
  * @date 2018/8/29
  */
 @Service
-public class AppFeedbackService {
+public class AppFeedbackService extends AbstractService {
 
     @Autowired
     private AppFeedbackFacade appFeedbackFacade;
@@ -37,7 +37,7 @@ public class AppFeedbackService {
         if (appFeedbackResultDTO.getBizType() == null) {
             throw new BizException("bizType不能为空");
         }
-        SaveAppFeedbackRequest request = DataConverterUtils.convert(appFeedbackResultDTO, SaveAppFeedbackRequest.class);
+        SaveAppFeedbackRequest request = convert(appFeedbackResultDTO, SaveAppFeedbackRequest.class);
         appFeedbackFacade.addAppFeedbackResult(request);
     }
 

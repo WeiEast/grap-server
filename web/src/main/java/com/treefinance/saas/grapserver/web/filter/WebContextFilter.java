@@ -19,15 +19,15 @@ package com.treefinance.saas.grapserver.web.filter;
 import com.alibaba.fastjson.JSON;
 import com.google.common.collect.Maps;
 import com.treefinance.saas.assistant.model.HttpMonitorMessage;
-import com.treefinance.saas.grapserver.biz.config.DiamondConfig;
-import com.treefinance.saas.grapserver.biz.service.AppLicenseService;
+import com.treefinance.saas.grapserver.context.config.DiamondConfig;
+import com.treefinance.saas.grapserver.biz.service.LicenseService;
 import com.treefinance.saas.grapserver.biz.service.MonitorService;
 import com.treefinance.saas.grapserver.common.exception.AppIdUncheckException;
 import com.treefinance.saas.grapserver.common.exception.ForbiddenException;
 import com.treefinance.saas.grapserver.common.model.AppLicenseKey;
-import com.treefinance.saas.grapserver.common.model.Constants;
-import com.treefinance.saas.grapserver.common.model.WebContext;
-import com.treefinance.saas.grapserver.biz.dto.AppLicense;
+import com.treefinance.saas.grapserver.context.Constants;
+import com.treefinance.saas.grapserver.context.WebContext;
+import com.treefinance.saas.grapserver.biz.domain.AppLicense;
 import com.treefinance.saas.grapserver.web.request.WrappedHttpServletRequest;
 import com.treefinance.saas.knife.result.SimpleResult;
 import com.treefinance.toolkit.util.http.servlet.ServletRequests;
@@ -55,15 +55,15 @@ public class WebContextFilter extends AbstractRequestFilter {
     private static final Logger logger = LoggerFactory.getLogger(WebContextFilter.class);
     private MonitorService monitorService;
     private DiamondConfig diamondConfig;
-    private AppLicenseService appLicenseService;
+    private LicenseService licenseService;
 
 
     public WebContextFilter(MonitorService monitorService,
                             DiamondConfig diamondConfig,
-                            AppLicenseService appLicenseService) {
+                            LicenseService licenseService) {
         this.monitorService = monitorService;
         this.diamondConfig = diamondConfig;
-        this.appLicenseService = appLicenseService;
+        this.licenseService = licenseService;
     }
 
     @Override
@@ -144,7 +144,7 @@ public class WebContextFilter extends AbstractRequestFilter {
      * @throws ForbiddenException
      */
     private WebContext createWebContext(String appId, String ip) throws ForbiddenException {
-        AppLicense license = appLicenseService.getAppLicense(appId);
+        AppLicense license = licenseService.getAppLicense(appId);
         if (license == null) {
             if (logger.isDebugEnabled()) {
                 logger.debug("Can not find license for appLicenseKey '{}'.", appId);

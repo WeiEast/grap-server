@@ -2,12 +2,12 @@ package com.treefinance.saas.grapserver.biz.service;
 
 import com.alibaba.fastjson.JSON;
 import com.google.common.collect.Lists;
-import com.treefinance.saas.grapserver.biz.config.DiamondConfig;
+import com.treefinance.saas.grapserver.context.config.DiamondConfig;
 import com.treefinance.saas.grapserver.common.enums.EBizType;
 import com.treefinance.saas.grapserver.common.exception.*;
 import com.treefinance.saas.grapserver.common.exception.base.MarkBaseException;
-import com.treefinance.saas.grapserver.biz.dto.AppBizLicense;
-import com.treefinance.saas.grapserver.biz.dto.AppLicense;
+import com.treefinance.saas.grapserver.biz.domain.BizLicenseInfo;
+import com.treefinance.saas.grapserver.biz.domain.AppLicense;
 import com.treefinance.saas.merchant.facade.request.grapserver.QueryMerchantByAppIdRequest;
 import com.treefinance.saas.merchant.facade.result.console.MerchantBaseResult;
 import com.treefinance.saas.merchant.facade.result.console.MerchantResult;
@@ -31,7 +31,7 @@ public class TaskLicenseService {
     private static final Logger logger = LoggerFactory.getLogger(TaskLicenseService.class);
 
     @Autowired
-    private AppLicenseService appLicenseService;
+    private LicenseService licenseService;
     @Autowired
     private AppBizLicenseService appBizLicenseService;
     @Autowired
@@ -55,7 +55,7 @@ public class TaskLicenseService {
         }
 
         boolean hasCreateTaskAuth = false;
-        AppLicense appLicense = appLicenseService.getAppLicense(appId);
+        AppLicense appLicense = licenseService.getAppLicense(appId);
 
         hasCreateTaskAuth = isHasCreateTaskAuth(appId, bizType, hasCreateTaskAuth, appLicense);
 
@@ -104,7 +104,7 @@ public class TaskLicenseService {
         }
 
         boolean hasCreateTaskAuth = false;
-        AppLicense appLicense = appLicenseService.getAppLicense(appId);
+        AppLicense appLicense = licenseService.getAppLicense(appId);
 
         hasCreateTaskAuth = isHasCreateTaskAuth(appId, bizType, hasCreateTaskAuth, appLicense);
 
@@ -136,14 +136,14 @@ public class TaskLicenseService {
 
     private boolean isHasCreateTaskAuth(String appId, EBizType bizType, boolean hasCreateTaskAuth, AppLicense appLicense) {
         if (appLicense != null) {
-            List<AppBizLicense> appBizLicenseList = appBizLicenseService.getByAppId(appId);
-            if (!appBizLicenseList.isEmpty()) {
-                for (AppBizLicense appBizLicense : appBizLicenseList) {
+            List<BizLicenseInfo> bizLicenseInfoList = appBizLicenseService.getByAppId(appId);
+            if (!bizLicenseInfoList.isEmpty()) {
+                for (BizLicenseInfo bizLicenseInfo : bizLicenseInfoList) {
                     // 仅启用状态授权可用
-                    if (!Byte.valueOf("1").equals(appBizLicense.getIsValid())) {
+                    if (!Byte.valueOf("1").equals(bizLicenseInfo.getIsValid())) {
                         continue;
                     }
-                    if (appBizLicense.getBizType().equals(bizType.getCode())) {
+                    if (bizLicenseInfo.getBizType().equals(bizType.getCode())) {
                         hasCreateTaskAuth = true;
                         break;
                     }

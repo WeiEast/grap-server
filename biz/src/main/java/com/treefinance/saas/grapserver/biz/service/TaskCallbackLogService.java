@@ -1,8 +1,8 @@
 package com.treefinance.saas.grapserver.biz.service;
 
-import com.treefinance.saas.grapserver.common.exception.UnknownException;
-import com.treefinance.saas.grapserver.common.utils.DataConverterUtils;
 import com.treefinance.saas.grapserver.biz.dto.TaskCallbackLog;
+import com.treefinance.saas.grapserver.common.exception.UnknownException;
+import com.treefinance.saas.grapserver.context.component.AbstractService;
 import com.treefinance.saas.taskcenter.facade.result.TaskCallbackLogRO;
 import com.treefinance.saas.taskcenter.facade.result.common.TaskResult;
 import com.treefinance.saas.taskcenter.facade.service.TaskCallbackLogFacade;
@@ -15,7 +15,7 @@ import java.util.List;
  * @author haojiahong on 2017/8/17.
  */
 @Service
-public class TaskCallbackLogService {
+public class TaskCallbackLogService extends AbstractService {
 
     @Autowired
     private TaskCallbackLogFacade taskCallbackLogFacade;
@@ -28,7 +28,7 @@ public class TaskCallbackLogService {
         if (!rpcResult.isSuccess()) {
             throw new UnknownException("调用taskcenter失败");
         }
-        return DataConverterUtils.convert(rpcResult.getData(), TaskCallbackLog.class);
+        return convert(rpcResult.getData(), TaskCallbackLog.class);
     }
 
 }

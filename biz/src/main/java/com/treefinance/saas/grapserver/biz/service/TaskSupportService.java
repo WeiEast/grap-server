@@ -17,8 +17,8 @@
 package com.treefinance.saas.grapserver.biz.service;
 
 import com.treefinance.saas.grapserver.common.exception.UnknownException;
-import com.treefinance.saas.grapserver.common.utils.DataConverterUtils;
 import com.treefinance.saas.grapserver.biz.dto.TaskSupport;
+import com.treefinance.saas.grapserver.context.component.AbstractService;
 import com.treefinance.saas.taskcenter.facade.result.TaskSupportRO;
 import com.treefinance.saas.taskcenter.facade.result.common.TaskResult;
 import com.treefinance.saas.taskcenter.facade.service.TaskSupportFacade;
@@ -32,7 +32,7 @@ import java.util.List;
  * @since 10:56 02/05/2017
  */
 @Service
-public class TaskSupportService {
+public class TaskSupportService extends AbstractService {
 
     @Autowired
     private TaskSupportFacade taskSupportFacade;
@@ -42,7 +42,7 @@ public class TaskSupportService {
         if (!rpcResult.isSuccess()) {
             throw new UnknownException("调用taskcenter失败");
         }
-        return DataConverterUtils.convert(rpcResult.getData(), TaskSupport.class);
+        return convert(rpcResult.getData(), TaskSupport.class);
     }
 
 }

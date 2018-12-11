@@ -14,10 +14,12 @@ import com.google.common.collect.Maps;
 import com.treefinance.commonservice.facade.location.GeoCoordSysType;
 import com.treefinance.commonservice.facade.location.GeoPosition;
 import com.treefinance.commonservice.facade.location.GeocodeService;
-import com.treefinance.saas.grapserver.biz.cache.RedisDao;
+import com.treefinance.saas.grapserver.biz.domain.Directive;
+import com.treefinance.saas.grapserver.context.component.AbstractService;
+import com.treefinance.saas.grapserver.share.cache.redis.RedisDao;
 import com.treefinance.saas.grapserver.biz.service.TaskAttributeService;
 import com.treefinance.saas.grapserver.biz.service.TaskLogService;
-import com.treefinance.saas.grapserver.biz.service.TaskNextDirectiveService;
+import com.treefinance.saas.grapserver.biz.service.TaskDirectiveService;
 import com.treefinance.saas.grapserver.biz.service.TaskService;
 import com.treefinance.saas.grapserver.common.enums.ETaskStatus;
 import com.treefinance.saas.grapserver.common.enums.ETaskStep;
@@ -26,8 +28,6 @@ import com.treefinance.saas.grapserver.common.exception.RequestFailedException;
 import com.treefinance.saas.grapserver.common.model.dto.TaskDTO;
 import com.treefinance.saas.grapserver.common.model.dto.moxie.*;
 import com.treefinance.saas.grapserver.common.model.vo.moxie.MoxieCityInfoVO;
-import com.treefinance.saas.grapserver.common.utils.DataConverterUtils;
-import com.treefinance.saas.grapserver.common.utils.JsonUtils;
 import com.treefinance.saas.grapserver.biz.dto.TaskAttribute;
 import com.treefinance.saas.grapserver.biz.dto.TaskLog;
 import com.treefinance.saas.grapserver.facade.enums.ETaskAttribute;
@@ -36,8 +36,6 @@ import com.treefinance.saas.taskcenter.facade.service.MoxieTaskEventNoticeFacade
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -51,9 +49,7 @@ import java.util.stream.Collectors;
  * @author haojiahong on 2017/9/15.
  */
 @Service
-public class MoxieBusinessService implements InitializingBean {
-
-    protected final Logger logger = LoggerFactory.getLogger(getClass());
+public class MoxieBusinessService extends AbstractService implements InitializingBean {
 
     private static String VERIFY_CODE_SMS_COUNT_PREFIX = "saas-grap-fund-verify-code-count";
 
@@ -64,7 +60,7 @@ public class MoxieBusinessService implements InitializingBean {
     @Autowired
     private FundMoxieService fundMoxieService;
     @Autowired
-    private TaskNextDirectiveService taskNextDirectiveService;
+    private TaskDirectiveService taskDirectiveService;
     @Autowired
     private TaskService taskService;
     @Autowired
@@ -93,7 +89,7 @@ public class MoxieBusinessService implements InitializingBean {
 
 
     @Override
-    public void afterPropertiesSet() throws Exception {
+    public void afterPropertiesSet() {
         List<MoxieCityInfoVO> cityList = this.queryCityList();
         logger.info("获取魔蝎城市公积金列表: cityList={}", JSON.toJSONString(cityList));
         this.cache.put("citys", CollectionUtils.isEmpty(cityList) ? Lists.newArrayList() : cityList);
@@ -122,7 +118,7 @@ public class MoxieBusinessService implements InitializingBean {
      * 魔蝎账单通知业务处理
      */
     public void bill(MoxieTaskEventNoticeDTO eventNoticeDTO) {
-        MoxieTaskEventNoticeRequest request = DataConverterUtils.convert(eventNoticeDTO, MoxieTaskEventNoticeRequest.class);
+        MoxieTaskEventNoticeRequest request = convert(eventNoticeDTO, MoxieTaskEventNoticeRequest.class);
         moxieTaskEventNoticeFacade.bill(request);
     }
 
@@ -217,7 +213,7 @@ public class MoxieBusinessService implements InitializingBean {
             logger.info("taskId={}创建魔蝎任务失败,params={},e={}", JSON.toJSONString(params), e);
             map.put("directive", EMoxieDirective.LOGIN_FAIL.getText());
             String result = e.getResult();
-            JSONObject object = (JSONObject) JsonUtils.toJsonObject(result);
+            JSONObject object = JSON.parseObject(result);
             if (object.containsKey("detail")) {
                 map.put("information", object.getString("detail"));
             } else {
@@ -242,8 +238,8 @@ public class MoxieBusinessService implements InitializingBean {
      */
     private Map<String, Object> queryLoginStatusFromDirective(Long taskId, String moxieTaskId) {
         Map<String, Object> map = Maps.newHashMap();
-        String content = taskNextDirectiveService.getNextDirective(taskId);
-        if (StringUtils.isEmpty(content)) {
+        Directive directiveInfo = taskDirectiveService.queryNextDirective(taskId);
+        if (directiveInfo  == null) {
             // 轮询过程中，判断登录是否超时
             if (moxieTimeoutService.isLoginTaskTimeout(taskId)) {
                 map.put("directive", EMoxieDirective.LOGIN_FAIL.getText());
@@ -263,18 +259,17 @@ public class MoxieBusinessService implements InitializingBean {
                 }
             }
         } else {
-            MoxieDirectiveDTO directiveMessage = JSON.parseObject(content, MoxieDirectiveDTO.class);
-            EMoxieDirective directive = EMoxieDirective.directiveOf(directiveMessage.getDirective());
+            EMoxieDirective directive = EMoxieDirective.directiveOf(directiveInfo.getDirective());
             if (directive == null) {
                 map.put("directive", "waiting");
                 map.put("information", "请等待");
             } else {
                 if (directive.getStepCode() == 1) {
-                    map.put("directive", directiveMessage.getDirective());
-                    map.put("information", directiveMessage.getRemark());
-                    // 如果是登录成功或失败,删掉指令,下一个页面轮询/next_derictive的时候转为waiting
-                    taskNextDirectiveService.deleteNextDirective(taskId, directiveMessage.getDirective());
-                    if (StringUtils.equals(directiveMessage.getDirective(), EMoxieDirective.LOGIN_FAIL.getText())) {
+                    map.put("directive", directiveInfo.getDirective());
+                    map.put("information", directiveInfo.getRemark());
+                    // 如果是登录成功或失败,删掉指令,下一个页面轮询/next_directive的时候转为waiting
+                    taskDirectiveService.deleteNextDirective(taskId, directiveInfo.getDirective());
+                    if (StringUtils.equals(directiveInfo.getDirective(), EMoxieDirective.LOGIN_FAIL.getText())) {
                         // 登录失败(如用户名密码错误),需删除task_attribute中此taskId对应的moxieTaskId,重新登录时,可正常轮询/login/submit接口
                         taskAttributeService.insertOrUpdateSelective(taskId, ETaskAttribute.FUND_MOXIE_TASKID.getAttribute(), "");
                     }
@@ -406,12 +401,12 @@ public class MoxieBusinessService implements InitializingBean {
 
 
     public void loginSuccess(MoxieTaskEventNoticeDTO eventNoticeDTO) {
-        MoxieTaskEventNoticeRequest request = DataConverterUtils.convert(eventNoticeDTO, MoxieTaskEventNoticeRequest.class);
+        MoxieTaskEventNoticeRequest request = convert(eventNoticeDTO, MoxieTaskEventNoticeRequest.class);
         moxieTaskEventNoticeFacade.loginSuccess(request);
     }
 
     public void loginFail(MoxieTaskEventNoticeDTO eventNoticeDTO) {
-        MoxieTaskEventNoticeRequest request = DataConverterUtils.convert(eventNoticeDTO, MoxieTaskEventNoticeRequest.class);
+        MoxieTaskEventNoticeRequest request = convert(eventNoticeDTO, MoxieTaskEventNoticeRequest.class);
         moxieTaskEventNoticeFacade.loginFail(request);
     }
 
@@ -419,7 +414,7 @@ public class MoxieBusinessService implements InitializingBean {
      * 魔蝎任务采集失败业务处理
      */
     public void grabFail(MoxieTaskEventNoticeDTO eventNoticeDTO) {
-        MoxieTaskEventNoticeRequest request = DataConverterUtils.convert(eventNoticeDTO, MoxieTaskEventNoticeRequest.class);
+        MoxieTaskEventNoticeRequest request = convert(eventNoticeDTO, MoxieTaskEventNoticeRequest.class);
         moxieTaskEventNoticeFacade.grabFail(request);
     }
 

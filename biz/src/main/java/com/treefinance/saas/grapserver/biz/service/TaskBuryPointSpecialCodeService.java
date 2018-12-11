@@ -3,7 +3,6 @@ package com.treefinance.saas.grapserver.biz.service;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.treefinance.saas.grapserver.common.utils.JsonUtils;
 import com.treefinance.saas.grapserver.facade.enums.ETaskAttribute;
 import com.treefinance.saas.taskcenter.facade.service.TaskBuryPointLogFacade;
 import org.apache.commons.collections.MapUtils;
@@ -50,7 +49,7 @@ public class TaskBuryPointSpecialCodeService {
             logger.error("运营商监控中,extra为空,extra={}", JSON.toJSONString(extra));
             return;
         }
-        JSONObject jsonObject = (JSONObject) JsonUtils.toJsonObject(extra);
+        JSONObject jsonObject = JSON.parseObject(extra);
         String groupCode = jsonObject.getString("groupCode");
         String groupName = jsonObject.getString("groupName");
         if (StringUtils.isBlank(groupCode) || StringUtils.isBlank(groupName)) {

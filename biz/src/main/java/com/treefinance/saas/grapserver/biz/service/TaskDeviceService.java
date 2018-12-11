@@ -7,8 +7,8 @@ import com.google.common.primitives.Doubles;
 import com.google.common.primitives.Ints;
 import com.treefinance.commonservice.facade.location.*;
 import com.treefinance.commonservice.uid.UidService;
-import com.treefinance.saas.grapserver.common.utils.DataConverterUtils;
 import com.treefinance.saas.grapserver.biz.dto.TaskDevice;
+import com.treefinance.saas.grapserver.context.component.AbstractService;
 import com.treefinance.saas.taskcenter.facade.request.TaskDeviceRequest;
 import com.treefinance.saas.taskcenter.facade.service.TaskDeviceFacade;
 import org.apache.commons.collections.CollectionUtils;
@@ -27,7 +27,7 @@ import java.util.Map;
  * @author luoyihua on 2017/5/2.
  */
 @Service
-public class TaskDeviceService {
+public class TaskDeviceService extends AbstractService {
 
     private static final Logger logger = LoggerFactory.getLogger(TaskDeviceService.class);
 
@@ -110,7 +110,7 @@ public class TaskDeviceService {
                 IpLocation ipLocation = ipLocationService.findLocation(ipAddress);
                 record.setIpPosition(ipLocation.getProvince());
 
-                TaskDeviceRequest rpcRequest = DataConverterUtils.convert(record, TaskDeviceRequest.class);
+                TaskDeviceRequest rpcRequest = convert(record, TaskDeviceRequest.class);
                 taskDeviceFacade.insertSelective(rpcRequest);
             } catch (GeoException ex) {
                 logger.error("经纬度解析地址异常={}", ex);

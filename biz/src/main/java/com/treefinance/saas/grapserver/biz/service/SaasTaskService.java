@@ -2,7 +2,7 @@ package com.treefinance.saas.grapserver.biz.service;
 
 import com.google.common.base.Splitter;
 import com.treefinance.saas.assistant.model.Constants;
-import com.treefinance.saas.grapserver.biz.config.DiamondConfig;
+import com.treefinance.saas.grapserver.context.config.DiamondConfig;
 import com.treefinance.saas.grapserver.common.exception.ParamsCheckException;
 import com.treefinance.saas.grapserver.common.exception.UniqueidMaxException;
 import com.treefinance.saas.grapserver.common.exception.UnknownException;

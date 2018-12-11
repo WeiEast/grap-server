@@ -17,7 +17,7 @@
 package com.treefinance.saas.grapserver.web.request;
 
 import com.google.common.collect.Maps;
-import com.treefinance.saas.grapserver.common.model.Constants;
+import com.treefinance.saas.grapserver.context.Constants;
 import org.apache.commons.lang3.StringUtils;
 
 import javax.servlet.ServletInputStream;
@@ -104,7 +104,7 @@ public class WrappedHttpServletRequest<T extends ServletInputStream> extends Htt
     }
 
     @Override
-    public Enumeration getParameterNames() {
+    public Enumeration<String> getParameterNames() {
         Map<String, String[]> parameters = getParameters();
         if (parameters.isEmpty()) {
             return super.getParameterNames();
@@ -121,7 +121,7 @@ public class WrappedHttpServletRequest<T extends ServletInputStream> extends Htt
     }
 
     @Override
-    public Map getParameterMap() {
+    public Map<String, String[]> getParameterMap() {
         Map<String, String[]> parameters = getParameters();
         if (parameters.isEmpty()) {
             return super.getParameterMap();
@@ -143,7 +143,7 @@ public class WrappedHttpServletRequest<T extends ServletInputStream> extends Htt
         return super.getInputStream();
     }
 
-    public Map<String, String[]> getParameters() {
+    private Map<String, String[]> getParameters() {
         if (this.parameters == null) {
             this.parameters = new HashMap<>();
         }

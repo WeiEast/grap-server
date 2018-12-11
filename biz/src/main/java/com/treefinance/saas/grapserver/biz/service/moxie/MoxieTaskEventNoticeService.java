@@ -1,6 +1,6 @@
 package com.treefinance.saas.grapserver.biz.service.moxie;
 
-import com.treefinance.saas.grapserver.biz.common.AsycExcutor;
+import com.treefinance.saas.grapserver.share.AsycExcutor;
 import com.treefinance.saas.grapserver.common.model.dto.moxie.MoxieTaskEventNoticeDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

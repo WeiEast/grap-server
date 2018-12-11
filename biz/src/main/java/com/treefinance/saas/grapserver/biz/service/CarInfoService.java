@@ -5,19 +5,17 @@ import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.serializer.SerializerFeature;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.treefinance.saas.grapserver.biz.config.DiamondConfig;
+import com.treefinance.saas.grapserver.context.component.AbstractService;
+import com.treefinance.saas.grapserver.context.config.DiamondConfig;
 import com.treefinance.saas.grapserver.common.enums.EBizType;
 import com.treefinance.saas.grapserver.common.enums.ETaskStep;
 import com.treefinance.saas.grapserver.common.model.dto.carinfo.CarInfoCollectTaskLogDTO;
-import com.treefinance.saas.grapserver.common.utils.DataConverterUtils;
-import com.treefinance.saas.grapserver.common.utils.HttpClientUtils;
-import com.treefinance.saas.grapserver.biz.dto.AppLicense;
+import com.treefinance.saas.grapserver.util.HttpClientUtils;
+import com.treefinance.saas.grapserver.biz.domain.AppLicense;
 import com.treefinance.saas.knife.result.SimpleResult;
 import com.treefinance.saas.taskcenter.facade.request.CarInfoCollectTaskLogRequest;
 import com.treefinance.saas.taskcenter.facade.service.CarInfoFacade;
 import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -33,16 +31,14 @@ import java.util.Map;
  * @date 2018/5/31
  */
 @Service
-public class CarInfoService {
-
-    private final static Logger logger = LoggerFactory.getLogger(CarInfoService.class);
+public class CarInfoService extends AbstractService {
 
     @Autowired
     private TaskService taskService;
     @Autowired
     private TaskLicenseService taskLicenseService;
     @Autowired
-    private AppLicenseService appLicenseService;
+    private LicenseService licenseService;
     @Autowired
     private DiamondConfig diamondConfig;
     @Autowired
@@ -87,7 +83,7 @@ public class CarInfoService {
                 && checkResultLog(resultData.get("resultLog").toString())) {
             processSuccessCollectTask(taskId, resultData.get("resultLog").toString());
             resultData.remove("resultLog");
-            AppLicense license = appLicenseService.getAppLicense(appId);
+            AppLicense license = licenseService.getAppLicense(appId);
             return SimpleResult.successEncryptByRSAResult(resultData, license.getServerPublicKey());
         } else {
             logger.error("调用爬数处理车辆信息采集任务返回值中任务日志信息存在问题:taskId={},modelNum={},httpResult={},result={}",
@@ -98,8 +94,7 @@ public class CarInfoService {
     }
 
     public void updateCollectTaskStatusAndTaskLogAndSendMonitor(Long taskId, List<CarInfoCollectTaskLogDTO> logList) {
-        List<CarInfoCollectTaskLogRequest> carInfoCollectTaskLogRequestList =
-                DataConverterUtils.convert(logList, CarInfoCollectTaskLogRequest.class);
+        List<CarInfoCollectTaskLogRequest> carInfoCollectTaskLogRequestList = convert(logList, CarInfoCollectTaskLogRequest.class);
         carInfoFacade.updateCollectTaskStatusAndTaskLogAndSendMonitor(taskId, carInfoCollectTaskLogRequestList);
     }
 

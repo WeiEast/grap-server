@@ -2,7 +2,7 @@ package com.treefinance.saas.grapserver.web.filter;
 
 import com.alibaba.fastjson.JSON;
 import com.google.common.collect.Maps;
-import com.treefinance.saas.grapserver.biz.config.DiamondConfig;
+import com.treefinance.saas.grapserver.context.config.DiamondConfig;
 import com.treefinance.saas.grapserver.biz.service.TaskAliveService;
 import com.treefinance.saas.grapserver.common.exception.TaskTimeOutException;
 import com.treefinance.saas.knife.result.SimpleResult;

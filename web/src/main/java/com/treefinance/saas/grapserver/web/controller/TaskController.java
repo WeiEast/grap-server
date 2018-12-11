@@ -3,15 +3,23 @@ package com.treefinance.saas.grapserver.web.controller;
 import com.alibaba.fastjson.JSON;
 import com.datatrees.spider.share.api.SpiderTaskApi;
 import com.google.common.collect.Maps;
-import com.treefinance.saas.grapserver.biz.mq.model.DirectiveMessage;
-import com.treefinance.saas.grapserver.biz.service.*;
+import com.treefinance.saas.grapserver.biz.domain.Directive;
+import com.treefinance.saas.grapserver.biz.domain.MerchantBaseInfo;
+import com.treefinance.saas.grapserver.biz.service.AppBizLicenseService;
+import com.treefinance.saas.grapserver.biz.service.MerchantBaseInfoService;
+import com.treefinance.saas.grapserver.biz.service.MerchantConfigService;
+import com.treefinance.saas.grapserver.biz.service.TaskBuryPointLogService;
+import com.treefinance.saas.grapserver.biz.service.TaskBuryPointSpecialCodeService;
+import com.treefinance.saas.grapserver.biz.service.TaskConfigService;
+import com.treefinance.saas.grapserver.biz.service.TaskDirectiveService;
+import com.treefinance.saas.grapserver.biz.service.TaskService;
+import com.treefinance.saas.grapserver.biz.service.TaskTimeService;
 import com.treefinance.saas.grapserver.common.enums.EBizType;
 import com.treefinance.saas.grapserver.common.enums.EDirective;
 import com.treefinance.saas.grapserver.common.enums.EOperatorCodeType;
 import com.treefinance.saas.grapserver.common.model.dto.TaskDTO;
-import com.treefinance.saas.grapserver.common.utils.JsonUtils;
-import com.treefinance.saas.grapserver.biz.dto.MerchantBaseInfo;
 import com.treefinance.saas.knife.result.SimpleResult;
+import com.treefinance.toolkit.util.json.Jackson;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,6 +30,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.validation.ValidationException;
+
 import java.util.Map;
 
 /**
@@ -40,7 +49,7 @@ public class TaskController {
     @Autowired
     private TaskTimeService taskTimeService;
     @Autowired
-    private TaskNextDirectiveService taskNextDirectiveService;
+    private TaskDirectiveService taskDirectiveService;
     @Autowired
     private SpiderTaskApi spiderTaskApi;
     @Autowired
@@ -73,7 +82,7 @@ public class TaskController {
         if (StringUtils.isBlank(type)) {
             throw new IllegalArgumentException("Parameter 'type' is incorrect.");
         }
-        Map colorMap = merchantConfigService.getColorConfig(appid, style);
+        Map<String, String> colorMap = merchantConfigService.getColorConfig(appid, style);
         Object defaultConfig = taskConfigService.getTaskConfig(type, id, name);
         Map<String, Object> map = Maps.newHashMap();
         map.put("config", defaultConfig);
@@ -124,41 +133,39 @@ public class TaskController {
      * 轮询任务执行指令
      */
     @RequestMapping(value = "/next_directive", method = {RequestMethod.POST})
-    public Object nextDirective(@RequestParam("taskid") Long taskid) throws Exception {
-        String content = taskNextDirectiveService.getNextDirective(taskid);
+    public Object nextDirective(@RequestParam("taskid") Long taskId) {
+        Directive directiveInfo = taskDirectiveService.queryNextDirective(taskId);
         Map<String, Object> map = Maps.newHashMap();
         // 刚登陆成功,未收到任何指令
-        if (StringUtils.isEmpty(content)) {
+        if (directiveInfo == null) {
             // 轮询过程中，判断任务是否超时
-            if (taskTimeService.isTaskTimeout(taskid)) {
+            if (taskTimeService.isTaskTimeout(taskId)) {
                 // 异步处理任务超时
-                taskTimeService.handleTaskTimeout(taskid);
+                taskTimeService.handleTaskTimeout(taskId);
             }
             map.put("directive", "waiting");
             map.put("information", "请等待");
         } else {
-            DirectiveMessage directiveMessage = JSON.parseObject(content, DirectiveMessage.class);
             //登陆成功后,已收到指令并指令操作已处理完毕,如输入短信验证码
-            if (StringUtils.equalsIgnoreCase(directiveMessage.getDirective(), "waiting")) {
+            if (StringUtils.equalsIgnoreCase(directiveInfo.getDirective(), "waiting")) {
                 // 轮询过程中，判断任务是否超时
-                if (taskTimeService.isTaskTimeout(taskid)) {
+                if (taskTimeService.isTaskTimeout(taskId)) {
                     // 异步处理任务超时
-                    taskTimeService.handleTaskTimeout(taskid);
+                    taskTimeService.handleTaskTimeout(taskId);
                 }
             }
-            map.put("directive", directiveMessage.getDirective());
-            map.put("directiveId", directiveMessage.getDirectiveId());
+            map.put("directive", directiveInfo.getDirective());
+            map.put("directiveId", directiveInfo.getDirectiveId());
 
             // 仅任务成功或回调失败时，转JSON处理
-            if (EDirective.TASK_SUCCESS.getText().equals(directiveMessage.getDirective()) ||
-                    EDirective.TASK_FAIL.getText().equals(directiveMessage.getDirective()) ||
-                    EDirective.CALLBACK_FAIL.getText().equals(directiveMessage.getDirective())) {
-                map.put("information", JSON.parse(directiveMessage.getRemark()));
+            if (EDirective.TASK_SUCCESS.getText().equals(directiveInfo.getDirective()) || EDirective.TASK_FAIL.getText().equals(directiveInfo.getDirective())
+                || EDirective.CALLBACK_FAIL.getText().equals(directiveInfo.getDirective())) {
+                map.put("information", JSON.parse(directiveInfo.getRemark()));
             } else {
-                map.put("information", directiveMessage.getRemark());
+                map.put("information", directiveInfo.getRemark());
             }
         }
-        logger.info("taskId={}下一指令信息={}", taskid, map);
+        logger.info("taskId={}下一指令信息={}", taskId, map);
         return new SimpleResult<>(map);
     }
 
@@ -171,11 +178,12 @@ public class TaskController {
                              @RequestParam() Long taskid,
                              @RequestParam() String type,
                              @RequestParam() String code,
-                             @RequestParam(value = "extra", required = false) String extra) throws Exception {
+        @RequestParam(value = "extra", required = false) String extra) {
         logger.info("taskId={}输入验证信息,directiveId={},type={},code={},extra={}",
                 taskid, directiveId, type, code, extra);
-        taskNextDirectiveService.deleteNextDirective(taskid);
-        spiderTaskApi.importCrawlCode(directiveId, taskid, EOperatorCodeType.getCode(type), code, JsonUtils.toMap(extra, String.class, String.class));
+        taskDirectiveService.deleteNextDirective(taskid);
+        spiderTaskApi.importCrawlCode(directiveId, taskid, EOperatorCodeType.getCode(type), code,
+            Jackson.parseMap(extra, String.class, String.class));
         return new SimpleResult<>();
     }
 
@@ -183,7 +191,7 @@ public class TaskController {
      * 取消爬取任务
      */
     @RequestMapping(value = "/cancel", method = {RequestMethod.POST})
-    public Object cancelTask(@RequestParam Long taskid) throws Exception {
+    public Object cancelTask(@RequestParam Long taskid) {
         taskServiceImpl.cancelTask(taskid);
         return new SimpleResult<>();
     }

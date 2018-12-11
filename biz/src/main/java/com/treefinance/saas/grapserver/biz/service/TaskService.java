@@ -4,14 +4,14 @@ import com.google.common.base.Splitter;
 import com.treefinance.basicservice.security.crypto.facade.EncryptionIntensityEnum;
 import com.treefinance.basicservice.security.crypto.facade.ISecurityCryptoService;
 import com.treefinance.saas.assistant.model.Constants;
-import com.treefinance.saas.grapserver.biz.config.DiamondConfig;
+import com.treefinance.saas.grapserver.context.component.AbstractService;
+import com.treefinance.saas.grapserver.context.config.DiamondConfig;
 import com.treefinance.saas.grapserver.common.enums.ETaskStatus;
 import com.treefinance.saas.grapserver.common.exception.AppIdUncheckException;
 import com.treefinance.saas.grapserver.common.exception.ForbiddenException;
 import com.treefinance.saas.grapserver.common.exception.UnknownException;
 import com.treefinance.saas.grapserver.common.exception.base.MarkBaseException;
 import com.treefinance.saas.grapserver.common.model.dto.TaskDTO;
-import com.treefinance.saas.grapserver.common.utils.DataConverterUtils;
 import com.treefinance.saas.grapserver.biz.dto.Task;
 import com.treefinance.saas.taskcenter.facade.request.TaskCreateRequest;
 import com.treefinance.saas.taskcenter.facade.request.TaskRequest;
@@ -20,8 +20,6 @@ import com.treefinance.saas.taskcenter.facade.result.TaskRO;
 import com.treefinance.saas.taskcenter.facade.result.common.TaskResult;
 import com.treefinance.saas.taskcenter.facade.service.TaskFacade;
 import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
@@ -32,9 +30,7 @@ import java.util.List;
  * @author hanif
  */
 @Service("taskService")
-public class TaskService {
-
-    protected final Logger logger = LoggerFactory.getLogger(getClass());
+public class TaskService extends AbstractService {
 
     @Autowired
     private RedisTemplate<String, String> redisTemplate;
@@ -116,7 +112,7 @@ public class TaskService {
      * 更新未完成任务
      */
     private int updateUnfinishedTask(Task task) {
-        TaskUpdateRequest taskUpdateRequest = DataConverterUtils.convert(task, TaskUpdateRequest.class);
+        TaskUpdateRequest taskUpdateRequest = convert(task, TaskUpdateRequest.class);
         TaskResult<Integer> rpcResult = taskFacade.updateUnfinishedTask(taskUpdateRequest);
         if (!rpcResult.isSuccess()) {
             throw new UnknownException("调用taskcenter失败");
@@ -139,7 +135,7 @@ public class TaskService {
         if (!rpcResult.isSuccess()) {
             throw new UnknownException("调用taskcenter失败");
         }
-        Task existTask = DataConverterUtils.convert(rpcResult.getData(), Task.class);
+        Task existTask = convert(rpcResult.getData(), Task.class);
         if (existTask != null && StringUtils.isEmpty(existTask.getAccountNo())) {
             Task task = new Task();
             task.setId(taskId);
@@ -175,7 +171,7 @@ public class TaskService {
         if (!rpcResult.isSuccess()) {
             throw new UnknownException("调用taskcenter失败");
         }
-        return DataConverterUtils.convert(rpcResult.getData(), TaskDTO.class);
+        return convert(rpcResult.getData(), TaskDTO.class);
     }
 
 

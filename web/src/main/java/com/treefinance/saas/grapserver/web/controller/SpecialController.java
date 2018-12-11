@@ -4,7 +4,7 @@ import com.alibaba.fastjson.JSON;
 import com.datatrees.spider.share.api.SpiderTaskApi;
 import com.datatrees.spider.share.domain.http.HttpResult;
 import com.google.common.collect.Maps;
-import com.treefinance.saas.grapserver.biz.service.TaskNextDirectiveService;
+import com.treefinance.saas.grapserver.biz.service.TaskDirectiveService;
 import com.treefinance.saas.grapserver.common.enums.EDirective;
 import com.treefinance.saas.grapserver.common.enums.EQRResult;
 import com.treefinance.saas.knife.result.SimpleResult;
@@ -32,7 +32,7 @@ public class SpecialController {
     @Autowired
     private SpiderTaskApi spiderTaskApi;
     @Autowired
-    private TaskNextDirectiveService taskNextDirectiveService;
+    private TaskDirectiveService taskDirectiveService;
 
     @RequestMapping(value = "/qrscan/checking", method = {RequestMethod.POST})
     public Object qrCheck(
@@ -44,7 +44,7 @@ public class SpecialController {
                 && (result.getData().equals(EQRResult.FAILED.toString())
                 || result.getData().equals(EQRResult.SUCCESS.toString())
                 || result.getData().equals(EQRResult.SKIP.toString()))) {
-            taskNextDirectiveService.deleteNextDirective(taskid, EDirective.REQUIRE_QR.getText());
+            taskDirectiveService.deleteNextDirective(taskid, EDirective.REQUIRE_QR.getText());
         }
         Map<String, Object> map = Maps.newHashMap();
         map.put("result", result.getData());

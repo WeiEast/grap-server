@@ -1,20 +1,31 @@
 package com.treefinance.saas.grapserver.web.advice;
 
 import com.alibaba.fastjson.JSON;
-import com.google.common.collect.Maps;
 import com.treefinance.saas.grapserver.common.enums.ECode;
-import com.treefinance.saas.grapserver.common.exception.*;
+import com.treefinance.saas.grapserver.common.exception.AppIdFormatException;
+import com.treefinance.saas.grapserver.common.exception.AppIdInvalidException;
+import com.treefinance.saas.grapserver.common.exception.AppIdNoMessageException;
+import com.treefinance.saas.grapserver.common.exception.AppIdNotActiveException;
+import com.treefinance.saas.grapserver.common.exception.AppIdUncheckException;
+import com.treefinance.saas.grapserver.common.exception.BizException;
+import com.treefinance.saas.grapserver.common.exception.CrawlerBizException;
+import com.treefinance.saas.grapserver.common.exception.CryptorException;
+import com.treefinance.saas.grapserver.common.exception.ParamsCheckException;
+import com.treefinance.saas.grapserver.common.exception.RequestFailedException;
+import com.treefinance.saas.grapserver.common.exception.ResponseEncryptException;
+import com.treefinance.saas.grapserver.common.exception.ResponseException;
+import com.treefinance.saas.grapserver.common.exception.TaskTimeOutException;
+import com.treefinance.saas.grapserver.common.exception.UniqueidMaxException;
+import com.treefinance.saas.grapserver.common.exception.UnknownException;
 import com.treefinance.saas.grapserver.common.exception.base.MarkBaseException;
 import com.treefinance.saas.grapserver.common.result.SaasResult;
-import com.treefinance.saas.knife.result.SimpleResult;
+import com.treefinance.saas.grapserver.exception.UnexpectedException;
+import javax.validation.ValidationException;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -22,12 +33,9 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
-import javax.validation.ValidationException;
-import java.util.Map;
-
 /**
- * @author:guoguoyun
- * @date:Created in 2018/10/30上午9:46
+ * @author guoguoyun
+ * @date 2018/10/30上午9:46
  */
 
 @ControllerAdvice("com.treefinance.saas.grapserver.web.saascontroller")
@@ -115,18 +123,17 @@ public class SaasExceptionAdvice extends ResponseEntityExceptionHandler {
     }
 
     private void handleLog(WebRequest request, Exception ex) {
-        StringBuffer logBuffer = new StringBuffer();
+        StringBuilder logBuffer = new StringBuilder();
         if (request != null) {
-            logBuffer.append("request=" + request);
+            logBuffer.append("request=").append(request);
         }
         if (ex != null) {
-            logBuffer.append(",exception:" + ex);
+            logBuffer.append(",exception:").append(ex);
         }
         logger.error(logBuffer.toString(), ex);
     }
 
     private Object buildBody(Exception ex) {
-        logger.error("系统异常", ex);
         SaasResult result = new SaasResult();
 
         if (ex instanceof AppIdInvalidException) {
@@ -138,34 +145,18 @@ public class SaasExceptionAdvice extends ResponseEntityExceptionHandler {
         } else if (ex instanceof AppIdNotActiveException) {
             result.setCode(ECode.FORBIDDEN_APPIDNOTACTIVE.getCode());
             result.setMsg(ECode.FORBIDDEN_APPIDNOTACTIVE.getMsg());
-        } else if (ex instanceof BizException) {
-            result.setCode(ECode.BIZ.getCode());
-            result.setMsg(ECode.BIZ.getMsg());
+        } else if (ex instanceof CrawlerBizException) {
+            result.setCode(ECode.CRAWLERBIZ.getCode());
+            result.setMsg(ECode.CRAWLERBIZ.getMsg());
         } else if (ex instanceof ParamsCheckException) {
             result.setCode(ECode.PARAMSCHECK.getCode());
             result.setMsg(ECode.PARAMSCHECK.getMsg());
-            logger.error("exception handle : ex={},description={} result={}", ex.getClass(), ex.getMessage(),
-                JSON.toJSONString(result));
-            return result;
         } else if (ex instanceof ValidationException) {
             result.setCode(ECode.VALIDATION.getCode());
             result.setMsg(ECode.VALIDATION.getMsg());
-            logger.error("exception handle : ex={},description={} result={}", ex.getClass(), ex.getMessage(),
-                JSON.toJSONString(result));
-            return result;
         } else if (ex instanceof ResponseException) {
             result.setCode(ECode.RESPONSE.getCode());
             result.setMsg(ECode.RESPONSE.getMsg());
-        }else if (ex instanceof CrawlerBizException) {
-            result.setCode(ECode.CRAWLERBIZ.getCode());
-            result.setMsg(ECode.CRAWLERBIZ.getMsg());
-            logger.error("exception handle : ex={},description={} result={}", ex.getClass(), ex.getMessage(),
-                JSON.toJSONString(result));
-            return result;
-        }
-        else if (ex instanceof UnknownException) {
-            result.setCode(ECode.UNKNOW.getCode());
-            result.setMsg(ECode.UNKNOW.getMsg());
         } else if (ex instanceof RequestFailedException) {
             result.setCode(ECode.REQUESTFAILED.getCode());
             result.setMsg(ECode.REQUESTFAILED.getMsg());
@@ -175,28 +166,24 @@ public class SaasExceptionAdvice extends ResponseEntityExceptionHandler {
         } else if (ex instanceof CryptorException) {
             result.setCode(ECode.CRPTOR.getCode());
             result.setMsg(ECode.CRPTOR.getMsg());
-        } else if (ex instanceof RequestDecryptException) {
-            result.setCode(ECode.CRPTOR_REQUESTDECRYPT.getCode());
-            result.setMsg(ECode.CRPTOR_REQUESTDECRYPT.getMsg());
         } else if (ex instanceof ResponseEncryptException) {
             result.setCode(ECode.CRPTOR_RESPONSEENCRYPT.getCode());
-            result.setCode(ECode.CRPTOR_RESPONSEENCRYPT.getCode());
-        } else if (ex instanceof TaskTimeOutException) {
-            result.setCode(ECode.TASKTIMEOUT.getCode());
-            result.setCode(ECode.TASKTIMEOUT.getCode());
-        } else if (ex instanceof Exception) {
+            result.setMsg(ECode.CRPTOR_RESPONSEENCRYPT.getMsg());
+        } else if (ex instanceof BizException) {
+            result.setCode(ECode.BIZ.getCode());
+            result.setMsg(ECode.BIZ.getMsg());
+        } else if (ex instanceof UnknownException || ex instanceof UnexpectedException) {
+            result.setCode(ECode.UNKNOW.getCode());
+            result.setMsg(ECode.UNKNOW.getMsg());
+        } else {
             result.setCode(ECode.EXCEPTION.getCode());
             result.setMsg(ECode.EXCEPTION.getMsg());
-            logger.error("exception handle : ex={},description={} result={}", ex.getClass(), ex.getMessage(),
-                JSON.toJSONString(result));
-            return result;
         }
         if (StringUtils.isEmpty(result.getMsg())) {
             result.setCode(-1);
             result.setMsg("系统忙，请稍后重试");
         }
-        logger.error("exception handle : ex={},description={} result={}", ex.getClass(),
-            ECode.getDescription(result.getCode()), JSON.toJSONString(result));
+        logger.error("exception handle : ex={},description={} result={}", ex.getMessage(), ECode.getDescription(result.getCode()), JSON.toJSONString(result), ex);
         return result;
     }
 

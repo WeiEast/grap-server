@@ -5,8 +5,8 @@ package com.treefinance.saas.grapserver.biz.service;
 
 import com.google.common.collect.Maps;
 import com.treefinance.saas.grapserver.common.exception.UnknownException;
-import com.treefinance.saas.grapserver.common.utils.DataConverterUtils;
 import com.treefinance.saas.grapserver.biz.dto.TaskAttribute;
+import com.treefinance.saas.grapserver.context.component.AbstractService;
 import com.treefinance.saas.taskcenter.facade.result.TaskAttributeRO;
 import com.treefinance.saas.taskcenter.facade.result.common.TaskResult;
 import com.treefinance.saas.taskcenter.facade.service.TaskAttributeFacade;
@@ -22,7 +22,7 @@ import java.util.Map;
  * 任务拓展属性业务层
  */
 @Service
-public class TaskAttributeService {
+public class TaskAttributeService extends AbstractService {
 
     @Autowired
     private TaskAttributeFacade taskAttributeFacade;
@@ -51,7 +51,7 @@ public class TaskAttributeService {
         if (rpcResult.getData() == null) {
             return null;
         }
-        return DataConverterUtils.convert(rpcResult.getData(), TaskAttribute.class);
+        return convert(rpcResult.getData(), TaskAttribute.class);
     }
 
     /**
@@ -66,7 +66,7 @@ public class TaskAttributeService {
         Map<String, TaskAttribute> attributeMap = Maps.newHashMap();
 
         for (Map.Entry<String, TaskAttributeRO> taskAttributeROEntry : rpcResult.getData().entrySet()) {
-            TaskAttribute taskAttribute = DataConverterUtils.convert(taskAttributeROEntry, TaskAttribute.class);
+            TaskAttribute taskAttribute = convert(taskAttributeROEntry, TaskAttribute.class);
             attributeMap.put(taskAttributeROEntry.getKey(), taskAttribute);
         }
         return attributeMap;
@@ -84,7 +84,7 @@ public class TaskAttributeService {
         if (rpcResult.getData() == null) {
             return null;
         }
-        return DataConverterUtils.convert(rpcResult.getData(), TaskAttribute.class);
+        return convert(rpcResult.getData(), TaskAttribute.class);
     }
 
     /**
@@ -95,7 +95,7 @@ public class TaskAttributeService {
         if (!rpcResult.isSuccess()) {
             throw new UnknownException("调用taskcenter失败");
         }
-        return DataConverterUtils.convert(rpcResult.getData(), TaskAttribute.class);
+        return convert(rpcResult.getData(), TaskAttribute.class);
     }
 
 }

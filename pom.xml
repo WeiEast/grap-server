@@ -9,8 +9,10 @@
     <modules>
         <module>common</module>
         <module>biz</module>
+        <module>share</module>
         <module>facade</module>
         <module>web</module>
+        <module>manager</module>
     </modules>
 
     <name>grap-server</name>

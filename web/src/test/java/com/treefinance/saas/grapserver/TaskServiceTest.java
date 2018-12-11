@@ -1,24 +1,28 @@
-package com.treefinance.saas.grapserver; /**
- * Copyright © 2017 Treefinance All Rights Reserved
- */
+package com.treefinance.saas.grapserver;
 
 import com.alibaba.fastjson.JSON;
 import com.google.common.collect.Lists;
-import com.treefinance.saas.grapserver.biz.cache.RedisDao;
-import com.treefinance.saas.grapserver.biz.common.SpringUtils;
+import com.treefinance.saas.grapserver.biz.domain.CallbackConfig;
+import com.treefinance.saas.grapserver.biz.dto.TaskBuryPointLog;
 import com.treefinance.saas.grapserver.biz.service.AppCallbackConfigService;
 import com.treefinance.saas.grapserver.biz.service.TaskService;
 import com.treefinance.saas.grapserver.biz.service.TaskTimeService;
-import com.treefinance.saas.grapserver.common.model.dto.AppCallbackConfigDTO;
 import com.treefinance.saas.grapserver.common.model.dto.TaskDTO;
-import com.treefinance.saas.grapserver.biz.dto.TaskBuryPointLog;
+import com.treefinance.saas.grapserver.context.SpringUtils;
 import com.treefinance.saas.grapserver.facade.enums.EDataType;
 import com.treefinance.saas.grapserver.facade.model.MerchantBaseInfoRO;
 import com.treefinance.saas.grapserver.facade.model.TaskRO;
 import com.treefinance.saas.grapserver.facade.service.MerchantFacade;
 import com.treefinance.saas.grapserver.facade.service.TaskFacade;
+import com.treefinance.saas.grapserver.share.cache.redis.RedisDao;
 import com.treefinance.saas.grapserver.web.GrapServerApplication;
 import com.treefinance.saas.knife.result.SaasResult;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentLinkedDeque;
+import java.util.concurrent.TimeUnit;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -26,13 +30,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentLinkedDeque;
-import java.util.concurrent.TimeUnit;
 
 /**
  * Created by chenjh on 2017/6/26.
@@ -70,13 +67,13 @@ public class TaskServiceTest {
 
     @Test
     public void testUpdateAccountNo() {
-        taskService.setAccountNo(67627606253551616l, "test");
+        taskService.setAccountNo(67627606253551616L, "test");
         System.out.println("------");
     }
 
     @Test
     public void testA() {
-        List<AppCallbackConfigDTO> list = appCallbackConfigService.getByAppIdAndBizType("QATestabcdefghQA", (byte) 4, EDataType.DELIVERY_ADDRESS);
+        List<CallbackConfig> list = appCallbackConfigService.queryCallbackConfigsByAppIdAndBizType("QATestabcdefghQA", (byte) 4, EDataType.DELIVERY_ADDRESS);
         System.out.println(JSON.toJSONString(list));
     }
 
@@ -171,18 +168,15 @@ public class TaskServiceTest {
 
     @Test
     public void testCLQueue() {
-        Thread thread = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                for (int i = 0; i < 1000; i++) {
-                    TaskBuryPointLog log = new TaskBuryPointLog();
-                    log.setId((long) i);
-                    staticLogQueue.offer(log);
-                    try {
-                        Thread.sleep(300);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
+        Thread thread = new Thread(() -> {
+            for (int i = 0; i < 1000; i++) {
+                TaskBuryPointLog log = new TaskBuryPointLog();
+                log.setId((long) i);
+                staticLogQueue.offer(log);
+                try {
+                    Thread.sleep(300);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
                 }
             }
         });

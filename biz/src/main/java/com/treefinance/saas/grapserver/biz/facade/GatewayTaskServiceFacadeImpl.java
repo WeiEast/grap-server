@@ -4,8 +4,8 @@ import com.treefinance.saas.gateway.servicefacade.TaskService;
 import com.treefinance.saas.gateway.servicefacade.enums.BizTypeEnum;
 import com.treefinance.saas.gateway.servicefacade.model.TaskDTO;
 import com.treefinance.saas.grapserver.common.exception.UnknownException;
-import com.treefinance.saas.grapserver.common.utils.DataConverterUtils;
 import com.treefinance.saas.grapserver.biz.dto.Task;
+import com.treefinance.saas.grapserver.context.component.AbstractFacade;
 import com.treefinance.saas.taskcenter.facade.request.TaskRequest;
 import com.treefinance.saas.taskcenter.facade.result.common.TaskResult;
 import com.treefinance.saas.taskcenter.facade.service.TaskFacade;
@@ -19,7 +19,7 @@ import java.util.List;
  * @author yh-treefinance on 2017/9/19.
  */
 @Service("gatewayTaskServiceFacade")
-public class GatewayTaskServiceFacadeImpl implements TaskService {
+public class GatewayTaskServiceFacadeImpl extends AbstractFacade implements TaskService {
 
     @Autowired
     private TaskFacade taskFacade;
@@ -41,8 +41,8 @@ public class GatewayTaskServiceFacadeImpl implements TaskService {
         if (!rpcResult.isSuccess()) {
             throw new UnknownException("调用taskcenter失败");
         }
-        Task task = DataConverterUtils.convert(rpcResult.getData(), Task.class);
-        TaskDTO result = DataConverterUtils.convert(task, TaskDTO.class);
+        Task task = convertStrict(rpcResult.getData(), Task.class);
+        TaskDTO result = convertStrict(task, TaskDTO.class);
         for (BizTypeEnum type : BizTypeEnum.values()) {
             if (BizTypeEnum.valueOfType(type).equals(task.getBizType())) {
                 result.setBizTypeEnum(type);

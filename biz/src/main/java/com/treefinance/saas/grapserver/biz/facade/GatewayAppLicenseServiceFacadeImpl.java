@@ -1,6 +1,7 @@
 package com.treefinance.saas.grapserver.biz.facade;
 
 import com.treefinance.saas.gateway.servicefacade.AppLicenseService;
+import com.treefinance.saas.grapserver.biz.service.LicenseService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -12,11 +13,11 @@ import org.springframework.stereotype.Service;
 public class GatewayAppLicenseServiceFacadeImpl implements AppLicenseService {
 
     @Autowired
-    private com.treefinance.saas.grapserver.biz.service.AppLicenseService appLicenseService;
+    private LicenseService licenseService;
 
     @Override
     public String getDataKey(String appId) {
-        return appLicenseService.getDataKey(appId);
+        return licenseService.getDataSecretKey(appId);
     }
 
 }

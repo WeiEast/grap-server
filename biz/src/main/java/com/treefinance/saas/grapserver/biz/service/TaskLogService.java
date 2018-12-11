@@ -2,8 +2,8 @@ package com.treefinance.saas.grapserver.biz.service;
 
 import com.google.common.collect.Lists;
 import com.treefinance.saas.grapserver.common.exception.UnknownException;
-import com.treefinance.saas.grapserver.common.utils.DataConverterUtils;
 import com.treefinance.saas.grapserver.biz.dto.TaskLog;
+import com.treefinance.saas.grapserver.context.component.AbstractService;
 import com.treefinance.saas.taskcenter.facade.result.TaskLogRO;
 import com.treefinance.saas.taskcenter.facade.result.common.TaskResult;
 import com.treefinance.saas.taskcenter.facade.service.TaskLogFacade;
@@ -20,7 +20,7 @@ import java.util.List;
  * @author luoyihua on 2017/4/26.
  */
 @Service
-public class TaskLogService {
+public class TaskLogService extends AbstractService {
 
     /**
      * logger
@@ -70,7 +70,7 @@ public class TaskLogService {
             return null;
 
         }
-        return DataConverterUtils.convert(rpcResult.getData(), TaskLog.class);
+        return convert(rpcResult.getData(), TaskLog.class);
     }
 
     public List<TaskLog> queryTaskLog(Long taskId, String msg) {
@@ -81,7 +81,7 @@ public class TaskLogService {
         if (CollectionUtils.isEmpty(rpcResult.getData())) {
             return Lists.newArrayList();
         }
-        return DataConverterUtils.convert(rpcResult.getData(), TaskLog.class);
+        return convert(rpcResult.getData(), TaskLog.class);
     }
 
 }

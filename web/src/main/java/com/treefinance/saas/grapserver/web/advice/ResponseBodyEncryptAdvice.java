@@ -18,8 +18,8 @@ package com.treefinance.saas.grapserver.web.advice;
 
 import com.treefinance.saas.knife.result.SimpleResult;
 import com.treefinance.saas.grapserver.common.exception.ResponseException;
-import com.treefinance.saas.grapserver.common.model.WebContext;
-import com.treefinance.saas.grapserver.common.utils.WebContextUtils;
+import com.treefinance.saas.grapserver.context.WebContext;
+import com.treefinance.saas.grapserver.context.WebContextUtils;
 import com.treefinance.saas.grapserver.web.auth.ResponseSecureHandler;
 import org.springframework.core.MethodParameter;
 import org.springframework.http.MediaType;

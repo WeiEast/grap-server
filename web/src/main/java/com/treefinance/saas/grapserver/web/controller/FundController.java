@@ -2,20 +2,22 @@ package com.treefinance.saas.grapserver.web.controller;
 
 import com.alibaba.fastjson.JSON;
 import com.google.common.collect.Maps;
+import com.treefinance.saas.grapserver.biz.domain.Directive;
+import com.treefinance.saas.grapserver.biz.dto.TaskAttribute;
 import com.treefinance.saas.grapserver.biz.service.AppBizLicenseService;
 import com.treefinance.saas.grapserver.biz.service.TaskAttributeService;
-import com.treefinance.saas.grapserver.biz.service.TaskNextDirectiveService;
+import com.treefinance.saas.grapserver.biz.service.TaskDirectiveService;
 import com.treefinance.saas.grapserver.biz.service.moxie.FundMoxieService;
 import com.treefinance.saas.grapserver.biz.service.moxie.MoxieBusinessService;
 import com.treefinance.saas.grapserver.biz.service.moxie.MoxieTimeoutService;
 import com.treefinance.saas.grapserver.common.enums.EBizType;
 import com.treefinance.saas.grapserver.common.enums.moxie.EMoxieDirective;
-import com.treefinance.saas.grapserver.common.model.dto.moxie.MoxieDirectiveDTO;
 import com.treefinance.saas.grapserver.common.model.dto.moxie.MoxieLoginParamsDTO;
 import com.treefinance.saas.grapserver.common.model.vo.moxie.MoxieCityInfoVO;
-import com.treefinance.saas.grapserver.biz.dto.TaskAttribute;
 import com.treefinance.saas.grapserver.facade.enums.ETaskAttribute;
 import com.treefinance.saas.knife.result.SimpleResult;
+import java.util.List;
+import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,9 +27,6 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.ModelAndView;
-
-import java.util.List;
-import java.util.Map;
 
 /**
  * @author hanif
@@ -48,7 +47,7 @@ public class FundController {
     @Autowired
     private MoxieBusinessService moxieBusinessService;
     @Autowired
-    private TaskNextDirectiveService taskNextDirectiveService;
+    private TaskDirectiveService taskDirectiveService;
     @Autowired
     private MoxieTimeoutService moxieTimeoutService;
 
@@ -169,29 +168,28 @@ public class FundController {
      * 轮询任务执行指令(魔蝎公积金)
      */
     @RequestMapping(value = "/next_directive", method = {RequestMethod.POST})
-    public Object nextMoxieDirective(@RequestParam("taskid") Long taskid) throws Exception {
-        String content = taskNextDirectiveService.getNextDirective(taskid);
+    public Object nextMoxieDirective(@RequestParam("taskid") Long taskId) {
+        Directive directiveInfo = taskDirectiveService.queryNextDirective(taskId);
         Map<String, Object> map = Maps.newHashMap();
-        if (StringUtils.isEmpty(content)) {
+        if (directiveInfo == null) {
             // 轮询过程中，判断任务是否超时
-            if (moxieTimeoutService.isTaskTimeout(taskid)) {
+            if (moxieTimeoutService.isTaskTimeout(taskId)) {
                 // 异步处理任务超时
-                moxieTimeoutService.handleTaskTimeout(taskid);
+                moxieTimeoutService.handleTaskTimeout(taskId);
             }
             map.put("directive", "waiting");
             map.put("information", "请等待");
         } else {
-            MoxieDirectiveDTO directiveMessage = JSON.parseObject(content, MoxieDirectiveDTO.class);
-            map.put("directive", directiveMessage.getDirective());
+            map.put("directive", directiveInfo.getDirective());
             // 仅任务成功或回调失败时，转JSON处理
-            if (EMoxieDirective.TASK_SUCCESS.getText().equals(directiveMessage.getDirective()) ||
-                    EMoxieDirective.TASK_FAIL.getText().equals(directiveMessage.getDirective())) {
-                map.put("information", JSON.parse(directiveMessage.getRemark()));
+            if (EMoxieDirective.TASK_SUCCESS.getText().equals(directiveInfo.getDirective()) ||
+                    EMoxieDirective.TASK_FAIL.getText().equals(directiveInfo.getDirective())) {
+                map.put("information", JSON.parse(directiveInfo.getRemark()));
             } else {
-                map.put("information", directiveMessage.getRemark());
+                map.put("information", directiveInfo.getRemark());
             }
         }
-        logger.info("taskId={}公积金指令轮询,下一指令信息={}", taskid, map);
+        logger.info("taskId={}公积金指令轮询,下一指令信息={}", taskId, map);
         return SimpleResult.successResult(map);
     }
 

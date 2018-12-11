@@ -6,9 +6,9 @@
     http://www.springframework.org/schema/context  
     http://www.springframework.org/schema/context/spring-context-3.0.xsd">
 
-    <import resource="classpath*:spring/core.diamond.xml"/>
-    <import resource="classpath*:spring/core.dubbo.xml"/>
-    <import resource="classpath*:spring/core.jedis.xml"/>
+    <import resource="classpath*:spring/grap-server-diamond.xml"/>
+    <import resource="classpath*:spring/grap-server-dubbo-registry.xml"/>
+    <import resource="classpath*:spring/grap-server-jedis.xml"/>
     <context:component-scan base-package="com.treefinance.saas.grapserver"/>
 
 </beans>

@@ -3,19 +3,23 @@ package com.treefinance.saas.grapserver.biz.service;
 
 import com.alibaba.fastjson.JSON;
 import com.google.common.collect.Maps;
-import com.treefinance.saas.grapserver.biz.common.CallbackSecureHandler;
-import com.treefinance.saas.grapserver.common.enums.EBizType;
-import com.treefinance.saas.grapserver.common.enums.ETaskStatus;
-import com.treefinance.saas.grapserver.common.exception.ParamsCheckException;
-import com.treefinance.saas.grapserver.common.model.dto.AppCallbackConfigDTO;
-import com.treefinance.saas.grapserver.common.model.dto.TaskDTO;
-import com.treefinance.saas.grapserver.biz.dto.AppLicense;
+import com.treefinance.saas.grapserver.biz.domain.AppLicense;
+import com.treefinance.saas.grapserver.biz.domain.CallbackConfig;
 import com.treefinance.saas.grapserver.biz.dto.TaskAttribute;
 import com.treefinance.saas.grapserver.biz.dto.TaskCallbackLog;
 import com.treefinance.saas.grapserver.biz.dto.TaskLog;
+import com.treefinance.saas.grapserver.common.enums.EBizType;
+import com.treefinance.saas.grapserver.common.enums.ETaskStatus;
+import com.treefinance.saas.grapserver.common.exception.ParamsCheckException;
+import com.treefinance.saas.grapserver.common.model.dto.TaskDTO;
 import com.treefinance.saas.grapserver.facade.enums.EDataType;
 import com.treefinance.saas.grapserver.facade.enums.EGrapStatus;
 import com.treefinance.saas.grapserver.facade.enums.ETaskAttribute;
+import com.treefinance.saas.grapserver.util.CallbackDataUtils;
+import java.net.URLEncoder;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -23,11 +27,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import java.net.URLEncoder;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
 
 /**
  * @author yh-treefinance on 2018/2/7.
@@ -40,21 +39,19 @@ public class GrapDataDownloadService {
      */
     private final Logger logger = LoggerFactory.getLogger(getClass());
     @Autowired
-    private CallbackSecureHandler callbackSecureHandler;
-    @Autowired
     private TaskCallbackLogService taskCallbackLogService;
     @Autowired
     private TaskService taskService;
-    @Autowired
-    private GrapDataCallbackService grapDataCallbackService;
     @Autowired
     protected TaskLogService taskLogService;
     @Autowired
     protected TaskAttributeService taskAttributeService;
     @Autowired
-    protected AppLicenseService applicenseservice;
+    protected LicenseService applicenseservice;
     @Autowired
     private TaskLicenseService taskLicenseService;
+    @Autowired
+    private AppCallbackConfigService callbackConfigService;
 
     /**
      * 获取加密的爬取数据
@@ -87,7 +84,7 @@ public class GrapDataDownloadService {
         AppLicense appLicense = applicenseservice.getAppLicense(appId);
         String params = "";
         try {
-            params = callbackSecureHandler.encrypt(dataMap, appLicense.getServerPublicKey());
+            params = CallbackDataUtils.encrypt(dataMap, appLicense.getServerPublicKey());
             params = URLEncoder.encode(params, "utf-8");
         } catch (Exception e) {
             logger.error("encrypt data error: taskid={},dataMap={}", taskId, JSON.toJSONString(dataMap), e);
@@ -101,14 +98,17 @@ public class GrapDataDownloadService {
      * 获取抓取数据
      */
     protected Map<String, Object> getGrapDataMap(TaskDTO taskDTO) {
-        Long taskId = taskDTO.getId();
-        List<AppCallbackConfigDTO> configDTOList = grapDataCallbackService.getCallbackConfigs(taskDTO, EDataType.MAIN_STREAM);
-        // 根据回调日志获取数据
-        List<TaskCallbackLog> taskCallbackLogList = taskCallbackLogService.getTaskCallbackLogs(taskId, null);
         Map<String, Object> dataMap = Maps.newHashMap();
+        // 根据回调日志获取数据
+        List<TaskCallbackLog> taskCallbackLogList = taskCallbackLogService.getTaskCallbackLogs(taskDTO.getId(), null);
         if (CollectionUtils.isNotEmpty(taskCallbackLogList)) {
-            // 前端回调: 直接取数据结果
-            if (CollectionUtils.isEmpty(configDTOList)) {
+            String appId = taskDTO.getAppId();
+            Byte bizType = taskDTO.getBizType();
+            List<CallbackConfig> configs = callbackConfigService.queryCallbackConfigsByAppIdAndBizType(appId, bizType, EDataType.MAIN_STREAM);
+            logger.info("根据业务类型匹配回调配置结果:taskId={},configList={}", taskDTO.getId(), JSON.toJSONString(configs));
+
+            if (CollectionUtils.isEmpty(configs)) {
+                // 前端回调: 直接取数据结果
                 taskCallbackLogList.stream().filter(taskCallbackLog -> Byte.valueOf("2").equals(taskCallbackLog.getType()))
                         .forEach(taskCallbackLog -> {
                             if (StringUtils.isNotEmpty(taskCallbackLog.getRequestParam())) {
@@ -116,10 +116,9 @@ public class GrapDataDownloadService {
                                 dataMap.putAll(MapUtils.isNotEmpty(aDataMap) ? aDataMap : Maps.newHashMap());
                             }
                         });
-            }
-            // 后端回调:取主流程数据
-            else {
-                Long configId = configDTOList.get(0).getId().longValue();
+            } else {
+                // 后端回调:取主流程数据
+                Long configId = configs.get(0).getId().longValue();
                 taskCallbackLogList.stream().filter(taskCallbackLog ->
                         Byte.valueOf("1").equals(taskCallbackLog.getType()) && configId.equals(taskCallbackLog.getConfigId()))
                         .forEach(taskCallbackLog -> {

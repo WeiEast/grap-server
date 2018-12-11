@@ -2,7 +2,7 @@ package com.treefinance.saas.grapserver.biz.facade;
 
 import com.treefinance.saas.grapserver.common.enums.EBizType;
 import com.treefinance.saas.grapserver.common.exception.UnknownException;
-import com.treefinance.saas.grapserver.common.utils.DataConverterUtils;
+import com.treefinance.saas.grapserver.context.component.AbstractFacade;
 import com.treefinance.saas.grapserver.facade.model.TaskRO;
 import com.treefinance.saas.grapserver.facade.service.TaskFacade;
 import com.treefinance.saas.knife.result.Results;
@@ -18,7 +18,7 @@ import java.util.List;
  * @author haojiahong on 2017/12/22.
  */
 @Component("grapTaskFacade")
-public class TaskFacadeImpl implements TaskFacade {
+public class TaskFacadeImpl extends AbstractFacade implements TaskFacade {
 
     @Autowired
     private com.treefinance.saas.taskcenter.facade.service.TaskFacade taskFacade;
@@ -40,7 +40,7 @@ public class TaskFacadeImpl implements TaskFacade {
         if (!rpcResult.isSuccess()) {
             throw new UnknownException("调用taskcenter失败");
         }
-        TaskRO result = DataConverterUtils.convert(rpcResult.getData(), TaskRO.class);
+        TaskRO result = convertStrict(rpcResult.getData(), TaskRO.class);
         result.setBizTypeName(EBizType.getName(rpcResult.getData().getBizType()));
         return Results.newSuccessResult(result);
     }

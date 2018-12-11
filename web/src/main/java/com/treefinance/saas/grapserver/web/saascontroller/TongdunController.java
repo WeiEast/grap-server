@@ -2,9 +2,8 @@ package com.treefinance.saas.grapserver.web.saascontroller;
 
 import com.alibaba.fastjson.JSON;
 import com.treefinance.saas.grapserver.biz.service.TongdunService;
-import com.treefinance.saas.grapserver.common.exception.BizException;
 import com.treefinance.saas.grapserver.common.request.TongdunRequest;
-import com.treefinance.saas.grapserver.common.utils.JudgeUtils;
+import com.treefinance.saas.grapserver.util.JudgeUtils;
 import com.treefinance.saas.grapserver.web.controller.CarInfoController;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -18,8 +17,8 @@ import org.springframework.web.bind.annotation.RestController;
 import javax.xml.bind.ValidationException;
 
 /**
- * @author:guoguoyun
- * @date:Created in 2018/10/17下午2:13
+ * @author guoguoyun
+ * @date 2018/10/17下午2:13
  */
 @RestController
 @RequestMapping(value = {"/loan/special/ss"})

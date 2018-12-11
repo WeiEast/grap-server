@@ -3,7 +3,7 @@ package com.treefinance.saas.grapserver.biz.service;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.treefinance.saas.grapserver.biz.config.DiamondConfig;
+import com.treefinance.saas.grapserver.context.config.DiamondConfig;
 import com.treefinance.saas.grapserver.common.enums.EBizType;
 import com.treefinance.saas.grapserver.common.enums.ETaskStatus;
 import com.treefinance.saas.grapserver.common.enums.ETongdunData;
@@ -13,9 +13,9 @@ import com.treefinance.saas.grapserver.common.request.TongdunRequest;
 import com.treefinance.saas.grapserver.common.result.SaasResult;
 import com.treefinance.saas.grapserver.common.result.TongdunData;
 import com.treefinance.saas.grapserver.common.result.TongdunDetailResult;
-import com.treefinance.saas.grapserver.common.utils.HttpClientUtils;
-import com.treefinance.saas.grapserver.common.utils.TongdunDataResolver;
-import com.treefinance.saas.grapserver.biz.dto.AppLicense;
+import com.treefinance.saas.grapserver.util.HttpClientUtils;
+import com.treefinance.saas.grapserver.util.TongdunDataResolver;
+import com.treefinance.saas.grapserver.biz.domain.AppLicense;
 import com.treefinance.saas.taskcenter.facade.service.TaskFacade;
 import com.treefinance.saas.taskcenter.facade.service.TaskLogFacade;
 import org.slf4j.Logger;
@@ -52,7 +52,7 @@ public class TongdunService {
     @Autowired
     private TaskLogService taskLogService;
     @Autowired
-    private AppLicenseService appLicenseService;
+    private LicenseService licenseService;
     @Autowired
     private DiamondConfig diamondConfig;
 
@@ -118,7 +118,7 @@ public class TongdunService {
             tongdunDataList.add(tongdunData);
         }
 
-        AppLicense license = appLicenseService.getAppLicense(appId);
+        AppLicense license = licenseService.getAppLicense(appId);
         taskLogService.insert(taskId, "任务成功", new Date(), "");
         taskFacade.updateTaskStatusWithStep(taskId, ETaskStatus.SUCCESS.getStatus());
         return SaasResult.successEncryptByRSAResult(tongdunDataList, license.getServerPublicKey());
@@ -197,7 +197,7 @@ public class TongdunService {
             }
 
             // 获取黑名单
-            Map blackMap = new HashMap(2);
+            Map<String, Object> blackMap = new HashMap<>(2);
             blackMap.put("id", "IS_BLACK");
             blackMap.put("value", summary.get("isHitDiscreditPolicy"));
             resultList.addAll(tongdunDataList);
@@ -207,7 +207,7 @@ public class TongdunService {
             return SaasResult.failResult("查询不到数据!");
         }
 
-        AppLicense license = appLicenseService.getAppLicense(appId);
+        AppLicense license = licenseService.getAppLicense(appId);
         taskLogService.insert(taskId, "任务成功", new Date(), "");
         taskFacade.updateTaskStatusWithStep(taskId, ETaskStatus.SUCCESS.getStatus());
         return SaasResult.successEncryptByRSAResult(resultList, license.getServerPublicKey());

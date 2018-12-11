@@ -9,12 +9,12 @@ import com.datatrees.spider.share.domain.http.HttpResult;
 import com.google.common.collect.Maps;
 import com.treefinance.commonservice.facade.mobileattribution.IMobileAttributionService;
 import com.treefinance.commonservice.facade.mobileattribution.MobileAttributionDTO;
-import com.treefinance.saas.grapserver.biz.cache.RedisDao;
+import com.treefinance.saas.grapserver.share.cache.redis.RedisDao;
+import com.treefinance.saas.grapserver.biz.dto.TaskAttribute;
 import com.treefinance.saas.grapserver.common.enums.EBizType;
 import com.treefinance.saas.grapserver.common.exception.CrawlerBizException;
-import com.treefinance.saas.grapserver.common.model.Constants;
-import com.treefinance.saas.grapserver.common.utils.RedisKeyUtils;
-import com.treefinance.saas.grapserver.biz.dto.TaskAttribute;
+import com.treefinance.saas.grapserver.context.Constants;
+import com.treefinance.saas.grapserver.share.cache.redis.RedisKeyUtils;
 import com.treefinance.saas.grapserver.facade.enums.ETaskAttribute;
 import com.treefinance.saas.knife.result.SimpleResult;
 import org.apache.commons.lang3.StringUtils;
@@ -187,7 +187,7 @@ public class OperatorExtendLoginService {
      * 获取商户配置与运营商分组信息
      */
     public Object getConfigAndGroups(String appId, Long taskId, String style) {
-        Map colorMap = merchantConfigService.getColorConfig(appId, style);
+        Map<String, String> colorMap = merchantConfigService.getColorConfig(appId, style);
         HttpResult<List<Map<String, List<OperatorGroup>>>> result;
         try {
             result = operatorApi.queryGroups();

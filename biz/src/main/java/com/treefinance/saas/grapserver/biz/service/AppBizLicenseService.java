@@ -4,26 +4,25 @@ import com.alibaba.fastjson.JSON;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
-import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.treefinance.saas.assistant.variable.notify.client.VariableMessageHandler;
 import com.treefinance.saas.assistant.variable.notify.model.VariableMessage;
-import com.treefinance.saas.grapserver.biz.adapter.QueryAppBizLicenseAdapter;
+import com.treefinance.saas.grapserver.biz.domain.BizLicenseInfo;
 import com.treefinance.saas.grapserver.common.enums.EBizType;
-import com.treefinance.saas.grapserver.biz.dto.AppBizLicense;
+import com.treefinance.saas.grapserver.context.component.AbstractService;
+import com.treefinance.saas.grapserver.manager.BizLicenseManager;
+import com.treefinance.saas.grapserver.manager.domain.BizLicenseInfoBO;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang3.RandomUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -31,47 +30,37 @@ import java.util.stream.Collectors;
  * @author luoyihua on 2017/5/10.
  */
 @Component
-public class AppBizLicenseService implements InitializingBean, VariableMessageHandler {
-
-    /**
-     * logger
-     */
-    private static final Logger logger = LoggerFactory.getLogger(AppBizLicenseService.class);
+public class AppBizLicenseService extends AbstractService implements InitializingBean, VariableMessageHandler {
 
     @Autowired
-    private QueryAppBizLicenseAdapter queryAppBizLicenseAdapter;
+    private BizLicenseManager bizLicenseManager;
 
     /**
      * 本地缓存
      */
-    private final LoadingCache<String, List<AppBizLicense>> cache =
+    private final LoadingCache<String, List<BizLicenseInfo>> cache =
         CacheBuilder.newBuilder().refreshAfterWrite(5, TimeUnit.MINUTES).expireAfterWrite(5, TimeUnit.MINUTES)
-            .build(CacheLoader.from(appid -> queryAppBizLicenseAdapter.queryAppBizLicenseByAppId(appid)));
+            .build(new CacheLoader<String, List<BizLicenseInfo>>() {
+                @Override
+                public List<BizLicenseInfo> load(String appId) {
+                    List<BizLicenseInfoBO> list = bizLicenseManager.listBizLicenseInfosByAppId(appId);
+
+                    return convert(list, BizLicenseInfo.class);
+                }
+            });
 
     /**
      * 根据appId获取授权
      */
-    public List<AppBizLicense> getByAppId(String appId) {
-        List<AppBizLicense> list = Lists.newArrayList();
+    public List<BizLicenseInfo> getByAppId(String appId) {
         if (StringUtils.isEmpty(appId)) {
-            return list;
+            return Collections.emptyList();
         }
-        try {
-            list = this.cache.get(appId);
-            logger.info("getByAppId: appId={},list={}", appId, JSON.toJSONString(list));
-        } catch (ExecutionException e) {
-            logger.error("获取appId={}授权信息失败", appId, e);
-        }
-        return list;
-    }
 
-    /**
-     * 查询所有授权
-     */
-    public List<AppBizLicense> getAll() {
-        List<AppBizLicense> licenses = Lists.newArrayList();
-        cache.asMap().values().forEach(licenses::addAll);
-        return licenses;
+        List<BizLicenseInfo> list = this.cache.getUnchecked(appId);
+        logger.info("getByAppId: appId={},list={}", appId, JSON.toJSONString(list));
+
+        return list;
     }
 
     /**
@@ -87,12 +76,11 @@ public class AppBizLicenseService implements InitializingBean, VariableMessageHa
             return false;
         }
 
-        List<AppBizLicense> list = getByAppId(appId);
+        List<BizLicenseInfo> list = getByAppId(appId);
         if (CollectionUtils.isEmpty(list)) {
             return false;
         }
-        long count = list.stream().filter(appBizLicense -> Byte.valueOf("1").equals(appBizLicense.getIsShowLicense())
-            && bizType.equals(appBizLicense.getBizType())).count();
+        long count = list.stream().filter(bizLicenseInfo -> Byte.valueOf("1").equals(bizLicenseInfo.getIsShowLicense()) && bizType.equals(bizLicenseInfo.getBizType())).count();
         return count > 0;
     }
 
@@ -109,18 +97,17 @@ public class AppBizLicenseService implements InitializingBean, VariableMessageHa
             return false;
         }
 
-        List<AppBizLicense> list = getByAppId(appId);
+        List<BizLicenseInfo> list = getByAppId(appId);
         if (CollectionUtils.isEmpty(list)) {
             return false;
         }
-        Optional<AppBizLicense> optional =
-            list.stream().filter(appBizLicense -> bizType.equals(appBizLicense.getBizType()))
-                .filter(appBizLicense -> appBizLicense.getQuestionaireRate() > 0).findFirst();
+        Optional<BizLicenseInfo> optional =
+            list.stream().filter(bizLicenseInfo -> bizType.equals(bizLicenseInfo.getBizType())).filter(bizLicenseInfo -> bizLicenseInfo.getQuestionaireRate() > 0).findFirst();
         if (optional == null || !optional.isPresent()) {
             return false;
         }
-        AppBizLicense appBizLicense = optional.get();
-        int questionnaireRate = appBizLicense.getQuestionaireRate();
+        BizLicenseInfo bizLicenseInfo = optional.get();
+        int questionnaireRate = bizLicenseInfo.getQuestionaireRate();
         if (questionnaireRate >= 100) {
             return true;
         }
@@ -141,18 +128,17 @@ public class AppBizLicenseService implements InitializingBean, VariableMessageHa
             return false;
         }
 
-        List<AppBizLicense> list = getByAppId(appId);
+        List<BizLicenseInfo> list = getByAppId(appId);
         if (CollectionUtils.isEmpty(list)) {
             return false;
         }
-        Optional<AppBizLicense> optional =
-            list.stream().filter(appBizLicense -> bizType.equals(appBizLicense.getBizType()))
-                .filter(appBizLicense -> appBizLicense.getFeedbackRate() > 0).findFirst();
+        Optional<BizLicenseInfo> optional =
+            list.stream().filter(bizLicenseInfo -> bizType.equals(bizLicenseInfo.getBizType())).filter(bizLicenseInfo -> bizLicenseInfo.getFeedbackRate() > 0).findFirst();
         if (optional == null || !optional.isPresent()) {
             return false;
         }
-        AppBizLicense appBizLicense = optional.get();
-        int feedbackRate = appBizLicense.getFeedbackRate();
+        BizLicenseInfo bizLicenseInfo = optional.get();
+        int feedbackRate = bizLicenseInfo.getFeedbackRate();
         if (feedbackRate >= 100) {
             return true;
         }
@@ -175,36 +161,37 @@ public class AppBizLicenseService implements InitializingBean, VariableMessageHa
         return map;
     }
 
-    @Override
-    public void afterPropertiesSet() throws Exception {
-        List<AppBizLicense> licenses = queryAppBizLicenseAdapter.queryAllAppBizLicense();
-        if (CollectionUtils.isEmpty(licenses)) {
-            return;
-        }
-        this.cache.putAll(licenses.stream().collect(Collectors.groupingBy(AppBizLicense::getAppId)));
-    }
-
-    @Override
-    public String getVariableName() {
-        return "merchant-license";
-    }
-
     public String getLicenseTemplate(String appId, String type) {
         Byte bizType = EBizType.getCode(type);
         if (bizType == null) {
             return "DEFAULT";
         }
 
-        List<AppBizLicense> list = getByAppId(appId);
+        List<BizLicenseInfo> list = getByAppId(appId);
         if (CollectionUtils.isEmpty(list)) {
             return "DEFAULT";
         }
-        List<AppBizLicense> filterList = list.stream()
-            .filter(appBizLicense -> bizType.equals(appBizLicense.getBizType())).collect(Collectors.toList());
+        List<BizLicenseInfo> filterList = list.stream().filter(bizLicenseInfo -> bizType.equals(bizLicenseInfo.getBizType())).collect(Collectors.toList());
         if (CollectionUtils.isEmpty(filterList)) {
             return "DEFAULT";
         }
         return filterList.get(0).getLicenseTemplate();
+    }
+
+    @Override
+    public void afterPropertiesSet() {
+        List<BizLicenseInfoBO> list = bizLicenseManager.listBizLicenseInfos();
+
+        if (CollectionUtils.isEmpty(list)) {
+            return;
+        }
+
+        this.cache.putAll(list.stream().map(info -> convert(info, BizLicenseInfo.class)).collect(Collectors.groupingBy(BizLicenseInfo::getAppId)));
+    }
+
+    @Override
+    public String getVariableName() {
+        return "merchant-license";
     }
 
     @Override

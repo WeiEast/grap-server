@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:dubbo="http://code.alibabatech.com/schema/dubbo"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd http://code.alibabatech.com/schema/dubbo http://code.alibabatech.com/schema/dubbo/dubbo.xsd">
+
+    <dubbo:provider timeout="5000"/>
+
+    <!--生产者-->
+    <dubbo:service interface="com.treefinance.saas.grapserver.facade.service.TaskFacade" ref="grapTaskFacade"/>
+
+    <!--兼容老的生产者-->
+    <dubbo:service interface="com.treefinance.saas.gateway.servicefacade.TaskService" ref="gatewayTaskServiceFacade"/>
+    <dubbo:service interface="com.treefinance.saas.gateway.servicefacade.AppLicenseService"
+                   ref="gatewayAppLicenseServiceFacade"/>
+    <dubbo:service interface="com.treefinance.saas.grapserver.facade.service.MerchantFacade" ref="merchantFacade"/>
+    <dubbo:service interface="com.treefinance.saas.grapserver.facade.service.FundMoxieFacade" ref="fundMoxieFacade"/>
+
+</beans>
+
+

@@ -1,20 +1,19 @@
 package com.treefinance.saas.grapserver.biz.service;
 
 import com.alibaba.fastjson.JSON;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Joiner;
 import com.google.common.collect.Maps;
-import com.treefinance.saas.grapserver.biz.adapter.GetAppColorConfigAdapter;
-import com.treefinance.saas.grapserver.biz.config.DiamondConfig;
+import com.treefinance.saas.grapserver.context.config.DiamondConfig;
 import com.treefinance.saas.grapserver.common.exception.BizException;
 import com.treefinance.saas.grapserver.common.model.vo.task.AppH5TipsVO;
-import com.treefinance.saas.grapserver.common.utils.DataConverterUtils;
-import com.treefinance.saas.grapserver.biz.dto.AppColorConfig;
+import com.treefinance.saas.grapserver.manager.ColorConfigManager;
+import com.treefinance.saas.grapserver.manager.domain.ColorConfigBO;
+import com.treefinance.saas.grapserver.exception.IllegalBizDataException;
 import com.treefinance.saas.merchant.facade.request.grapserver.GetAppH5TipsRequest;
 import com.treefinance.saas.merchant.facade.result.console.AppH5TipsResult;
 import com.treefinance.saas.merchant.facade.result.console.MerchantResult;
-import com.treefinance.saas.merchant.facade.result.grapsever.AppColorConfigResult;
 import com.treefinance.saas.merchant.facade.service.AppH5TipsFacade;
+import com.treefinance.toolkit.util.json.Jackson;
 import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,43 +35,47 @@ public class MerchantConfigService {
     @Autowired
     private DiamondConfig diamondConfig;
     @Autowired
-    private GetAppColorConfigAdapter getAppColorConfigAdapter;
+    private ColorConfigManager colorConfigManager;
     @Autowired
     private AppH5TipsFacade appH5TipsFacade;
 
-    @SuppressWarnings("rawtypes")
-    public Map getColorConfig(String appId, String style) {
-
-        MerchantResult<AppColorConfigResult>
-            merchantColorConfigResult = getAppColorConfigAdapter.queryAppColorConfig(appId, style);
-        Map<String, Object> map = Maps.newHashMap();
-        if (merchantColorConfigResult.isSuccess()) {
-            AppColorConfig merchantColorConfig =
-                DataConverterUtils.convert(merchantColorConfigResult.getData(), AppColorConfig.class);
-            map.put("main", merchantColorConfig.getMain());
-            map.put("assist", merchantColorConfig.getAssist());
-            map.put("assistError", merchantColorConfig.getAssistError());
-            map.put("backBtnAndFontColor", merchantColorConfig.getBackBtnAndFontColor());
-            map.put("background", merchantColorConfig.getBackground());
-            map.put("btnDisabled", merchantColorConfig.getBtnDisabled());
-            map.put("scheduleError", merchantColorConfig.getScheduleError());
-        } else {
-            try {
-                logger.debug("{},读取默认配色appid={}，", merchantColorConfigResult.getRetMsg(), appId);
-                ObjectMapper objectMapper = new ObjectMapper();
-                Map cardInfoMap = objectMapper.readValue(diamondConfig.getDefaultMerchantColorConfig(), Map.class);
-                map.put("main", cardInfoMap.get("main"));
-                map.put("assist", cardInfoMap.get("assist"));
-                map.put("assistError", cardInfoMap.get("assistError"));
-                map.put("backBtnAndFontColor", cardInfoMap.get("backBtnAndFontColor"));
-                map.put("background", cardInfoMap.get("background"));
-                map.put("btnDisabled", cardInfoMap.get("btnDisabled"));
-                map.put("scheduleError", cardInfoMap.get("scheduleError"));
-            } catch (Exception ex) {
-                logger.error("商户默认配色解析失败={}", ex);
-            }
+    public Map<String, String> getColorConfig(String appId, String style) {
+        ColorConfigBO config = colorConfigManager.queryAppColorConfig(appId, style);
+        if (config == null) {
+            logger.debug("读取默认配色信息，appId={}，", appId);
+            config = getDefaultColorConfig();
         }
+
+        if (config == null) {
+            throw new IllegalBizDataException("Can not find any app's color config!");
+        }
+
+        Map<String, String> map = Maps.newHashMap();
+        map.put("main", config.getMain());
+        map.put("assist", config.getAssist());
+        map.put("assistError", config.getAssistError());
+        map.put("backBtnAndFontColor", config.getBackBtnAndFontColor());
+        map.put("background", config.getBackground());
+        map.put("btnDisabled", config.getBtnDisabled());
+        map.put("scheduleError", config.getScheduleError());
+
         return map;
+    }
+
+    private ColorConfigBO getDefaultColorConfig() {
+        Map<String, String> defaultSetting = Jackson.parseMap(diamondConfig.getDefaultMerchantColorConfig(), String.class, String.class);
+
+        ColorConfigBO defaultConfig = new ColorConfigBO();
+        defaultConfig.setStyle("default");
+        defaultConfig.setMain(defaultSetting.get("main"));
+        defaultConfig.setAssist(defaultSetting.get("assist"));
+        defaultConfig.setAssistError(defaultSetting.get("assistError"));
+        defaultConfig.setBackBtnAndFontColor(defaultSetting.get("backBtnAndFontColor"));
+        defaultConfig.setBackground(defaultSetting.get("background"));
+        defaultConfig.setBtnDisabled(defaultSetting.get("btnDisabled"));
+        defaultConfig.setScheduleError(defaultSetting.get("scheduleError"));
+
+        return defaultConfig;
     }
 
     public Object getTips(String appId, Byte bizType) {

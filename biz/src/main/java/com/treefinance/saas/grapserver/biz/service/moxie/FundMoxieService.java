@@ -1,18 +1,17 @@
 package com.treefinance.saas.grapserver.biz.service.moxie;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Maps;
-import com.treefinance.saas.grapserver.biz.config.DiamondConfig;
 import com.treefinance.saas.grapserver.common.model.dto.moxie.MoxieCityInfoDTO;
 import com.treefinance.saas.grapserver.common.model.dto.moxie.MoxieLoginParamsDTO;
-import com.treefinance.saas.grapserver.common.utils.HttpClientUtils;
-import com.treefinance.saas.grapserver.common.utils.JsonUtils;
+import com.treefinance.saas.grapserver.util.HttpClientUtils;
+import com.treefinance.saas.grapserver.context.config.DiamondConfig;
+import java.util.List;
+import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
-import java.util.Map;
 
 /**
  * @author haojiahong on 2017/9/13.
@@ -31,7 +30,7 @@ public class FundMoxieService {
         Map<String, String> headers = Maps.newHashMap();
         wrapperApiKeyHeaders(headers);
         String data = HttpClientUtils.doGetWithHeaders(url, headers);
-        return JsonUtils.toJavaBeanList(data, MoxieCityInfoDTO.class);
+        return JSON.parseArray(data, MoxieCityInfoDTO.class);
     }
 
     /**
@@ -42,7 +41,7 @@ public class FundMoxieService {
         Map<String, String> headers = Maps.newHashMap();
         wrapperApiKeyHeaders(headers);
         String data = HttpClientUtils.doGetWithHeaders(url, headers);
-        return JsonUtils.toJavaBeanList(data, MoxieCityInfoDTO.class);
+        return JSON.parseArray(data, MoxieCityInfoDTO.class);
     }
 
     /**
@@ -50,11 +49,11 @@ public class FundMoxieService {
      */
     public Object queryLoginElementsEx(String areaCode) {
         String url = diamondConfig.getMoxieUrlFundGetLoginElementsEx();
-        url = url.replaceAll("\\{area_code\\}", areaCode);
+        url = url.replaceAll("\\{area_code}", areaCode);
         Map<String, String> headers = Maps.newHashMap();
         wrapperApiKeyHeaders(headers);
         String data = HttpClientUtils.doGetWithHeaders(url, headers);
-        return JsonUtils.toJsonObjectList(data);
+        return JSONObject.parseObject(data);
     }
 
     /**
@@ -62,11 +61,11 @@ public class FundMoxieService {
      */
     public Object queryInformation(String areaCode) {
         String url = diamondConfig.getMoxieUrlFundGetInformation();
-        url = url.replaceAll("\\{area_code\\}", areaCode);
+        url = url.replaceAll("\\{area_code}", areaCode);
         Map<String, String> headers = Maps.newHashMap();
         wrapperApiKeyHeaders(headers);
         String data = HttpClientUtils.doGetWithHeaders(url, headers);
-        return JsonUtils.toJsonObject(data);
+        return JSONObject.parseObject(data);
     }
 
     /**
@@ -74,11 +73,11 @@ public class FundMoxieService {
      */
     public Object queryTaskStatus(String moxieTaskId) {
         String url = diamondConfig.getMoxieUrlFundGetTasksStatus();
-        url = url.replaceAll("\\{task_id\\}", moxieTaskId);
+        url = url.replaceAll("\\{task_id}", moxieTaskId);
         Map<String, String> headers = Maps.newHashMap();
         wrapperApiKeyHeaders(headers);
         String data = HttpClientUtils.doGetWithHeaders(url, headers);
-        return JsonUtils.toJsonObject(data);
+        return JSON.parseObject(data);
     }
 
     /**
@@ -91,7 +90,7 @@ public class FundMoxieService {
         wrapperParams(params, moxieLoginParams);
         wrapperApiKeyHeaders(headers);
         String data = HttpClientUtils.doPostWithHeaders(url, params, headers);
-        JSONObject result = (JSONObject) JsonUtils.toJsonObject(data);
+        JSONObject result = JSON.parseObject(data);
         return result.getString("task_id");
     }
 
@@ -100,7 +99,7 @@ public class FundMoxieService {
      */
     public void submitTaskInput(String moxieTaskId, String input) {
         String url = diamondConfig.getMoxieUrlFundPostTasksInput();
-        url = url.replaceAll("\\{task_id\\}", moxieTaskId);
+        url = url.replaceAll("\\{task_id}", moxieTaskId);
         Map<String, String> headers = Maps.newHashMap();
         wrapperApiKeyHeaders(headers);
         Map<String, Object> params = Maps.newHashMap();
@@ -113,7 +112,7 @@ public class FundMoxieService {
      */
     public String queryFunds(String moxieTaskId) {
         String url = diamondConfig.getMoxieUrlFundGetFunds();
-        url = url.replaceAll("\\{task_id\\}", moxieTaskId);
+        url = url.replaceAll("\\{task_id}", moxieTaskId);
         Map<String, String> headers = Maps.newHashMap();
         wrapperTokenHeaders(headers);
         return HttpClientUtils.doGetWithHeaders(url, headers);
@@ -124,7 +123,7 @@ public class FundMoxieService {
      */
     public String queryFundsEx(String moxieTaskId) {
         String url = diamondConfig.getMoxieUrlFundGetFundsEx();
-        url = url.replaceAll("\\{task_id\\}", moxieTaskId);
+        url = url.replaceAll("\\{task_id}", moxieTaskId);
         Map<String, String> headers = Maps.newHashMap();
         wrapperTokenHeaders(headers);
         return HttpClientUtils.doGetWithHeaders(url, headers);

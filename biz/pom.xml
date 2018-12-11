@@ -17,6 +17,16 @@
         </dependency>
         <dependency>
             <groupId>com.treefinance.saas</groupId>
+            <artifactId>grap-server-share</artifactId>
+            <version>1.1.0-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>com.treefinance.saas</groupId>
+            <artifactId>grap-server-manager</artifactId>
+            <version>1.1.0-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>com.treefinance.saas</groupId>
             <artifactId>grap-server-facade</artifactId>
             <version>1.1.0-SNAPSHOT</version>
         </dependency>
@@ -28,86 +38,6 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-aop</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-data-redis</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>com.alibaba</groupId>
-            <artifactId>dubbo</artifactId>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.jboss.netty</groupId>
-                    <artifactId>netty</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-        <dependency>
-            <groupId>com.101tec</groupId>
-            <artifactId>zkclient</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.zookeeper</groupId>
-            <artifactId>zookeeper</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>com.github.diamond</groupId>
-            <artifactId>super-diamond-client</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>com.alibaba.rocketmq</groupId>
-            <artifactId>rocketmq-client</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>com.treefinance.saas</groupId>
-            <artifactId>merchant-center-facade</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>com.treefinance.saas</groupId>
-            <artifactId>taskcenter-facade</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>com.treefinance.proxy</groupId>
-            <artifactId>proxy-api</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>com.datatrees.spider</groupId>
-            <artifactId>spider-share-api</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>com.datatrees.spider</groupId>
-            <artifactId>spider-operator-api</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>com.datatrees.spider</groupId>
-            <artifactId>spider-bank-api</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>com.datatrees.spider</groupId>
-            <artifactId>spider-extra-api</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>com.datatrees.spider</groupId>
-            <artifactId>spider-ecommerce-api</artifactId>
-        </dependency>
-
-        <!-- 兼容老的gateway接口 -->
-        <dependency>
-            <groupId>com.treefinance.saas.gateway</groupId>
-            <artifactId>gateway-facade</artifactId>
-            <version>1.0.1</version>
         </dependency>
 
         <dependency>
@@ -121,11 +51,6 @@
         <dependency>
             <groupId>com.treefinance.saas</groupId>
             <artifactId>assistant-monitor</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>com.treefinance.saas.processor.thirdparty</groupId>
-            <artifactId>processor-thirdparty-facade</artifactId>
         </dependency>
 
         <dependency>
