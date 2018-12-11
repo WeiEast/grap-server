@@ -68,5 +68,9 @@ public enum RpcActionEnum {
     /**
      * 查询全部的biz-type信息
      */
-    QUERY_APP_BIZ_TYPE_ALL
+    QUERY_APP_BIZ_TYPE_ALL,
+    /**
+     * 启动爬虫入口
+     */
+    ACQUISITION_ENTRY_BOOT
 }
