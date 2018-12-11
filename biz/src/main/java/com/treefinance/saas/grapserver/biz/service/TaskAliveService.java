@@ -31,16 +31,6 @@ public class TaskAliveService {
     }
 
     /**
-     * 更新任务最近活跃时间
-     *
-     * @param taskId 任务id
-     */
-
-    public void updateTaskActiveTime(Long taskId, Date date) {
-        taskAliveFacade.updateTaskActiveTime(taskId, date);
-    }
-
-    /**
      * 获取任务最近活跃时间
      */
     public String getTaskAliveTime(Long taskId) {

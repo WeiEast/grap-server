@@ -96,25 +96,6 @@ public class MoxieBusinessService extends AbstractService implements Initializin
     }
 
     /**
-     * 任务是否已经结束(即:任务是否已经为成功,失败或取消)
-     */
-    private boolean isTaskDone(long taskId) {
-        TaskDTO task = taskService.getById(taskId);
-        if (task == null) {
-            logger.error("taskId={}不存在", taskId);
-            return true;
-        }
-        Byte taskStatus = task.getStatus();
-        if (ETaskStatus.CANCEL.getStatus().equals(taskStatus)
-                || ETaskStatus.SUCCESS.getStatus().equals(taskStatus)
-                || ETaskStatus.FAIL.getStatus().equals(taskStatus)) {
-            logger.info("taskId={}任务已经结束,魔蝎后续重试回调不再处理", taskId);
-            return true;
-        }
-        return false;
-    }
-
-    /**
      * 魔蝎账单通知业务处理
      */
     public void bill(MoxieTaskEventNoticeDTO eventNoticeDTO) {

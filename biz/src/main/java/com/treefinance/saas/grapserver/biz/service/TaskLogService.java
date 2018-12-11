@@ -22,17 +22,6 @@ import java.util.List;
 @Service
 public class TaskLogService extends AbstractService {
 
-    /**
-     * logger
-     */
-    private static final Logger logger = LoggerFactory.getLogger(TaskLogService.class);
-
-    public static final String TASK_CANCEL_LOG = "任务取消";
-    public static final String TASK_CREATE_LOG = "任务创建";
-    public static final String TASK_TIMEOUT_LOG = "任务超时";
-    public static final String TASK_FAIL_LOG = "任务失败";
-    public static final String TASK_SUCCESS_LOG = "任务成功";
-
     @Autowired
     private TaskLogFacade taskLogFacade;
 
@@ -46,13 +35,6 @@ public class TaskLogService extends AbstractService {
         }
         logger.info("记录任务日志:taskId={},msg={},processTime={},errorMsg={}", taskId, msg, processTime, errorMsg);
         return rpcResult.getData();
-    }
-
-    /**
-     * 记录任务超时
-     */
-    public Long logTimeoutTask(Long taskId, String errorMessage) {
-        return insert(taskId, TASK_TIMEOUT_LOG, new Date(), errorMessage);
     }
 
     /**

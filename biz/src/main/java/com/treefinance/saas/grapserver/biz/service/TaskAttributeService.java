@@ -1,6 +1,3 @@
-/**
- * Copyright © 2017 Treefinance All Rights Reserved
- */
 package com.treefinance.saas.grapserver.biz.service;
 
 import com.google.common.collect.Maps;
@@ -70,32 +67,6 @@ public class TaskAttributeService extends AbstractService {
             attributeMap.put(taskAttributeROEntry.getKey(), taskAttribute);
         }
         return attributeMap;
-    }
-
-    /**
-     * 通过属性名和属性值查询taskId
-     */
-    public TaskAttribute findByNameAndValue(String name, String value, boolean encrypt) {
-
-        TaskResult<TaskAttributeRO> rpcResult = taskAttributeFacade.findByNameAndValue(name, value, encrypt);
-        if (!rpcResult.isSuccess()) {
-            throw new UnknownException("调用taskcenter失败");
-        }
-        if (rpcResult.getData() == null) {
-            return null;
-        }
-        return convert(rpcResult.getData(), TaskAttribute.class);
-    }
-
-    /**
-     * 根据taskId查询所有属性
-     */
-    public List<TaskAttribute> findByTaskId(Long taskId) {
-        TaskResult<List<TaskAttributeRO>> rpcResult = taskAttributeFacade.findByTaskId(taskId);
-        if (!rpcResult.isSuccess()) {
-            throw new UnknownException("调用taskcenter失败");
-        }
-        return convert(rpcResult.getData(), TaskAttribute.class);
     }
 
 }

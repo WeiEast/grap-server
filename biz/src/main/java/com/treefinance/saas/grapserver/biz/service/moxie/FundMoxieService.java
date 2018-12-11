@@ -23,17 +23,6 @@ public class FundMoxieService {
     private DiamondConfig diamondConfig;
 
     /**
-     * 获取城市公积金列表
-     */
-    public List<MoxieCityInfoDTO> queryCityList() {
-        String url = diamondConfig.getMoxieUrlFundGetCityList();
-        Map<String, String> headers = Maps.newHashMap();
-        wrapperApiKeyHeaders(headers);
-        String data = HttpClientUtils.doGetWithHeaders(url, headers);
-        return JSON.parseArray(data, MoxieCityInfoDTO.class);
-    }
-
-    /**
      * 获取城市公积金列表(省市关联接口，含province)
      */
     public List<MoxieCityInfoDTO> queryCityListEx() {
@@ -105,17 +94,6 @@ public class FundMoxieService {
         Map<String, Object> params = Maps.newHashMap();
         params.put("input", input);
         HttpClientUtils.doPostWithHeaders(url, params, headers);
-    }
-
-    /**
-     * 根据task_id获取公积金全部信息
-     */
-    public String queryFunds(String moxieTaskId) {
-        String url = diamondConfig.getMoxieUrlFundGetFunds();
-        url = url.replaceAll("\\{task_id}", moxieTaskId);
-        Map<String, String> headers = Maps.newHashMap();
-        wrapperTokenHeaders(headers);
-        return HttpClientUtils.doGetWithHeaders(url, headers);
     }
 
     /**

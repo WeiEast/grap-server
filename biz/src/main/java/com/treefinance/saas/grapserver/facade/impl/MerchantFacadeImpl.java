@@ -1,4 +1,4 @@
-package com.treefinance.saas.grapserver.biz.facade;
+package com.treefinance.saas.grapserver.facade.impl;
 
 import com.alibaba.fastjson.JSON;
 import com.treefinance.saas.grapserver.biz.domain.MerchantBaseInfo;
