@@ -3,13 +3,7 @@ package com.treefinance.saas.grapserver.biz.service;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.treefinance.saas.grapserver.context.config.DiamondConfig;
-import com.treefinance.saas.grapserver.common.enums.EBizType;
-import com.treefinance.saas.grapserver.common.enums.ETaskStatus;
-import com.treefinance.saas.grapserver.common.enums.ETongdunData;
-import com.treefinance.saas.grapserver.common.enums.ETongdunDetailData;
-import com.treefinance.saas.grapserver.common.enums.ETongdunType;
-import com.treefinance.saas.grapserver.biz.config.DiamondConfig;
+import com.treefinance.saas.grapserver.biz.domain.AppLicense;
 import com.treefinance.saas.grapserver.common.enums.EBizType;
 import com.treefinance.saas.grapserver.common.enums.ETaskStatus;
 import com.treefinance.saas.grapserver.common.enums.ETongdunData;
@@ -20,9 +14,9 @@ import com.treefinance.saas.grapserver.common.result.SaasResult;
 import com.treefinance.saas.grapserver.common.result.TongdunData;
 import com.treefinance.saas.grapserver.common.result.TongdunDetailData;
 import com.treefinance.saas.grapserver.common.result.TongdunDetailResult;
+import com.treefinance.saas.grapserver.context.config.DiamondConfig;
 import com.treefinance.saas.grapserver.util.HttpClientUtils;
 import com.treefinance.saas.grapserver.util.TongdunDataResolver;
-import com.treefinance.saas.grapserver.biz.domain.AppLicense;
 import com.treefinance.saas.taskcenter.facade.service.TaskFacade;
 import com.treefinance.saas.taskcenter.facade.service.TaskLogFacade;
 import org.apache.commons.lang3.StringUtils;
@@ -33,12 +27,6 @@ import org.springframework.stereotype.Service;
 
 import javax.xml.bind.ValidationException;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -175,7 +163,7 @@ public class TongdunService {
     }
 
     public Object processCollectDetailTask(Long taskId, String appId, TongdunRequest tongdunRequest) {
-        String url = diamondConfig.getTongdunUrlCollect();
+        String url = diamondConfig.getTongdunDetailUrlCollect();
         JSONObject data = JSON.parseObject(JSON.toJSONString(tongdunRequest));
         Map<String, Object> map = new HashMap<>(1);
         map.put("data", data);

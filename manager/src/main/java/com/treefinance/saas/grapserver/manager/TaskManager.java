@@ -14,17 +14,15 @@
  * limitations under the License.
  */
 
-package com.treefinance.saas.grapserver.biz.service;
+package com.treefinance.saas.grapserver.manager;
 
-import com.treefinance.saas.grapserver.biz.domain.AppLicense;
+import com.treefinance.saas.grapserver.manager.domain.TaskBO;
 
 /**
  * @author Jerry
- * @since 19:14 25/04/2017
+ * @date 2018/12/12 02:06
  */
-public interface LicenseService  {
+public interface TaskManager {
 
-    AppLicense getAppLicense(String appId);
-
-    String getDataSecretKey(String appId);
+  TaskBO getTaskById(Long id);
 }

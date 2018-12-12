@@ -1,12 +1,5 @@
 package com.treefinance.saas.grapserver.biz.service;
 
-import com.treefinance.saas.taskcenter.facade.result.common.TaskResult;
-import com.treefinance.saas.taskcenter.facade.service.TaskAliveFacade;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
-import java.util.Date;
-
 /**
  * Buddha Bless , No Bug !
  * 任务活跃服务类
@@ -14,28 +7,17 @@ import java.util.Date;
  * @author haojiahong
  * @date 2018/4/24
  */
-@Service("taskAliveService")
-public class TaskAliveService {
 
-    @Autowired
-    private TaskAliveFacade taskAliveFacade;
+public interface TaskAliveService {
 
     /**
-     * 更新任务最近活跃时间
-     * 可能存在多个请求同时更新活跃时间,未获得锁的请求可过滤掉
+     * 更新任务最近活跃时间 可能存在多个请求同时更新活跃时间,未获得锁的请求可过滤掉
      *
      * @param taskId 任务id
      */
-    public void updateTaskActiveTime(Long taskId) {
-        taskAliveFacade.updateTaskActiveTime(taskId);
-    }
-
+    void updateTaskActiveTime(Long taskId);
     /**
      * 获取任务最近活跃时间
      */
-    public String getTaskAliveTime(Long taskId) {
-        TaskResult<String> rpcResult = taskAliveFacade.getTaskAliveTime(taskId);
-        return rpcResult.getData();
-    }
-
+    String getTaskAliveTime(Long taskId);
 }

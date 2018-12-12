@@ -7,14 +7,14 @@ import com.treefinance.saas.grapserver.biz.domain.AppLicense;
 import com.treefinance.saas.grapserver.biz.domain.CallbackConfig;
 import com.treefinance.saas.grapserver.biz.dto.TaskAttribute;
 import com.treefinance.saas.grapserver.biz.dto.TaskCallbackLog;
-import com.treefinance.saas.grapserver.biz.dto.TaskLog;
+import com.treefinance.saas.grapserver.biz.domain.TaskLog;
 import com.treefinance.saas.grapserver.common.enums.EBizType;
 import com.treefinance.saas.grapserver.common.enums.ETaskStatus;
 import com.treefinance.saas.grapserver.common.exception.ParamsCheckException;
-import com.treefinance.saas.grapserver.common.model.dto.TaskDTO;
 import com.treefinance.saas.grapserver.facade.enums.EDataType;
 import com.treefinance.saas.grapserver.facade.enums.EGrapStatus;
 import com.treefinance.saas.grapserver.facade.enums.ETaskAttribute;
+import com.treefinance.saas.grapserver.manager.domain.TaskBO;
 import com.treefinance.saas.grapserver.util.CallbackDataUtils;
 import java.net.URLEncoder;
 import java.util.List;
@@ -47,7 +47,7 @@ public class GrapDataDownloadService {
     @Autowired
     protected TaskAttributeService taskAttributeService;
     @Autowired
-    protected LicenseService applicenseservice;
+    protected LicenseService licenseService;
     @Autowired
     private TaskLicenseService taskLicenseService;
     @Autowired
@@ -57,14 +57,11 @@ public class GrapDataDownloadService {
      * 获取加密的爬取数据
      */
     public String getEncryptGrapData(String appId, String bizType, Long taskId) {
-        TaskDTO taskDTO = taskService.getById(taskId);
-        if (taskDTO == null) {
-            throw new ParamsCheckException("taskId不存在");
-        }
-        if (!taskDTO.getAppId().equals(appId)) {
+        TaskBO task = taskService.getTaskById(taskId);
+        if (!task.getAppId().equals(appId)) {
             throw new ParamsCheckException("非授权用户taskId");
         }
-        if (!taskService.isTaskCompleted(taskDTO)) {
+        if (!taskService.isCompleted(task.getStatus())) {
             throw new ParamsCheckException("任务进行中");
         }
         // 校验范围权限
@@ -72,16 +69,16 @@ public class GrapDataDownloadService {
         if (ebizType == null) {
             throw new ParamsCheckException("未开通相关业务");
         }
-        if (!ebizType.getCode().equals(taskDTO.getBizType())) {
+        if (!ebizType.getCode().equals(task.getBizType())) {
             throw new ParamsCheckException("非所属业务taskId");
         }
-        taskLicenseService.verifyCreateTask(appId, taskDTO.getUniqueId(), EBizType.of(bizType));
+        taskLicenseService.verifyCreateTask(appId, task.getUniqueId(), EBizType.of(bizType));
         // 1.获取回调日志中的数据
-        Map<String, Object> dataMap = getGrapDataMap(taskDTO);
+        Map<String, Object> dataMap = getGrapDataMap(task);
         // 2.默认数据的填充
-        fillDataMap(taskDTO, dataMap);
+        fillDataMap(task, dataMap);
         // 3.加密参数
-        AppLicense appLicense = applicenseservice.getAppLicense(appId);
+        AppLicense appLicense = licenseService.getAppLicense(appId);
         String params = "";
         try {
             params = CallbackDataUtils.encrypt(dataMap, appLicense.getServerPublicKey());
@@ -97,15 +94,15 @@ public class GrapDataDownloadService {
     /**
      * 获取抓取数据
      */
-    protected Map<String, Object> getGrapDataMap(TaskDTO taskDTO) {
+    private Map<String, Object> getGrapDataMap(TaskBO task) {
         Map<String, Object> dataMap = Maps.newHashMap();
         // 根据回调日志获取数据
-        List<TaskCallbackLog> taskCallbackLogList = taskCallbackLogService.getTaskCallbackLogs(taskDTO.getId(), null);
+        List<TaskCallbackLog> taskCallbackLogList = taskCallbackLogService.getTaskCallbackLogs(task.getId(), null);
         if (CollectionUtils.isNotEmpty(taskCallbackLogList)) {
-            String appId = taskDTO.getAppId();
-            Byte bizType = taskDTO.getBizType();
+            String appId = task.getAppId();
+            Byte bizType = task.getBizType();
             List<CallbackConfig> configs = callbackConfigService.queryCallbackConfigsByAppIdAndBizType(appId, bizType, EDataType.MAIN_STREAM);
-            logger.info("根据业务类型匹配回调配置结果:taskId={},configList={}", taskDTO.getId(), JSON.toJSONString(configs));
+            logger.info("根据业务类型匹配回调配置结果:taskId={},configList={}", task.getId(), JSON.toJSONString(configs));
 
             if (CollectionUtils.isEmpty(configs)) {
                 // 前端回调: 直接取数据结果
@@ -135,7 +132,7 @@ public class GrapDataDownloadService {
     /**
      * 生成数据Map
      */
-    protected Map<String, Object> fillDataMap(TaskDTO task, Map<String, Object> dataMap) {
+    private void fillDataMap(TaskBO task, Map<String, Object> dataMap) {
         Long taskId = task.getId();
         // 1. 初始化回调数据 并填充uniqueId、taskId、taskStatus
         if (!dataMap.containsKey("taskId")) {
@@ -205,7 +202,6 @@ public class GrapDataDownloadService {
             }
         }
         logger.info("fillDataMap: data={}, task={}", JSON.toJSONString(dataMap), JSON.toJSONString(task));
-        return dataMap;
     }
 
 }

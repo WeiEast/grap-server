@@ -16,12 +16,13 @@
 
 package com.treefinance.saas.grapserver.context.config;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.alibaba.fastjson.JSON;
 import com.github.diamond.client.extend.annotation.AfterUpdate;
 import com.github.diamond.client.extend.annotation.BeforeUpdate;
 import com.github.diamond.client.extend.annotation.DAttribute;
 import com.github.diamond.client.extend.annotation.DResource;
 import com.treefinance.saas.grapserver.common.enums.EBizType;
+import com.treefinance.toolkit.util.json.Jackson;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Scope;
@@ -134,8 +135,7 @@ public class DiamondConfig {
 
     public String getSdkTitle(EBizType bizType) {
         try {
-            ObjectMapper objectMapper = new ObjectMapper();
-            Map sdkTitleMap = objectMapper.readValue(this.sdkTitle, Map.class);
+            Map<String, Object> sdkTitleMap = JSON.parseObject(this.sdkTitle);
             return sdkTitleMap.get(bizType.getText()).toString();
         } catch (Exception ex) {
             return "";
@@ -294,4 +294,11 @@ public class DiamondConfig {
         this.tongdunUrlCollect = tongdunUrlCollect;
     }
 
+    public ColorConfig getDefaultColorConfig() {
+        ColorConfig defaultConfig = Jackson.parse(getDefaultMerchantColorConfig(), ColorConfig.class);
+        defaultConfig.setStyle("default");
+
+        return defaultConfig;
+    }
+    
 }

@@ -3,17 +3,18 @@ package com.treefinance.saas.grapserver.biz.service;
 import com.alibaba.fastjson.JSON;
 import com.google.common.base.Joiner;
 import com.google.common.collect.Maps;
-import com.treefinance.saas.grapserver.context.config.DiamondConfig;
 import com.treefinance.saas.grapserver.common.exception.BizException;
 import com.treefinance.saas.grapserver.common.model.vo.task.AppH5TipsVO;
+import com.treefinance.saas.grapserver.context.component.AbstractService;
+import com.treefinance.saas.grapserver.context.config.ColorConfig;
+import com.treefinance.saas.grapserver.context.config.DiamondConfig;
+import com.treefinance.saas.grapserver.exception.IllegalBizDataException;
 import com.treefinance.saas.grapserver.manager.ColorConfigManager;
 import com.treefinance.saas.grapserver.manager.domain.ColorConfigBO;
-import com.treefinance.saas.grapserver.exception.IllegalBizDataException;
 import com.treefinance.saas.merchant.facade.request.grapserver.GetAppH5TipsRequest;
 import com.treefinance.saas.merchant.facade.result.console.AppH5TipsResult;
 import com.treefinance.saas.merchant.facade.result.console.MerchantResult;
 import com.treefinance.saas.merchant.facade.service.AppH5TipsFacade;
-import com.treefinance.toolkit.util.json.Jackson;
 import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,9 +29,7 @@ import java.util.stream.Collectors;
  * @author by luoyihua on 2017/5/5.
  */
 @Service
-public class MerchantConfigService {
-
-    private static final Logger logger = LoggerFactory.getLogger(MerchantConfigService.class);
+public class MerchantConfigService extends AbstractService {
 
     @Autowired
     private DiamondConfig diamondConfig;
@@ -43,7 +42,8 @@ public class MerchantConfigService {
         ColorConfigBO config = colorConfigManager.queryAppColorConfig(appId, style);
         if (config == null) {
             logger.debug("读取默认配色信息，appId={}，", appId);
-            config = getDefaultColorConfig();
+            ColorConfig defaultColorConfig = diamondConfig.getDefaultColorConfig();
+            config = convert(defaultColorConfig, ColorConfigBO.class);
         }
 
         if (config == null) {
@@ -60,22 +60,6 @@ public class MerchantConfigService {
         map.put("scheduleError", config.getScheduleError());
 
         return map;
-    }
-
-    private ColorConfigBO getDefaultColorConfig() {
-        Map<String, String> defaultSetting = Jackson.parseMap(diamondConfig.getDefaultMerchantColorConfig(), String.class, String.class);
-
-        ColorConfigBO defaultConfig = new ColorConfigBO();
-        defaultConfig.setStyle("default");
-        defaultConfig.setMain(defaultSetting.get("main"));
-        defaultConfig.setAssist(defaultSetting.get("assist"));
-        defaultConfig.setAssistError(defaultSetting.get("assistError"));
-        defaultConfig.setBackBtnAndFontColor(defaultSetting.get("backBtnAndFontColor"));
-        defaultConfig.setBackground(defaultSetting.get("background"));
-        defaultConfig.setBtnDisabled(defaultSetting.get("btnDisabled"));
-        defaultConfig.setScheduleError(defaultSetting.get("scheduleError"));
-
-        return defaultConfig;
     }
 
     public Object getTips(String appId, Byte bizType) {

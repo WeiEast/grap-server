@@ -20,8 +20,9 @@ public class GrapDataController {
 
     @RequestMapping(value = {"/grap/{bizType}/data"}, method = {RequestMethod.GET})
     public Object getData(@PathVariable("bizType") String bizType, GrapDataVO grapDataVO) {
-        return SimpleResult.successResult(
-                grapDataDownloadService.getEncryptGrapData(grapDataVO.getAppid(), bizType, grapDataVO.getTaskId()));
+        String result = grapDataDownloadService.getEncryptGrapData(grapDataVO.getAppid(), bizType, grapDataVO.getTaskId());
+
+        return SimpleResult.successResult(result);
     }
 
 }

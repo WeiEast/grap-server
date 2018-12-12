@@ -21,15 +21,13 @@ import com.treefinance.saas.grapserver.biz.service.TaskAttributeService;
 import com.treefinance.saas.grapserver.biz.service.TaskLogService;
 import com.treefinance.saas.grapserver.biz.service.TaskDirectiveService;
 import com.treefinance.saas.grapserver.biz.service.TaskService;
-import com.treefinance.saas.grapserver.common.enums.ETaskStatus;
 import com.treefinance.saas.grapserver.common.enums.ETaskStep;
 import com.treefinance.saas.grapserver.common.enums.moxie.EMoxieDirective;
 import com.treefinance.saas.grapserver.common.exception.RequestFailedException;
-import com.treefinance.saas.grapserver.common.model.dto.TaskDTO;
 import com.treefinance.saas.grapserver.common.model.dto.moxie.*;
 import com.treefinance.saas.grapserver.common.model.vo.moxie.MoxieCityInfoVO;
 import com.treefinance.saas.grapserver.biz.dto.TaskAttribute;
-import com.treefinance.saas.grapserver.biz.dto.TaskLog;
+import com.treefinance.saas.grapserver.biz.domain.TaskLog;
 import com.treefinance.saas.grapserver.facade.enums.ETaskAttribute;
 import com.treefinance.saas.taskcenter.facade.request.MoxieTaskEventNoticeRequest;
 import com.treefinance.saas.taskcenter.facade.service.MoxieTaskEventNoticeFacade;
@@ -137,8 +135,8 @@ public class MoxieBusinessService extends AbstractService implements Initializin
                     map.put("directive", "require_sms");
                     map.put("information", moxieCaptchaDTO);
                     logger.info("魔蝎公积金任务需要短信验证码,moxieCaptchaDTO={},taskId={}", JSON.toJSONString(moxieCaptchaDTO), taskId);
-                    List<TaskLog> list = taskLogService.queryTaskLog(taskId, ETaskStep.WAITING_USER_INPUT_MESSAGE_CODE.getText());
-                    if (list.size() <= inputCount) {
+                    int size = taskLogService.countTaskLogsByTaskIdAndMsg(taskId, ETaskStep.WAITING_USER_INPUT_MESSAGE_CODE.getText());
+                    if (size <= inputCount) {
                         taskLogService.insert(taskId, ETaskStep.WAITING_USER_INPUT_MESSAGE_CODE.getText(), new Date(), null);
                     }
                 }
@@ -147,8 +145,8 @@ public class MoxieBusinessService extends AbstractService implements Initializin
                     map.put("directive", "require_picture");
                     map.put("information", moxieCaptchaDTO);
                     logger.info("魔蝎公积金任务需要图片验证码,moxieCaptchaDTO={},taskId={}", JSON.toJSONString(moxieCaptchaDTO), taskId);
-                    List<TaskLog> list = taskLogService.queryTaskLog(taskId, ETaskStep.WAITING_USER_INPUT_IMAGE_CODE.getText());
-                    if (list.size() <= inputCount) {
+                    int size = taskLogService.countTaskLogsByTaskIdAndMsg(taskId, ETaskStep.WAITING_USER_INPUT_IMAGE_CODE.getText());
+                    if (size <= inputCount) {
                         taskLogService.insert(taskId, ETaskStep.WAITING_USER_INPUT_IMAGE_CODE.getText(), new Date(), null);
                     }
                 }

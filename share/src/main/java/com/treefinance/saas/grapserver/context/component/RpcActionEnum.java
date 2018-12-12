@@ -72,5 +72,17 @@ public enum RpcActionEnum {
     /**
      * 启动爬虫入口
      */
-    ACQUISITION_ENTRY_BOOT
+    ACQUISITION_ENTRY_BOOT,
+    /**
+     * 根据任务ID查询任务
+     */
+    QUERY_TASK_BY_ID,
+    /**
+     * 添加任务日志
+     */
+    ADD_TASK_LOG,
+    /**
+     * 查询失败任务的最后一条错误日志
+     */
+    QUERY_LAST_ERROR_TASK_LOG,
 }

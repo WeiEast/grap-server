@@ -17,7 +17,8 @@ import com.treefinance.saas.grapserver.biz.service.TaskTimeService;
 import com.treefinance.saas.grapserver.common.enums.EBizType;
 import com.treefinance.saas.grapserver.common.enums.EDirective;
 import com.treefinance.saas.grapserver.common.enums.EOperatorCodeType;
-import com.treefinance.saas.grapserver.common.model.dto.TaskDTO;
+import com.treefinance.saas.grapserver.exception.RpcServiceException;
+import com.treefinance.saas.grapserver.manager.domain.TaskBO;
 import com.treefinance.saas.knife.result.SimpleResult;
 import com.treefinance.toolkit.util.json.Jackson;
 import org.apache.commons.lang3.StringUtils;
@@ -120,12 +121,14 @@ public class TaskController {
         map.put("company", merchantBaseInfo.getCompany());
         map.put("bussiness", merchantBaseInfo.getBussiness());
         map.put("bussiness2", merchantBaseInfo.getBussiness2());
-        TaskDTO taskDTO = taskServiceImpl.getById(taskid);
-        if (taskDTO != null) {
-            map.put("uniqueId", taskDTO.getUniqueId());
-        } else {
+        try {
+            TaskBO task = taskServiceImpl.getTaskById(taskid);
+            map.put("uniqueId", task.getUniqueId());
+        } catch (RpcServiceException e) {
+            logger.warn("获取任务[{}]失败", taskid, e);
             map.put("uniqueId", "");
         }
+
         return new SimpleResult<>(map);
     }
 

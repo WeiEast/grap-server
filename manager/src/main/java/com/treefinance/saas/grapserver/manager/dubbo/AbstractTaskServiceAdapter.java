@@ -34,4 +34,12 @@ public abstract class AbstractTaskServiceAdapter extends AbstractDubboServiceAda
             throw new RpcServiceException("[TASK] Error server! code: " + result.getCode() + ", message: " + result.getMessage() + " - action:" + " " + action + appendArgs(args));
         }
     }
+
+    protected <T> void validateResult(TaskResult<T> result, RpcActionEnum action, Object... args) {
+        validateResponse(result, action, args);
+
+        if (result.getData() == null) {
+            throw new RpcServiceException("[TASK] Invalid response entity! - action:" + " " + action + appendArgs(args));
+        }
+    }
 }

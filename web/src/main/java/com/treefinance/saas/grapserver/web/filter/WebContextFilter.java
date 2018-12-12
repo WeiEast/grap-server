@@ -127,9 +127,9 @@ public class WebContextFilter extends AbstractRequestFilter {
         logger.error(String.format("@[%s;%s;%s] >> %s", request.getRequestURI(), request.getMethod(),
                 ServletRequests.getIP(request), e.getMessage()));
 
-        Map map = Maps.newHashMap();
+        Map<String, Object> map = Maps.newHashMap();
         map.put("mark", 0);
-        SimpleResult result = new SimpleResult(map);
+        SimpleResult<Map<String, Object>> result = new SimpleResult<>(map);
         result.setErrorMsg("appId非法");
         String responseBody = Jackson.toJSONString(result);
         ServletResponses.responseJson(response, 400, responseBody);
@@ -174,9 +174,9 @@ public class WebContextFilter extends AbstractRequestFilter {
         logger.error(String.format("@[%s;%s;%s] >> %s", request.getRequestURI(), request.getMethod(),
                 ServletRequests.getIP(request), e.getMessage()));
 
-        Map map = Maps.newHashMap();
+        Map<String, Object> map = Maps.newHashMap();
         map.put("mark", 0);
-        SimpleResult result = new SimpleResult(map);
+        SimpleResult<Map<String, Object>> result = new SimpleResult<>(map);
         result.setErrorMsg("用户未授权");
         String responseBody = Jackson.toJSONString(result);
         ServletResponses.responseJson(response, 403, responseBody);

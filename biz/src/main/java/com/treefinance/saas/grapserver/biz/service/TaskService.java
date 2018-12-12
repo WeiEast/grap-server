@@ -4,15 +4,17 @@ import com.google.common.base.Splitter;
 import com.treefinance.basicservice.security.crypto.facade.EncryptionIntensityEnum;
 import com.treefinance.basicservice.security.crypto.facade.ISecurityCryptoService;
 import com.treefinance.saas.assistant.model.Constants;
-import com.treefinance.saas.grapserver.context.component.AbstractService;
-import com.treefinance.saas.grapserver.context.config.DiamondConfig;
+import com.treefinance.saas.grapserver.biz.dto.Task;
 import com.treefinance.saas.grapserver.common.enums.ETaskStatus;
 import com.treefinance.saas.grapserver.common.exception.AppIdUncheckException;
 import com.treefinance.saas.grapserver.common.exception.ForbiddenException;
 import com.treefinance.saas.grapserver.common.exception.UnknownException;
 import com.treefinance.saas.grapserver.common.exception.base.MarkBaseException;
 import com.treefinance.saas.grapserver.common.model.dto.TaskDTO;
-import com.treefinance.saas.grapserver.biz.dto.Task;
+import com.treefinance.saas.grapserver.context.component.AbstractService;
+import com.treefinance.saas.grapserver.context.config.DiamondConfig;
+import com.treefinance.saas.grapserver.manager.TaskManager;
+import com.treefinance.saas.grapserver.manager.domain.TaskBO;
 import com.treefinance.saas.taskcenter.facade.request.TaskCreateRequest;
 import com.treefinance.saas.taskcenter.facade.request.TaskRequest;
 import com.treefinance.saas.taskcenter.facade.request.TaskUpdateRequest;
@@ -40,6 +42,8 @@ public class TaskService extends AbstractService {
     private DiamondConfig diamondConfig;
     @Autowired
     private TaskFacade taskFacade;
+    @Autowired
+    private TaskManager taskManager;
 
     /**
      * 创建任务
@@ -150,28 +154,15 @@ public class TaskService extends AbstractService {
     }
 
 
-    /**
-     * 任务是否完成
-     */
-    public boolean isTaskCompleted(TaskDTO task) {
-        if (task == null) {
-            return false;
-        }
-        Byte status = task.getStatus();
+    public boolean isCompleted(Byte status) {
         return ETaskStatus.CANCEL.getStatus().equals(status)
                 || ETaskStatus.FAIL.getStatus().equals(status)
                 || ETaskStatus.SUCCESS.getStatus().equals(status);
     }
 
 
-    public TaskDTO getById(Long taskId) {
-        TaskRequest taskRequest = new TaskRequest();
-        taskRequest.setId(taskId);
-        TaskResult<TaskRO> rpcResult = taskFacade.getTaskByPrimaryKey(taskRequest);
-        if (!rpcResult.isSuccess()) {
-            throw new UnknownException("调用taskcenter失败");
-        }
-        return convert(rpcResult.getData(), TaskDTO.class);
+    public TaskBO getTaskById(Long taskId) {
+        return taskManager.getTaskById(taskId);
     }
 
 

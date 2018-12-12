@@ -14,17 +14,27 @@
  * limitations under the License.
  */
 
-package com.treefinance.saas.grapserver.biz.service;
+package com.treefinance.saas.grapserver.biz.domain;
 
-import com.treefinance.saas.grapserver.biz.domain.AppLicense;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
 
-/**
- * @author Jerry
- * @since 19:14 25/04/2017
- */
-public interface LicenseService  {
+import java.io.Serializable;
+import java.util.Date;
 
-    AppLicense getAppLicense(String appId);
+@Getter
+@Setter
+@ToString
+public class TaskLog implements Serializable {
+    private Long taskId;
 
-    String getDataSecretKey(String appId);
+    private String stepCode;
+
+    private String msg;
+
+    private Date occurTime;
+
+    private String errorMsg;
+
 }
