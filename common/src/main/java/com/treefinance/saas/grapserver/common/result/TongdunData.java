@@ -1,10 +1,16 @@
 package com.treefinance.saas.grapserver.common.result;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
+
+import java.io.Serializable;
+
 /**
- * @author:guoguoyun
- * @date:Created in 2018/10/18下午7:32
+ * @author guoguoyun
+ * @date 2018/10/18下午7:32
  */
-public class TongdunData {
+@JsonInclude(Include.NON_NULL)
+public class TongdunData implements Serializable {
 
     /**
      * 对应规则 {@link com.treefinance.saas.grapserver.common.enums.ETongdunData#name}
@@ -18,6 +24,10 @@ public class TongdunData {
      * 对应规则的评分
      */
     private String score;
+    /**
+     * 规则详情
+     */
+    private TongdunDetailData detail;
 
     public String getId() {
         return id;
@@ -43,7 +53,16 @@ public class TongdunData {
         this.score = score;
     }
 
-    @Override public String toString() {
-        return "TongdunData{" + "id='" + id + '\'' + ", value='" + value + '\'' + ", score='" + score + '\'' + '}';
+    public TongdunDetailData getDetail() {
+        return detail;
+    }
+
+    public void setDetail(TongdunDetailData detail) {
+        this.detail = detail;
+    }
+
+    @Override
+    public String toString() {
+        return "TongdunData{" + "id='" + id + '\'' + ", value='" + value + '\'' + ", score='" + score + '\'' + ", detail=" + detail + '}';
     }
 }
