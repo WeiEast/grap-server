@@ -16,40 +16,51 @@
 
 package com.treefinance.saas.grapserver.share.cache.redis;
 
-import com.treefinance.saas.grapserver.context.Constants;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.TimeUnit;
+import com.google.common.collect.ImmutableMap;
+import com.treefinance.b2b.saas.context.conf.PropertiesConfiguration;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.StringRedisTemplate;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
-@Component("redisDao")
+import java.util.Map;
+import java.util.concurrent.TimeUnit;
+
+@Service("redisDao")
 public class RedisDaoImpl implements RedisDao {
 
     private static final Logger logger = LoggerFactory.getLogger(RedisDaoImpl.class);
+    private static final int REDIS_KEY_TIMEOUT = PropertiesConfiguration.getInstance().getInt("platform.redisKey.timeout", 600);
 
+    private final StringRedisTemplate redisTemplate;
 
     @Autowired
-    private StringRedisTemplate redisTemplate;
-
-    @Override
-    public RedisTemplate<String, String> getRedisTemplate() {
-        return redisTemplate;
+    public RedisDaoImpl(StringRedisTemplate redisTemplate) {
+        this.redisTemplate = redisTemplate;
     }
 
+    @Override
+    public void enqueue(String key, String value) {
+        redisTemplate.opsForList().leftPush(key, value);
+    }
 
     @Override
-    public String get(String key) {
+    public String dequeue(String key) {
+        return redisTemplate.opsForList().rightPop(key);
+    }
+
+    @Override
+    public String getValue(String key) {
+        return redisTemplate.opsForValue().get(key);
+    }
+
+    @Override
+    public String getValueQuietly(String key) {
         try {
-            return redisTemplate.opsForValue().get(key);
+            return getValue(key);
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
             return null;
@@ -57,14 +68,106 @@ public class RedisDaoImpl implements RedisDao {
     }
 
     @Override
-    public Boolean setEx(String key, String value, long timeout, TimeUnit unit) {
+    public boolean setExpiredValueQuietly(String key, final String value) {
+        return setValueQuietly(key, value, REDIS_KEY_TIMEOUT);
+    }
+
+    @Override
+    public boolean setValueQuietly(String key, String value) {
         try {
-            redisTemplate.opsForValue().set(key, value, timeout, unit);
+            setValue(key, value);
+            return true;
         } catch (Exception e) {
-            logger.error(e.getMessage(), e);
-            return false;
+            logger.error("Error setting value into redis!", e);
+        }
+        return false;
+    }
+
+    @Override
+    public boolean setValueQuietly(String key, String value, long ttlSeconds) {
+        return setValueQuietly(key, value, ttlSeconds, TimeUnit.SECONDS);
+    }
+
+    @Override
+    public boolean setValueQuietly(String key, String value, long timeout, TimeUnit unit) {
+        try {
+            setValue(key, value, timeout, unit);
+            return true;
+        } catch (Exception e) {
+            logger.error("Error setting value into redis!", e);
+        }
+        return false;
+    }
+
+    @Override
+    public void setValue(String key, String value) {
+        redisTemplate.opsForValue().set(key, value);
+    }
+
+    @Override
+    public void setValue(String key, String value, long timeout, TimeUnit unit) {
+        redisTemplate.opsForValue().set(key, value, timeout, unit);
+    }
+
+    @Override
+    public Boolean setIfAbsent(String key, String value) {
+        return redisTemplate.opsForValue().setIfAbsent(key, value);
+    }
+
+    @Override
+    public void putHash(String key, String hashKey, String hashValue) {
+        redisTemplate.opsForHash().put(key, hashKey, hashValue);
+    }
+
+    @Override
+    public void putHash(String key, Map<String, String> map) {
+        redisTemplate.opsForHash().putAll(key, map);
+    }
+
+    @Override
+    public Map<String, String> getHash(String key) {
+        return redisTemplate.<String, String>opsForHash().entries(key);
+    }
+
+    @Override
+    public String getHashValue(String key, String hashKey) {
+        return redisTemplate.<String, String>opsForHash().get(key, hashKey);
+    }
+
+    @Override
+    public boolean deleteQuietly(String key) {
+        try {
+            delete(key);
+            return true;
+        } catch (Exception e) {
+            logger.error("Error deleting redis key!", e);
         }
         return true;
+    }
+
+    @Override
+    public void delete(String key) {
+        redisTemplate.delete(key);
+    }
+
+    @Override
+    public boolean hasKey(String key) {
+        return redisTemplate.hasKey(key);
+    }
+
+    @Override
+    public Long getExpire(String key) {
+        return redisTemplate.getExpire(key);
+    }
+
+    @Override
+    public Long getExpire(String key, TimeUnit unit) {
+        return redisTemplate.getExpire(key, unit);
+    }
+
+    @Override
+    public Boolean expire(String key, final long timeout, final TimeUnit unit) {
+        return redisTemplate.expire(key, timeout, unit);
     }
 
     @Override
@@ -80,62 +183,11 @@ public class RedisDaoImpl implements RedisDao {
     }
 
     @Override
-    public boolean saveString2List(final String key, final String value) {
-        return saveListString(key, Collections.singletonList(value));
-    }
-
-    @Override
-    public boolean saveListString(final String key, final List<String> valueList) {
-        Long result = redisTemplate.opsForList().rightPushAll(key, valueList.toArray(new String[0]));
-        redisTemplate.expire(key, Constants.REDIS_KEY_TIMEOUT, TimeUnit.SECONDS);
-        return result != null;
-    }
-
-    @Override
-    public String getStringFromList(final String key) {
-        return redisTemplate.opsForList().rightPop(key);
-    }
-
-    @Override
-    public String pullResult(final String obtainRedisKey) {
-        try {
-            return redisTemplate.opsForValue().get(obtainRedisKey);
-        } catch (Exception e) {
-            logger.error(e.getMessage(), e);
-            return null;
-        }
-    }
-
-    @Override
-    public boolean pushMessage(final String submitRedisKey, final String messageType) {
-        return this.pushMessage(submitRedisKey, messageType, Constants.REDIS_KEY_TIMEOUT);
-    }
-
-    @Override
-    public boolean pushMessage(String submitRedisKey, String messageType, int ttlSeconds) {
-        try {
-            redisTemplate.opsForValue().set(submitRedisKey, messageType, ttlSeconds, TimeUnit.SECONDS);
-        } catch (Exception e) {
-            logger.error(e.getMessage(), e);
-            return false;
-        }
-        return true;
-    }
-
-    @Override
-    public void deleteKey(String key) {
-        redisTemplate.delete(key);
-    }
-
-    @Override
     public Map<String, Object> acquireLock(String lockKey, long expired) {
-        Map<String, Object> map = new HashMap<>();
         long value = System.currentTimeMillis() + expired + 1;
         boolean acquired = redisTemplate.opsForValue().setIfAbsent(lockKey, String.valueOf(value));
         if (acquired) {
-            map.put("isSuccess", true);
-            map.put("expireTimeStr", String.valueOf(value));
-            return map;
+            return ImmutableMap.of("isSuccess", true, "expireTimeStr", String.valueOf(value));
         } else {
             String oldValueStr = redisTemplate.opsForValue().get(lockKey);
             //如果其他资源之前获得锁已经超时
@@ -143,16 +195,11 @@ public class RedisDaoImpl implements RedisDao {
                 String getValue = redisTemplate.opsForValue().getAndSet(lockKey, String.valueOf(value));
                 //上一个锁超时后会有很多线程去争夺锁，所以只有拿到oldValue的线程才是获得锁的。
                 if (Long.parseLong(getValue) == Long.parseLong(oldValueStr)) {
-                    map.put("isSuccess", true);
-                    map.put("expireTimeStr", String.valueOf(value));
-                    return map;
-                } else {
-                    return null;
+                    return ImmutableMap.of("isSuccess", true, "expireTimeStr", String.valueOf(value));
                 }
-            } else {
-                return null;
             }
         }
+        return null;
     }
 
     @Override

@@ -3,16 +3,12 @@ package com.treefinance.saas.grapserver.facade.impl;
 import com.treefinance.saas.gateway.servicefacade.TaskService;
 import com.treefinance.saas.gateway.servicefacade.enums.BizTypeEnum;
 import com.treefinance.saas.gateway.servicefacade.model.TaskDTO;
-import com.treefinance.saas.grapserver.common.exception.UnknownException;
-import com.treefinance.saas.grapserver.biz.dto.Task;
 import com.treefinance.saas.grapserver.context.component.AbstractFacade;
-import com.treefinance.saas.taskcenter.facade.request.TaskRequest;
-import com.treefinance.saas.taskcenter.facade.result.common.TaskResult;
-import com.treefinance.saas.taskcenter.facade.service.TaskFacade;
+import com.treefinance.saas.grapserver.manager.TaskManager;
+import com.treefinance.saas.grapserver.manager.domain.TaskBO;
+import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
 
 /**
  * 兼容老的任务服务
@@ -22,26 +18,16 @@ import java.util.List;
 public class GatewayTaskServiceFacadeImpl extends AbstractFacade implements TaskService {
 
     @Autowired
-    private TaskFacade taskFacade;
+    private TaskManager taskManager;
 
     @Override
     public List<Long> getUserTaskIdList(Long taskId) {
-        TaskResult<List<Long>> rpcResult = taskFacade.getUserTaskIdList(taskId);
-        if (!rpcResult.isSuccess()) {
-            throw new UnknownException("调用taskcenter失败");
-        }
-        return rpcResult.getData();
+        return taskManager.listTaskIdsWithSameTrigger(taskId);
     }
 
     @Override
     public TaskDTO getById(Long taskId) {
-        TaskRequest taskRequest = new TaskRequest();
-        taskRequest.setId(taskId);
-        TaskResult<com.treefinance.saas.taskcenter.facade.result.TaskRO> rpcResult = taskFacade.getTaskByPrimaryKey(taskRequest);
-        if (!rpcResult.isSuccess()) {
-            throw new UnknownException("调用taskcenter失败");
-        }
-        Task task = convertStrict(rpcResult.getData(), Task.class);
+        TaskBO task = taskManager.getTaskById(taskId);
         TaskDTO result = convertStrict(task, TaskDTO.class);
         for (BizTypeEnum type : BizTypeEnum.values()) {
             if (BizTypeEnum.valueOfType(type).equals(task.getBizType())) {

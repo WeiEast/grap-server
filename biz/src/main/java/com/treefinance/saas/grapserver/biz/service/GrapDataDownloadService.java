@@ -5,15 +5,16 @@ import com.alibaba.fastjson.JSON;
 import com.google.common.collect.Maps;
 import com.treefinance.saas.grapserver.biz.domain.AppLicense;
 import com.treefinance.saas.grapserver.biz.domain.CallbackConfig;
+import com.treefinance.saas.grapserver.biz.domain.TaskLog;
 import com.treefinance.saas.grapserver.biz.dto.TaskAttribute;
 import com.treefinance.saas.grapserver.biz.dto.TaskCallbackLog;
-import com.treefinance.saas.grapserver.biz.domain.TaskLog;
 import com.treefinance.saas.grapserver.common.enums.EBizType;
 import com.treefinance.saas.grapserver.common.enums.ETaskStatus;
 import com.treefinance.saas.grapserver.common.exception.ParamsCheckException;
 import com.treefinance.saas.grapserver.facade.enums.EDataType;
 import com.treefinance.saas.grapserver.facade.enums.EGrapStatus;
 import com.treefinance.saas.grapserver.facade.enums.ETaskAttribute;
+import com.treefinance.saas.grapserver.manager.TaskManager;
 import com.treefinance.saas.grapserver.manager.domain.TaskBO;
 import com.treefinance.saas.grapserver.util.CallbackDataUtils;
 import java.net.URLEncoder;
@@ -41,7 +42,7 @@ public class GrapDataDownloadService {
     @Autowired
     private TaskCallbackLogService taskCallbackLogService;
     @Autowired
-    private TaskService taskService;
+    private TaskManager taskManager;
     @Autowired
     protected TaskLogService taskLogService;
     @Autowired
@@ -57,13 +58,15 @@ public class GrapDataDownloadService {
      * 获取加密的爬取数据
      */
     public String getEncryptGrapData(String appId, String bizType, Long taskId) {
-        TaskBO task = taskService.getTaskById(taskId);
+        TaskBO task = taskManager.queryCompletedTaskById(taskId);
+        if(task == null) {
+            throw new ParamsCheckException("任务进行中");
+        }
+
         if (!task.getAppId().equals(appId)) {
             throw new ParamsCheckException("非授权用户taskId");
         }
-        if (!taskService.isCompleted(task.getStatus())) {
-            throw new ParamsCheckException("任务进行中");
-        }
+
         // 校验范围权限
         EBizType ebizType = EBizType.of(bizType);
         if (ebizType == null) {

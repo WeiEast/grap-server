@@ -4,16 +4,14 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.treefinance.saas.grapserver.biz.domain.AppBizType;
-import com.treefinance.saas.grapserver.biz.dto.Task;
 import com.treefinance.saas.grapserver.biz.service.AppBizTypeService;
 import com.treefinance.saas.grapserver.common.exception.UnknownException;
 import com.treefinance.saas.grapserver.context.component.AbstractService;
+import com.treefinance.saas.grapserver.manager.TaskManager;
+import com.treefinance.saas.grapserver.manager.domain.TaskBO;
 import com.treefinance.saas.grapserver.util.SystemUtils;
-import com.treefinance.saas.taskcenter.facade.request.TaskRequest;
-import com.treefinance.saas.taskcenter.facade.result.TaskRO;
 import com.treefinance.saas.taskcenter.facade.result.common.TaskResult;
 import com.treefinance.saas.taskcenter.facade.service.MoxieTimeoutFacade;
-import com.treefinance.saas.taskcenter.facade.service.TaskFacade;
 import com.treefinance.toolkit.util.DateUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
@@ -36,19 +34,15 @@ public class MoxieTimeoutService extends AbstractService {
     @Autowired
     private AppBizTypeService appBizTypeService;
     @Autowired
-    private TaskFacade taskFacade;
+    private TaskManager taskManager;
     @Autowired
     private MoxieTimeoutFacade moxieTimeoutFacade;
 
     /**
      * 本地任务缓存
      */
-    private final LoadingCache<Long, Task> cache = CacheBuilder.newBuilder().expireAfterWrite(5, TimeUnit.MINUTES).maximumSize(20000).build(CacheLoader.from(taskId -> {
-        TaskRequest taskRequest = new TaskRequest();
-        taskRequest.setId(taskId);
-        TaskResult<TaskRO> rpcResult = taskFacade.getTaskByPrimaryKey(taskRequest);
-        return convert(rpcResult.getData(), Task.class);
-    }));
+    private final LoadingCache<Long, TaskBO> cache =
+        CacheBuilder.newBuilder().expireAfterWrite(5, TimeUnit.MINUTES).maximumSize(20000).build(CacheLoader.from(taskId -> taskManager.getTaskById(taskId)));
 
     /**
      * 登录是否超时,即等待魔蝎登录状态接口回调是否超时
@@ -94,7 +88,7 @@ public class MoxieTimeoutService extends AbstractService {
     }
 
     public boolean isTaskTimeout(Long taskId) {
-        Task task = cache.getUnchecked(taskId);
+        TaskBO task = cache.getUnchecked(taskId);
         AppBizType bizType = appBizTypeService.getAppBizType(task.getBizType());
         if (bizType.getTimeout() == null) {
             return false;

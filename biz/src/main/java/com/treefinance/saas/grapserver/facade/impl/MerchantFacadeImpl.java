@@ -2,10 +2,11 @@ package com.treefinance.saas.grapserver.facade.impl;
 
 import com.alibaba.fastjson.JSON;
 import com.treefinance.saas.grapserver.biz.domain.MerchantBaseInfo;
-import com.treefinance.saas.grapserver.biz.dto.Task;
 import com.treefinance.saas.grapserver.context.component.AbstractFacade;
 import com.treefinance.saas.grapserver.facade.model.MerchantBaseInfoRO;
 import com.treefinance.saas.grapserver.facade.service.MerchantFacade;
+import com.treefinance.saas.grapserver.manager.TaskManager;
+import com.treefinance.saas.grapserver.manager.domain.TaskBO;
 import com.treefinance.saas.knife.common.CommonStateCode;
 import com.treefinance.saas.knife.result.Results;
 import com.treefinance.saas.knife.result.SaasResult;
@@ -13,12 +14,6 @@ import com.treefinance.saas.merchant.facade.request.grapserver.QueryMerchantByAp
 import com.treefinance.saas.merchant.facade.result.console.MerchantBaseResult;
 import com.treefinance.saas.merchant.facade.result.console.MerchantResult;
 import com.treefinance.saas.merchant.facade.service.MerchantBaseInfoFacade;
-import com.treefinance.saas.taskcenter.facade.request.TaskRequest;
-import com.treefinance.saas.taskcenter.facade.result.TaskRO;
-import com.treefinance.saas.taskcenter.facade.result.common.TaskResult;
-import com.treefinance.saas.taskcenter.facade.service.TaskFacade;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
@@ -32,10 +27,8 @@ import java.util.List;
 @Service("merchantFacade")
 public class MerchantFacadeImpl extends AbstractFacade implements MerchantFacade {
 
-    private static final Logger logger = LoggerFactory.getLogger(MerchantFacade.class);
-
     @Autowired
-    private TaskFacade taskFacade;
+    private TaskManager taskManager;
 
     @Autowired
     private MerchantBaseInfoFacade merchantBaseInfoFacade;
@@ -46,16 +39,8 @@ public class MerchantFacadeImpl extends AbstractFacade implements MerchantFacade
             logger.error("通过taskId查询商户基本信息传入taskId={}有误", taskId);
             return Results.newFailedResult(CommonStateCode.PARAMETER_LACK);
         }
-        TaskRequest taskRequest = new TaskRequest();
-        taskRequest.setId(taskId);
 
-        TaskResult<TaskRO> rpcResult = taskFacade.getTaskByPrimaryKey(taskRequest);
-        if (!rpcResult.isSuccess()) {
-            logger.info("通过taskId查询商户基本信息,未查询到taskId={}的任务信息", taskId);
-            return Results.newSuccessResult(null);
-        }
-
-        Task task = convertStrict(rpcResult.getData(), Task.class);
+        TaskBO task = taskManager.getTaskById(taskId);
         QueryMerchantByAppIdRequest queryMerchantByTaskIdRequest = new QueryMerchantByAppIdRequest();
         List<String> stringList = new ArrayList<String>();
         stringList.add(task.getAppId());

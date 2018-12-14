@@ -15,20 +15,22 @@ import com.treefinance.commonservice.facade.location.GeoCoordSysType;
 import com.treefinance.commonservice.facade.location.GeoPosition;
 import com.treefinance.commonservice.facade.location.GeocodeService;
 import com.treefinance.saas.grapserver.biz.domain.Directive;
-import com.treefinance.saas.grapserver.context.component.AbstractService;
-import com.treefinance.saas.grapserver.share.cache.redis.RedisDao;
+import com.treefinance.saas.grapserver.biz.dto.TaskAttribute;
 import com.treefinance.saas.grapserver.biz.service.TaskAttributeService;
-import com.treefinance.saas.grapserver.biz.service.TaskLogService;
 import com.treefinance.saas.grapserver.biz.service.TaskDirectiveService;
-import com.treefinance.saas.grapserver.biz.service.TaskService;
+import com.treefinance.saas.grapserver.biz.service.TaskLogService;
 import com.treefinance.saas.grapserver.common.enums.ETaskStep;
 import com.treefinance.saas.grapserver.common.enums.moxie.EMoxieDirective;
 import com.treefinance.saas.grapserver.common.exception.RequestFailedException;
-import com.treefinance.saas.grapserver.common.model.dto.moxie.*;
+import com.treefinance.saas.grapserver.common.model.dto.moxie.MoxieCaptchaDTO;
+import com.treefinance.saas.grapserver.common.model.dto.moxie.MoxieCityInfoDTO;
+import com.treefinance.saas.grapserver.common.model.dto.moxie.MoxieLoginParamsDTO;
+import com.treefinance.saas.grapserver.common.model.dto.moxie.MoxieTaskEventNoticeDTO;
 import com.treefinance.saas.grapserver.common.model.vo.moxie.MoxieCityInfoVO;
-import com.treefinance.saas.grapserver.biz.dto.TaskAttribute;
-import com.treefinance.saas.grapserver.biz.domain.TaskLog;
+import com.treefinance.saas.grapserver.context.component.AbstractService;
 import com.treefinance.saas.grapserver.facade.enums.ETaskAttribute;
+import com.treefinance.saas.grapserver.manager.TaskManager;
+import com.treefinance.saas.grapserver.share.cache.redis.RedisDao;
 import com.treefinance.saas.taskcenter.facade.request.MoxieTaskEventNoticeRequest;
 import com.treefinance.saas.taskcenter.facade.service.MoxieTaskEventNoticeFacade;
 import org.apache.commons.collections.CollectionUtils;
@@ -38,7 +40,11 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.*;
+import java.util.Comparator;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
@@ -60,7 +66,7 @@ public class MoxieBusinessService extends AbstractService implements Initializin
     @Autowired
     private TaskDirectiveService taskDirectiveService;
     @Autowired
-    private TaskService taskService;
+    private TaskManager taskManager;
     @Autowired
     private MoxieTimeoutService moxieTimeoutService;
     @Autowired
@@ -203,7 +209,7 @@ public class MoxieBusinessService extends AbstractService implements Initializin
         // 3.魔蝎任务创建成功,写入task_attribute,开始轮询此接口,等待魔蝎回调登录状态信息
         taskAttributeService.insertOrUpdateSelective(taskId, ETaskAttribute.FUND_MOXIE_TASKID.getAttribute(), moxieId);
         // 魔蝎任务创建成功,记录登录account,登录失败重试会更新accountNo
-        taskService.updateTask(taskId, params.getAccount(), null);
+        taskManager.setAccountNoAndWebsite(taskId, params.getAccount(), null);
         // 魔蝎任务创建成功,记录任务创建时间,查询登录状态时判断登录是否超时.
         moxieTimeoutService.logLoginTime(taskId);
         map.put("directive", "waiting");
@@ -340,7 +346,7 @@ public class MoxieBusinessService extends AbstractService implements Initializin
 
     private Integer getVerifyCodeCount(Long taskId) {
         String key = Joiner.on(":").useForNull("null").join(VERIFY_CODE_SMS_COUNT_PREFIX, taskId);
-        String value = redisDao.get(key);
+        String value = redisDao.getValueQuietly(key);
         if (StringUtils.isNotBlank(value)) {
             return Integer.parseInt(value);
         } else {
@@ -349,7 +355,7 @@ public class MoxieBusinessService extends AbstractService implements Initializin
                 return null;
             }
             value = taskAttribute.getValue();
-            redisDao.setEx(key, value, 5, TimeUnit.MINUTES);
+            redisDao.setValueQuietly(key, value, 5, TimeUnit.MINUTES);
             return Integer.parseInt(value);
         }
     }

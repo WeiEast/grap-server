@@ -2,13 +2,11 @@ package com.treefinance.saas.grapserver.biz.service;
 
 import com.google.common.base.Splitter;
 import com.treefinance.saas.assistant.model.Constants;
-import com.treefinance.saas.grapserver.context.config.DiamondConfig;
 import com.treefinance.saas.grapserver.common.exception.ParamsCheckException;
 import com.treefinance.saas.grapserver.common.exception.UniqueidMaxException;
-import com.treefinance.saas.grapserver.common.exception.UnknownException;
-import com.treefinance.saas.taskcenter.facade.request.TaskCreateRequest;
-import com.treefinance.saas.taskcenter.facade.result.common.TaskResult;
-import com.treefinance.saas.taskcenter.facade.service.TaskFacade;
+import com.treefinance.saas.grapserver.context.config.DiamondConfig;
+import com.treefinance.saas.grapserver.manager.TaskManager;
+import com.treefinance.saas.grapserver.manager.param.TaskParams;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,7 +32,7 @@ public class SaasTaskService {
     @Autowired
     private DiamondConfig diamondConfig;
     @Autowired
-    private TaskFacade taskFacade;
+    private TaskManager taskManager;
 
     /**
      * 创建任务
@@ -59,28 +57,16 @@ public class SaasTaskService {
             checkUniqueId(uniqueId, appId, bizType);
         }
 
-        TaskCreateRequest rpcRequest = new TaskCreateRequest();
-        rpcRequest.setUniqueId(uniqueId);
-        rpcRequest.setAppId(appId);
-        rpcRequest.setBizType(bizType);
-        rpcRequest.setStatus((byte) 0);
-        rpcRequest.setSource(source);
-        if (StringUtils.isNotBlank(website)) {
-            rpcRequest.setWebsite(website);
-        }
-        rpcRequest.setSaasEnv(Byte.valueOf(Constants.SAAS_ENV_VALUE));
-        rpcRequest.setExtra(extra);
-        TaskResult<Long> rpcResult;
-        try {
-            rpcResult = taskFacade.createTask(rpcRequest);
-        } catch (Exception e) {
-            logger.error("调用taskcenter异常", e);
-            throw new UnknownException();
-        }
-        if (!rpcResult.isSuccess()) {
-            throw new UnknownException();
-        }
-        return rpcResult.getData();
+        TaskParams params = new TaskParams();
+        params.setUniqueId(uniqueId);
+        params.setAppId(appId);
+        params.setBizType(bizType);
+        params.setSource(source);
+        params.setWebsite(website);
+        params.setSaasEnv(Byte.valueOf(Constants.SAAS_ENV_VALUE));
+        params.setExtra(extra);
+
+        return taskManager.createTask(params);
     }
 
     /**

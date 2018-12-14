@@ -11,16 +11,18 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 /**
- * @author:guoguoyun
- * @date:Created in 2018/10/18上午11:35
+ * @author guoguoyun
+ * @date 2018/10/18上午11:35
  */
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringBootTest(classes = GrapServerApplication.class, webEnvironment = SpringBootTest.WebEnvironment.NONE)
 public class TongdunServiceTest {
 
 
-    @Autowired TaskService taskService;
-    @Autowired TongdunService tongdunService;
+    @Autowired
+    private TaskService taskService;
+    @Autowired
+    private TongdunService tongdunService;
     @Test
     public void test() throws InterruptedException {
 //        Long taskId = taskService.createTask("223344", "QATestabcdefghQA", (byte) 8, null, null, null);

@@ -28,8 +28,8 @@ import org.apache.commons.lang3.StringUtils;
  */
 public abstract class AbstractDubboServiceAdapter extends AbstractDomainObjectAdapter {
 
-    protected <Response> void validateResponse(Response result, RpcActionEnum action, Object... args) {
-        if (result == null) {
+    protected <Response> void validateResponse(Response response, RpcActionEnum action, Object... args) {
+        if (response == null) {
             throw new RpcServiceException("Bad response! - action: " + action + appendArgs(args));
         }
     }

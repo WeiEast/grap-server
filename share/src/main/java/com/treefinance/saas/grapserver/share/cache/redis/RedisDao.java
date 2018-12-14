@@ -16,48 +16,52 @@
 
 package com.treefinance.saas.grapserver.share.cache.redis;
 
-import org.springframework.data.redis.core.RedisTemplate;
-
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 public interface RedisDao {
 
-    /**
-     * 获取redisTemplate
-     *
-     * @return
-     */
-    RedisTemplate<String, String> getRedisTemplate();
+    void enqueue(String key, String value);
 
-    /**
-     * 删除key
-     *
-     * @param key
-     */
-    void deleteKey(String key);
+    String dequeue(String key);
 
+    String getValue(String key);
 
-    /**
-     * String操作:获取指定key的值
-     *
-     * @param key
-     * @return
-     */
-    String get(String key);
+    String getValueQuietly(String key);
 
+    boolean setExpiredValueQuietly(String key, String value);
 
-    /**
-     * String操作:设置指定key的值,并设置过期时间
-     *
-     * @param key
-     * @param value
-     * @param timeout
-     * @param unit
-     */
-    Boolean setEx(String key, String value, long timeout, TimeUnit unit);
+    boolean setValueQuietly(String key, String value);
 
+    boolean setValueQuietly(String key, String value, long ttlSeconds);
+
+    boolean setValueQuietly(String key, String value, long timeout, TimeUnit unit);
+
+    void setValue(String key, String value);
+
+    void setValue(String key, String value, long timeout, TimeUnit unit);
+
+    Boolean setIfAbsent(String key, String value);
+
+    void putHash(String key, String hashKey, String hashValue);
+
+    void putHash(String key, Map<String, String> map);
+
+    Map<String, String> getHash(String key);
+
+    String getHashValue(String key, String hashKey);
+
+    boolean deleteQuietly(String key);
+
+    void delete(String key);
+
+    boolean hasKey(String key);
+
+    Long getExpire(String key);
+
+    Long getExpire(String key, TimeUnit unit);
+
+    Boolean expire(String key, long timeout, TimeUnit unit);
 
     /**
      * String操作:增加,负数则为自减,并设置过期时间
@@ -69,41 +73,6 @@ public interface RedisDao {
      * @return
      */
     Long incrBy(String key, long increment, long timeout, TimeUnit unit);
-
-
-    /**
-     * List操作:存储值列表在list尾部
-     *
-     * @param key       键
-     * @param valueList 值列表
-     * @return
-     */
-    boolean saveListString(final String key, final List<String> valueList);
-
-
-    /**
-     * List操作:存储值在list尾部
-     *
-     * @param key   键
-     * @param value 值
-     * @return
-     */
-    boolean saveString2List(final String key, final String value);
-
-    /**
-     * List操作:移除并获取list最后一个元素
-     *
-     * @param key
-     * @return
-     */
-    String getStringFromList(final String key);
-
-
-    boolean pushMessage(String submitRedisKey, String messageType);
-
-    boolean pushMessage(String submitRedisKey, String messageType, int ttlSeconds);
-
-    String pullResult(String obtainRedisKey);
 
     /**
      * 分布式锁,获取锁

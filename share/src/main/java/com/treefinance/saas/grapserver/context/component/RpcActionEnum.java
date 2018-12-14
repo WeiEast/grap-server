@@ -74,10 +74,6 @@ public enum RpcActionEnum {
      */
     ACQUISITION_ENTRY_BOOT,
     /**
-     * 根据任务ID查询任务
-     */
-    QUERY_TASK_BY_ID,
-    /**
      * 添加任务日志
      */
     ADD_TASK_LOG,
@@ -85,4 +81,49 @@ public enum RpcActionEnum {
      * 查询失败任务的最后一条错误日志
      */
     QUERY_LAST_ERROR_TASK_LOG,
+    /**
+     * 根据任务ID查询任务
+     */
+    QUERY_TASK_BY_ID,
+    /**
+     * 根据条件列出运行中的任务
+     */
+    LIST_RUNNING_TASKS,
+    /**
+     * 列出跟指定任务具有相同触发条件的任务ID
+     */
+    LIST_TASK_ID_WITH_SAME_TRIGGER,
+    /**
+     * 创建任务
+     */
+    CREATE_TASK,
+    /**
+     * 针对正在处理中的任务，根据需要更新账号<code>accountNo</code>和网站标识<code>website</code>
+     */
+    UPDATE_ACCOUNT_WEBSITE_IF_NEED_WHEN_PROCESSING,
+    /**
+     * 针对正在处理中的任务，更新账号<code>accountNo</code>和网站标识<code>website</code>
+     */
+    UPDATE_ACCOUNT_WEBSITE_WHEN_PROCESSING,
+    /**
+     * 更新任务的<code>AccountNo</code>
+     */
+    UPDATE_TASK_ACCOUNT_NO,
+    /**
+     * 根据任务ID更新处理中的任务
+     */
+    UPDATE_PROCESSING_TASK_BY_ID,
+    /**
+     * 更新任务完成时的任务状态
+     */
+    UPDATE_STATUS_IF_DONE,
+    /**
+     * 取消任务
+     */
+    CANCEL_TASK,
+    /**
+     * 根据taskId查询已完成的任务
+     */
+    QUERY_COMPLETED_TASK_BY_ID,
+
 }

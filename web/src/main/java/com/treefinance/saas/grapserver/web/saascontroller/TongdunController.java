@@ -3,11 +3,9 @@ package com.treefinance.saas.grapserver.web.saascontroller;
 import com.alibaba.fastjson.JSON;
 import com.treefinance.saas.grapserver.biz.service.TongdunService;
 import com.treefinance.saas.grapserver.common.request.TongdunRequest;
+import com.treefinance.saas.grapserver.context.component.AbstractController;
 import com.treefinance.saas.grapserver.util.JudgeUtils;
-import com.treefinance.saas.grapserver.web.controller.CarInfoController;
 import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -17,22 +15,20 @@ import org.springframework.web.bind.annotation.RestController;
 import javax.xml.bind.ValidationException;
 
 /**
+ * 同盾数据服务接口
+ * 
  * @author guoguoyun
  * @date 2018/10/17下午2:13
  */
 @RestController
 @RequestMapping(value = {"/loan/special/ss"})
-public class TongdunController {
-
-    private static final Logger logger = LoggerFactory.getLogger(CarInfoController.class);
+public class TongdunController extends AbstractController {
 
     @Autowired
     private TongdunService tongdunService;
 
     /**
-     * 同盾信息采集
-     *
-     * @return
+     * 同盾数据查询（大岚定制）
      */
     @RequestMapping(value = "/query", method = {RequestMethod.POST})
     public Object collect(@RequestParam("appid") String appId, @RequestParam("name") String name,
@@ -63,9 +59,8 @@ public class TongdunController {
     }
 
     /**
-     * 同盾详细信息采集
+     * 同盾数据查询（随手定制）
      *
-     * @return
      */
     @RequestMapping(value = "/query/detail", method = {RequestMethod.POST})
     public Object collectDetail(@RequestParam("appid") String appId, @RequestParam("name") String name,

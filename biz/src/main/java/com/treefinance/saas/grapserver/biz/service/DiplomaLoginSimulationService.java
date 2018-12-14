@@ -5,13 +5,14 @@ import com.datatrees.spider.extra.api.EducationApi;
 import com.datatrees.spider.share.domain.CommonPluginParam;
 import com.datatrees.spider.share.domain.http.HttpResult;
 import com.google.common.collect.Maps;
-import com.treefinance.saas.grapserver.share.cache.redis.RedisDao;
+import com.treefinance.saas.grapserver.biz.dto.TaskAttribute;
 import com.treefinance.saas.grapserver.common.enums.EBizType;
 import com.treefinance.saas.grapserver.common.exception.CrawlerBizException;
 import com.treefinance.saas.grapserver.context.Constants;
-import com.treefinance.saas.grapserver.share.cache.redis.RedisKeyUtils;
-import com.treefinance.saas.grapserver.biz.dto.TaskAttribute;
 import com.treefinance.saas.grapserver.facade.enums.ETaskAttribute;
+import com.treefinance.saas.grapserver.manager.TaskManager;
+import com.treefinance.saas.grapserver.share.cache.redis.RedisDao;
+import com.treefinance.saas.grapserver.share.cache.redis.RedisKeyUtils;
 import com.treefinance.saas.knife.result.SimpleResult;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -35,7 +36,7 @@ public class DiplomaLoginSimulationService {
     @Autowired
     private EducationApi educationApi;
     @Autowired
-    private TaskService taskService;
+    private TaskManager taskManager;
     @Autowired
     private MerchantConfigService merchantConfigService;
     @Autowired
@@ -103,7 +104,7 @@ public class DiplomaLoginSimulationService {
                 Long taskId = param.getTaskId();
                 String website = param.getWebsiteName();
                 String loginName = param.getUsername();
-                taskService.updateTask(taskId, loginName, website);
+                taskManager.setAccountNoAndWebsite(taskId, loginName, website);
                 taskTimeService.updateLoginTime(taskId, new Date());
                 return SimpleResult.successResult(result.getData());
             }

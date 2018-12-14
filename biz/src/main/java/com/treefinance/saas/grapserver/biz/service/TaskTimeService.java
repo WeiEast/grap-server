@@ -4,16 +4,15 @@ import com.google.common.base.Function;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
-import com.google.common.collect.Maps;
 import com.treefinance.saas.assistant.model.Constants;
 import com.treefinance.saas.grapserver.biz.domain.AppBizType;
-import com.treefinance.saas.grapserver.biz.dto.Task;
 import com.treefinance.saas.grapserver.common.exception.UnknownException;
-import com.treefinance.saas.grapserver.share.cache.redis.RedisKeyUtils;
 import com.treefinance.saas.grapserver.context.component.AbstractService;
+import com.treefinance.saas.grapserver.manager.TaskManager;
+import com.treefinance.saas.grapserver.manager.domain.TaskBO;
 import com.treefinance.saas.grapserver.share.cache.redis.RedisDao;
-import com.treefinance.saas.taskcenter.facade.request.TaskRequest;
-import com.treefinance.saas.taskcenter.facade.result.TaskRO;
+import com.treefinance.saas.grapserver.share.cache.redis.RedisKeyUtils;
+import com.treefinance.saas.grapserver.util.SystemUtils;
 import com.treefinance.saas.taskcenter.facade.result.common.TaskResult;
 import com.treefinance.saas.taskcenter.facade.service.TaskFacade;
 import com.treefinance.saas.taskcenter.facade.service.TaskTimeFacade;
@@ -41,24 +40,18 @@ public class TaskTimeService extends AbstractService {
     @Autowired
     private TaskTimeFacade taskTimeFacade;
     @Autowired
-    private TaskFacade taskFacade;
+    private TaskManager taskManager;
     @Autowired
     private RedisDao redisDao;
 
     /**
      * 本地任务缓存
      */
-    private final LoadingCache<Long, Task> cache =
-        CacheBuilder.newBuilder().expireAfterWrite(5, TimeUnit.MINUTES).maximumSize(20000).build(CacheLoader.from(new Function<Long, Task>() {
+    private final LoadingCache<Long, TaskBO> cache =
+        CacheBuilder.newBuilder().expireAfterWrite(5, TimeUnit.MINUTES).maximumSize(20000).build(CacheLoader.from(new Function<Long, TaskBO>() {
             @Override
-            public Task apply(Long taskId) {
-                TaskRequest taskRequest = new TaskRequest();
-                taskRequest.setId(taskId);
-                TaskResult<TaskRO> rpcResult = taskFacade.getTaskByPrimaryKey(taskRequest);
-                if (!rpcResult.isSuccess()) {
-                    throw new UnknownException("调用taskcenter失败");
-                }
-                return convert(rpcResult.getData(), Task.class);
+            public TaskBO apply(Long taskId) {
+                return taskManager.getTaskById(taskId);
             }
         }));
 
@@ -102,7 +95,7 @@ public class TaskTimeService extends AbstractService {
      * 获取设置的任务抓取超时时长
      */
     public Integer getCrawlerTimeoutSeconds(Long taskId) {
-        Task task = cache.getUnchecked(taskId);
+        TaskBO task = cache.getUnchecked(taskId);
 
         AppBizType bizType = appBizTypeService.getAppBizType(task.getBizType());
 
@@ -146,18 +139,18 @@ public class TaskTimeService extends AbstractService {
      */
     @Scheduled(cron = "0 0/1 * * * ?")
     public void scheduleTaskTimeout() {
-        Map<String, Object> lockMap = Maps.newHashMap();
         String lockKey = RedisKeyUtils.genRedisLockKey("task-crawler-time-job", Constants.SAAS_ENV_VALUE);
+        Map<String, Object> lockMap = null;
         try {
-            Date startTime = new Date();
             lockMap = redisDao.acquireLock(lockKey, 60 * 1000L);
             if (MapUtils.isEmpty(lockMap)) {
                 return;
             }
-            Date endTime = DateUtils.minusMinutes(startTime, 60);
-            TaskResult<List<TaskRO>> rpcResult = taskFacade.selectRecentRunningTaskList(Byte.parseByte(Constants.SAAS_ENV_VALUE), startTime, endTime);
-            List<Task> tasks = convert(rpcResult.getData(), Task.class);
-            for (Task task : tasks) {
+
+            Date now = SystemUtils.now();
+            Date before = DateUtils.minusMinutes(now, 60);
+            List<TaskBO> tasks = taskManager.listRunningTasks(Byte.valueOf(Constants.SAAS_ENV_VALUE), before, now);
+            for (TaskBO task : tasks) {
                 if (this.isTaskTimeout(task.getId())) {
                     // 处理抓取超时任务
                     this.handleTaskTimeout(task.getId());
@@ -174,19 +167,19 @@ public class TaskTimeService extends AbstractService {
      */
     @Scheduled(cron = "0 0/1 * * * ?")
     public void scheduleTaskActiveTimeout() {
-        Map<String, Object> lockMap = Maps.newHashMap();
         String lockKey = RedisKeyUtils.genRedisLockKey("task-alive-time-job", Constants.SAAS_ENV_VALUE);
+        Map<String, Object> lockMap = null;
         try {
-            Date startTime = new Date();
             lockMap = redisDao.acquireLock(lockKey, 60 * 1000L);
             if (MapUtils.isEmpty(lockMap)) {
                 return;
             }
-            Date endTime = DateUtils.minusMinutes(startTime, 60);
-            TaskResult<List<TaskRO>> rpcResult = taskFacade.selectRecentRunningTaskList(Byte.parseByte(Constants.SAAS_ENV_VALUE), startTime, endTime);
-            List<Task> tasks = convert(rpcResult.getData(), Task.class);
-            for (Task task : tasks) {
-                this.handleTaskAliveTimeout(task.getId(), startTime);
+
+            Date now = new Date();
+            Date before = DateUtils.minusMinutes(now, 60);
+            List<TaskBO> tasks = taskManager.listRunningTasks(Byte.valueOf(Constants.SAAS_ENV_VALUE), before, now);
+            for (TaskBO task : tasks) {
+                this.handleTaskAliveTimeout(task.getId(), now);
             }
         } finally {
             redisDao.releaseLock(lockKey, lockMap, 60 * 1000L);

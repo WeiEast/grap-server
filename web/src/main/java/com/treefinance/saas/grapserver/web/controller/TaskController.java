@@ -18,7 +18,6 @@ import com.treefinance.saas.grapserver.common.enums.EBizType;
 import com.treefinance.saas.grapserver.common.enums.EDirective;
 import com.treefinance.saas.grapserver.common.enums.EOperatorCodeType;
 import com.treefinance.saas.grapserver.exception.RpcServiceException;
-import com.treefinance.saas.grapserver.manager.domain.TaskBO;
 import com.treefinance.saas.knife.result.SimpleResult;
 import com.treefinance.toolkit.util.json.Jackson;
 import org.apache.commons.lang3.StringUtils;
@@ -46,7 +45,7 @@ public class TaskController {
     @Autowired
     private TaskConfigService taskConfigService;
     @Autowired
-    private TaskService taskServiceImpl;
+    private TaskService taskService;
     @Autowired
     private TaskTimeService taskTimeService;
     @Autowired
@@ -122,8 +121,8 @@ public class TaskController {
         map.put("bussiness", merchantBaseInfo.getBussiness());
         map.put("bussiness2", merchantBaseInfo.getBussiness2());
         try {
-            TaskBO task = taskServiceImpl.getTaskById(taskid);
-            map.put("uniqueId", task.getUniqueId());
+            String uniqueId = taskService.getUniqueIdInTask(taskid);
+            map.put("uniqueId", uniqueId);
         } catch (RpcServiceException e) {
             logger.warn("获取任务[{}]失败", taskid, e);
             map.put("uniqueId", "");
@@ -195,7 +194,7 @@ public class TaskController {
      */
     @RequestMapping(value = "/cancel", method = {RequestMethod.POST})
     public Object cancelTask(@RequestParam Long taskid) {
-        taskServiceImpl.cancelTask(taskid);
+        taskService.cancelTask(taskid);
         return new SimpleResult<>();
     }
 

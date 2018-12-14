@@ -9,6 +9,7 @@ import com.datatrees.spider.share.domain.http.HttpResult;
 import com.google.common.collect.Maps;
 import com.treefinance.commonservice.facade.mobileattribution.IMobileAttributionService;
 import com.treefinance.commonservice.facade.mobileattribution.MobileAttributionDTO;
+import com.treefinance.saas.grapserver.manager.TaskManager;
 import com.treefinance.saas.grapserver.share.cache.redis.RedisDao;
 import com.treefinance.saas.grapserver.biz.dto.TaskAttribute;
 import com.treefinance.saas.grapserver.common.enums.EBizType;
@@ -44,7 +45,7 @@ public class OperatorExtendLoginService {
     @Autowired
     private IMobileAttributionService mobileAttributionService;
     @Autowired
-    private TaskService taskService;
+    private TaskManager taskManager;
     @Autowired
     private TaskTimeService taskTimeService;
     @Autowired
@@ -106,7 +107,7 @@ public class OperatorExtendLoginService {
         String accountNo = operatorParam.getMobile().toString();
         taskAttributeService.insertOrUpdateSelective(taskId, ETaskAttribute.OPERATOR_GROUP_CODE.getAttribute(), groupCode);
         taskAttributeService.insertOrUpdateSelective(taskId, ETaskAttribute.OPERATOR_GROUP_NAME.getAttribute(), groupName);
-        taskService.updateTask(taskId, accountNo, websiteName);
+        taskManager.setAccountNoAndWebsite(taskId, accountNo, websiteName);
         return SimpleResult.successResult(result.getData());
     }
 
@@ -233,7 +234,7 @@ public class OperatorExtendLoginService {
                 && StringUtils.isNotBlank(result.getData().getWebsiteName())) {
             String accountNo = String.valueOf(result.getData().getMobile());
             String websiteName = result.getData().getWebsiteName();
-            taskService.updateTask(taskId, accountNo, websiteName);
+            taskManager.setAccountNoAndWebsite(taskId, accountNo, websiteName);
         } else {
             logger.info("运营商:调用爬数获取运营商accountNo,websiteName为空,taskId={},operatorParam={},result={}",
                     taskId, JSON.toJSONString(operatorParam), JSON.toJSONString(result));

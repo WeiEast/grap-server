@@ -2,7 +2,11 @@ package com.treefinance.saas.grapserver.biz.service;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
-import com.datatrees.spider.bank.api.*;
+import com.datatrees.spider.bank.api.MailServiceApiFor126;
+import com.datatrees.spider.bank.api.MailServiceApiFor163;
+import com.datatrees.spider.bank.api.MailServiceApiForExMailQQ;
+import com.datatrees.spider.bank.api.MailServiceApiForQQ;
+import com.datatrees.spider.bank.api.MailServiceApiForSina;
 import com.datatrees.spider.share.api.SpiderTaskApi;
 import com.datatrees.spider.share.domain.CommonPluginParam;
 import com.datatrees.spider.share.domain.ProcessResult;
@@ -10,9 +14,9 @@ import com.datatrees.spider.share.domain.http.HttpResult;
 import com.google.common.base.Joiner;
 import com.google.common.collect.Maps;
 import com.treefinance.proxy.api.ProxyProvider;
-import com.treefinance.saas.grapserver.share.cache.redis.RedisDao;
 import com.treefinance.saas.grapserver.common.exception.CrawlerBizException;
 import com.treefinance.saas.grapserver.context.Constants;
+import com.treefinance.saas.grapserver.share.cache.redis.RedisDao;
 import com.treefinance.saas.grapserver.share.cache.redis.RedisKeyUtils;
 import com.treefinance.saas.knife.result.Results;
 import com.treefinance.saas.knife.result.SimpleResult;
@@ -123,7 +127,7 @@ public class EmailLoginSimulationService {
             }
         }
         if (result.getData() != null && StringUtils.equals(SUCCESS, String.valueOf(result.getData()))) {
-            taskService.updateWebSite(param.getTaskId(), "qq.com");
+            taskService.updateWebsite(param.getTaskId(), "qq.com");
             taskTimeService.updateLoginTime(param.getTaskId(), new Date());
         }
         return SimpleResult.successResult(result);
@@ -173,10 +177,7 @@ public class EmailLoginSimulationService {
                     Map<String, Object> map = JSONObject.parseObject(JSON.toJSONString(result.getData()));
                     if (MapUtils.isNotEmpty(map) && map.get(DIRECTIVE) != null) {
                         if (StringUtils.equalsIgnoreCase(LOGIN_SUCCESS, map.get(DIRECTIVE).toString())) {
-                            if (StringUtils.isNotEmpty(param.getUsername())) {
-                                taskService.setAccountNo(param.getTaskId(), param.getUsername());
-                            }
-                            taskService.updateWebSite(param.getTaskId(), "exmail.qq.com");
+                            taskService.recordAccountNoAndWebsite(param.getTaskId(), param.getUsername(), "exmail.qq.com");
                             taskTimeService.updateLoginTime(param.getTaskId(), new Date());
                         }
                     }
@@ -259,7 +260,7 @@ public class EmailLoginSimulationService {
             }
         }
         if (result.getData() != null && StringUtils.equals(SUCCESS, String.valueOf(result.getData()))) {
-            taskService.updateWebSite(param.getTaskId(), "163.com");
+            taskService.updateWebsite(param.getTaskId(), "163.com");
             taskTimeService.updateLoginTime(param.getTaskId(), new Date());
         }
         return SimpleResult.successResult(result);
@@ -330,7 +331,7 @@ public class EmailLoginSimulationService {
             }
         }
         if (result.getData() != null && StringUtils.equals(SUCCESS, String.valueOf(result.getData()))) {
-            taskService.updateWebSite(param.getTaskId(), "126.com");
+            taskService.updateWebsite(param.getTaskId(), "126.com");
             taskTimeService.updateLoginTime(param.getTaskId(), new Date());
         }
         return SimpleResult.successResult(result);
@@ -380,10 +381,7 @@ public class EmailLoginSimulationService {
                     Map<String, Object> map = JSONObject.parseObject(JSON.toJSONString(result.getData()));
                     if (MapUtils.isNotEmpty(map) && map.get(DIRECTIVE) != null) {
                         if (StringUtils.equalsIgnoreCase(LOGIN_SUCCESS, map.get(DIRECTIVE).toString())) {
-                            if (StringUtils.isNotEmpty(param.getUsername())) {
-                                taskService.setAccountNo(param.getTaskId(), param.getUsername());
-                            }
-                            taskService.updateWebSite(param.getTaskId(), "sina.com");
+                            taskService.recordAccountNoAndWebsite(param.getTaskId(), param.getUsername(), "sina.com");
                             taskTimeService.updateLoginTime(param.getTaskId(), new Date());
                         }
                     }
@@ -425,15 +423,16 @@ public class EmailLoginSimulationService {
         }
         if (StringUtils.equalsIgnoreCase(SUCCESS, result.getProcessStatus())) {
             String key = Joiner.on(":").join(EMAIL_LOGIN_PROCESS_KEY_PREFIX, processId);
-            boolean hasKey = redisDao.getRedisTemplate().hasKey(key);
+            boolean hasKey = redisDao.hasKey(key);
             if (hasKey) {
-                Map<Object, Object> map = redisDao.getRedisTemplate().opsForHash().entries(key);
-                // 记录账号
-                taskService.setAccountNo(Long.valueOf(map.get("taskId").toString()), map.get("userName").toString());
-                // 记录webSite
-                taskService.updateWebSite(Long.valueOf(map.get("taskId").toString()), map.get("webSite").toString());
+                Map<String, String> map = redisDao.getHash(key);
+                Long tid = Long.valueOf(map.get("taskId"));
+                String userName = map.get("userName");
+                String webSite = map.get("webSite");
+                // 记录账号和webSite
+                taskService.recordAccountNoAndWebsite(tid, userName, webSite);
                 // 更新登录成功时间
-                taskTimeService.updateLoginTime(Long.valueOf(map.get("taskId").toString()), new Date());
+                taskTimeService.updateLoginTime(tid, new Date());
             }
 
         }
@@ -465,13 +464,13 @@ public class EmailLoginSimulationService {
             Long processId = jsonObject.getLong("processId");
             if (StringUtils.isNotEmpty(userName) && processId != null) {
                 String key = Joiner.on(":").join(EMAIL_LOGIN_PROCESS_KEY_PREFIX, processId);
-                Map<String, Object> map = Maps.newHashMap();
-                map.put("taskId", taskId + "");
+                Map<String, String> map = Maps.newHashMap();
+                map.put("taskId", taskId.toString());
                 map.put("userName", userName);
                 map.put("webSite", webSite);
-                redisDao.getRedisTemplate().opsForHash().putAll(key, map);
-                if (redisDao.getRedisTemplate().getExpire(key) == -1) {
-                    redisDao.getRedisTemplate().expire(key, 10, TimeUnit.MINUTES);
+                redisDao.putHash(key, map);
+                if (redisDao.getExpire(key) == -1) {
+                    redisDao.expire(key, 10, TimeUnit.MINUTES);
                 }
             }
         } catch (Exception e) {
