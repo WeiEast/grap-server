@@ -34,7 +34,13 @@ public class AcquisitionServiceImpl extends AbstractService implements Acquisiti
 
     @Override
     public void acquisition(Long taskId, String header, String cookie, String url, String website, String accountNo, String topic) {
-        logger.info("acquisition >>> taskId={}, header={}, cookie={}, url={}, website={}, accountNo={}, topic={}", taskId, header, cookie, url, website, accountNo, topic);
+        acquisition(taskId, header, cookie, url, website, accountNo, topic, null);
+    }
+
+    @Override
+    public void acquisition(Long taskId, String header, String cookie, String url, String website, String accountNo, String topic, String extra) {
+        logger.info("acquisition >>> taskId={}, header={}, cookie={}, url={}, website={}, accountNo={}, topic={}, extra={}", taskId, header, cookie, url,
+                website, accountNo, topic, extra);
         AcquisitionEntry entry = new AcquisitionEntry();
         entry.setTaskId(taskId);
         entry.setWebsite(website);
@@ -43,6 +49,7 @@ public class AcquisitionServiceImpl extends AbstractService implements Acquisiti
         entry.setUrl(url);
         entry.setAccountNo(accountNo);
         entry.setTopic(topic);
+        entry.setExtra(extra);
 
         acquisitionManager.acquire(entry);
     }

@@ -11,4 +11,7 @@ public interface AcquisitionService {
 
     void acquisition(Long taskId, String header, String cookie, String url, String website,
         String accountNo, String topic);
+
+    void acquisition(Long taskId, String header, String cookie, String url, String website,
+            String accountNo, String topic, String extra);
 }

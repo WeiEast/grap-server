@@ -35,5 +35,6 @@ public class AcquisitionEntry implements Serializable {
     private String url;
     private String accountNo;
     private String topic;
+    private String extra;
 
 }
