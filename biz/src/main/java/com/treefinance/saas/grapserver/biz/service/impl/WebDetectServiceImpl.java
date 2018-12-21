@@ -70,7 +70,7 @@ public class WebDetectServiceImpl extends AbstractService implements WebDetectSe
         }
         logger.info("舆情监控-发消息：acquisition，taskid={},extra={}", taskid, extra);
         acquisitionService
-                .acquisition(taskid, null, null, null, website, null, ESpiderTopic.SPIDER_EXTRA.name().toLowerCase(), JSON.toJSONString(map));
+                .acquisition(taskid, null, null, null, website, null, ESpiderTopic.SPIDER_EXTRA.name().toLowerCase(), extra);
         return SaasResult.successResult(taskid);
     }
 
