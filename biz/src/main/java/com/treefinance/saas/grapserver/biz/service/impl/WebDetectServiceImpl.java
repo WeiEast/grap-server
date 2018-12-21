@@ -1,15 +1,12 @@
 package com.treefinance.saas.grapserver.biz.service.impl;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import com.alibaba.dubbo.rpc.RpcException;
 import com.alibaba.fastjson.JSON;
 import com.google.gson.reflect.TypeToken;
 import com.treefinance.saas.grapserver.biz.service.AcquisitionService;
-import com.treefinance.saas.grapserver.biz.service.WebDetectService;
 import com.treefinance.saas.grapserver.biz.service.TaskLicenseService;
 import com.treefinance.saas.grapserver.biz.service.TaskService;
+import com.treefinance.saas.grapserver.biz.service.WebDetectService;
 import com.treefinance.saas.grapserver.common.enums.EBizType;
 import com.treefinance.saas.grapserver.common.enums.ESpiderTopic;
 import com.treefinance.saas.grapserver.common.enums.ETaskStatus;
@@ -29,6 +26,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.util.Date;
+import java.util.Map;
 
 /**
  * @author guimeichao
@@ -81,6 +81,20 @@ public class WebDetectServiceImpl extends AbstractService implements WebDetectSe
     }
 
     @Override
+    public boolean isStartCrawler(String enterpriseName) {
+        EnterpriseDataResultDTO result;
+        try {
+            result = enterpriseService.getEnterpriseDate(enterpriseName);
+        } catch (RpcException e) {
+            logger.error("调用dubbo服务失败", e);
+            return true;
+        }
+        Date date = result.getCrawlerDate();
+        long second = Long.parseLong(config.getWebdetectSecond());
+        return date.getTime() < (System.currentTimeMillis() - second * 1000);
+    }
+
+    @Override
     public Object getData(String appId, String uniqueId, Long taskid, Integer size, Long start, String platform,
         String entryname, String keyword) {
         taskLicenseService.verifyCreateSaasTask(appId, uniqueId, EBizType.ENTERPRISE);
@@ -121,13 +135,19 @@ public class WebDetectServiceImpl extends AbstractService implements WebDetectSe
             return SaasResult.failResult(null, "任务失败或取消", -2);
         }
         if (ETaskStatus.SUCCESS.getStatus().equals(task.getStatus())) {
-            try {
-                EnterpriseDataResultDTO result = enterpriseService.getEnterpriseDate(enterpriseName);
-                return SaasResult.successResult(result);
-            } catch (RpcException e) {
-                logger.error("调用dubbo服务失败", e);
-            }
+            return getResult(enterpriseName);
         }
         return SaasResult.failResult("获取企业信息数据失败");
+    }
+
+    @Override
+    public Object getResult(String enterpriseName) {
+        try {
+            EnterpriseDataResultDTO result = enterpriseService.getEnterpriseDate(enterpriseName);
+            return SaasResult.successResult(result);
+        } catch (RpcException e) {
+            logger.error("调用dubbo服务失败", e);
+            return SaasResult.failResult("获取企业信息数据失败");
+        }
     }
 }

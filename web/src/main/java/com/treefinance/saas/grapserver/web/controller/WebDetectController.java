@@ -1,11 +1,16 @@
 package com.treefinance.saas.grapserver.web.controller;
 
+import com.alibaba.fastjson.JSON;
+import com.treefinance.saas.grapserver.biz.service.WebDetectService;
+import com.treefinance.saas.grapserver.common.result.SaasResult;
+import com.treefinance.saas.processor.thirdparty.facade.enterprise.model.EnterpriseDataResultDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import com.treefinance.saas.grapserver.biz.service.WebDetectService;
+
+import java.util.Map;
 
 /**
  * @author guimeichao
@@ -34,6 +39,16 @@ public class WebDetectController {
     @RequestMapping(value = "/start", method = RequestMethod.POST)
     public Object createTask(@RequestParam String appid, @RequestParam("uniqueId") String uniqueId,
         @RequestParam("platform") String platform, @RequestParam("extra") String extra) {
+        if ("enterprise".equals(platform)) {
+            Map<String, Object> map = JSON.parseObject(extra);
+            String enterpriseName = (String)map.get("business");
+            boolean flag = webDetectService.isStartCrawler(enterpriseName);
+            if (!flag) {
+                SaasResult<Object> saasResult= (SaasResult<Object>)webDetectService.getResult(enterpriseName);
+                saasResult.setCode(3);
+                return saasResult;
+            }
+        }
         Long taskId = webDetectService.creatTask(appid, uniqueId);
         return webDetectService.startCrawler(taskId, platform, extra);
     }

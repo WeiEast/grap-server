@@ -5,11 +5,16 @@ package com.treefinance.saas.grapserver.biz.service;
  * @date 2018/12/12
  */
 public interface WebDetectService {
-    Long creatTask(String appId,String uniqueId);
+    Long creatTask(String appId, String uniqueId);
 
     Object startCrawler(Long taskid, String platform, String extra);
 
-    Object getData(String appId,String uniqueId,Long taskid, Integer size, Long start, String platform, String entryname, String keyword);
+    boolean isStartCrawler(String enterpriseName);
 
-    Object getEnterpriseData(String appId,String uniqueId,Long taskid, String enterpriseName);
+    Object getData(String appId, String uniqueId, Long taskid, Integer size, Long start, String platform,
+        String entryname, String keyword);
+
+    Object getEnterpriseData(String appId, String uniqueId, Long taskid, String enterpriseName);
+
+    Object getResult(String enterpriseName);
 }
