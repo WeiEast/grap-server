@@ -10,4 +10,6 @@ public interface WebDetectService {
     Object startCrawler(Long taskid, String platform, String extra);
 
     Object getData(String appId,String uniqueId,Long taskid, Integer size, Long start, String platform, String entryname, String keyword);
+
+    Object getEnterpriseData(String appId,String uniqueId,Long taskid, String enterpriseName);
 }

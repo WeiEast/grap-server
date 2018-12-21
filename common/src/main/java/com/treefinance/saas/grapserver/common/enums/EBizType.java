@@ -15,7 +15,8 @@ public enum EBizType {
     CAR_INFO("CAR_INFO", (byte) 9),
     TONGDUN("TONGDUN", (byte) 10),
     TONGDUN_KANIU("TONGDUN_KANIU", (byte) 11),
-    OPINION_DETECT("OPINION_DETECT", (byte) 12);
+    OPINION_DETECT("OPINION_DETECT", (byte) 12),
+    ENTERPRISE("ENTERPRISE",(byte)13);
 
     private String text;
     private Byte code;
