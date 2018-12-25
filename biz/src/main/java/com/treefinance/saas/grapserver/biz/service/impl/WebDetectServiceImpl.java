@@ -85,7 +85,7 @@ public class WebDetectServiceImpl extends AbstractService implements WebDetectSe
         EnterpriseDataResultDTO result;
         try {
             result = enterpriseService.getEnterpriseDate(enterpriseName);
-            if (result==null){
+            if (result == null) {
                 return true;
             }
         } catch (RpcException e) {
@@ -105,23 +105,24 @@ public class WebDetectServiceImpl extends AbstractService implements WebDetectSe
         if (ETaskStatus.RUNNING.getStatus().equals(task.getStatus())) {
             return SaasResult.failResult(null, "任务还在进行中...", 1);
         }
-        //if (ETaskStatus.FAIL.getStatus().equals(task.getStatus()) || ETaskStatus.CANCEL.getStatus().equals(task.getStatus())) {
-        //    return SaasResult.failResult(null, "任务失败或取消", -2);
-        //}
-        //if (ETaskStatus.SUCCESS.getStatus().equals(task.getStatus())) {
-            OpinionDetectResultQuery query = new OpinionDetectResultQuery();
-            query.setSize(size);
-            query.setStart(start);
-            query.setPlatform(platform);
-            query.setEntryName(entryname);
-            query.setKeyword(keyword);
-            try {
-                OpinionDetectDataResult result = opinionDetectService.queryOpinionDetectData(query);
-                return SaasResult.successResult(result);
-            } catch (RpcException e) {
-                logger.error("调用dubbo服务失败", e);
-            }
-        //}
+        // if (ETaskStatus.FAIL.getStatus().equals(task.getStatus()) ||
+        // ETaskStatus.CANCEL.getStatus().equals(task.getStatus())) {
+        // return SaasResult.failResult(null, "任务失败或取消", -2);
+        // }
+        // if (ETaskStatus.SUCCESS.getStatus().equals(task.getStatus())) {
+        OpinionDetectResultQuery query = new OpinionDetectResultQuery();
+        query.setSize(size);
+        query.setStart(start);
+        query.setPlatform(platform);
+        query.setEntryName(entryname);
+        query.setKeyword(keyword);
+        try {
+            OpinionDetectDataResult result = opinionDetectService.queryOpinionDetectData(query);
+            return SaasResult.successResult(result);
+        } catch (RpcException e) {
+            logger.error("调用dubbo服务失败", e);
+        }
+        // }
         return SaasResult.failResult("获取数据失败");
     }
 
@@ -132,14 +133,14 @@ public class WebDetectServiceImpl extends AbstractService implements WebDetectSe
         if (ETaskStatus.RUNNING.getStatus().equals(task.getStatus())) {
             return SaasResult.failResult(null, "任务还在进行中...", 1);
         }
-        if (ETaskStatus.FAIL.getStatus().equals(task.getStatus())
-            || ETaskStatus.CANCEL.getStatus().equals(task.getStatus())) {
-            return SaasResult.failResult(null, "任务失败或取消", -2);
-        }
-        if (ETaskStatus.SUCCESS.getStatus().equals(task.getStatus())) {
-            return getResult(enterpriseName);
-        }
-        return SaasResult.failResult("获取企业信息数据失败");
+        // if (ETaskStatus.FAIL.getStatus().equals(task.getStatus())
+        // || ETaskStatus.CANCEL.getStatus().equals(task.getStatus())) {
+        // return SaasResult.failResult(null, "任务失败或取消", -2);
+        // }
+        // if (ETaskStatus.SUCCESS.getStatus().equals(task.getStatus())) {
+        return getResult(enterpriseName);
+        // }
+        // return SaasResult.failResult("获取企业信息数据失败");
     }
 
     @Override
