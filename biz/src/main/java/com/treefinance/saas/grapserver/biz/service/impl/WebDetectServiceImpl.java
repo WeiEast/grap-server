@@ -105,18 +105,10 @@ public class WebDetectServiceImpl extends AbstractService implements WebDetectSe
         if (ETaskStatus.RUNNING.getStatus().equals(task.getStatus())) {
             return SaasResult.failResult(null, "任务还在进行中...", 1);
         }
-<<<<<<< HEAD
         //if (ETaskStatus.FAIL.getStatus().equals(task.getStatus()) || ETaskStatus.CANCEL.getStatus().equals(task.getStatus())) {
         //    return SaasResult.failResult(null, "任务失败或取消", -2);
         //}
         //if (ETaskStatus.SUCCESS.getStatus().equals(task.getStatus())) {
-=======
-        if (ETaskStatus.FAIL.getStatus().equals(task.getStatus())
-            || ETaskStatus.CANCEL.getStatus().equals(task.getStatus())) {
-            return SaasResult.failResult(null, "任务失败或取消", -2);
-        }
-        if (ETaskStatus.SUCCESS.getStatus().equals(task.getStatus())) {
->>>>>>> 8cb82c5d827b43fb8d3d5649546126581c3e38ec
             OpinionDetectResultQuery query = new OpinionDetectResultQuery();
             query.setSize(size);
             query.setStart(start);
