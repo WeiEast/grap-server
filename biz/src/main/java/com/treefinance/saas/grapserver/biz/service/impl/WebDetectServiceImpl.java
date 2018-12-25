@@ -85,6 +85,9 @@ public class WebDetectServiceImpl extends AbstractService implements WebDetectSe
         EnterpriseDataResultDTO result;
         try {
             result = enterpriseService.getEnterpriseDate(enterpriseName);
+            if (result==null){
+                return true;
+            }
         } catch (RpcException e) {
             logger.error("调用dubbo服务失败", e);
             return true;
