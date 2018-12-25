@@ -106,6 +106,9 @@ public class DiamondConfig {
     @DAttribute(key = "opiniondetect.platform.to.website")
     private String opinionDetectPlatformToWebsite;
 
+    @DAttribute(key="webdetect_second")
+    private String webdetectSecond;
+
     public static Logger getLogger() {
         return logger;
     }
@@ -303,6 +306,14 @@ public class DiamondConfig {
 
     public void setOpinionDetectPlatformToWebsite(String opinionDetectPlatformToWebsite) {
         this.opinionDetectPlatformToWebsite = opinionDetectPlatformToWebsite;
+    }
+
+    public String getWebdetectSecond() {
+        return webdetectSecond;
+    }
+
+    public void setWebdetectSecond(String webdetectSecond) {
+        this.webdetectSecond = webdetectSecond;
     }
 
     public ColorConfig getDefaultColorConfig() {
