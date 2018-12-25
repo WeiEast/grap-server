@@ -81,10 +81,10 @@ public class WebDetectServiceImpl extends AbstractService implements WebDetectSe
         if (ETaskStatus.RUNNING.getStatus().equals(task.getStatus())) {
             return SaasResult.failResult(null, "任务还在进行中...", 1);
         }
-        if (ETaskStatus.FAIL.getStatus().equals(task.getStatus()) || ETaskStatus.CANCEL.getStatus().equals(task.getStatus())) {
-            return SaasResult.failResult(null, "任务失败或取消", -2);
-        }
-        if (ETaskStatus.SUCCESS.getStatus().equals(task.getStatus())) {
+        //if (ETaskStatus.FAIL.getStatus().equals(task.getStatus()) || ETaskStatus.CANCEL.getStatus().equals(task.getStatus())) {
+        //    return SaasResult.failResult(null, "任务失败或取消", -2);
+        //}
+        //if (ETaskStatus.SUCCESS.getStatus().equals(task.getStatus())) {
             OpinionDetectResultQuery query = new OpinionDetectResultQuery();
             query.setSize(size);
             query.setStart(start);
@@ -97,7 +97,7 @@ public class WebDetectServiceImpl extends AbstractService implements WebDetectSe
             } catch (RpcException e) {
                 logger.error("调用dubbo服务失败", e);
             }
-        }
+        //}
         return SaasResult.failResult("获取数据失败");
     }
 }
