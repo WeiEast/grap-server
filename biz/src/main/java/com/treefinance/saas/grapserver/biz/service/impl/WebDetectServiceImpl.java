@@ -97,7 +97,7 @@ public class WebDetectServiceImpl extends AbstractService implements WebDetectSe
     @Override
     public Object getData(String appId, String uniqueId, Long taskid, Integer size, Long start, String platform,
         String entryname, String keyword) {
-        taskLicenseService.verifyCreateSaasTask(appId, uniqueId, EBizType.ENTERPRISE);
+        taskLicenseService.verifyCreateSaasTask(appId, uniqueId, EBizType.OPINION_DETECT);
         TaskBO task = taskManager.getTaskById(taskid);
         if (ETaskStatus.RUNNING.getStatus().equals(task.getStatus())) {
             return SaasResult.failResult(null, "任务还在进行中...", 1);
@@ -125,7 +125,7 @@ public class WebDetectServiceImpl extends AbstractService implements WebDetectSe
 
     @Override
     public Object getEnterpriseData(String appId, String uniqueId, Long taskid, String enterpriseName) {
-        taskLicenseService.verifyCreateSaasTask(appId, uniqueId, EBizType.OPINION_DETECT);
+        taskLicenseService.verifyCreateSaasTask(appId, uniqueId, EBizType.ENTERPRISE);
         TaskBO task = taskManager.getTaskById(taskid);
         if (ETaskStatus.RUNNING.getStatus().equals(task.getStatus())) {
             return SaasResult.failResult(null, "任务还在进行中...", 1);
