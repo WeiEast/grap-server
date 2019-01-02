@@ -48,6 +48,7 @@ public class AcquisitionServiceAdapter extends AbstractTaskServiceAdapter implem
         request.setUrl(entry.getUrl());
         request.setAccountNo(entry.getAccountNo());
         request.setTopic(entry.getTopic());
+        request.setExtra(entry.getExtra());
 
         TaskResult<Void> result = acquisitionFacade.acquisition(request);
 
