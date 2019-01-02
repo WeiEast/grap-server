@@ -29,21 +29,27 @@ import org.springframework.stereotype.Service;
  */
 @Service("acquisitionService")
 public class AcquisitionServiceImpl extends AbstractService implements AcquisitionService {
+
     @Autowired
     private AcquisitionManager acquisitionManager;
 
     @Override
-    public void acquisition(Long taskId, String header, String cookie, String url, String website, String accountNo, String topic) {
-        logger.info("acquisition >>> taskId={}, header={}, cookie={}, url={}, website={}, accountNo={}, topic={}", taskId, header, cookie, url, website, accountNo, topic);
+    public void acquisition(Long taskid, String header, String cookie, String url, String website, String accountNo, String topic) {
+        acquisition(taskid, header, cookie, url, website, accountNo, topic, null);
+    }
+
+    @Override
+    public void acquisition(Long taskid, String header, String cookie, String url, String website, String accountNo, String topic, String extra) {
+        logger.info("acquisition : taskid={},header={},cookie={},url={},website={},accountNo={}", taskid, header, cookie, url, website, accountNo);
         AcquisitionEntry entry = new AcquisitionEntry();
-        entry.setTaskId(taskId);
-        entry.setWebsite(website);
+        entry.setTaskId(taskid);
         entry.setHeader(header);
         entry.setCookie(cookie);
         entry.setUrl(url);
+        entry.setWebsite(website);
         entry.setAccountNo(accountNo);
         entry.setTopic(topic);
-
+        entry.setExtra(extra);
         acquisitionManager.acquire(entry);
     }
 }
