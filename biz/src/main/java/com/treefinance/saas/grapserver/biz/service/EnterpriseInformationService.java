@@ -2,14 +2,13 @@ package com.treefinance.saas.grapserver.biz.service;
 
 import java.util.Map;
 
-import com.alibaba.dubbo.rpc.RpcException;
-import com.alibaba.fastjson.JSON;
-import com.datatrees.common.util.GsonUtils;
 import com.google.gson.reflect.TypeToken;
 import com.treefinance.saas.grapserver.biz.config.DiamondConfig;
 import com.treefinance.saas.grapserver.common.enums.EBizType;
 import com.treefinance.saas.grapserver.common.enums.ESpiderTopic;
 import com.treefinance.saas.grapserver.common.result.SaasResult;
+import com.treefinance.toolkit.util.json.GsonUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,8 +41,13 @@ public class EnterpriseInformationService {
     }
 
     public Object startCrawler(Long taskid, String extra) {
+        Map platToWebsite = GsonUtils.fromJson(config.getOpinionDetectPlatformToWebsite(), new TypeToken<Map>() {}.getType());
+        String website = (String) platToWebsite.get("enterprise");
+        if (StringUtils.isBlank(website)) {
+            return SaasResult.failResult("当前平台不支持!");
+        }
         logger.info("工商信息-发消息：acquisition，taskid={},extra={}", taskid, extra);
-        acquisitionService.acquisition(taskid, null, null, null, "qichacha.com_gfd", null, ESpiderTopic.SPIDER_EXTRA.name().toLowerCase(), extra);
+        acquisitionService.acquisition(taskid, null, null, null, website, null, ESpiderTopic.SPIDER_EXTRA.name().toLowerCase(), extra);
         return SaasResult.successResult(taskid);
     }
 
