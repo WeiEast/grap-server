@@ -9,5 +9,4 @@ public interface EnterpriseInformationService {
     Long creatTask(String appId, String uniqueId);
 
     Object startCrawler(Long taskid, String extra);
-
 }
