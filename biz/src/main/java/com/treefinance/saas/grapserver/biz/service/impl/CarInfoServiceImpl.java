@@ -88,8 +88,8 @@ public class CarInfoServiceImpl extends AbstractService implements CarInfoServic
             resultData.remove("resultLog");
             AppLicense license = licenseService.getAppLicense(appId);
             //临时不做加密返回，联调需去掉
-            return SimpleResult.successResult(resultData);
-            //return SimpleResult.successEncryptByRSAResult(resultData, license.getServerPublicKey());
+            //return SimpleResult.successResult(resultData);
+            return SimpleResult.successEncryptByRSAResult(resultData, license.getServerPublicKey());
         } else {
             logger.error("调用爬数处理车辆信息采集任务返回值中任务日志信息存在问题:taskId={},modelNum={},httpResult={},result={}", taskId, modelNum, httpResult, JSON.toJSONString(result));
             processFailCollectTask(taskId, "调用爬数处理车辆信息采集任务返回值中任务日志信息存在问题");
