@@ -106,6 +106,9 @@
     <dubbo:reference interface="com.treefinance.saas.taskcenter.facade.service.AcquisitionFacade"
                      id="acquisitionFacade"
                      version="1.0.0"/>
+    <dubbo:reference interface="com.treefinance.saas.processor.thirdparty.facade.opiniondetect.OpinionDetectService"
+                     id="opinionDetectService"/>
+    <dubbo:reference interface="com.treefinance.saas.processor.thirdparty.facade.enterprise.EnterpriseService" id="enterpriseService"/>
 
 </beans>
 
