@@ -55,7 +55,7 @@
         <assistant.version>1.0.10</assistant.version>
         <assistant-monitor.version>1.1.0-SNAPSHOT</assistant-monitor.version>
         <merchant-center.version>1.0.9-SNAPSHOT</merchant-center.version>
-        <taskcenter.version>2.0.0-SNAPSHOT</taskcenter.version>
+        <taskcenter.version>1.0.0-SNAPSHOT</taskcenter.version>
 
     </properties>
 

@@ -16,7 +16,6 @@ import com.treefinance.saas.grapserver.dao.entity.Task;
 import com.treefinance.saas.taskcenter.facade.request.TaskCreateRequest;
 import com.treefinance.saas.taskcenter.facade.request.TaskRequest;
 import com.treefinance.saas.taskcenter.facade.request.TaskUpdateRequest;
-import com.treefinance.saas.taskcenter.facade.response.TaskResponse;
 import com.treefinance.saas.taskcenter.facade.result.TaskRO;
 import com.treefinance.saas.taskcenter.facade.result.common.TaskResult;
 import com.treefinance.saas.taskcenter.facade.service.TaskFacade;
@@ -93,7 +92,7 @@ public class TaskService {
         }
         rpcRequest.setSaasEnv(Byte.valueOf(Constants.SAAS_ENV_VALUE));
         rpcRequest.setExtra(extra);
-        TaskResponse<Long> rpcResult;
+        TaskResult<Long> rpcResult;
         try {
             rpcResult = taskFacade.createTask(rpcRequest);
         } catch (Exception e) {
@@ -103,7 +102,7 @@ public class TaskService {
         if (!rpcResult.isSuccess()) {
             throw new UnknownException("调用taskcenter失败");
         }
-        return rpcResult.getEntity();
+        return rpcResult.getData();
     }
 
     /**
@@ -216,37 +215,6 @@ public class TaskService {
     public void updateTask(Long taskId, String accountNo, String webSite) {
         taskFacade.updateTask(taskId, accountNo, webSite);
     }
-
-    //public String cancelTaskWithStep(Long taskId) {
-    //
-    //    TaskResult<String> rpcResult = taskFacade.cancelTaskWithStep(taskId);
-    //    if (!rpcResult.isSuccess()) {
-    //        throw new UnknownException("调用taskcenter失败");
-    //    }
-    //    return rpcResult.getData();
-    //
-    //}
-    //
-    //
-    //public String failTaskWithStep(Long taskId) {
-    //
-    //    TaskResult<String> rpcResult = taskFacade.failTaskWithStep(taskId);
-    //    if (!rpcResult.isSuccess()) {
-    //        throw new UnknownException("调用taskcenter失败");
-    //    }
-    //    return rpcResult.getData();
-    //}
-
-
-    public String updateTaskStatusWithStep(Long taskId, Byte status) {
-
-        TaskResult<String> rpcResult = taskFacade.updateTaskStatusWithStep(taskId, status);
-        if (!rpcResult.isSuccess()) {
-            throw new UnknownException("调用taskcenter失败");
-        }
-        return rpcResult.getData();
-    }
-
 
     /**
      * 正常流程下取消任务
