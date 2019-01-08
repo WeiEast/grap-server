@@ -85,6 +85,17 @@ public class DiamondConfig {
     @DAttribute(key = "tongdun.detail.url.collect")
     private String tongdunDetailUrlCollect;
 
+    @DAttribute(key = "opiniondetect.platform.to.website")
+    private String opinionDetectPlatformToWebsite;
+
+    public String getOpinionDetectPlatformToWebsite() {
+        return opinionDetectPlatformToWebsite;
+    }
+
+    public void setOpinionDetectPlatformToWebsite(String opinionDetectPlatformToWebsite) {
+        this.opinionDetectPlatformToWebsite = opinionDetectPlatformToWebsite;
+    }
+
     public static Logger getLogger() {
         return logger;
     }

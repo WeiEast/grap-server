@@ -12,11 +12,17 @@ import org.springframework.stereotype.Service;
  */
 @Service
 public class AcquisitionService {
+
     private static final Logger logger = LoggerFactory.getLogger(AcquisitionService.class);
+
     @Autowired
     private AcquisitionFacade acquisitionFacade;
 
     public void acquisition(Long taskid, String header, String cookie, String url, String website, String accountNo, String topic) {
+        acquisition(taskid, header, cookie, url, website, accountNo, topic, null);
+    }
+
+    public void acquisition(Long taskid, String header, String cookie, String url, String website, String accountNo, String topic, String extra) {
         logger.info("acquisition : taskid={},header={},cookie={},url={},website={},accountNo={}", taskid, header, cookie, url, website, accountNo);
         AcquisitionRequest rpcRequest = new AcquisitionRequest();
         rpcRequest.setTaskId(taskid);
@@ -26,14 +32,15 @@ public class AcquisitionService {
         rpcRequest.setWebsite(website);
         rpcRequest.setAccountNo(accountNo);
         rpcRequest.setTopic(topic);
+        rpcRequest.setExtra(extra);
         acquisitionFacade.acquisition(rpcRequest);
     }
 
     @Deprecated
     //兴海:这个已经不用了
     public void loginProcess(String directiveId, Long taskid, String html, String cookie) {
-//        HttpResult<Boolean> res = crawlerService.importAppCrawlResult(directiveId, taskid, html, cookie, null);
-//        taskNextDirectiveService.deleteNextDirective(taskid, EDirective.GRAB_URL.getText());
-//        logger.debug("taskId={}已发送sdk爬取结果={}", taskid, JSON.toJSONString(res));
+        //        HttpResult<Boolean> res = crawlerService.importAppCrawlResult(directiveId, taskid, html, cookie, null);
+        //        taskNextDirectiveService.deleteNextDirective(taskid, EDirective.GRAB_URL.getText());
+        //        logger.debug("taskId={}已发送sdk爬取结果={}", taskid, JSON.toJSONString(res));
     }
 }
