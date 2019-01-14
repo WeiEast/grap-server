@@ -42,7 +42,7 @@ public class FundMoxieService {
         Map<String, String> headers = Maps.newHashMap();
         wrapperApiKeyHeaders(headers);
         String data = HttpClientUtils.doGetWithHeaders(url, headers);
-        return JSONObject.parseObject(data);
+        return JSONObject.parseArray(data);
     }
 
     /**
@@ -106,7 +106,6 @@ public class FundMoxieService {
         wrapperTokenHeaders(headers);
         return HttpClientUtils.doGetWithHeaders(url, headers);
     }
-
 
     private void wrapperTokenHeaders(Map<String, String> headers) {
         headers.put("Authorization", "token" + " " + diamondConfig.getMoxieFundToken());
