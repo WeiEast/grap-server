@@ -291,7 +291,7 @@
             <dependency>
                 <groupId>com.datatrees.spider</groupId>
                 <artifactId>spider-extra-api</artifactId>
-                <version>3.0.7-SNAPSHOT</version>
+                <version>4.0.1</version>
             </dependency>
 
             <dependency>

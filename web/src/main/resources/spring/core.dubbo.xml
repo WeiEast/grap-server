@@ -111,6 +111,7 @@
     <dubbo:reference interface="com.treefinance.saas.taskcenter.facade.service.AcquisitionFacade"
                      id="acquisitionFacade"
                      version="1.0.0"/>
+    <dubbo:reference interface="com.datatrees.spider.extra.api.EnterpriseApi" id="enterpriseApi"/>
 
     <!--生产者-->
     <dubbo:service interface="com.treefinance.saas.grapserver.facade.service.TaskFacade" ref="grapTaskFacade"/>
