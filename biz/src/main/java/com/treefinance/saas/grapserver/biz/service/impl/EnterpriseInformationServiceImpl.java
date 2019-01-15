@@ -37,10 +37,10 @@ public class EnterpriseInformationServiceImpl extends AbstractService implements
     private TaskLicenseService taskLicenseService;
 
     @Autowired
-    private TaskService        taskService;
+    private TaskService taskService;
 
     @Autowired
-    private DiamondConfig      config;
+    private DiamondConfig config;
 
     @Autowired
     private AcquisitionService acquisitionService;
@@ -62,36 +62,37 @@ public class EnterpriseInformationServiceImpl extends AbstractService implements
 
     @Override
     public Object startCrawler(Long taskid, String extra) {
-        Map platToWebsite = GsonUtils.fromJson(config.getOpinionDetectPlatformToWebsite(), new TypeToken<Map>() {
-        }.getType());
+        Map platToWebsite = GsonUtils.fromJson(config.getOpinionDetectPlatformToWebsite(), new TypeToken<Map>() {}.getType());
         String website = (String)platToWebsite.get("enterprise");
         if (StringUtils.isBlank(website)) {
             return SaasResult.failResult("当前平台不支持!");
         }
-        Map param = GsonUtils.fromJson(extra, new TypeToken<Map>() {
-        }.getType());
+        Map param = GsonUtils.fromJson(extra, new TypeToken<Map>() {}.getType());
         String keyword = (String)param.get("business");
         List<Map<String, String>> enterpriseList = enterpriseApi.queryEnterprise(keyword, website);
         if (enterpriseList == null) {
             // 回调操作
-            messageProducer.send(JSON.toJSONString(new DirectiveResult(taskid, DirectiveResult.Directive.task_success,
+            messageProducer.send(
+                JSON.toJSONString(new DirectiveResult(taskid, DirectiveResult.Directive.task_success,
                     JSON.toJSONString(new SuccessRemark(taskid, "enterprise", 0, null, 0, Clock.systemUTC().millis(), (byte)1)))),
                 mqConfig.getProduceDirectiveTopic(), mqConfig.getProduceDirectiveTag(), null);
             logger.info("mq发送成功，taskId={},topic={},tag={}", taskid, mqConfig.getProduceDirectiveTopic(), mqConfig.getProduceDirectiveTag());
             return SaasResult.successResult(taskid);
         }
         StringBuilder extraValue = new StringBuilder();
-        enterpriseList.stream().forEach(
-            enterprise -> extraValue.append(enterprise.get("name")).append(":").append(enterprise.get("unique")).append(":").append(enterprise.get("index")).append(";"));
+        enterpriseList.stream()
+            .forEach(enterprise -> extraValue.append(enterprise.get("name")).append(":").append(enterprise.get("unique")).append(":").append(enterprise.get("index")).append(";"));
         if (StringUtils.isBlank(extraValue)) {
-            return SaasResult.failResult("企业列表为空");
+            messageProducer.send(JSON.toJSONString(new DirectiveResult(taskid, DirectiveResult.Directive.task_fail, null)), mqConfig.getProduceDirectiveTopic(),
+                mqConfig.getProduceDirectiveTag(), null);
+            logger.warn("调用EnterpriseApi返回空列表，taskId={}",taskid);
+            return SaasResult.successResult(taskid);
         }
         Map<String, String> extraMap = new HashMap<>();
         extraMap.put("business", extraValue.toString());
         extra = GsonUtils.toJson(extraMap);
         logger.info("工商信息-发消息：acquisition，taskid={},extra={}", taskid, extra);
-        acquisitionService
-            .acquisition(taskid, null, null, null, website, null, ESpiderTopic.SPIDER_EXTRA.name().toLowerCase(), extra);
+        acquisitionService.acquisition(taskid, null, null, null, website, null, ESpiderTopic.SPIDER_EXTRA.name().toLowerCase(), extra);
         return SaasResult.successResult(taskid);
     }
 }
