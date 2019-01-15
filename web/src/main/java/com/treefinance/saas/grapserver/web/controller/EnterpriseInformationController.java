@@ -1,7 +1,7 @@
 package com.treefinance.saas.grapserver.web.controller;
 
+import com.treefinance.saas.assistant.exception.FailureInSendingToMQException;
 import com.treefinance.saas.grapserver.biz.service.EnterpriseInformationService;
-import com.treefinance.saas.grapserver.common.exception.FailureInSendingToMQException;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
