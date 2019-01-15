@@ -81,7 +81,10 @@ public class EnterpriseInformationService {
         enterpriseList.stream()
             .forEach(enterprise -> extraValue.append(enterprise.get("name")).append(":").append(enterprise.get("unique")).append(":").append(enterprise.get("index")).append(";"));
         if (StringUtils.isBlank(extraValue)) {
-            return SaasResult.failResult("企业列表为空");
+            messageProducer.send(JSON.toJSONString(new DirectiveResult(taskid, DirectiveResult.Directive.task_fail, null)), mqConfig.getProduceDirectiveTopic(),
+                mqConfig.getProduceDirectiveTag(), null);
+            logger.warn("调用EnterpriseApi返回空列表，taskId={}",taskid);
+            return SaasResult.successResult(taskid);
         }
         Map<String, String> extraMap = new HashMap<>();
         extraMap.put("business", extraValue.toString());
