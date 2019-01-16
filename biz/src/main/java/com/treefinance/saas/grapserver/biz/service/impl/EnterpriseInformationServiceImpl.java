@@ -72,7 +72,7 @@ public class EnterpriseInformationServiceImpl extends AbstractService implements
         }
         Map param = GsonUtils.fromJson(extra, new TypeToken<Map>() {}.getType());
         String keyword = (String)param.get("business");
-        List<Map<String, String>> enterpriseList = enterpriseApi.queryEnterprise(keyword, website);
+        List<Map<String, String>> enterpriseList = enterpriseApi.queryEnterprise(keyword, website,taskid);
         StringBuilder extraValue = new StringBuilder();
         enterpriseList.stream()
             .forEach(enterprise -> extraValue.append(enterprise.get("name")).append(":").append(enterprise.get("unique")).append(":").append(enterprise.get("index")).append(";"));
@@ -113,7 +113,7 @@ public class EnterpriseInformationServiceImpl extends AbstractService implements
         }
         Map param = GsonUtils.fromJson(extra, new TypeToken<Map>() {}.getType());
         String keyword = (String)param.get("business");
-        List<Map<String, String>> enterpriseList = enterpriseApi.queryEnterprise(keyword, website);
+        List<Map<String, String>> enterpriseList = enterpriseApi.queryEnterprise(keyword, website,taskid);
         boolean flag = false;
         StringBuilder extraValue = new StringBuilder();
         for (Map<String, String> enterprise : enterpriseList) {

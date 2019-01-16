@@ -1,8 +1,8 @@
 package com.treefinance.saas.grapserver.web.controller;
 
 import com.alibaba.fastjson.JSON;
+import com.treefinance.saas.assistant.exception.FailureInSendingToMQException;
 import com.treefinance.saas.grapserver.biz.service.EnterpriseInformationService;
-import com.treefinance.saas.grapserver.common.exception.FailureInSendingToMQException;
 import org.apache.commons.lang.StringUtils;
 import com.treefinance.saas.grapserver.common.result.SaasResult;
 import org.slf4j.Logger;
