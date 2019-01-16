@@ -2,6 +2,7 @@ package com.treefinance.saas.grapserver.web.saascontroller;
 
 import com.alibaba.fastjson.JSON;
 import com.treefinance.saas.grapserver.biz.service.TongdunService;
+import com.treefinance.saas.grapserver.common.exception.BizException;
 import com.treefinance.saas.grapserver.common.request.TongdunRequest;
 import com.treefinance.saas.grapserver.context.component.AbstractController;
 import com.treefinance.saas.grapserver.util.JudgeUtils;
@@ -102,9 +103,12 @@ public class TongdunController extends AbstractController {
     @RequestMapping(value = "/query/tieshu", method = {RequestMethod.POST})
     public Object collectTieshuDetail(@RequestParam("appid") String appId, @RequestParam("name") String name,
         @RequestParam("idcard") String idcard, @RequestParam("mobile") String mobile,
-        @RequestParam(value = "email", required = false) String email) {
-        if (StringUtils.isBlank(name) || StringUtils.isBlank(idcard) || StringUtils.isBlank(mobile)) {
-            throw new BizException("姓名，身份证号，手机号必填信息不能为空");
+        @RequestParam(value = "email", required = false) String email) throws ValidationException {
+        if (!JudgeUtils.isIdCard(idcard)) {
+            throw new ValidationException("身份证号不合法");
+        }
+        if (!JudgeUtils.isCellNumber(mobile)) {
+            throw new ValidationException("手机号不合法");
         }
         logger.info("铁树信用同盾信息采集,输入参数:appid={},name={},idcard={},mobile={}", appId, name, idcard, mobile);
         TongdunRequest tongdunRequest = new TongdunRequest();
@@ -112,6 +116,9 @@ public class TongdunController extends AbstractController {
         tongdunRequest.setIdCard(idcard);
         tongdunRequest.setTelNum(mobile);
         if (StringUtils.isNotBlank(email)) {
+            if (!JudgeUtils.isEmail(email)) {
+                throw new ValidationException("邮箱不合法");
+            }
             tongdunRequest.setAccountEmail(email);
             logger.info("铁树信用同盾信息采集,输入参数:email={}", email);
         }
