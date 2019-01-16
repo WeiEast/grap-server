@@ -67,7 +67,7 @@ public class EnterpriseInformationService {
         }
         Map param = GsonUtils.fromJson(extra, new TypeToken<Map>() {}.getType());
         String keyword = (String)param.get("business");
-        List<Map<String, String>> enterpriseList = enterpriseApi.queryEnterprise(keyword, website);
+        List<Map<String, String>> enterpriseList = enterpriseApi.queryEnterprise(keyword, website,taskid);
         if (enterpriseList == null) {
             // 回调操作
             messageProducer.send(
