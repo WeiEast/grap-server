@@ -25,14 +25,20 @@ public class RSAUtils {
      * @throws Exception
      */
     public static void main(String[] args) throws Exception {
+        //
+        // String params =
+        // "{\"idcard\":\"110000199001041119\",\"name\":\"xxx\",\"email\":\"787394773@qq.com\",\"mobile\":\"15871362990\"}";
+        // String key =
+        // "MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCMe0CmYZFqmhj9cnRYz8eP0ChRaz8LR8gVEtgNj4XuhpJOGR3xnGEjVvi0NrJx8DAsoJRvJDZS4fZu0094X4kPAB9dZ8z3KNT+g4LnqLufua0JhCaPo1XtlynTL2I7l9Zz+EV3q8eXiL0G3yCDtAZPix3UsHoQxi+Q9VFafWAuxwIDAQAB";
+        // String data = encryptData(params, key);
+        // System.out.println(data);
 
-        String params = "{\"idcard\":\"110000199001041119\",\"name\":\"xxx\",\"email\":\"xxx\",\"mobile\":\"12312xxx\"}";
-        String key = "MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCMe0CmYZFqmhj9cnRYz8eP0ChRaz8LR8gVEtgNj4XuhpJOGR3xnGEjVvi0NrJx8DAsoJRvJDZS4fZu0094X4kPAB9dZ8z3KNT+g4LnqLufua0JhCaPo1XtlynTL2I7l9Zz+EV3q8eXiL0G3yCDtAZPix3UsHoQxi+Q9VFafWAuxwIDAQAB";
-        String data = encryptData(params, key);
-        System.out.println(data);
 
-        String data1 ="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";
-        String privateKey = "MIICdwIBADANBgkqhkiG9w0BAQEFAASCAmEwggJdAgEAAoGBAKNc0IpE+q61AL57xuY9PXlafqbs5IxqtAj89YTWLvGG9okVr+bcOwQUKhkFvXrTblFaWCfa820lM4n1GbpZ2eHB5K3cy6XcQMKXXjyMqmH2rUHzoLq+dZHoOaTV7FwtwEJPQ9IAjgiUlxKckkmkZglsmPFYy4I9ptsOVTyCb2WPAgMBAAECgYEAhYNDxN3fa43vD78lreJ7LYUyYcbWe5Rxk676EhjiwO8m6p7Y5nszmH/KcCzq0UmfrcmCpwAhVyDCYIv6/PyWPsWwtC3sWjitfBhLLMgiLnRUYpLDLHXdyrsUc7G4DJhVhz2HXlei+oVZNgqotUaanYLMw9TyJ/rOIOeDKuyvDzECQQDljPBApJauWPu7xO/l7qUVSOE6K0oB4VIQNiS454YjNnjA8RSU26M/vrY7hB1zn8DHSXNl/jEI6HJCvsYn6MALAkEAti+GyTiF3mKlCgB0hneR1XB3NhmXbTMn1kI7iUHBE4+01iWQi73uzE4yoD8WHz5rwkD/XBqshMpcCSNNgjcPDQJAe2S4nTccXJour6/ceVBAY2Gq2Jb+kGYrs9U3BkJGg9U7MhQlySML7S86TGHnZwkAGuBr7O6oMy6ohSKB6GAgIwJAZx65lRXIOBrvvZyKWD4/rmctItMTcfzdlJoCpuswBQl3WysCCQblroCoiSmMNP0Y82fk4lY6xiLgO0/fJFBT1QJBAJ9p++Ut8lNotZ617SF50o/AKWTiheauKDj6kwFtZSeNwBnPXATfrtAh8jNvopsY8e3K+5RPuB9m5kpmVHMsNEw=";
+
+            String data1 =
+                "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";
+        String privateKey =
+            "MIICdQIBADANBgkqhkiG9w0BAQEFAASCAl8wggJbAgEAAoGBAIHVSUvJnBk4vcbNtKjOsBp1Egy8mpjm8EA3H/VEBRotqAqRYrlLrcBBJgXCgWE8B6vJXyfVScsQtXwBiH/rl7HOpRQ536d1Q/RQLqwDjvO7XlsyyVj2VMmNU54ORaEIl/dSPY9jKgbCFznUwCis/5wz105blSVSqdvecEHQucyHAgMBAAECgYAZtNE+YDy4AbQRmMkcY1Aa7PMV8oHppFANZty9Ayq/dCrBbOfPKFzOpBeTLF/RkME0Ejr0+BYUTsqgMu2D5nGySPWiH6i/6B4ObZ0WUSzX++uuuvhmbouILra4AIS6bzMK/RKBHkF30Zd02/8vfb+4rQlswzgEk80/j886tuq8gQJBAOMmDagaCK6cKYMy93C+5ypx2shlwl2xZ6gw2+H76e/boJ2X9BWdcS9f8UhEo9utXjwNEvZa5r2X3W9EhFDzbK0CQQCSUu4owigSI2bScBsyeWCsoSob9vlCvXMN4Kcy+zctTagkwWufkdSlCdvkyZNmAzNMqTXHnnhuNUgKf9BRQ/CDAkBUTldbQO5gAE3YCB6WlgQuWLufDUWqiKG0Zw31Pg6Bm75tP2y0aQ8NSkq/S9qVOi9zklarYOmrDKZ/GasScIaxAkBcqdYWy7YSnoa8F7CxizpUuI9xPDtoL4+QJ0fbOkocD4S/Ghps6C5RAehWf+0vejFfh/z92HaN3IIt2/lxrWO/AkBZn6/jcHe7tk82Q++UsLamBm1S33En02PykZ2IIdOj4N4slGKsgzqG/2PniUmGnApfeal+ybXY/qCxH5k/QlIX";
         String dData = decrytData(data1, privateKey);
         System.out.println(dData);
     }
@@ -41,13 +47,13 @@ public class RSAUtils {
      * 解密数据
      *
      * @param params 请求返回的参数
-     * @param key    rsa私钥
+     * @param key rsa私钥
      * @return
      * @throws Exception
      */
     public static String decrytData(String params, String key) throws Exception {
         // 1.decode
-//        params = URLDecoder.decode(params, "utf-8");
+        // params = URLDecoder.decode(params, "utf-8");
         // 2.base64
         byte[] data = Base64.getDecoder().decode(params);
         // 3.rsa解密
@@ -66,7 +72,7 @@ public class RSAUtils {
     public static String encryptData(String data, String key) throws Exception {
         byte[] bytes = Helper.encrypt(data.getBytes(), key);
         String params = Base64.getEncoder().encodeToString(bytes);
-//        params = URLEncoder.encode(params, "utf-8");
+        // params = URLEncoder.encode(params, "utf-8");
         return params;
     }
 
@@ -95,7 +101,7 @@ public class RSAUtils {
 
             Cipher cipher = getCipher(Cipher.ENCRYPT_MODE, key);
 
-            return doFinalInBlock(cipher, getBlockSize((RSAKey) key, true), data);
+            return doFinalInBlock(cipher, getBlockSize((RSAKey)key, true), data);
         }
 
         private static byte[] decrypt(byte[] data, String privateKey) throws Exception {
@@ -107,7 +113,7 @@ public class RSAUtils {
 
             Cipher cipher = getCipher(Cipher.DECRYPT_MODE, key);
 
-            return doFinalInBlock(cipher, getBlockSize((RSAKey) key, false), data);
+            return doFinalInBlock(cipher, getBlockSize((RSAKey)key, false), data);
         }
 
         private static int getBlockSize(RSAKey key, boolean encrypt) {
@@ -138,8 +144,7 @@ public class RSAUtils {
             }
         }
 
-        private static Cipher getCipher(int mode, Key key)
-                throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException {
+        private static Cipher getCipher(int mode, Key key) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException {
             Cipher cipher = Cipher.getInstance(ALGORITHM);
             cipher.init(mode, key);
             return cipher;
@@ -165,7 +170,6 @@ public class RSAUtils {
             return Base64.getMimeDecoder().decode(key);
         }
     }
-
 
     private static class KeyGenerator {
 
