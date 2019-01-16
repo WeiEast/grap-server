@@ -21,7 +21,20 @@ public class TongdunDetailResult {
     /**
      * 对应具体详细的结果
      */
-    private Map<String,Map>  details;
+    private Map<String, Map> details;
+
+    /**
+     * 规则详情
+     */
+    private TongdunDetailData dataDetails;
+
+    public TongdunDetailData getDataDetails() {
+        return dataDetails;
+    }
+
+    public void setDataDetails(TongdunDetailData dataDetails) {
+        this.dataDetails = dataDetails;
+    }
 
     public String getId() {
         return id;
@@ -48,7 +61,8 @@ public class TongdunDetailResult {
     }
 
     @Override public String toString() {
-        return "TongdunDetailResult{" + "id='" + id + '\'' + ", value='" + value + '\'' + ", details=" + details + '}';
+        return "TongdunDetailResult{" + "id='" + id + '\'' + ", value='" + value + '\'' + ", details=" + details
+            + ", dataDetails=" + dataDetails + '}';
     }
 
 }
