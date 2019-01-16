@@ -30,6 +30,10 @@
             <groupId>com.alibaba</groupId>
             <artifactId>fastjson</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.treefinance.toolkit</groupId>
+            <artifactId>toolkit</artifactId>
+        </dependency>
 
         <dependency>
             <groupId>com.treefinance.b2b.saas</groupId>

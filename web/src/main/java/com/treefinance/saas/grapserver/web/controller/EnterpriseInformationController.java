@@ -2,6 +2,8 @@ package com.treefinance.saas.grapserver.web.controller;
 
 import com.alibaba.fastjson.JSON;
 import com.treefinance.saas.grapserver.biz.service.EnterpriseInformationService;
+import com.treefinance.saas.grapserver.common.exception.FailureInSendingToMQException;
+import org.apache.commons.lang.StringUtils;
 import com.treefinance.saas.grapserver.common.result.SaasResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,16 +30,17 @@ public class EnterpriseInformationController {
 
     /**
      * 获取工商信息
-     * 
+     *
      * @param appid
      * @param uniqueId
      * @param extra
      * @return
      */
     @RequestMapping(value = "/process", method = {RequestMethod.POST})
-    public Object process(@RequestParam String appid, @RequestParam("uniqueId") String uniqueId, @RequestParam("extra") String extra) {
+    public Object process(@RequestParam String appid, @RequestParam("uniqueId") String uniqueId, @RequestParam("extra") String extra) throws
+        FailureInSendingToMQException {
         logger.info("工商信息:获取工商信息,传入参数,appid={},uniqueId={},extra={}", appid, uniqueId, extra);
-        if (extra == null) {
+        if (StringUtils.isEmpty(extra)) {
             logger.error("工商信息:获取工商信息,参数缺失,appid={},uniqueId={},extra={}", appid, uniqueId, extra);
             throw new IllegalArgumentException("工商信息:获取工商信息,参数缺失");
         }
