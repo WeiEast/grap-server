@@ -109,7 +109,7 @@ public class TongdunController {
             logger.info("铁树信用同盾信息采集,输入参数:email={}", email);
         }
         Long taskId = tongdunService.startCollectTieshuDetailTask(appId,tongdunRequest);
-        Object result = tongdunService.processCollectTieshuDetailTask(null, appId,tongdunRequest);
+        Object result = tongdunService.processCollectTieshuDetailTask(taskId, appId,tongdunRequest);
         logger.info("铁树信用同盾信息采集,返回结果:result={},taskId={},appid={}", JSON.toJSONString(result), taskId, appId
         );
         return result;
