@@ -67,6 +67,7 @@
                      timeout="20000"/>
     <dubbo:reference id="economicApiForTaoBaoQR" interface="com.datatrees.spider.ecommerce.api.EconomicApiForTaoBaoQR"/>
     <dubbo:reference id="educationApi" interface="com.datatrees.spider.extra.api.EducationApi" timeout="20000"/>
+    <dubbo:reference id="enterpriseApi" interface="com.datatrees.spider.extra.api.EnterpriseApi" timeout="20000"/>
 
 
     <dubbo:reference interface="com.treefinance.saas.taskcenter.facade.service.TaskFacade" id="taskFacade"
@@ -106,7 +107,9 @@
     <dubbo:reference interface="com.treefinance.saas.taskcenter.facade.service.AcquisitionFacade"
                      id="acquisitionFacade"
                      version="1.0.0"/>
-    <dubbo:reference interface="com.datatrees.spider.extra.api.EnterpriseApi" id="enterpriseApi"/>
+    <dubbo:reference interface="com.treefinance.saas.processor.thirdparty.facade.opiniondetect.OpinionDetectService"
+                     id="opinionDetectService"/>
+    <dubbo:reference interface="com.treefinance.saas.processor.thirdparty.facade.enterprise.EnterpriseService" id="enterpriseService"/>
 
 </beans>
 

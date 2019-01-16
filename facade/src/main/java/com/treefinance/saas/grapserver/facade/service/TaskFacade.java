@@ -8,6 +8,7 @@ import java.util.List;
 /**
  * Created by yh-treefinance on 2017/9/11.
  */
+@Deprecated
 public interface TaskFacade {
     /**
      * 获取当前taskId对应该平台该用户曾经导过的taskId列表

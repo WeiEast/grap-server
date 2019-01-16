@@ -1,8 +1,10 @@
 package com.treefinance.saas.grapserver.web.controller;
 
+import com.alibaba.fastjson.JSON;
 import com.treefinance.saas.assistant.exception.FailureInSendingToMQException;
 import com.treefinance.saas.grapserver.biz.service.EnterpriseInformationService;
 import org.apache.commons.lang.StringUtils;
+import com.treefinance.saas.grapserver.common.result.SaasResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,6 +12,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.Map;
 
 /**
  * @author guimeichao
@@ -26,6 +30,7 @@ public class EnterpriseInformationController {
 
     /**
      * 获取工商信息
+     *
      * @param appid
      * @param uniqueId
      * @param extra
@@ -41,5 +46,26 @@ public class EnterpriseInformationController {
         }
         Long taskId = enterpriseInformationService.creatTask(appid, uniqueId);
         return enterpriseInformationService.startCrawler(taskId, extra);
+    }
+
+    @RequestMapping(value = "/pynerStart", method = RequestMethod.POST)
+    public Object createTask(@RequestParam String appid, @RequestParam("uniqueId") String uniqueId, @RequestParam("platform") String platform,
+        @RequestParam("extra") String extra) {
+        Map<String, Object> map = JSON.parseObject(extra);
+        String enterpriseName = (String)map.get("business");
+        boolean flag = enterpriseInformationService.isStartCrawler(enterpriseName);
+        if (!flag) {
+            SaasResult<Object> saasResult = (SaasResult<Object>)enterpriseInformationService.getResult(enterpriseName);
+            saasResult.setCode(3);
+            return saasResult;
+        }
+        Long taskId = enterpriseInformationService.creatTask(appid, uniqueId);
+        return enterpriseInformationService.startPynerCrawler(taskId, platform, extra);
+    }
+
+    @RequestMapping(value = "/getEnterpriseData", method = RequestMethod.POST)
+    public Object getEnterpriseData(@RequestParam String appid, @RequestParam("uniqueId") String uniqueId, @RequestParam("saasid") Long saasid,
+        @RequestParam(value = "enterpriseName") String enterpriseName) {
+        return enterpriseInformationService.getEnterpriseData(appid, uniqueId, saasid, enterpriseName);
     }
 }
