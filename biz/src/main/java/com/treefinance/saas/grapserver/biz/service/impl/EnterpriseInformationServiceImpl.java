@@ -1,8 +1,13 @@
 package com.treefinance.saas.grapserver.biz.service.impl;
 
 import com.alibaba.dubbo.rpc.RpcException;
+import com.alibaba.fastjson.JSON;
 import com.datatrees.spider.extra.api.EnterpriseApi;
 import com.google.gson.reflect.TypeToken;
+import com.treefinance.saas.grapserver.biz.mq.DirectiveResult;
+import com.treefinance.saas.grapserver.biz.mq.MQConfig;
+import com.treefinance.saas.grapserver.biz.mq.MessageProducer;
+import com.treefinance.saas.grapserver.biz.mq.SuccessRemark;
 import com.treefinance.saas.grapserver.biz.service.AcquisitionService;
 import com.treefinance.saas.grapserver.biz.service.EnterpriseInformationService;
 import com.treefinance.saas.grapserver.biz.service.TaskLicenseService;
@@ -24,6 +29,7 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 
+import java.time.Clock;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -57,6 +63,12 @@ public class EnterpriseInformationServiceImpl extends AbstractService implements
     @Autowired
     private TaskManager taskManager;
 
+    @Autowired
+    private MessageProducer messageProducer;
+
+    @Autowired
+    private MQConfig mqConfig;
+
     @Override
     public Long creatTask(String appId, String uniqueId) {
         taskLicenseService.verifyCreateTask(appId, uniqueId, EBizType.ENTERPRISE);
@@ -72,12 +84,24 @@ public class EnterpriseInformationServiceImpl extends AbstractService implements
         }
         Map param = GsonUtils.fromJson(extra, new TypeToken<Map>() {}.getType());
         String keyword = (String)param.get("business");
-        List<Map<String, String>> enterpriseList = enterpriseApi.queryEnterprise(keyword, website,taskid);
+        List<Map<String, String>> enterpriseList = enterpriseApi.queryEnterprise(keyword, website, taskid);
+        if (enterpriseList == null) {
+            // 回调操作
+            messageProducer.send(
+                JSON.toJSONString(new DirectiveResult(taskid, DirectiveResult.Directive.task_success,
+                    JSON.toJSONString(new SuccessRemark(taskid, "enterprise", 0, null, 0, Clock.systemUTC().millis(), (byte)1)))),
+                mqConfig.getProduceDirectiveTopic(), mqConfig.getProduceDirectiveTag(), null);
+            logger.info("mq发送成功，taskId={},topic={},tag={}", taskid, mqConfig.getProduceDirectiveTopic(), mqConfig.getProduceDirectiveTag());
+            return SaasResult.successResult(taskid);
+        }
         StringBuilder extraValue = new StringBuilder();
         enterpriseList.stream()
             .forEach(enterprise -> extraValue.append(enterprise.get("name")).append(":").append(enterprise.get("unique")).append(":").append(enterprise.get("index")).append(";"));
         if (StringUtils.isBlank(extraValue)) {
-            return SaasResult.failResult("企业列表为空");
+            messageProducer.send(JSON.toJSONString(new DirectiveResult(taskid, DirectiveResult.Directive.task_fail, null)), mqConfig.getProduceDirectiveTopic(),
+                mqConfig.getProduceDirectiveTag(), null);
+            logger.warn("调用EnterpriseApi返回空列表，taskId={}", taskid);
+            return SaasResult.successResult(taskid);
         }
         Map<String, String> extraMap = new HashMap<>();
         extraMap.put("business", extraValue.toString());
@@ -113,7 +137,7 @@ public class EnterpriseInformationServiceImpl extends AbstractService implements
         }
         Map param = GsonUtils.fromJson(extra, new TypeToken<Map>() {}.getType());
         String keyword = (String)param.get("business");
-        List<Map<String, String>> enterpriseList = enterpriseApi.queryEnterprise(keyword, website,taskid);
+        List<Map<String, String>> enterpriseList = enterpriseApi.queryEnterprise(keyword, website, taskid);
         boolean flag = false;
         StringBuilder extraValue = new StringBuilder();
         for (Map<String, String> enterprise : enterpriseList) {
