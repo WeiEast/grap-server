@@ -6,10 +6,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.treefinance.saas.grapserver.biz.config.DiamondConfig;
 import com.treefinance.saas.grapserver.common.enums.*;
 import com.treefinance.saas.grapserver.common.request.TongdunRequest;
-import com.treefinance.saas.grapserver.common.result.SaasResult;
-import com.treefinance.saas.grapserver.common.result.TongdunData;
-import com.treefinance.saas.grapserver.common.result.TongdunDetailData;
-import com.treefinance.saas.grapserver.common.result.TongdunDetailResult;
+import com.treefinance.saas.grapserver.common.result.*;
 import com.treefinance.saas.grapserver.common.utils.HttpClientUtils;
 import com.treefinance.saas.grapserver.common.utils.TongdunDataResolver;
 import com.treefinance.saas.grapserver.dao.entity.AppLicense;
@@ -109,16 +106,7 @@ public class TongdunService {
                 tongdunData.setDetail(getTongdunDetailData(item, associated3MDTO));
                 tongdunDataList.add(tongdunData);
             }
-            for (ETongdunExtraData data : ETongdunExtraData.values()) {
-                TongdunData tongdunData = new TongdunData();
-                tongdunData.setId(data.getName());
-                if (StringUtils.isEmpty(summary.getString(data.getText()))) {
-                    tongdunData.setValue("false");
-                } else {
-                    tongdunData.setValue(summary.getString(data.getText()));
-                }
-                tongdunDataList.add(tongdunData);
-            }
+
         } catch (Exception e) {
             logger.error("调用功夫贷同盾采集任务返回值中结果存在问题{}", httpResult, e);
             return SaasResult.failResult("查询不到数据!");
@@ -201,12 +189,12 @@ public class TongdunService {
         // 获取详细数值
         JSONObject summary = result.getJSONObject("saasSummaryDTO");
         ETongdunType[] types = ETongdunType.values();
-        List<TongdunDetailResult> tongdunDataList = new ArrayList<>(5);
-        List<TongdunDetailResult> newtongdunDataList = new ArrayList<>(3);
+        List<TongdunDetailTieshuResult> tongdunDataList = new ArrayList<>(5);
+        List<TongdunDetailTieshuResult> newtongdunDataList = new ArrayList<>(3);
         try {
             for (int i = 1; i < 6; i++) {
                 if (summary.getInteger(ETongdunData.getText((byte)i)) != 0) {
-                    TongdunDetailResult tongdunDetailResult = new TongdunDetailResult();
+                    TongdunDetailTieshuResult tongdunDetailResult = new TongdunDetailTieshuResult();
                     JSONObject item = detail.getJSONObject(ETongdunData.getText((byte)i));
                     tongdunDetailResult.setId(ETongdunData.getName((byte)i));
                     tongdunDetailResult.setValue(TongdunDataResolver.to(summary.getInteger(ETongdunData.getText((byte)i))));
@@ -240,7 +228,7 @@ public class TongdunService {
             }
 
             for (int i = 10; i < 13; i++) {
-                TongdunDetailResult tongdunDetailResult = new TongdunDetailResult();
+                TongdunDetailTieshuResult tongdunDetailResult = new TongdunDetailTieshuResult();
                 tongdunDetailResult.setId(ETongdunData.getName((byte)i));
                 tongdunDetailResult.setDataDetails(getTongdunDetailData(ETongdunData.getETonddunData((byte)i), associated3MDTO));
                 newtongdunDataList.add(tongdunDetailResult);
@@ -266,7 +254,9 @@ public class TongdunService {
     }
 
     public Object processCollectDetailTask(Long taskId, String appId, TongdunRequest tongdunRequest) {
-        String url = diamondConfig.getTongdunDetailUrlCollect();
+        // String url = diamondConfig.getTongdunDetailUrlCollect();
+        String url = "https://risk-third-party.99gfd.com/td/saas/ext/query";
+
         JSONObject data = JSON.parseObject(JSON.toJSONString(tongdunRequest));
         Map<String, Object> map = new HashMap<>(1);
         map.put("data", data);
@@ -300,15 +290,18 @@ public class TongdunService {
         // 获取详细数值
         JSONObject summary = result.getJSONObject("saasSummaryDTO");
         ETongdunType[] types = ETongdunType.values();
-        List<TongdunDetailResult> tongdunDataList = new ArrayList<>(5);
+        List<TongdunDetailResult> tongdunDataList = new ArrayList<>();
         try {
             for (int i = 1; i < 6; i++) {
-                if (summary.getInteger(ETongdunData.getText((byte)i)) != 0) {
+
+                if (summary.getInteger(ETongDunSuiShouData.getText((byte)i)) != 0) {
                     TongdunDetailResult tongdunDetailResult = new TongdunDetailResult();
-                    JSONObject item = detail.getJSONObject(ETongdunData.getText((byte)i));
-                    tongdunDetailResult.setId(ETongdunData.getName((byte)i));
-                    tongdunDetailResult.setValue(TongdunDataResolver.to(summary.getInteger(ETongdunData.getText((byte)i))));
+                    JSONObject item = detail.getJSONObject(ETongDunSuiShouData.getText((byte)i));
+                    tongdunDetailResult.setId(ETongDunSuiShouData.getName((byte)i));
+                    tongdunDetailResult.setValue(TongdunDataResolver.to(summary.getInteger(ETongDunSuiShouData.getText((byte)i))));
+
                     Map<String, Map> firstmap = new HashMap<>();
+
                     for (ETongdunType eTongdunType : types) {
 
                         Map<String, String> secondmap = new HashMap<>();
@@ -320,6 +313,7 @@ public class TongdunService {
                         } else {
                             continue;
                         }
+
                         for (ETongdunDetailData eTongdunDetailData : ETongdunDetailData.values()) {
 
                             if (!Objects.isNull(jsonType.get(eTongdunDetailData.getText()))) {
@@ -336,6 +330,25 @@ public class TongdunService {
                     tongdunDataList.add(tongdunDetailResult);
                 }
             }
+            for (int i = 6; i < 16; i++) {
+                TongdunDetailResult tongdunDetailResult = new TongdunDetailResult();
+                JSONObject item = detail.getJSONObject(ETongDunSuiShouData.getText((byte)i));
+                tongdunDetailResult.setId(ETongDunSuiShouData.getName((byte)i));
+                tongdunDetailResult.setValue(TongdunDataResolver.to(summary.getInteger(ETongDunSuiShouData.getText((byte)i))));
+                tongdunDetailResult.setDetails(null);
+                tongdunDataList.add(tongdunDetailResult);
+            }
+
+            for (ETongdunExtraData eTongdunExtraData : ETongdunExtraData.values()) {
+                TongdunDetailResult tongdunData = new TongdunDetailResult();
+                tongdunData.setId(eTongdunExtraData.getName());
+                if (StringUtils.isEmpty(summary.getString(eTongdunExtraData.getText()))) {
+                    tongdunData.setValue("false");
+                } else {
+                    tongdunData.setValue(summary.getString(eTongdunExtraData.getText()));
+                }
+                tongdunDataList.add(tongdunData);
+            }
 
             // 获取黑名单
             Map blackMap = new HashMap(2);
@@ -349,8 +362,8 @@ public class TongdunService {
         }
 
         AppLicense license = appLicenseService.getAppLicense(appId);
-        taskLogService.insert(taskId, "任务成功", new Date(), "");
-        taskFacade.updateTaskStatusWithStep(taskId, ETaskStatus.SUCCESS.getStatus());
+        // taskLogService.insert(taskId, "任务成功", new Date(), "");
+        // taskFacade.updateTaskStatusWithStep(taskId, ETaskStatus.SUCCESS.getStatus());
         return SaasResult.successEncryptByRSAResult(resultList, license.getServerPublicKey());
 
     }

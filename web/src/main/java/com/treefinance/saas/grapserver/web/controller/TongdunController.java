@@ -77,10 +77,10 @@ public class TongdunController {
             tongdunRequest.setAccountEmail(email);
             logger.info("同盾详细信息采集,输入参数:email={}", email);
         }
-        Long taskId = tongdunService.startCollectDetailTask(appId,tongdunRequest);
-        Object result = tongdunService.processCollectDetailTask(taskId, appId,tongdunRequest);
-        logger.info("同盾详细信息采集,返回结果:result={},taskId={},appid={}", JSON.toJSONString(result), taskId, appId
-        );
+//        Long taskId = tongdunService.startCollectDetailTask(appId,tongdunRequest);
+        Object result = tongdunService.processCollectDetailTask(null, appId,tongdunRequest);
+//        logger.info("同盾详细信息采集,返回结果:result={},taskId={},appid={}", JSON.toJSONString(result), taskId, appId
+//        );
         return result;
     }
 
