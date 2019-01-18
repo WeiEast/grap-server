@@ -42,7 +42,7 @@ public enum ETongDunSuiShouData {
     /**
      * 1天内身份证关联设备数
      */
-    MD_IDCARD_1D("MD_IDCARD_1W", "identityAssociatedDevice1DCntCopy", (byte)8),
+    MD_IDCARD_1D("MD_IDCARD_1D", "identityAssociatedDevice1DCntCopy", (byte)8),
 
     /**
      * 1个月内身份证关联设备数
