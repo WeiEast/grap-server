@@ -57,7 +57,7 @@ public class TongdunController {
 
 
     /**
-     * 同盾详细信息采集
+     * 同盾详细信息采集(随手)
      *
      * @return
      */
@@ -80,6 +80,37 @@ public class TongdunController {
         Long taskId = tongdunService.startCollectDetailTask(appId,tongdunRequest);
         Object result = tongdunService.processCollectDetailTask(taskId, appId,tongdunRequest);
         logger.info("同盾详细信息采集,返回结果:result={},taskId={},appid={}", JSON.toJSONString(result), taskId, appId
+        );
+        return result;
+    }
+
+
+
+
+    /**
+     * 铁树信用同盾信息采集
+     *
+     * @return
+     */
+    @RequestMapping(value = "/query/tieshu", method = {RequestMethod.POST})
+    public Object collectTieshuDetail(@RequestParam("appid") String appId, @RequestParam("name") String name,
+        @RequestParam("idcard") String idcard, @RequestParam("mobile") String mobile,
+        @RequestParam(value = "email", required = false) String email) {
+        if (StringUtils.isBlank(name) || StringUtils.isBlank(idcard) || StringUtils.isBlank(mobile)) {
+            throw new BizException("姓名，身份证号，手机号必填信息不能为空");
+        }
+        logger.info("铁树信用同盾信息采集,输入参数:appid={},name={},idcard={},mobile={}", appId, name, idcard, mobile);
+        TongdunRequest tongdunRequest = new TongdunRequest();
+        tongdunRequest.setUserName(name);
+        tongdunRequest.setIdCard(idcard);
+        tongdunRequest.setTelNum(mobile);
+        if (StringUtils.isNotBlank(email)) {
+            tongdunRequest.setAccountEmail(email);
+            logger.info("铁树信用同盾信息采集,输入参数:email={}", email);
+        }
+        Long taskId = tongdunService.startCollectTieshuDetailTask(appId,tongdunRequest);
+        Object result = tongdunService.processCollectTieshuDetailTask(taskId, appId,tongdunRequest);
+        logger.info("铁树信用同盾信息采集,返回结果:result={},taskId={},appid={}", JSON.toJSONString(result), taskId, appId
         );
         return result;
     }
