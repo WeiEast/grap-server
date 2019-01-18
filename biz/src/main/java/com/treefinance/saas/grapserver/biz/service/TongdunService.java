@@ -22,9 +22,6 @@ import com.treefinance.saas.grapserver.manager.TaskManager;
 import com.treefinance.saas.grapserver.util.HttpClientUtils;
 import com.treefinance.saas.grapserver.util.TongdunDataResolver;
 import com.treefinance.saas.grapserver.common.result.*;
-import com.treefinance.saas.grapserver.common.utils.HttpClientUtils;
-import com.treefinance.saas.grapserver.common.utils.TongdunDataResolver;
-import com.treefinance.saas.grapserver.dao.entity.AppLicense;
 import com.treefinance.saas.taskcenter.facade.service.TaskFacade;
 import com.treefinance.saas.taskcenter.facade.service.TaskLogFacade;
 import org.apache.commons.lang3.StringUtils;
@@ -33,6 +30,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.xml.bind.ValidationException;
 import java.util.*;
 
 /**
@@ -58,7 +56,7 @@ public class TongdunService extends AbstractService {
     @Autowired
     private DiamondConfig diamondConfig;
 
-    public Long startCollectTask(String appId, TongdunRequest tongdunRequest) {
+    public Long startCollectTask(String appId, TongdunRequest tongdunRequest) throws ValidationException {
         // 使用身份证号当作uniqueId
         taskLicenseService.verifyCreateSaasTask(appId, tongdunRequest.getIdCard(), EBizType.TONGDUN);
         return saasTaskService.createTask(tongdunRequest.getIdCard(), appId, EBizType.TONGDUN.getCode(), null, null, null);
