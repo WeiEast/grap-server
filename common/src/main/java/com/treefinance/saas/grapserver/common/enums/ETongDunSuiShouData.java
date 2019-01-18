@@ -29,53 +29,56 @@ public enum ETongDunSuiShouData {
      */
     MD_LOAN_1W("MD_LOAN_1W", "loanApply7DCntCopy", (byte)5),
 
-
     /**
-     *  1天内设备关联身份证数
+     * 7天内设备或身份证或手机号申请次数过多
      */
-    MI_DEVICE_1D("MD_IDCARD_1W", "deviceAssociatedIdentity1DCntCopy", (byte)6),
+    MDIP_DEVICE_IDCARD_MOBILE__1W("MDIP_DEVICE_IDCARD_MOBILE__1W", "identityOrDeviceOrPhoneApply7DCnt", (byte)6),
 
     /**
-     * 1天内设备关联手机号数
+     * 1个月内设备或身份证或手机号申请次数过多
      */
-    MP_DEVICE_1D("MD_IDCARD_1W", "deviceAssociatedPhone1DCntCopy", (byte)7),
+    MDIP_DEVICE_IDCARD_MOBILE__1M("MDIP_DEVICE_IDCARD_MOBILE__1M", "identityOrDeviceOrPhoneApply1MCnt", (byte)7),
 
     /**
-     * 1天内身份证关联设备数 / 1天内身份证使用过多设备进行申请
+     * 1天内身份证关联设备数
      */
     MD_IDCARD_1D("MD_IDCARD_1W", "identityAssociatedDevice1DCntCopy", (byte)8),
 
     /**
-     * 1个月内身份证关联设备数/1个月内身份证使用过多设备进行申请
+     * 1个月内身份证关联设备数
      */
     MD_IDCARD_1M("MD_IDCARD_1M", "identityAssociatedDevice1MCntCopy", (byte)9),
+
     /**
-     * 7天内设备关联身份证数
+     * 7天内身份证关联设备数
      */
-    MM_IDCARD_1W("MD_IDCARD_1W", "deviceAssociatedIdentity7DCntCopy", (byte)10),
-    /**
-     * 7天内设备关联手机数
-     */
-    MM_DEVICE_1W("MM_DEVICE_1W", "deviceAssociatedPhone7DCntCopy", (byte)11),
-    /**
-     * 7天内设备关联身份证数
-     */
-    MI_DEVICE_1W("MI_DEVICE_1W", "identityAssociatedDevice7DCntCopy", (byte)12),
+    MI_DEVICE_1W("MI_DEVICE_1W", "identityAssociatedDevice7DCntCopy", (byte)10),
+
+
     /**
      * 3个月内手机关联身份证数
      */
-    MI_MOBILE_3W("MI_MOBILE_3W", "phoneAssociatedIdentity3MCntCopy", (byte)13),
-    /**
-     * 3个月内身份证关联邮箱数
-     */
-    ME_IDCARD_3M("ME_IDCARD_3M", "identityAssociatedMail3MCntCopy", (byte)14),
-    /**
-     * 3个月内身份证关联手机数
-     */
-    MM_IDCARD_3M("MM_IDCARD_3M", "identityAssociatedPhone3MCntCopy", (byte)15);
+    MI_MOBILE_3W("MI_MOBILE_3W", "phoneAssociatedIdentity3MCntCopy", (byte)11),
 
+
+    /**
+     * 3个月内身份证关联邮箱数/3个月身份证关联多个申请信息
+     */
+    ME_IDCARD_3M("MMP_IDCARD_3M", "identityAssociatedMail3MCntCopy", (byte)12),
+    /**
+     * 3个月内身份证关联手机数//3个月身份证关联多个申请信息
+     */
+    MM_IDCARD_3M("MMP_IDCARD_3M", "identityAssociatedPhone3MCntCopy", (byte)13);
+
+    /**
+     * 枚举类名字
+     */
     private String name;
+    /**
+     * 返回给调用方的字段
+     */
     private String text;
+
     private Byte code;
 
     ETongDunSuiShouData(String name, String text, Byte code) {

@@ -254,8 +254,7 @@ public class TongdunService {
     }
 
     public Object processCollectDetailTask(Long taskId, String appId, TongdunRequest tongdunRequest) {
-        // String url = diamondConfig.getTongdunDetailUrlCollect();
-        String url = "https://risk-third-party.99gfd.com/td/saas/ext/query";
+         String url = diamondConfig.getTongdunDetailUrlCollect();
 
         JSONObject data = JSON.parseObject(JSON.toJSONString(tongdunRequest));
         Map<String, Object> map = new HashMap<>(1);
@@ -292,6 +291,7 @@ public class TongdunService {
         ETongdunType[] types = ETongdunType.values();
         List<TongdunDetailResult> tongdunDataList = new ArrayList<>();
         try {
+            //直接返回从同盾输出的字段
             for (int i = 1; i < 6; i++) {
 
                 if (summary.getInteger(ETongDunSuiShouData.getText((byte)i)) != 0) {
@@ -330,7 +330,8 @@ public class TongdunService {
                     tongdunDataList.add(tongdunDetailResult);
                 }
             }
-            for (int i = 6; i < 16; i++) {
+           
+            for (int i = 6; i < 11; i++) {
                 TongdunDetailResult tongdunDetailResult = new TongdunDetailResult();
                 JSONObject item = detail.getJSONObject(ETongDunSuiShouData.getText((byte)i));
                 tongdunDetailResult.setId(ETongDunSuiShouData.getName((byte)i));
@@ -338,7 +339,14 @@ public class TongdunService {
                 tongdunDetailResult.setDetails(null);
                 tongdunDataList.add(tongdunDetailResult);
             }
-
+           //处理返回需要累计的字段
+            TongdunDetailResult tongdunDetailResult = new TongdunDetailResult();
+            tongdunDetailResult.setId(ETongDunSuiShouData.getName((byte)12));
+            tongdunDetailResult.setValue(TongdunDataResolver.to(summary.getInteger(ETongDunSuiShouData.getText((byte)12)+summary.getInteger(ETongDunSuiShouData.getText((byte)13)))));
+            tongdunDetailResult.setDetails(null);
+            tongdunDataList.add(tongdunDetailResult);
+            
+           //加入新增的随手需要额外字段
             for (ETongdunExtraData eTongdunExtraData : ETongdunExtraData.values()) {
                 TongdunDetailResult tongdunData = new TongdunDetailResult();
                 tongdunData.setId(eTongdunExtraData.getName());
@@ -362,8 +370,8 @@ public class TongdunService {
         }
 
         AppLicense license = appLicenseService.getAppLicense(appId);
-        // taskLogService.insert(taskId, "任务成功", new Date(), "");
-        // taskFacade.updateTaskStatusWithStep(taskId, ETaskStatus.SUCCESS.getStatus());
+         taskLogService.insert(taskId, "任务成功", new Date(), "");
+         taskFacade.updateTaskStatusWithStep(taskId, ETaskStatus.SUCCESS.getStatus());
         return SaasResult.successEncryptByRSAResult(resultList, license.getServerPublicKey());
 
     }
