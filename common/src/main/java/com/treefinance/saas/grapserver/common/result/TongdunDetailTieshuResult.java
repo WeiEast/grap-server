@@ -1,17 +1,12 @@
 package com.treefinance.saas.grapserver.common.result;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
-
-import java.util.List;
 import java.util.Map;
 
 /**
  * @author:guoguoyun
- * @date:Created in 2018/10/25上午11:13
+ * @date:Created in 2019/1/17下午5:35
  */
-@JsonInclude(JsonInclude.Include.NON_NULL)
-public class TongdunDetailResult {
-
+public class TongdunDetailTieshuResult {
     /**
      * 对应规则 {@link com.treefinance.saas.grapserver.common.enums.ETongdunData#name}
      */
@@ -27,7 +22,18 @@ public class TongdunDetailResult {
      */
     private Map<String, Map> details;
 
+    /**
+     * 规则详情
+     */
+    private TongdunDetailData dataDetails;
 
+    public TongdunDetailData getDataDetails() {
+        return dataDetails;
+    }
+
+    public void setDataDetails(TongdunDetailData dataDetails) {
+        this.dataDetails = dataDetails;
+    }
 
     public String getId() {
         return id;
@@ -54,6 +60,7 @@ public class TongdunDetailResult {
     }
 
     @Override public String toString() {
-        return "TongdunDetailResult{" + "id='" + id + '\'' + ", value='" + value + '\'' + ", details=" + details + '}';
+        return "TongdunDetailResult{" + "id='" + id + '\'' + ", value='" + value + '\'' + ", details=" + details
+            + ", dataDetails=" + dataDetails + '}';
     }
 }
