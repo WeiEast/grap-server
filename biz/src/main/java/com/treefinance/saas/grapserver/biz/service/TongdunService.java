@@ -3,6 +3,7 @@ package com.treefinance.saas.grapserver.biz.service;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.treefinance.b2b.saas.util.BeanUtils;
 import com.treefinance.saas.gateway.servicefacade.AppLicenseService;
 import com.treefinance.saas.grapserver.biz.domain.AppLicense;
 import com.treefinance.saas.grapserver.common.enums.EBizType;
@@ -11,7 +12,6 @@ import com.treefinance.saas.grapserver.common.enums.ETongdunData;
 import com.treefinance.saas.grapserver.common.enums.ETongdunDetailData;
 import com.treefinance.saas.grapserver.common.enums.ETongdunType;
 import com.google.common.collect.Lists;
-import com.treefinance.saas.grapserver.biz.config.DiamondConfig;
 import com.treefinance.saas.grapserver.biz.domain.AppLicense;
 import com.treefinance.saas.grapserver.common.enums.*;
 import com.treefinance.saas.grapserver.common.model.dto.carinfo.CarInfoCollectTaskLogDTO;
@@ -26,10 +26,6 @@ import com.treefinance.saas.grapserver.manager.TaskManager;
 import com.treefinance.saas.grapserver.util.HttpClientUtils;
 import com.treefinance.saas.grapserver.util.TongdunDataResolver;
 import com.treefinance.saas.grapserver.common.result.*;
-import com.treefinance.saas.grapserver.common.utils.DataConverterUtils;
-import com.treefinance.saas.grapserver.common.utils.HttpClientUtils;
-import com.treefinance.saas.grapserver.common.utils.TongdunDataResolver;
-import com.treefinance.saas.grapserver.dao.entity.AppLicense;
 import com.treefinance.saas.taskcenter.facade.request.CarInfoCollectTaskLogRequest;
 import com.treefinance.saas.taskcenter.facade.service.CarInfoFacade;
 import com.treefinance.saas.taskcenter.facade.service.TaskFacade;
@@ -391,20 +387,21 @@ public class TongdunService extends AbstractService {
             return SaasResult.failResult("查询不到数据!");
         }
 
-        AppLicense license = licenseService.getAppLicense(appId);        processSuccessCollectTask(taskId,"任务成功");
+        AppLicense license = licenseService.getAppLicense(appId);
+        processSuccessCollectTask(taskId,"任务成功");
         return SaasResult.successEncryptByRSAResult(resultList, license.getServerPublicKey());
 
     }
 
     public void updateCollectTaskStatusAndTaskLogAndSendMonitor(Long taskId, List<CarInfoCollectTaskLogDTO> logList) {
-        List<CarInfoCollectTaskLogRequest> carInfoCollectTaskLogRequestList = DataConverterUtils
-            .convert(logList, CarInfoCollectTaskLogRequest.class);
+        List<CarInfoCollectTaskLogRequest> carInfoCollectTaskLogRequestList = BeanUtils
+            .convertList(logList, CarInfoCollectTaskLogRequest.class);
         carInfoFacade.updateCollectTaskStatusAndTaskLogAndSendMonitor(taskId, carInfoCollectTaskLogRequestList);
     }
 
     private void processFailCollectTask(Long taskId, String failMsg) {
         List<CarInfoCollectTaskLogDTO> carInfoCollectTaskLogDTOList = Lists.newArrayList();
-        carInfoCollectTaskLogDTOList.add(new CarInfoCollectTaskLogDTO(ETaskStep.TASK_FAIL.getText(), null, new Date()));
+        carInfoCollectTaskLogDTOList.add(new CarInfoCollectTaskLogDTO(ETaskStep.TASK_FAIL.getText(), failMsg, new Date()));
         this.updateCollectTaskStatusAndTaskLogAndSendMonitor(taskId, carInfoCollectTaskLogDTOList);
     }
 
