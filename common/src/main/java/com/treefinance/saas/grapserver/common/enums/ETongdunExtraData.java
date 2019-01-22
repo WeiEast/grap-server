@@ -40,7 +40,7 @@ public enum ETongdunExtraData {
     IS_IDCARD_RISK("IS_IDCARD_RISK", "identityHitRiskList", (byte)7),
 
     /**
-     * 身份证命中高风险关注名单
+     * 身份证命中法院执行结案名单
      */
     IS_IDCARD_COURTCASE("IS_IDCARD_RISK", "identityHitCourtCasesList", (byte)8),
 

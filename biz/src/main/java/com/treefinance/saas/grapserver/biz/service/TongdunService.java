@@ -10,7 +10,11 @@ import com.treefinance.saas.grapserver.common.enums.ETaskStatus;
 import com.treefinance.saas.grapserver.common.enums.ETongdunData;
 import com.treefinance.saas.grapserver.common.enums.ETongdunDetailData;
 import com.treefinance.saas.grapserver.common.enums.ETongdunType;
+import com.google.common.collect.Lists;
+import com.treefinance.saas.grapserver.biz.config.DiamondConfig;
+import com.treefinance.saas.grapserver.biz.domain.AppLicense;
 import com.treefinance.saas.grapserver.common.enums.*;
+import com.treefinance.saas.grapserver.common.model.dto.carinfo.CarInfoCollectTaskLogDTO;
 import com.treefinance.saas.grapserver.common.request.TongdunRequest;
 import com.treefinance.saas.grapserver.common.result.SaasResult;
 import com.treefinance.saas.grapserver.common.result.TongdunData;
@@ -22,6 +26,12 @@ import com.treefinance.saas.grapserver.manager.TaskManager;
 import com.treefinance.saas.grapserver.util.HttpClientUtils;
 import com.treefinance.saas.grapserver.util.TongdunDataResolver;
 import com.treefinance.saas.grapserver.common.result.*;
+import com.treefinance.saas.grapserver.common.utils.DataConverterUtils;
+import com.treefinance.saas.grapserver.common.utils.HttpClientUtils;
+import com.treefinance.saas.grapserver.common.utils.TongdunDataResolver;
+import com.treefinance.saas.grapserver.dao.entity.AppLicense;
+import com.treefinance.saas.taskcenter.facade.request.CarInfoCollectTaskLogRequest;
+import com.treefinance.saas.taskcenter.facade.service.CarInfoFacade;
 import com.treefinance.saas.taskcenter.facade.service.TaskFacade;
 import com.treefinance.saas.taskcenter.facade.service.TaskLogFacade;
 import org.apache.commons.lang3.StringUtils;
@@ -45,6 +55,8 @@ public class TongdunService extends AbstractService {
     private SaasTaskService saasTaskService;
     @Autowired
     private TaskManager taskManager;
+    @Autowired
+    private CarInfoFacade carInfoFacade;
     @Autowired
     private TaskLogFacade taskLogFacade;
     @Autowired
@@ -276,8 +288,7 @@ public class TongdunService extends AbstractService {
             httpResult = HttpClientUtils.doPost(url, map);
         } catch (Exception e) {
             logger.error("调用功夫贷同盾采集详细任务异常:taskId={},tongdunRequset={}", taskId, tongdunRequest, e);
-            taskLogFacade.insert(taskId, "调用功夫贷同盾采集任务异常", new Date(), "调用功夫贷同盾采集任务异常");
-            taskManager.updateStatusIfDone(taskId, ETaskStatus.FAIL.getStatus());
+            processFailCollectTask(taskId, "调用功夫贷同盾采集任务异常");
             return SaasResult.failResult("Unexpected exception!");
         }
 
@@ -289,8 +300,7 @@ public class TongdunService extends AbstractService {
         }
         if (result == null) {
             logger.error("调用功夫贷同盾采集详细任务返回值中任务日志信息存在问题:taskId={},tongdunRequest={},httpResult={}", taskId, tongdunRequest, httpResult);
-            taskLogFacade.insert(taskId, "调用功夫贷同盾采集详细任务返回值中任务日志信息存在问题", new Date(), "调用功夫贷同盾采集任务返回值中任务日志信息存在问题");
-            taskManager.updateStatusIfDone(taskId, ETaskStatus.FAIL.getStatus());
+            processFailCollectTask(taskId,"调用功夫贷同盾采集详细任务返回值中任务日志信息存在问题");
             // 错误日志中
             return SaasResult.failResult("Unexpected exception!");
         }
@@ -313,6 +323,7 @@ public class TongdunService extends AbstractService {
                     tongdunDetailResult.setValue(TongdunDataResolver.to(summary.getInteger(ETongDunSuiShouData.getText((byte)i))));
 
                     Map<String, Map> firstmap = new HashMap<>();
+
                     for (ETongdunType eTongdunType : types) {
 
                         Map<String, String> secondmap = new HashMap<>();
@@ -324,6 +335,7 @@ public class TongdunService extends AbstractService {
                         } else {
                             continue;
                         }
+
                         for (ETongdunDetailData eTongdunDetailData : ETongdunDetailData.values()) {
 
                             if (!Objects.isNull(jsonType.get(eTongdunDetailData.getText()))) {
@@ -340,22 +352,22 @@ public class TongdunService extends AbstractService {
                     tongdunDataList.add(tongdunDetailResult);
                 }
             }
-
+           
             for (int i = 6; i < 11; i++) {
                 TongdunDetailResult tongdunDetailResult = new TongdunDetailResult();
                 JSONObject item = detail.getJSONObject(ETongDunSuiShouData.getText((byte)i));
                 tongdunDetailResult.setId(ETongDunSuiShouData.getName((byte)i));
                 tongdunDetailResult.setValue(TongdunDataResolver.to(summary.getInteger(ETongDunSuiShouData.getText((byte)i))));
-                tongdunDetailResult.setDetails(null);
+
                 tongdunDataList.add(tongdunDetailResult);
             }
            //处理返回需要累计的字段
             TongdunDetailResult tongdunDetailResult = new TongdunDetailResult();
             tongdunDetailResult.setId(ETongDunSuiShouData.getName((byte)12));
             tongdunDetailResult.setValue(TongdunDataResolver.to(summary.getInteger(ETongDunSuiShouData.getText((byte)12)+summary.getInteger(ETongDunSuiShouData.getText((byte)13)))));
-            tongdunDetailResult.setDetails(null);
-            tongdunDataList.add(tongdunDetailResult);
 
+            tongdunDataList.add(tongdunDetailResult);
+            
            //加入新增的随手需要额外字段
             for (ETongdunExtraData eTongdunExtraData : ETongdunExtraData.values()) {
                 TongdunDetailResult tongdunData = new TongdunDetailResult();
@@ -379,11 +391,32 @@ public class TongdunService extends AbstractService {
             return SaasResult.failResult("查询不到数据!");
         }
 
-        AppLicense license = licenseService.getAppLicense(appId);
-        taskLogService.insert(taskId, "任务成功", new Date(), "");
-        taskManager.updateStatusIfDone(taskId, ETaskStatus.SUCCESS.getStatus());
+        AppLicense license = licenseService.getAppLicense(appId);        processSuccessCollectTask(taskId,"任务成功");
         return SaasResult.successEncryptByRSAResult(resultList, license.getServerPublicKey());
 
+    }
+
+    public void updateCollectTaskStatusAndTaskLogAndSendMonitor(Long taskId, List<CarInfoCollectTaskLogDTO> logList) {
+        List<CarInfoCollectTaskLogRequest> carInfoCollectTaskLogRequestList = DataConverterUtils
+            .convert(logList, CarInfoCollectTaskLogRequest.class);
+        carInfoFacade.updateCollectTaskStatusAndTaskLogAndSendMonitor(taskId, carInfoCollectTaskLogRequestList);
+    }
+
+    private void processFailCollectTask(Long taskId, String failMsg) {
+        List<CarInfoCollectTaskLogDTO> carInfoCollectTaskLogDTOList = Lists.newArrayList();
+        carInfoCollectTaskLogDTOList.add(new CarInfoCollectTaskLogDTO(ETaskStep.TASK_FAIL.getText(), null, new Date()));
+        this.updateCollectTaskStatusAndTaskLogAndSendMonitor(taskId, carInfoCollectTaskLogDTOList);
+    }
+
+    private Boolean processSuccessCollectTask(Long taskId, String resultLog) {
+        List<CarInfoCollectTaskLogDTO> logList = JSON.parseArray(resultLog, CarInfoCollectTaskLogDTO.class);
+        this.updateCollectTaskStatusAndTaskLogAndSendMonitor(taskId, logList);
+        for (CarInfoCollectTaskLogDTO log : logList) {
+            if (StringUtils.equalsIgnoreCase(log.getMsg(), ETaskStep.TASK_SUCCESS.getText())) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private Map<String, Integer> getSaasRuleScoreMapFromJson(JSONObject result) {
