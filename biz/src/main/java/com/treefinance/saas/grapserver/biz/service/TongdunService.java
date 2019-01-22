@@ -388,12 +388,13 @@ public class TongdunService {
 
     private void processFailCollectTask(Long taskId, String failMsg) {
         List<CarInfoCollectTaskLogDTO> carInfoCollectTaskLogDTOList = Lists.newArrayList();
-        carInfoCollectTaskLogDTOList.add(new CarInfoCollectTaskLogDTO(ETaskStep.TASK_FAIL.getText(), null, new Date()));
+        carInfoCollectTaskLogDTOList.add(new CarInfoCollectTaskLogDTO(ETaskStep.TASK_FAIL.getText(), failMsg, new Date()));
         this.updateCollectTaskStatusAndTaskLogAndSendMonitor(taskId, carInfoCollectTaskLogDTOList);
     }
 
     private Boolean processSuccessCollectTask(Long taskId, String resultLog) {
-        List<CarInfoCollectTaskLogDTO> logList = JSON.parseArray(resultLog, CarInfoCollectTaskLogDTO.class);
+        List<CarInfoCollectTaskLogDTO> logList = Lists.newArrayList();
+        logList.add(new CarInfoCollectTaskLogDTO(ETaskStep.TASK_SUCCESS.getText(), resultLog, new Date()));
         this.updateCollectTaskStatusAndTaskLogAndSendMonitor(taskId, logList);
         for (CarInfoCollectTaskLogDTO log : logList) {
             if (StringUtils.equalsIgnoreCase(log.getMsg(), ETaskStep.TASK_SUCCESS.getText())) {
