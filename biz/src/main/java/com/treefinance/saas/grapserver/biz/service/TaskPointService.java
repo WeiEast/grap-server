@@ -21,7 +21,13 @@ public class TaskPointService {
     @Resource
     private TaskPointFacade taskPointFacade;
 
-    public void addTaskPoint(TaskPointRequest taskPointRequest){
+    public void addTaskPoint(Long taskId,String appId,String code,String ip){
+        TaskPointRequest taskPointRequest=new TaskPointRequest();
+        taskPointRequest.setIp(ip);
+        taskPointRequest.setTaskId(taskId);
+        taskPointRequest.setAppId(appId);
+        taskPointRequest.setCode(code);
+        taskPointRequest.setType((byte)0);
         TaskResult<Void> result=taskPointFacade.addTaskPoint(taskPointRequest);
         if (!result.isSuccess()){
             logger.error("埋点记录失败,taskPointRequest={}", JSON.toJSONString(taskPointRequest));
