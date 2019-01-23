@@ -59,7 +59,7 @@
             <dependency>
                 <groupId>com.datatrees.spider</groupId>
                 <artifactId>spider-extra-api</artifactId>
-                <version>4.0.1-SNAPSHOT</version>
+                <version>4.2.0</version>
             </dependency>
 
             <dependency>
