@@ -104,6 +104,16 @@ public enum ETongdunData {
         }
         return null;
     }
+    public static ETongdunData getETonddunData(Byte code) {
+        if (Objects.nonNull(code)) {
+            for (ETongdunData item : ETongdunData.values()) {
+                if (code.equals(item.getCode())) {
+                    return item;
+                }
+            }
+        }
+        return null;
+    }
 
     public static String getName(Byte code) {
         if (Objects.nonNull(code)) {
