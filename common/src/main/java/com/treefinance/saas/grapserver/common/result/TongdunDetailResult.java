@@ -28,7 +28,6 @@ public class TongdunDetailResult {
     private Map<String, Map> details;
 
 
-
     public String getId() {
         return id;
     }
