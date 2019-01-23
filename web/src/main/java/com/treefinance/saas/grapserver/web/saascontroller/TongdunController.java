@@ -99,9 +99,9 @@ public class TongdunController extends AbstractController {
     @RequestMapping(value = "/query/tieshu", method = {RequestMethod.POST})
     public Object collectTieshuDetail(@RequestParam("appid") String appId, @RequestParam("name") String name,
         @RequestParam("idcard") String idcard, @RequestParam("mobile") String mobile,
-        @RequestParam(value = "email", required = false) String email) {
+        @RequestParam(value = "email", required = false) String email) throws ValidationException {
         if (StringUtils.isBlank(name) || StringUtils.isBlank(idcard) || StringUtils.isBlank(mobile)) {
-            throw new BizException("姓名，身份证号，手机号必填信息不能为空");
+            throw new ValidationException("姓名，身份证号，手机号必填信息不能为空");
         }
         logger.info("铁树信用同盾信息采集,输入参数:appid={},name={},idcard={},mobile={}", appId, name, idcard, mobile);
         TongdunRequest tongdunRequest = new TongdunRequest();

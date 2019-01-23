@@ -14,6 +14,7 @@ import com.treefinance.saas.grapserver.common.result.SaasResult;
 import com.treefinance.saas.grapserver.common.result.TongdunData;
 import com.treefinance.saas.grapserver.common.result.TongdunDetailData;
 import com.treefinance.saas.grapserver.common.result.TongdunDetailResult;
+import com.treefinance.saas.grapserver.common.result.TongdunDetailTieshuResult;
 import com.treefinance.saas.grapserver.context.component.AbstractService;
 import com.treefinance.saas.grapserver.context.config.DiamondConfig;
 import com.treefinance.saas.grapserver.manager.TaskManager;
@@ -68,10 +69,10 @@ public class TongdunService extends AbstractService {
         taskLicenseService.verifyCreateSaasTask(appId, tongdunRequest.getIdCard(), EBizType.TONGDUN_KANIU);
         return saasTaskService.createTask(tongdunRequest.getIdCard(), appId, EBizType.TONGDUN_KANIU.getCode(), null, null, null);
     }
-    public Long startCollectTieshuDetailTask(String appId, TongdunRequest tongdunRequest) {
+    public Long startCollectTieshuDetailTask(String appId, TongdunRequest tongdunRequest) throws ValidationException {
         // 使用身份证号当作uniqueId
         taskLicenseService.verifyCreateTask(appId, tongdunRequest.getIdCard(), EBizType.TONGDUN_TIESHU);
-        return taskService.createTask(tongdunRequest.getIdCard(), appId, EBizType.TONGDUN_TIESHU.getCode(), null, null, null);
+        return saasTaskService.createTask(tongdunRequest.getIdCard(), appId, EBizType.TONGDUN_TIESHU.getCode(), null, null, null);
     }
 
     public Object processCollectTask(Long taskId, String appId, TongdunRequest tongdunRequest) {
@@ -265,7 +266,7 @@ public class TongdunService extends AbstractService {
         } catch (Exception e) {
             logger.error("调用功夫贷同盾采集详细任务异常:taskId={},tongdunRequset={}", taskId, tongdunRequest, e);
             taskLogFacade.insert(taskId, "调用功夫贷同盾采集详细任务异常", new Date(), "调用功夫贷同盾采集详细任务异常");
-            taskFacade.updateTaskStatusWithStep(taskId, ETaskStatus.FAIL.getStatus());
+            taskManager.updateStatusIfDone(taskId, ETaskStatus.FAIL.getStatus());
             return SaasResult.failResult("Unexpected exception!");
         }
 
@@ -278,7 +279,7 @@ public class TongdunService extends AbstractService {
         if (result == null) {
             logger.error("调用功夫贷同盾采集详细任务返回值中任务日志信息存在问题:taskId={},tongdunRequest={},httpResult={}", taskId, tongdunRequest, httpResult);
             taskLogFacade.insert(taskId, "调用功夫贷同盾采集详细任务返回值中任务日志信息存在问题", new Date(), "调用功夫贷同盾采集详细任务返回值中任务日志信息存在问题");
-            taskFacade.updateTaskStatusWithStep(taskId, ETaskStatus.FAIL.getStatus());
+            taskManager.updateStatusIfDone(taskId, ETaskStatus.FAIL.getStatus());
             // 错误日志中
             return SaasResult.failResult("Unexpected exception!");
         }
@@ -349,9 +350,9 @@ public class TongdunService extends AbstractService {
             return SaasResult.failResult("查询不到数据!");
         }
 
-        AppLicense license = appLicenseService.getAppLicense(appId);
+        AppLicense license = licenseService.getAppLicense(appId);
         taskLogService.insert(taskId, "任务成功", new Date(), "");
-        taskFacade.updateTaskStatusWithStep(taskId, ETaskStatus.SUCCESS.getStatus());
+        taskManager.updateStatusIfDone(taskId, ETaskStatus.SUCCESS.getStatus());
         return SaasResult.successEncryptByRSAResult(resultList, license.getServerPublicKey());
 
     }
