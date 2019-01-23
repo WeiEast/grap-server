@@ -10,10 +10,7 @@ import com.treefinance.saas.grapserver.common.enums.ETongdunData;
 import com.treefinance.saas.grapserver.common.enums.ETongdunDetailData;
 import com.treefinance.saas.grapserver.common.enums.ETongdunType;
 import com.treefinance.saas.grapserver.common.request.TongdunRequest;
-import com.treefinance.saas.grapserver.common.result.SaasResult;
-import com.treefinance.saas.grapserver.common.result.TongdunData;
-import com.treefinance.saas.grapserver.common.result.TongdunDetailData;
-import com.treefinance.saas.grapserver.common.result.TongdunDetailResult;
+import com.treefinance.saas.grapserver.common.result.*;
 import com.treefinance.saas.grapserver.common.utils.HttpClientUtils;
 import com.treefinance.saas.grapserver.common.utils.TongdunDataResolver;
 import com.treefinance.saas.grapserver.dao.entity.AppLicense;
@@ -264,7 +261,8 @@ public class TongdunService {
             httpResult = HttpClientUtils.doPost(url, map);
         } catch (Exception e) {
             logger.error("调用功夫贷同盾采集详细任务异常:taskId={},tongdunRequset={}", taskId, tongdunRequest, e);
-            processFailCollectTask(taskId, "调用功夫贷同盾采集详细任务异常");
+            taskLogFacade.insert(taskId, "调用功夫贷同盾采集详细任务异常", new Date(), "调用功夫贷同盾采集详细任务异常");
+            taskFacade.updateTaskStatusWithStep(taskId, ETaskStatus.FAIL.getStatus());
             return SaasResult.failResult("Unexpected exception!");
         }
 
@@ -276,7 +274,8 @@ public class TongdunService {
         }
         if (result == null) {
             logger.error("调用功夫贷同盾采集详细任务返回值中任务日志信息存在问题:taskId={},tongdunRequest={},httpResult={}", taskId, tongdunRequest, httpResult);
-            processFailCollectTask(taskId, "调用功夫贷同盾采集详细任务返回值中任务日志信息存在问题");
+            taskLogFacade.insert(taskId, "调用功夫贷同盾采集详细任务返回值中任务日志信息存在问题", new Date(), "调用功夫贷同盾采集详细任务返回值中任务日志信息存在问题");
+            taskFacade.updateTaskStatusWithStep(taskId, ETaskStatus.FAIL.getStatus());
             // 错误日志中
             return SaasResult.failResult("Unexpected exception!");
         }
@@ -348,7 +347,8 @@ public class TongdunService {
         }
 
         AppLicense license = appLicenseService.getAppLicense(appId);
-        processSuccessCollectTask(taskId,"任务成功");
+        taskLogService.insert(taskId, "任务成功", new Date(), "");
+        taskFacade.updateTaskStatusWithStep(taskId, ETaskStatus.SUCCESS.getStatus());
         return SaasResult.successEncryptByRSAResult(resultList, license.getServerPublicKey());
 
     }
