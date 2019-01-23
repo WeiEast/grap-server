@@ -4,13 +4,9 @@ import com.treefinance.saas.grapserver.biz.service.TaskBuryPointLogService;
 import com.treefinance.saas.grapserver.biz.service.TaskBuryPointSpecialCodeService;
 import com.treefinance.saas.grapserver.biz.service.TaskPointService;
 import com.treefinance.saas.grapserver.common.enums.CodeEnum;
-import com.treefinance.saas.taskcenter.facade.request.TaskPointRequest;
 import com.treefinance.toolkit.util.http.servlet.ServletRequests;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -29,15 +25,16 @@ public class TaskPointController {
     private TaskBuryPointSpecialCodeService taskBuryPointSpecialCodeService;
 
     @RequestMapping(value = "/add", method = RequestMethod.POST)
-    public void addTaskPoint(@RequestBody TaskPointRequest taskPointRequest, HttpServletRequest httpServletRequest) {
-        if (taskPointRequest.getType()!=1){
-            taskPointRequest.setIp(ServletRequests.getIP(httpServletRequest));
-        }
-        taskPointService.addTaskPoint(taskPointRequest);
-        String oldCode = CodeEnum.getName(taskPointRequest.getCode());
+    public void addTaskPoint(@RequestParam("taskid") Long taskId,
+        @RequestParam("appid") String appId,
+        @RequestParam("code") String code,
+        @RequestParam(value = "extra", required = false) String extra, HttpServletRequest httpServletRequest) {
+        String ip=ServletRequests.getIP(httpServletRequest);
+        taskPointService.addTaskPoint(taskId,appId,code,ip);
+        String oldCode = CodeEnum.getName(code);
         if (oldCode != null) {
-            taskBuryPointLogService.pushTaskBuryPointLog(taskPointRequest.getTaskId(), taskPointRequest.getAppId(), oldCode);
-            taskBuryPointSpecialCodeService.doProcess(oldCode, taskPointRequest.getTaskId(), taskPointRequest.getAppId(), taskPointRequest.getExtra());
+            taskBuryPointLogService.pushTaskBuryPointLog(taskId, appId, oldCode);
+            taskBuryPointSpecialCodeService.doProcess(oldCode, taskId, appId, extra);
         }
     }
 }
