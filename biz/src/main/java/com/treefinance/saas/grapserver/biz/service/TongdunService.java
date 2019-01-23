@@ -358,15 +358,15 @@ public class TongdunService {
                         JSONObject jsonObject = JSONObject.parseObject(ruleHitDetail.substring(1, ruleHitDetail.length() - 1));
                         mapString = jsonObject.toJavaObject(Map.class);
                         if (i < 8) {
-                            mapString = convertMap(mapString,"设备或身份证或手机号申请次数过多",ETongDunSuiShouData.getName((byte)i));
+                            mapString = convertMap(mapString,"设备或身份证或手机号申请次数过多");
 
                         } else if (i >= 8 && i < 11) {
-                            mapString = convertMap(mapString, "身份证关联设备数", ETongDunSuiShouData.getName((byte)i));
+                            mapString = convertMap(mapString, "身份证关联设备数");
                         } else if (i == 11) {
-                            mapString = convertMap(mapString, "手机关联身份证数", ETongDunSuiShouData.getName((byte)i));
+                            mapString = convertMap(mapString, "手机关联身份证数");
 
                         } else if (i > 11) {
-                            mapString = convertMap(mapString, "3个月身份证关联多个申请信息", ETongDunSuiShouData.getName((byte)i));
+                            mapString = convertMap(mapString, "3个月身份证关联多个申请信息");
                         }
                     }
                 }
@@ -378,9 +378,9 @@ public class TongdunService {
             // 处理返回需要累计的字段
             TongdunDetailResult tongdunDetailResult = new TongdunDetailResult();
             tongdunDetailResult = tongdunDataList.get(11);
-            tongdunDetailResult
-                .setValue(TongdunDataResolver.to(summary.getInteger(ETongDunSuiShouData.getText((byte)12) + summary.getInteger(ETongDunSuiShouData.getText((byte)13)))));
+            tongdunDetailResult.setValue(TongdunDataResolver.to(summary.getInteger(ETongDunSuiShouData.getText((byte)12)) + summary.getInteger(ETongDunSuiShouData.getText((byte)13))));
             tongdunDataList.set(11, tongdunDetailResult);
+
 
             // 加入新增的随手需要额外字段
             for (ETongdunExtraData eTongdunExtraData : ETongdunExtraData.values()) {
@@ -469,7 +469,7 @@ public class TongdunService {
                                     lostDetail = jsonObject.getJSONArray("借款人手机");
                                 }
                                 String cheatType = "";
-                                String mobile = "";
+                                String lenderMobile = "";
 
                                 if (!ObjectUtils.isEmpty(lostDetail)) {
 
@@ -481,10 +481,10 @@ public class TongdunService {
 
                                 }
                                 if (!ObjectUtils.isEmpty(JSONObject.parseObject(lostDetail.get(0).toString()).get("借款人手机")))
-                                    mobile = JSONObject.parseObject(lostDetail.get(0).toString()).get("借款人手机").toString();
+                                    lenderMobile = JSONObject.parseObject(lostDetail.get(0).toString()).get("借款人手机").toString();
 
                                 mapString.put("cheatType", cheatType);
-                                mapString.put("mobile", mobile);
+                                mapString.put("lenderMobile", lenderMobile);
                                 mapString.remove("描述");
                             }
                         }
@@ -514,11 +514,22 @@ public class TongdunService {
 
     }
 
-    private Map convertMap(Map mapString, String name, String value) {
+    private Map convertMap(Map mapString, String name) {
+        if (("设备或身份证或手机号申请次数过多").equals(name)) {
+            if (!ObjectUtils.isEmpty(mapString.get("借款人身份证出现次数"))) {
+                mapString.put("lenderIdCardOccurTime", mapString.get("借款人身份证出现次数"));
+                mapString.remove("借款人身份证出现次数");
+                mapString.remove("描述");
+            }
+            if (!ObjectUtils.isEmpty(mapString.get("设备ID出现次数"))) {
+                mapString.put("deviceOccurTime", mapString.get("设备ID出现次数"));
+                mapString.remove("设备ID出现次数");
+                mapString.remove("描述");
+            }
 
+        }
         if (("手机关联身份证数").equals(name)) {
             if (!ObjectUtils.isEmpty(mapString.get("借款人手机关联借款人身份证数目"))) {
-//                mapString.put(value, TongdunDataResolver.to((Integer)mapString.get("借款人手机关联借款人身份证数目")));
                 mapString.put("associatedLenderIdcardList", mapString.get("关联借款人身份证列表"));
                 mapString.remove("借款人手机关联借款人身份证数目");
                 mapString.remove("关联借款人身份证列表");
@@ -528,10 +539,8 @@ public class TongdunService {
         }
         if (("身份证关联设备数").equals(name)) {
             if (!ObjectUtils.isEmpty(mapString.get("借款人身份证关联设备ID数目"))) {
-//                mapString.put(value, TongdunDataResolver.to((Integer)mapString.get("借款人身份证关联设备ID数目")));
                 mapString.remove("借款人身份证关联设备ID数目");
             } else if (!ObjectUtils.isEmpty(mapString.get("账户身份证关联设备ID数目"))) {
-//                mapString.put(value, TongdunDataResolver.to((Integer)mapString.get("账户身份证关联设备ID数目")));
                 mapString.remove("账户身份证关联设备ID数目");
 
             }
