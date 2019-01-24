@@ -10,9 +10,6 @@ import com.treefinance.saas.grapserver.biz.mq.MessageProducer;
 import com.treefinance.saas.grapserver.biz.mq.SuccessRemark;
 import com.treefinance.saas.grapserver.biz.service.AcquisitionService;
 import com.treefinance.saas.grapserver.biz.service.EnterpriseInformationService;
-import com.treefinance.saas.grapserver.biz.service.TaskLicenseService;
-import com.treefinance.saas.grapserver.biz.service.TaskService;
-import com.treefinance.saas.grapserver.common.enums.EBizType;
 import com.treefinance.saas.grapserver.common.enums.ESpiderTopic;
 import com.treefinance.saas.grapserver.common.enums.ETaskStatus;
 import com.treefinance.saas.grapserver.common.result.SaasResult;
@@ -43,12 +40,6 @@ import java.util.Map;
 public class EnterpriseInformationServiceImpl extends AbstractService implements EnterpriseInformationService {
 
     @Autowired
-    private TaskLicenseService taskLicenseService;
-
-    @Autowired
-    private TaskService taskService;
-
-    @Autowired
     private DiamondConfig config;
 
     @Autowired
@@ -68,12 +59,6 @@ public class EnterpriseInformationServiceImpl extends AbstractService implements
 
     @Autowired
     private MQConfig mqConfig;
-
-    @Override
-    public Long creatTask(String appId, String uniqueId) {
-        taskLicenseService.verifyCreateTask(appId, uniqueId, EBizType.ENTERPRISE);
-        return taskService.createTask(uniqueId, appId, EBizType.ENTERPRISE.getCode(), null, null, null);
-    }
 
     @Override
     public Object startCrawler(Long taskid, String extra) {
@@ -162,7 +147,6 @@ public class EnterpriseInformationServiceImpl extends AbstractService implements
 
     @Override
     public Object getEnterpriseData(String appId, String uniqueId, Long taskid, String enterpriseName) {
-        taskLicenseService.verifyCreateSaasTask(appId, uniqueId, EBizType.ENTERPRISE);
         TaskBO task = taskManager.getTaskById(taskid);
         if (ETaskStatus.RUNNING.getStatus().equals(task.getStatus())) {
             return SaasResult.failResult(null, "任务还在进行中...", 1);

@@ -1,5 +1,7 @@
 package com.treefinance.saas.grapserver.biz.service;
 
+import com.treefinance.saas.grapserver.common.enums.EBizType;
+
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
@@ -16,16 +18,36 @@ public interface TaskService {
     String getUniqueIdInTask(Long taskId);
 
     /**
-     * 创建任务
+     * 检查任务访问有效性
+     * 
+     * @param appId 商户ID
      * @param uniqueId 用户ID
-     * @param appId    商户ID
-     * @param bizType  业务类型
-     * @param extra    额外信息
-     * @param website  网站标识
-     * @param source   来源
+     * @param bizType 业务类型
+     */
+    void validateTask(String appId, String uniqueId, EBizType bizType);
+
+    /**
+     * 创建任务
+     * 
+     * @param appId 商户ID
+     * @param uniqueId 用户ID
+     * @param bizType 业务类型
      * @return 任务ID
      */
-    Long createTask(String uniqueId, String appId, Byte bizType, String extra, String website, String source);
+    Long createTask(String appId, String uniqueId, EBizType bizType);
+
+    /**
+     * 创建任务
+     * 
+     * @param appId 商户ID
+     * @param uniqueId 用户ID
+     * @param bizType 业务类型
+     * @param extra 额外信息
+     * @param website 网站标识
+     * @param source 来源
+     * @return 任务ID
+     */
+    Long createTask(String appId, String uniqueId, EBizType bizType, String extra, String website, String source);
 
     /**
      * 更新网站标识

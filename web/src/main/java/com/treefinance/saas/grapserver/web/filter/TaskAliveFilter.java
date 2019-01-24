@@ -1,25 +1,26 @@
 package com.treefinance.saas.grapserver.web.filter;
 
-import com.alibaba.fastjson.JSON;
 import com.google.common.collect.Maps;
-import com.treefinance.saas.grapserver.context.config.DiamondConfig;
 import com.treefinance.saas.grapserver.biz.service.TaskAliveService;
-import com.treefinance.saas.grapserver.common.exception.TaskTimeOutException;
+import com.treefinance.saas.grapserver.exception.TaskTimeOutException;
+import com.treefinance.saas.grapserver.context.config.DiamondConfig;
 import com.treefinance.saas.knife.result.SimpleResult;
 import com.treefinance.toolkit.util.DateUtils;
 import com.treefinance.toolkit.util.http.servlet.ServletRequests;
 import com.treefinance.toolkit.util.http.servlet.ServletResponses;
 import com.treefinance.toolkit.util.json.Jackson;
-import java.io.IOException;
-import java.util.Date;
-import java.util.Map;
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
+import java.io.IOException;
+import java.util.Date;
+import java.util.Map;
 
 /**
  * Buddha Bless , No Bug !
@@ -31,6 +32,7 @@ import org.slf4j.LoggerFactory;
 public class TaskAliveFilter extends AbstractRequestFilter {
 
     private static final Logger logger = LoggerFactory.getLogger(TaskAliveFilter.class);
+    private static final String[] TASK_ID_PARAMS = new String[] {"taskId", "taskid"};
     private DiamondConfig diamondConfig;
     private TaskAliveService taskAliveService;
 
@@ -43,15 +45,15 @@ public class TaskAliveFilter extends AbstractRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         try {
             //校验任务是否超时取消
-            String taskIdStr = request.getParameter("taskId");
-            String taskidStr = request.getParameter("taskid");
             long taskId = 0;
-            if (StringUtils.isNotBlank(taskIdStr)) {
-                taskId = Long.parseLong(taskIdStr);
+            for (String param : TASK_ID_PARAMS) {
+                String taskIdStr = request.getParameter(param);
+                if (StringUtils.isNotBlank(taskIdStr)) {
+                    taskId = Long.parseLong(taskIdStr);
+                    break;
+                }
             }
-            if (StringUtils.isNotBlank(taskidStr)) {
-                taskId = Long.parseLong(taskidStr);
-            }
+
             if (taskId > 0) {
                 String lastActiveTimeStr = taskAliveService.getTaskAliveTime(taskId);
                 if (StringUtils.isBlank(lastActiveTimeStr)) {
@@ -70,18 +72,11 @@ public class TaskAliveFilter extends AbstractRequestFilter {
             filterChain.doFilter(request, response);
         } catch (TaskTimeOutException e) {
             taskTimeout(request, response, e);
-        } finally {
-            logger.info("{} of {} : params={}", request.getMethod(), request.getRequestURL(),
-                    JSON.toJSONString(request.getParameterMap()));
         }
     }
 
     /**
      * 任务超时取消处理
-     *
-     * @param request
-     * @param response
-     * @param e
      */
     private void taskTimeout(HttpServletRequest request, HttpServletResponse response, TaskTimeOutException e) {
         logger.error(String.format("@[%s;%s;%s] >> %s", request.getRequestURI(), request.getMethod(),

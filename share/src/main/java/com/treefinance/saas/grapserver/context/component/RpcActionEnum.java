@@ -38,6 +38,10 @@ public enum RpcActionEnum {
      */
     QUERY_MERCHANT_BASE_INFO_BY_APP_ID,
     /**
+     * 根据appId查询商户（已激活）的基本信息
+     */
+    QUERY_ACTIVE_MERCHANT_BASE_INFO_BY_APP_ID,
+    /**
      * 根据appId查询license业务信息
      */
     QUERY_APP_BIZ_LICENSE_BY_APP_ID,

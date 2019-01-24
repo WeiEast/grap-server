@@ -21,7 +21,7 @@ import com.treefinance.saas.grapserver.biz.service.TaskDirectiveService;
 import com.treefinance.saas.grapserver.biz.service.TaskLogService;
 import com.treefinance.saas.grapserver.common.enums.ETaskStep;
 import com.treefinance.saas.grapserver.common.enums.moxie.EMoxieDirective;
-import com.treefinance.saas.grapserver.common.exception.RequestFailedException;
+import com.treefinance.saas.grapserver.exception.RequestFailedException;
 import com.treefinance.saas.grapserver.common.model.dto.moxie.MoxieCaptchaDTO;
 import com.treefinance.saas.grapserver.common.model.dto.moxie.MoxieCityInfoDTO;
 import com.treefinance.saas.grapserver.common.model.dto.moxie.MoxieLoginParamsDTO;

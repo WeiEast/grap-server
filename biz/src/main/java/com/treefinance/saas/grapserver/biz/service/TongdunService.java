@@ -4,7 +4,6 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.treefinance.saas.grapserver.biz.domain.AppLicense;
-import com.treefinance.saas.grapserver.common.enums.EBizType;
 import com.treefinance.saas.grapserver.common.enums.ETaskStatus;
 import com.treefinance.saas.grapserver.common.enums.ETongdunData;
 import com.treefinance.saas.grapserver.common.enums.ETongdunDetailData;
@@ -25,8 +24,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import javax.xml.bind.ValidationException;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -44,36 +41,15 @@ import java.util.Objects;
 public class TongdunService extends AbstractService {
 
     @Autowired
-    private SaasTaskService saasTaskService;
-    @Autowired
     private TaskManager taskManager;
     @Autowired
     private TaskLogFacade taskLogFacade;
-    @Autowired
-    private TaskLicenseService taskLicenseService;
     @Autowired
     private TaskLogService taskLogService;
     @Autowired
     private LicenseService licenseService;
     @Autowired
     private DiamondConfig diamondConfig;
-
-    public Long startCollectTask(String appId, TongdunRequest tongdunRequest) throws ValidationException {
-        // 使用身份证号当作uniqueId
-        taskLicenseService.verifyCreateSaasTask(appId, tongdunRequest.getIdCard(), EBizType.TONGDUN);
-        return saasTaskService.createTask(tongdunRequest.getIdCard(), appId, EBizType.TONGDUN.getCode(), null, null, null);
-    }
-
-    public Long startCollectDetailTask(String appId, TongdunRequest tongdunRequest) throws ValidationException {
-        // 使用身份证号当作uniqueId
-        taskLicenseService.verifyCreateSaasTask(appId, tongdunRequest.getIdCard(), EBizType.TONGDUN_KANIU);
-        return saasTaskService.createTask(tongdunRequest.getIdCard(), appId, EBizType.TONGDUN_KANIU.getCode(), null, null, null);
-    }
-    public Long startCollectTieshuDetailTask(String appId, TongdunRequest tongdunRequest) throws ValidationException {
-        // 使用身份证号当作uniqueId
-        taskLicenseService.verifyCreateTask(appId, tongdunRequest.getIdCard(), EBizType.TONGDUN_TIESHU);
-        return saasTaskService.createTask(tongdunRequest.getIdCard(), appId, EBizType.TONGDUN_TIESHU.getCode(), null, null, null);
-    }
 
     public Object processCollectTask(Long taskId, String appId, TongdunRequest tongdunRequest) {
         String url = diamondConfig.getTongdunUrlCollect();

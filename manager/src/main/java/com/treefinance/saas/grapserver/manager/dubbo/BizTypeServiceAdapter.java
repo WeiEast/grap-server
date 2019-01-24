@@ -15,7 +15,7 @@ package com.treefinance.saas.grapserver.manager.dubbo;
 
 import com.alibaba.fastjson.JSON;
 import com.treefinance.saas.grapserver.context.component.RpcActionEnum;
-import com.treefinance.saas.grapserver.exception.IllegalBizDataException;
+import com.treefinance.saas.grapserver.exception.IllegalBusinessDataException;
 import com.treefinance.saas.grapserver.manager.BizTypeManager;
 import com.treefinance.saas.grapserver.manager.domain.BizTypeInfoBO;
 import com.treefinance.saas.merchant.facade.request.common.BaseRequest;
@@ -62,7 +62,7 @@ public class BizTypeServiceAdapter extends AbstractMerchantServiceAdapter implem
         AppBizTypeResult data = CollectionUtils.isNotEmpty(list) ? list.get(0) : null;
 
         if (data == null) {
-            throw new IllegalBizDataException("Can not find any biz-type information! bizType: " + bizType);
+            throw new IllegalBusinessDataException("Can not find any biz-type information! bizType: " + bizType);
         }
 
         return convert(data, BizTypeInfoBO.class);

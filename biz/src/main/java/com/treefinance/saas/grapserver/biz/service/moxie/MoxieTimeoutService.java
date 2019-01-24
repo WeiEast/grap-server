@@ -5,7 +5,7 @@ import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.treefinance.saas.grapserver.biz.domain.AppBizType;
 import com.treefinance.saas.grapserver.biz.service.AppBizTypeService;
-import com.treefinance.saas.grapserver.common.exception.UnknownException;
+import com.treefinance.saas.grapserver.exception.UnknownException;
 import com.treefinance.saas.grapserver.context.component.AbstractService;
 import com.treefinance.saas.grapserver.manager.TaskManager;
 import com.treefinance.saas.grapserver.manager.domain.TaskBO;

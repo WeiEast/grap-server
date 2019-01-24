@@ -1,16 +1,16 @@
 package com.treefinance.saas.grapserver.web.controller;
 
 import com.google.common.collect.Maps;
-import com.treefinance.saas.grapserver.share.cache.redis.RedisDao;
-import com.treefinance.saas.grapserver.context.config.DiamondConfig;
 import com.treefinance.saas.grapserver.biz.service.MerchantConfigService;
 import com.treefinance.saas.grapserver.biz.service.TaskDeviceService;
-import com.treefinance.saas.grapserver.biz.service.TaskLicenseService;
 import com.treefinance.saas.grapserver.biz.service.TaskService;
 import com.treefinance.saas.grapserver.common.enums.EBizType;
-import com.treefinance.saas.grapserver.common.exception.BizException;
+import com.treefinance.saas.grapserver.exception.BizException;
 import com.treefinance.saas.grapserver.context.Constants;
+import com.treefinance.saas.grapserver.context.config.DiamondConfig;
+import com.treefinance.saas.grapserver.share.cache.redis.RedisDao;
 import com.treefinance.saas.grapserver.share.cache.redis.RedisKeyUtils;
+import com.treefinance.saas.grapserver.web.RequestChecker;
 import com.treefinance.saas.knife.result.SimpleResult;
 import com.treefinance.toolkit.util.net.IpUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -43,8 +43,6 @@ public class StartController {
     @Autowired
     private MerchantConfigService merchantConfigService;
     @Autowired
-    private TaskLicenseService taskLicenseService;
-    @Autowired
     private DiamondConfig diamondConfig;
     @Autowired
     private RedisDao redisDao;
@@ -66,26 +64,32 @@ public class StartController {
         if (StringUtils.isEmpty(bizType)) {
             bizType = (String) request.getAttribute("bizType");
         }
+
+        logger.info("task start : appid={},uniqueId={},coorType={},deviceInfo={},extra={},bizType={},source={}",
+            appid, uniqueId, coorType, deviceInfo, extra, bizType, source);
+
+        RequestChecker.notEmpty("appid", appid);
+        RequestChecker.notEmpty("uniqueId", uniqueId);
+        RequestChecker.notEmpty("bizType", bizType);
+
         Map<String, Object> lockMap = Maps.newHashMap();
         String key = RedisKeyUtils.genCreateTaskUserLockKey(appid, uniqueId, bizType);
         try {
             lockMap = redisDao.acquireLock(key, 60 * 1000L);
-            if (lockMap != null) {
-                logger.info("task start : appid={},uniqueId={},coorType={},deviceInfo={},extra={},bizType={},source={}",
-                        appid, uniqueId, coorType, deviceInfo, extra, bizType, source);
-                EBizType  eBizType = EBizType.of(bizType);
-                taskLicenseService.verifyCreateTask(appid, uniqueId, eBizType);
-                Long taskId = taskService.createTask(uniqueId, appid, eBizType != null ? eBizType.getCode() : null, extra, website, source);
-                Map<String, Object> map = Maps.newHashMap();
-                map.put("taskid", String.valueOf(taskId));
-                map.put("color", merchantConfigService.getColorConfig(appid, style));
-                map.put("title", diamondConfig.getSdkTitle(eBizType));
-                String ipAddress = IpUtils.getIp(request);
-                taskDeviceService.create(deviceInfo, ipAddress, coorType, taskId);
-                return new SimpleResult<>(map);
+            if (lockMap == null) {
+                throw new BizException(Constants.REDIS_LOCK_ERROR_MSG);
             }
-            throw new BizException(Constants.REDIS_LOCK_ERROR_MSG);
 
+            EBizType  eBizType = EBizType.of(bizType);
+            Long taskId = taskService.createTask(appid, uniqueId,  eBizType, extra, website, source);
+            Map<String, Object> map = Maps.newHashMap();
+            map.put("taskid", String.valueOf(taskId));
+            map.put("color", merchantConfigService.getColorConfig(appid, style));
+            map.put("title", diamondConfig.getSdkTitle(eBizType));
+            String ipAddress = IpUtils.getIp(request);
+            taskDeviceService.create(deviceInfo, ipAddress, coorType, taskId);
+
+            return new SimpleResult<>(map);
         } finally {
             redisDao.releaseLock(key, lockMap, 60 * 1000L);
         }

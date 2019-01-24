@@ -16,25 +16,23 @@
 package com.treefinance.saas.grapserver.web.advice;
 
 import com.alibaba.fastjson.JSON;
-import com.google.common.collect.Maps;
-import com.treefinance.saas.grapserver.common.exception.*;
-import com.treefinance.saas.grapserver.common.exception.base.MarkBaseException;
+import com.google.common.collect.ImmutableMap;
+import com.treefinance.saas.grapserver.exception.BizException;
+import com.treefinance.saas.grapserver.exception.ForbiddenException;
+import com.treefinance.saas.grapserver.exception.IllegalRequestParameterException;
+import com.treefinance.saas.grapserver.exception.InformException;
+import com.treefinance.saas.grapserver.web.ResponseCode;
 import com.treefinance.saas.knife.result.SimpleResult;
 import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.MissingServletRequestParameterException;
+import org.springframework.web.bind.ServletRequestBindingException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.context.request.WebRequest;
-import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
 import javax.validation.ValidationException;
+
 import java.util.Map;
 
 /**
@@ -43,125 +41,36 @@ import java.util.Map;
  * @since 2017年3月06日 上午10:12:41
  */
 @ControllerAdvice("com.treefinance.saas.grapserver.web.controller")
-public class GlobalExceptionAdvice extends ResponseEntityExceptionHandler {
-    private static final Logger logger = LoggerFactory.getLogger(GlobalExceptionAdvice.class);
-
-    @ExceptionHandler(value = UnknownException.class)
-    @ResponseStatus(HttpStatus.SERVICE_UNAVAILABLE)
-    @ResponseBody
-    public ResponseEntity<Object> handleUnknownException(WebRequest request, UnknownException ex) {
-        handleLog(request, ex);
-        return handleExceptionInternal(ex, buildBody(ex), null, HttpStatus.SERVICE_UNAVAILABLE, request);
-    }
-
-    @ExceptionHandler(value = TaskTimeOutException.class)
-    @ResponseStatus(HttpStatus.GATEWAY_TIMEOUT)
-    @ResponseBody
-    public ResponseEntity<Object> handleTimeoutException(WebRequest request, TaskTimeOutException ex) {
-        handleLog(request, ex);
-        return handleExceptionInternal(ex, buildBody(ex), null, HttpStatus.GATEWAY_TIMEOUT, request);
-    }
-
-    @ExceptionHandler(value = ForbiddenException.class)
-    @ResponseStatus(HttpStatus.FORBIDDEN)
-    @ResponseBody
-    public ResponseEntity<Object> handleForbiddenException(WebRequest request, ForbiddenException ex) {
-        handleLog(request, ex);
-        return handleExceptionInternal(ex, buildBody(ex), null, HttpStatus.FORBIDDEN, request);
-    }
-
-    @ExceptionHandler(value = MarkBaseException.class)
-    @ResponseStatus(HttpStatus.FORBIDDEN)
-    @ResponseBody
-    public ResponseEntity<Object> handleMarkBaseException(WebRequest request, MarkBaseException ex) {
-        return handleExceptionInternal(ex, buildBody(ex), null, HttpStatus.GATEWAY_TIMEOUT, request);
-    }
-
-    @ExceptionHandler(value = AppIdUncheckException.class)
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    @ResponseBody
-    public ResponseEntity<Object> handleAppIdUncheckException(WebRequest request, AppIdUncheckException ex) {
-        handleLog(request, ex);
-        return handleExceptionInternal(ex, buildBody(ex), null, HttpStatus.BAD_REQUEST, request);
-    }
-
-    @ExceptionHandler(Exception.class)
-    @ResponseStatus(value = HttpStatus.INTERNAL_SERVER_ERROR)
-    @ResponseBody
-    public ResponseEntity<Object> handleAllException(WebRequest request, Exception ex) {
-        handleLog(request, ex);
-        return handleExceptionInternal(ex, buildBody(ex), null, HttpStatus.INTERNAL_SERVER_ERROR, request);
-    }
+public class GlobalExceptionAdvice extends BaseResponseEntityExceptionHandler<Object> {
 
     @ExceptionHandler(BizException.class)
-    @ResponseStatus(value = HttpStatus.BAD_REQUEST)
-    @ResponseBody
     public ResponseEntity<Object> handleBizException(WebRequest request, Exception ex) {
-        handleLog(request, ex);
-        return handleExceptionInternal(ex, buildBody(ex), null, HttpStatus.BAD_REQUEST, request);
-    }
-
-    @ExceptionHandler(ValidationException.class)
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    @ResponseBody
-    public ResponseEntity<Object> handleValidationException(ValidationException ex, WebRequest request) {
-        handleLog(request, ex);
-        return handleExceptionInternal(ex, buildBody(ex), null, HttpStatus.BAD_REQUEST, request);
+        return handleExceptionInternal(ex, buildBody(ex, request), null, HttpStatus.BAD_REQUEST, request);
     }
 
     @Override
-    public ResponseEntity<Object> handleMissingServletRequestParameter(MissingServletRequestParameterException ex,
-                                                                       HttpHeaders headers, HttpStatus status, WebRequest request) {
-        return handleExceptionInternal(ex, buildBody(ex), headers, status, request);
-    }
-
-    private void handleLog(WebRequest request, Exception ex) {
-        StringBuffer logBuffer = new StringBuffer();
-        if (request != null) {
-            logBuffer.append("request=" + request);
-        }
-        if (ex != null) {
-            logBuffer.append(",exception:" + ex);
-        }
-        logger.error(logBuffer.toString(), ex);
-    }
-
-    private Object buildBody(Exception ex) {
-        logger.error("系统异常", ex);
-        SimpleResult result = new SimpleResult();
+    protected Object buildBody(Exception ex, WebRequest request) {
+        SimpleResult<Map<String, Object>> result = new SimpleResult<>();
         result.setSuccess(false);
-        if (ex instanceof ForbiddenException) {
-            Map map = Maps.newHashMap();
-            map.put("mark", 0);
-            result.setData(map);
-            result.setErrorMsg("用户未授权");
-        } else if (ex instanceof AppIdUncheckException) {
-            Map map = Maps.newHashMap();
-            map.put("mark", 0);
-            result.setData(map);
-            result.setErrorMsg("appId非法");
-        } else if (ex instanceof MarkBaseException) {
-            Map map = Maps.newHashMap();
-            map.put("mark", ((MarkBaseException) ex).getMark());
-            result.setData(map);
-            result.setErrorMsg(((MarkBaseException) ex).getErrorMsg());
-        } else if (ex instanceof MissingServletRequestParameterException) {
-            result.setErrorMsg("参数异常");
+        if (ex instanceof ValidationException || ex instanceof IllegalRequestParameterException || ex instanceof ServletRequestBindingException) {
+            result.setErrorMsg("非法参数！");
+        } else if (ex instanceof ForbiddenException) {
+            result.setData(ImmutableMap.of("mark", 0));
+            result.setErrorMsg(StringUtils.defaultString(ex.getMessage(), ResponseCode.FORBIDDEN.getMsg()));
+        } else if (ex instanceof InformException) {
+            result.setErrorMsg(ex.getMessage());
         } else if (ex instanceof BizException) {
             result.setErrorMsg(ex.getMessage());
             Map<String, Object> map = JSON.parseObject(JSON.toJSONString(result));
             map.put("errorCode", ((BizException) ex).getCode());
-            if (map.get("errorMsg") == null) {
-                map.put("errorMsg", "系统忙，请稍后重试");
-            }
+            map.putIfAbsent("errorMsg", "系统忙，请稍后重试");
             return map;
-        } else if (ex instanceof ParamsCheckException) {
-            result.setErrorMsg(ex.getMessage());
+        } else {
+            // 暂时
+            result.setErrorMsg("系统忙，请稍后重试");
         }
-        if (StringUtils.isEmpty(result.getErrorMsg())) {
-            result.setErrorMsg("系统忙，请稍后重试");//暂时
-        }
-        logger.info("exception handle : ex={}, result={}", ex.getClass(), JSON.toJSONString(result));
+        logger.error("Exception handler result={}", JSON.toJSONString(result), ex);
+
         return result;
     }
 

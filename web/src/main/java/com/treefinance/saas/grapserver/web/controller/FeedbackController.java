@@ -2,7 +2,7 @@ package com.treefinance.saas.grapserver.web.controller;
 
 import com.treefinance.saas.grapserver.biz.service.AppFeedbackService;
 import com.treefinance.saas.grapserver.common.enums.EBizType;
-import com.treefinance.saas.grapserver.common.exception.BizException;
+import com.treefinance.saas.grapserver.exception.BizException;
 import com.treefinance.saas.grapserver.common.model.dto.AppFeedbackResultDTO;
 import com.treefinance.saas.knife.result.SimpleResult;
 import org.slf4j.Logger;

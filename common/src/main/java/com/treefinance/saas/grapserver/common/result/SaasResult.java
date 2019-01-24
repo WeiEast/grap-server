@@ -1,22 +1,47 @@
 package com.treefinance.saas.grapserver.common.result;
 
 import com.alibaba.fastjson.JSON;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.treefinance.toolkit.util.crypto.RSA;
 import com.treefinance.toolkit.util.crypto.core.Encryptor;
 import com.treefinance.toolkit.util.crypto.exception.CryptoException;
 import com.treefinance.toolkit.util.json.Jackson;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
+
+import java.io.Serializable;
 
 /**
  * @author guoguoyun
  * @date Created in 2018/10/18下午10:27
  */
-public class SaasResult<T> {
-
-    private String msg;
+@JsonInclude(Include.NON_NULL)
+public class SaasResult<T> implements Serializable {
 
     private Integer code;
-
+    private String msg;
     private T data;
+
+    public SaasResult() {}
+
+    private SaasResult(Integer code, String msg) {
+        this.code = code;
+        this.msg = msg;
+    }
+
+    private SaasResult(T data) {
+        this.code = 0;
+        this.data = data;
+    }
+
+    public Integer getCode() {
+        return code;
+    }
+
+    public void setCode(Integer code) {
+        this.code = code;
+    }
 
     public String getMsg() {
         return msg;
@@ -34,20 +59,9 @@ public class SaasResult<T> {
         this.data = data;
     }
 
-    public int getCode() {
-        return code;
-    }
-
-    public void setCode(int code) {
-        this.code = code;
-    }
-
-    public SaasResult() {
-    }
-
-    public SaasResult(T data) {
-
-        this.data = data;
+    @Override
+    public String toString() {
+        return new ToStringBuilder(this, ToStringStyle.JSON_STYLE).append("code", code).append("msg", msg).append("data", data).toString();
     }
 
     public SaasResult(String msg) {
@@ -72,13 +86,26 @@ public class SaasResult<T> {
         this.data = data;
     }
 
+    public static <T> SaasResult success(T data) {
+        return new SaasResult<>(data);
+    }
+
+    public static SaasResult failure(Integer code, String msg) {
+        return new SaasResult<>(code, msg);
+    }
+
+    public static SaasResult failure( String msg) {
+        return new SaasResult<>(-1, msg);
+    }
+
     public static <T> SaasResult<String> successEncryptByRSAResult(T data, String rsaPublicKey) {
         String encryptData = EncryptHelper.encryptResult(data, rsaPublicKey);
         return successResult(encryptData);
     }
 
+    @Deprecated
     public static <T> SaasResult<T> failResult(String errorMsg) {
-        return failResult(null,errorMsg,-1);
+        return failure(errorMsg);
     }
 
     public static <T> SaasResult<T> failResult(T data, String msg,int code) {

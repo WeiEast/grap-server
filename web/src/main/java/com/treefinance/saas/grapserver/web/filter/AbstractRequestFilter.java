@@ -18,11 +18,11 @@ package com.treefinance.saas.grapserver.web.filter;
 
 import com.google.common.collect.Lists;
 import org.springframework.util.AntPathMatcher;
-import org.springframework.util.CollectionUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
+
 import java.util.Arrays;
 import java.util.List;
 
@@ -33,10 +33,10 @@ import java.util.List;
  * @version 1.0.3
  * @since 1.0.1.4 [19:18, 11/26/15]
  */
-public abstract class AbstractRequestFilter extends OncePerRequestFilter {
+public abstract class AbstractRequestFilter extends OncePerRequestFilter implements ExclusiveFilter {
 
-    private AntPathMatcher pathMatcher = new AntPathMatcher();
-    private List<String> excludeUrlPatterns = Lists.newArrayList();
+    private final AntPathMatcher pathMatcher = new AntPathMatcher();
+    private final List<String> excludeUrlPatterns = Lists.newArrayList();
 
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
@@ -49,25 +49,7 @@ public abstract class AbstractRequestFilter extends OncePerRequestFilter {
         return false;
     }
 
-    public List<String> getExcludeUrlPatterns() {
-        return excludeUrlPatterns;
-    }
-
-    /**
-     * @param excludeUrlPatterns
-     */
-    public void addExcludeUrlPatterns(List<String> excludeUrlPatterns) {
-        if (CollectionUtils.isEmpty(excludeUrlPatterns)) {
-            excludeUrlPatterns = Lists.newArrayList();
-        }
-        excludeUrlPatterns.addAll(excludeUrlPatterns);
-    }
-
-    /**
-     * 增加排除的url
-     *
-     * @param excludeUrlPatterns
-     */
+    @Override
     public void addExcludeUrlPatterns(String... excludeUrlPatterns) {
         if (excludeUrlPatterns != null && excludeUrlPatterns.length != 0) {
             this.excludeUrlPatterns.addAll(Arrays.asList(excludeUrlPatterns));

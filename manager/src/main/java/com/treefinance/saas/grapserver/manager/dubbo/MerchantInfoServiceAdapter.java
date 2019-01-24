@@ -13,12 +13,16 @@
 
 package com.treefinance.saas.grapserver.manager.dubbo;
 
+import com.alibaba.fastjson.JSON;
+import com.treefinance.saas.grapserver.context.Constants;
 import com.treefinance.saas.grapserver.context.component.RpcActionEnum;
-import com.treefinance.saas.grapserver.exception.IllegalBizDataException;
+import com.treefinance.saas.grapserver.exception.IllegalBusinessDataException;
 import com.treefinance.saas.grapserver.manager.MerchantInfoManager;
 import com.treefinance.saas.grapserver.manager.domain.BaseMerchantInfoBO;
 import com.treefinance.saas.merchant.facade.request.console.GetMerchantByAppIdRequest;
+import com.treefinance.saas.merchant.facade.request.grapserver.QueryMerchantByAppIdRequest;
 import com.treefinance.saas.merchant.facade.result.console.MerchantBaseInfoResult;
+import com.treefinance.saas.merchant.facade.result.console.MerchantBaseResult;
 import com.treefinance.saas.merchant.facade.result.console.MerchantResult;
 import com.treefinance.saas.merchant.facade.service.MerchantBaseInfoFacade;
 import org.apache.commons.collections4.CollectionUtils;
@@ -27,6 +31,7 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.Nonnull;
 
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -56,9 +61,27 @@ public class MerchantInfoServiceAdapter extends AbstractMerchantServiceAdapter i
         BaseMerchantInfoBO baseInfo = CollectionUtils.isEmpty(list) ? null : list.get(0);
 
         if (baseInfo == null) {
-            throw new IllegalBizDataException("Can not find merchant base information which appId" + " is '" + appId + "'");
+            throw new IllegalBusinessDataException("Can not find merchant base information which appId" + " is '" + appId + "'");
         }
 
         return baseInfo;
+    }
+
+    @Override
+    public boolean isActive(@Nonnull String appId) {
+        // 商户是否禁用状态
+        QueryMerchantByAppIdRequest request = new QueryMerchantByAppIdRequest();
+        request.setAppIds(Collections.singletonList(appId));
+
+        MerchantResult<List<MerchantBaseResult>> merchantResult = merchantBaseInfoFacade.queryMerchantBaseListByAppId(request);
+
+        validateResponse(merchantResult, RpcActionEnum.QUERY_MERCHANT_BASE_INFO_BY_APP_ID, request);
+
+        List<MerchantBaseResult> list = merchantResult.getData();
+        MerchantBaseResult baseInfo = CollectionUtils.isEmpty(list) ? null : list.get(0);
+
+        logger.info("merchantBaseResult={}", appId, JSON.toJSONString(baseInfo));
+
+        return baseInfo != null && Constants.OK.equals(baseInfo.getIsActive());
     }
 }

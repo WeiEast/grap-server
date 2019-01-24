@@ -30,8 +30,7 @@ public class ScheduleConfig implements SchedulingConfigurer {
 
         //线程池维护线程的最少数量
         int corePoolSize = 10;
-        ScheduledThreadPoolExecutor scheduledThreadPoolExecutor = new ScheduledThreadPoolExecutor(corePoolSize, new GrapServerScheduleThreadFactory());
-        return scheduledThreadPoolExecutor;
+        return new ScheduledThreadPoolExecutor(corePoolSize, new GrapServerScheduleThreadFactory());
     }
 
     static class GrapServerScheduleThreadFactory implements ThreadFactory {

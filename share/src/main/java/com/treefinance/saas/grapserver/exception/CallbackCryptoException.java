@@ -16,8 +16,6 @@
 
 package com.treefinance.saas.grapserver.exception;
 
-import com.treefinance.saas.grapserver.common.exception.CryptoException;
-
 /**
  * @author luoyihua on 2017/5/10.
  */

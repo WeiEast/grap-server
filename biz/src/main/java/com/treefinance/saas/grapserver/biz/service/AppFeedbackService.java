@@ -1,6 +1,6 @@
 package com.treefinance.saas.grapserver.biz.service;
 
-import com.treefinance.saas.grapserver.common.exception.BizException;
+import com.treefinance.saas.grapserver.exception.BizException;
 import com.treefinance.saas.grapserver.common.model.dto.AppFeedbackResultDTO;
 import com.treefinance.saas.grapserver.context.component.AbstractService;
 import com.treefinance.saas.merchant.facade.request.grapserver.SaveAppFeedbackRequest;

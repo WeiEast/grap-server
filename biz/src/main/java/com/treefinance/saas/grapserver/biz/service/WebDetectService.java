@@ -5,7 +5,6 @@ package com.treefinance.saas.grapserver.biz.service;
  * @date 2018/12/12
  */
 public interface WebDetectService {
-    Long creatTask(String appId, String uniqueId);
 
     Object startCrawler(Long taskid, String platform, String extra);
 

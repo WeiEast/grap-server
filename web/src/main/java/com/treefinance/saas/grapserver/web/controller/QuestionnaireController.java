@@ -3,7 +3,7 @@ package com.treefinance.saas.grapserver.web.controller;
 import com.alibaba.fastjson.JSON;
 import com.google.common.collect.Lists;
 import com.treefinance.saas.grapserver.common.enums.EBizType;
-import com.treefinance.saas.grapserver.common.exception.BizException;
+import com.treefinance.saas.grapserver.exception.BizException;
 import com.treefinance.saas.grapserver.common.model.vo.AppQuestionnaireResultRequest;
 import com.treefinance.saas.knife.result.SimpleResult;
 import com.treefinance.saas.merchant.facade.request.grapserver.GetAppQuestionnaireRequest;
