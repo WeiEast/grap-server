@@ -259,7 +259,7 @@ public class TongdunService {
     }
 
 
-    public Object processCollectDetailTaskV1(Long taskId, String appId, TongdunRequest tongdunRequest) {
+    public Object processCollectDetailTask(Long taskId, String appId, TongdunRequest tongdunRequest) {
         String url = diamondConfig.getTongdunDetailUrlCollect();
         JSONObject data = JSON.parseObject(JSON.toJSONString(tongdunRequest));
         Map<String, Object> map = new HashMap<>(1);
@@ -349,10 +349,8 @@ public class TongdunService {
 
 
 
-    public Object processCollectDetailTask(Long taskId, String appId, TongdunRequest tongdunRequest) {
-        // String url = diamondConfig.getTongdunDetailUrlCollect();
-        String url = "https://risk-third-party.99gfd.com/td/saas/ext/query";
-        // String url ="http://risk-third-party.test.91gfd.cn/td/saas/ext/query";
+    public Object processCollectDetailTaskV1(Long taskId, String appId, TongdunRequest tongdunRequest) {
+         String url = diamondConfig.getTongdunDetailUrlCollect();
         JSONObject data = JSON.parseObject(JSON.toJSONString(tongdunRequest));
 
         Map<String, Object> map = new HashMap<>(1);
