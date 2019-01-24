@@ -15,13 +15,13 @@ public enum EBizType {
     CAR_INFO("CAR_INFO", (byte) 9),
     TONGDUN("TONGDUN", (byte) 10),
     TONGDUN_KANIU("TONGDUN_KANIU", (byte) 11),
-    OPINION_DETECT("OPINION_DETECT", (byte) 12),
-    ENTERPRISE("ENTERPRISE",(byte)13),
-    TONGDUN_TIESHU("TONGDUN_TIESHU",(byte)14);
-
+    TONGDUN_TIESHU("TONGDUN_TIESHU",(byte)12),
+    ENTERPRISE("ENTERPRISE", (byte) 13),
+    OPINION_DETECT("OPINION_DETECT", (byte) 14);
 
     private String text;
-    private Byte code;
+
+    private Byte   code;
 
     EBizType(String text, Byte code) {
         this.text = text;
