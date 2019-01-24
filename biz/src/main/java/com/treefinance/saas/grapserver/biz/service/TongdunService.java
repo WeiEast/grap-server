@@ -122,7 +122,7 @@ public class TongdunService {
         }
 
         AppLicense license = appLicenseService.getAppLicense(appId);
-        processSuccessCollectTask(taskId,"任务成功");
+        processSuccessCollectTask(taskId, "任务成功");
         return SaasResult.successEncryptByRSAResult(tongdunDataList, license.getServerPublicKey());
     }
 
@@ -253,7 +253,7 @@ public class TongdunService {
         }
 
         AppLicense license = appLicenseService.getAppLicense(appId);
-        processSuccessCollectTask(taskId,"任务成功");
+        processSuccessCollectTask(taskId, "任务成功");
         return SaasResult.successEncryptByRSAResult(resultList, license.getServerPublicKey());
 
     }
@@ -263,10 +263,6 @@ public class TongdunService {
         String url = "https://risk-third-party.99gfd.com/td/saas/ext/query";
         // String url ="http://risk-third-party.test.91gfd.cn/td/saas/ext/query";
         JSONObject data = JSON.parseObject(JSON.toJSONString(tongdunRequest));
-        List<Byte> detailCode = new ArrayList<>();
-        detailCode.add((byte)6);
-        detailCode.add((byte)7);
-        detailCode.add((byte)10);
 
         Map<String, Object> map = new HashMap<>(1);
         map.put("data", data);
@@ -287,7 +283,7 @@ public class TongdunService {
         }
         if (result == null) {
             logger.error("调用功夫贷同盾采集详细任务返回值中任务日志信息存在问题:taskId={},tongdunRequest={},httpResult={}", taskId, tongdunRequest, httpResult);
-            processFailCollectTask(taskId,"调用功夫贷同盾采集详细任务返回值中任务日志信息存在问题");
+            processFailCollectTask(taskId, "调用功夫贷同盾采集详细任务返回值中任务日志信息存在问题");
             // 错误日志中
             return SaasResult.failResult("Unexpected exception!");
         }
@@ -358,7 +354,7 @@ public class TongdunService {
                         JSONObject jsonObject = JSONObject.parseObject(ruleHitDetail.substring(1, ruleHitDetail.length() - 1));
                         mapString = jsonObject.toJavaObject(Map.class);
                         if (i < 8) {
-                            mapString = convertMap(mapString,"设备或身份证或手机号申请次数过多");
+                            mapString = convertMap(mapString, "设备或身份证或手机号申请次数过多");
 
                         } else if (i >= 8 && i < 11) {
                             mapString = convertMap(mapString, "身份证关联设备数");
@@ -378,124 +374,12 @@ public class TongdunService {
             // 处理返回需要累计的字段
             TongdunDetailResult tongdunDetailResult = new TongdunDetailResult();
             tongdunDetailResult = tongdunDataList.get(11);
-            tongdunDetailResult.setValue(TongdunDataResolver.to(summary.getInteger(ETongDunSuiShouData.getText((byte)12)) + summary.getInteger(ETongDunSuiShouData.getText((byte)13))));
+            tongdunDetailResult
+                .setValue(TongdunDataResolver.to(summary.getInteger(ETongDunSuiShouData.getText((byte)12)) + summary.getInteger(ETongDunSuiShouData.getText((byte)13))));
             tongdunDataList.set(11, tongdunDetailResult);
 
-
             // 加入新增的随手需要额外字段
-            for (ETongdunExtraData eTongdunExtraData : ETongdunExtraData.values()) {
-                TongdunDetailResult tongdunData = new TongdunDetailResult();
-                tongdunData.setId(eTongdunExtraData.getName());
-                if (StringUtils.isEmpty(summary.getString(eTongdunExtraData.getText()))) {
-                    tongdunData.setValue("false");
-                } else {
-                    tongdunData.setValue(summary.getString(eTongdunExtraData.getText()));
-                }
-                Map<String, Map> mapResult = new HashMap<>();
-                Map mapString = new HashMap<>();
-
-                if (detailCode.contains(eTongdunExtraData.getCode())) {
-                    for (int j = 0; j < tongdunDetailDTOS.size(); j++) {
-                        if (tongdunDetailDTOS.get(j).getRuleName().contains(eTongdunExtraData.getValue())) {
-                            String ruleHitDetail = tongdunDetailDTOS.get(j).getRuleHitDetail();
-
-                            JSONObject jsonObject = JSONObject.parseObject(ruleHitDetail.substring(1, ruleHitDetail.length() - 1));
-
-                            if (eTongdunExtraData.getCode() == 6) {
-                                JSONArray lostDetail = new JSONArray();
-                                if (!ObjectUtils.isEmpty(jsonObject.getJSONArray("失信详情展示"))) {
-                                    lostDetail = jsonObject.getJSONArray("失信详情展示");
-                                }
-                                String overdueCounts = "";
-                                String overdueAmounts = "";
-                                String overdueDays = "";
-                                String loseCredibilityTime = "";
-                                String matchField = "";
-                                String loseCredibilityType = "";
-                                if (!ObjectUtils.isEmpty(lostDetail)) {
-                                    for (int k = 0; k < lostDetail.size(); k++) {
-                                        if (!ObjectUtils.isEmpty(JSONObject.parseObject(lostDetail.get(k).toString()).get("逾期笔数"))) {
-                                            overdueCounts = overdueCounts + JSONObject.parseObject(lostDetail.get(k).toString()).get("逾期笔数");
-                                        }
-                                        if (!ObjectUtils.isEmpty(JSONObject.parseObject(lostDetail.get(k).toString()).get("逾期金额"))) {
-                                            overdueAmounts = overdueAmounts + JSONObject.parseObject(lostDetail.get(k).toString()).get("逾期金额");
-                                        }
-                                        if (!ObjectUtils.isEmpty(JSONObject.parseObject(lostDetail.get(k).toString()).get("逾期天数"))) {
-                                            overdueDays = overdueDays + JSONObject.parseObject(lostDetail.get(k).toString()).get("逾期天数");
-                                        }
-                                    }
-                                }
-
-                                if (!ObjectUtils.isEmpty(jsonObject.get("失信次数"))) {
-                                    loseCredibilityTime = jsonObject.get("失信次数").toString();
-                                }
-                                if (!ObjectUtils.isEmpty(jsonObject.get("匹配字段"))) {
-                                    matchField = jsonObject.get("匹配字段").toString();
-                                }
-                                if (!ObjectUtils.isEmpty(jsonObject.get("失信类型"))) {
-                                    loseCredibilityType = jsonObject.get("失信类型").toString();
-                                }
-                                mapString.put("overdueCounts", overdueCounts);
-                                mapString.put("overdueAmounts", overdueAmounts);
-                                mapString.put("overdueDays", overdueDays);
-                                mapString.put("loseCredibilityTime", loseCredibilityTime);
-                                mapString.put("matchField", matchField);
-                                mapString.put("loseCredibilityType", loseCredibilityType);
-                                mapString.remove("描述");
-                            } else if (eTongdunExtraData.getCode() == 7) {
-
-                                String name = "";
-                                String cheatType = "";
-                                String idCard = "";
-
-                                if (!ObjectUtils.isEmpty(jsonObject.get("姓名"))) {
-                                    name = jsonObject.get("姓名").toString();
-                                }
-                                if (!ObjectUtils.isEmpty(jsonObject.get("欺诈类型"))) {
-                                    cheatType = jsonObject.get("欺诈类型").toString();
-                                }
-                                if (!ObjectUtils.isEmpty(jsonObject.get("身份证"))) {
-                                    idCard = jsonObject.get("身份证").toString();
-                                }
-                                mapString.put("name", name);
-                                mapString.put("cheatType", cheatType);
-                                mapString.put("idCard", idCard);
-                                mapString.remove("描述");
-
-                            } else if (eTongdunExtraData.getCode() == 10) {
-
-                                JSONArray lostDetail = new JSONArray();
-                                if (!ObjectUtils.isEmpty(jsonObject.getJSONArray("借款人手机"))) {
-                                    lostDetail = jsonObject.getJSONArray("借款人手机");
-                                }
-                                String cheatType = "";
-                                String lenderMobile = "";
-
-                                if (!ObjectUtils.isEmpty(lostDetail)) {
-
-                                    for (int k = 0; k < lostDetail.size(); k++) {
-                                        if (!ObjectUtils.isEmpty(JSONObject.parseObject(lostDetail.get(k).toString()).get("欺诈类型"))) {
-                                            cheatType = cheatType + "," + JSONObject.parseObject(lostDetail.get(k).toString()).get("欺诈类型");
-                                        }
-                                    }
-
-                                }
-                                if (!ObjectUtils.isEmpty(JSONObject.parseObject(lostDetail.get(0).toString()).get("借款人手机")))
-                                    lenderMobile = JSONObject.parseObject(lostDetail.get(0).toString()).get("借款人手机").toString();
-
-                                mapString.put("cheatType", cheatType);
-                                mapString.put("lenderMobile", lenderMobile);
-                                mapString.remove("描述");
-                            }
-                        }
-                    }
-                    if (!ObjectUtils.isEmpty(mapString)) {
-                        mapResult.put("detail", mapString);
-                        tongdunData.setDetails(mapResult);
-                    }
-                }
-                tongdunDataList.add(tongdunData);
-            }
+            tongdunDataList = getTongdunExtraList(summary, tongdunDetailDTOS, tongdunDataList);
 
             // 获取黑名单
             Map blackMap = new HashMap(2);
@@ -512,6 +396,130 @@ public class TongdunService {
         // processSuccessCollectTask(taskId, "任务成功");
         return SaasResult.successEncryptByRSAResult(resultList, license.getServerPublicKey());
 
+    }
+
+    private List<TongdunDetailResult> getTongdunExtraList(JSONObject summary, List<TongdunDetailDTO> tongdunDetailDTOS, List<TongdunDetailResult> tongdunDataList) {
+        List<Byte> detailCode = new ArrayList<>();
+        detailCode.add((byte)6);
+        detailCode.add((byte)7);
+        detailCode.add((byte)10);
+
+        for (ETongdunExtraData eTongdunExtraData : ETongdunExtraData.values()) {
+            TongdunDetailResult tongdunData = new TongdunDetailResult();
+            tongdunData.setId(eTongdunExtraData.getName());
+            if (StringUtils.isEmpty(summary.getString(eTongdunExtraData.getText()))) {
+                tongdunData.setValue("false");
+            } else {
+                tongdunData.setValue(summary.getString(eTongdunExtraData.getText()));
+            }
+            Map<String, Map> mapResult = new HashMap<>();
+            Map mapString = new HashMap<>();
+
+            if (detailCode.contains(eTongdunExtraData.getCode())) {
+                for (int j = 0; j < tongdunDetailDTOS.size(); j++) {
+                    if (tongdunDetailDTOS.get(j).getRuleName().contains(eTongdunExtraData.getValue())) {
+                        String ruleHitDetail = tongdunDetailDTOS.get(j).getRuleHitDetail();
+
+                        JSONObject jsonObject = JSONObject.parseObject(ruleHitDetail.substring(1, ruleHitDetail.length() - 1));
+
+                        if (eTongdunExtraData.getCode() == 6) {
+                            JSONArray lostDetail = new JSONArray();
+                            if (!ObjectUtils.isEmpty(jsonObject.getJSONArray("失信详情展示"))) {
+                                lostDetail = jsonObject.getJSONArray("失信详情展示");
+                            }
+                            String overdueCounts = "";
+                            String overdueAmounts = "";
+                            String overdueDays = "";
+                            String loseCredibilityTime = "";
+                            String matchField = "";
+                            String loseCredibilityType = "";
+                            if (!ObjectUtils.isEmpty(lostDetail)) {
+                                for (int k = 0; k < lostDetail.size(); k++) {
+                                    if (!ObjectUtils.isEmpty(JSONObject.parseObject(lostDetail.get(k).toString()).get("逾期笔数"))) {
+                                        overdueCounts = overdueCounts + JSONObject.parseObject(lostDetail.get(k).toString()).get("逾期笔数");
+                                    }
+                                    if (!ObjectUtils.isEmpty(JSONObject.parseObject(lostDetail.get(k).toString()).get("逾期金额"))) {
+                                        overdueAmounts = overdueAmounts + JSONObject.parseObject(lostDetail.get(k).toString()).get("逾期金额");
+                                    }
+                                    if (!ObjectUtils.isEmpty(JSONObject.parseObject(lostDetail.get(k).toString()).get("逾期天数"))) {
+                                        overdueDays = overdueDays + JSONObject.parseObject(lostDetail.get(k).toString()).get("逾期天数");
+                                    }
+                                }
+                            }
+                            if (!ObjectUtils.isEmpty(jsonObject.get("失信次数"))) {
+                                loseCredibilityTime = jsonObject.get("失信次数").toString();
+                            }
+                            if (!ObjectUtils.isEmpty(jsonObject.get("匹配字段"))) {
+                                matchField = jsonObject.get("匹配字段").toString();
+                            }
+                            if (!ObjectUtils.isEmpty(jsonObject.get("失信类型"))) {
+                                loseCredibilityType = jsonObject.get("失信类型").toString();
+                            }
+                            mapString.put("overdueCounts", overdueCounts);
+                            mapString.put("overdueAmounts", overdueAmounts);
+                            mapString.put("overdueDays", overdueDays);
+                            mapString.put("loseCredibilityTime", loseCredibilityTime);
+                            mapString.put("matchField", matchField);
+                            mapString.put("loseCredibilityType", loseCredibilityType);
+                            mapString.remove("描述");
+                        }
+                        if (eTongdunExtraData.getCode() == 7) {
+
+                            String name = "";
+                            String cheatType = "";
+                            String idCard = "";
+
+                            if (!ObjectUtils.isEmpty(jsonObject.get("姓名"))) {
+                                name = jsonObject.get("姓名").toString();
+                            }
+                            if (!ObjectUtils.isEmpty(jsonObject.get("欺诈类型"))) {
+                                cheatType = jsonObject.get("欺诈类型").toString();
+                            }
+                            if (!ObjectUtils.isEmpty(jsonObject.get("身份证"))) {
+                                idCard = jsonObject.get("身份证").toString();
+                            }
+                            mapString.put("name", name);
+                            mapString.put("cheatType", cheatType);
+                            mapString.put("idCard", idCard);
+                            mapString.remove("描述");
+
+                        }
+                        if (eTongdunExtraData.getCode() == 10) {
+                            JSONArray lostDetail = new JSONArray();
+                            if (!ObjectUtils.isEmpty(jsonObject.getJSONArray("借款人手机"))) {
+                                lostDetail = jsonObject.getJSONArray("借款人手机");
+                            }
+                            String cheatType = "";
+                            String lenderMobile = "";
+                            if (!ObjectUtils.isEmpty(lostDetail)) {
+                                for (int k = 0; k < lostDetail.size(); k++) {
+                                    if (!ObjectUtils.isEmpty(JSONObject.parseObject(lostDetail.get(k).toString()).get("欺诈类型"))) {
+                                        if (StringUtils.isNotEmpty(cheatType)) {
+                                            cheatType = cheatType + "," + JSONObject.parseObject(lostDetail.get(k).toString()).get("欺诈类型");
+                                        } else {
+                                            cheatType = JSONObject.parseObject(lostDetail.get(k).toString()).get("欺诈类型").toString();
+
+                                        }
+                                    }
+                                }
+                            }
+                            if (!ObjectUtils.isEmpty(JSONObject.parseObject(lostDetail.get(0).toString()).get("借款人手机")))
+                                lenderMobile = JSONObject.parseObject(lostDetail.get(0).toString()).get("借款人手机").toString();
+
+                            mapString.put("cheatType", cheatType);
+                            mapString.put("lenderMobile", lenderMobile);
+                            mapString.remove("描述");
+                        }
+                    }
+                }
+                if (!ObjectUtils.isEmpty(mapString)) {
+                    mapResult.put("detail", mapString);
+                    tongdunData.setDetails(mapResult);
+                }
+            }
+            tongdunDataList.add(tongdunData);
+        }
+        return tongdunDataList;
     }
 
     private Map convertMap(Map mapString, String name) {
@@ -552,7 +560,7 @@ public class TongdunService {
         if (("3个月身份证关联多个申请信息").equals(name)) {
             if (!ObjectUtils.isEmpty(mapString.get("账户身份证关联登录手机数目"))) {
                 mapString.put("associatedLoginMobilCount", TongdunDataResolver.to((Integer)mapString.get("账户身份证关联登录手机数目")));
-                mapString.put("associatedLoginMobileList",mapString.get("关联登录手机列表"));
+                mapString.put("associatedLoginMobileList", mapString.get("关联登录手机列表"));
                 mapString.remove("关联登录手机列表");
                 mapString.remove("账户身份证关联登录手机数目");
             } else if (!ObjectUtils.isEmpty(mapString.get("账户身份证关联登录邮箱数目"))) {
@@ -562,12 +570,12 @@ public class TongdunService {
                 mapString.remove("账户身份证关联登录邮箱数目");
             } else if (!ObjectUtils.isEmpty(mapString.get("借款人身份证关联借款人手机数目"))) {
                 mapString.put("associatedLenderMobileCount", TongdunDataResolver.to((Integer)mapString.get("借款人身份证关联借款人手机数目")));
-                mapString.put("associatedLenderMobileList",mapString.get("关联借款人手机列表"));
+                mapString.put("associatedLenderMobileList", mapString.get("关联借款人手机列表"));
                 mapString.remove("关联借款人手机列表");
                 mapString.remove("借款人身份证关联借款人手机数目");
             } else if (!ObjectUtils.isEmpty(mapString.get("借款人身份证关联借款人邮箱数目"))) {
                 mapString.put("associatedLenderEmailCount", TongdunDataResolver.to((Integer)mapString.get("借款人身份证关联借款人邮箱数目")));
-                mapString.put("associatedLenderEmailList",mapString.get("关联借款人邮箱列表"));
+                mapString.put("associatedLenderEmailList", mapString.get("关联借款人邮箱列表"));
                 mapString.remove("关联借款人邮箱列表");
                 mapString.remove("借款人身份证关联借款人邮箱数目");
 

@@ -46,24 +46,22 @@ public enum ETongdunExtraData {
 
 
 
-
     /**
      * 身份证号码命中法院执行结案名单
      */
-    IS_IDCARD_COURTCASE("IS_IDCARD_RISK", "identityHitCourtCasesList", "身份证命中法院执行结案名单",(byte)8),
+    IS_IDCARD_COURTCASE("IS_IDCARD_COURTCASE", "identityHitCourtCasesList", "身份证命中法院执行结案名单",(byte)8),
 
     /**
      * 手机号码命中高风险关注名单
      */
-    MOBILE_HIT_RISK("IS_IDCARD_RISK", "mobileHitRiskList","手机号命中高风险关注名单", (byte)9),
+    MOBILE_HIT_RISK("MOBILE_HIT_RISK", "mobileHitRiskList","手机号命中高风险关注名单", (byte)9),
 
 
 
     /**
      * 手机号码命中贷款逾期名单
      */
-    MOBILE_HIT_CREDIT("IS_IDCARD_RISK", "mobileHitCreditList", "手机号命中信贷逾期名单",(byte)10),
-
+    MOBILE_HIT_CREDIT("MOBILE_HIT_CREDIT", "mobileHitCreditList", "手机号命中信贷逾期关注名单",(byte)10),
 
 
 
