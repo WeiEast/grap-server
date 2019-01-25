@@ -52,9 +52,7 @@ public final class RequestChecker {
      * @see Assert#notNull(Object, String)
      */
     public static void notNull(final String name, final Object object) {
-        if (object == null) {
-            throw new IllegalRequestParameterException("请求参数[" + name + "]缺失！");
-        }
+        checkNotNull(object, "请求参数[" + name + "]缺失！");
     }
 
     /**
@@ -63,9 +61,7 @@ public final class RequestChecker {
      * @see Assert#notBlank(String, String)
      */
     public static void notBlank(final String name, final String text) {
-        if (StringUtils.isBlank(text)) {
-            throw new IllegalRequestParameterException("请求参数[" + name + "]不正确！");
-        }
+        checkNotBlank(text, "请求参数[" + name + "]不正确！");
     }
 
     /**
@@ -74,8 +70,39 @@ public final class RequestChecker {
      * @see Assert#notEmpty(String, String)
      */
     public static void notEmpty(final String name, final String text) {
+        checkNotEmpty(text, "请求参数[" + name + "]不能为空！");
+    }
+
+    /**
+     * check if {@code object} is not null.
+     *
+     * @see Assert#notNull(Object, String)
+     */
+    public static void checkNotNull(final Object object, final String msg) {
+        if (object == null) {
+            throw new IllegalRequestParameterException(msg);
+        }
+    }
+
+    /**
+     * check if {@code text} is not blank.
+     *
+     * @see Assert#notBlank(String, String)
+     */
+    public static void checkNotBlank(final String text, final String msg) {
+        if (StringUtils.isBlank(text)) {
+            throw new IllegalRequestParameterException(msg);
+        }
+    }
+
+    /**
+     * check if {@code text} is not null or not empty.
+     *
+     * @see Assert#notEmpty(String, String)
+     */
+    public static void checkNotEmpty(final String text, final String msg) {
         if (StringUtils.isEmpty(text)) {
-            throw new IllegalRequestParameterException("请求参数[" + name + "]不能为空！");
+            throw new IllegalRequestParameterException(msg);
         }
     }
 }

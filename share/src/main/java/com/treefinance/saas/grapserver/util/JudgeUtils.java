@@ -16,6 +16,8 @@
 
 package com.treefinance.saas.grapserver.util;
 
+import org.apache.commons.lang3.StringUtils;
+
 /**
  * @author guoguoyun
  * @date Created in 2018/10/29下午7:11
@@ -26,28 +28,28 @@ public class JudgeUtils {
      * 判断输入密码是否为纯数字
      */
     public static boolean isPassword(String str) {
-        return str.matches("^[0-9]*$");
+        return StringUtils.isNotEmpty(str) && str.matches("^[0-9]*$");
     }
 
     /**
      * 判断输入身份证号码是否正确
      */
     public static boolean isIdCard(String str) {
-        return str.matches("^[1-9]\\d{5}(18|19|([23]\\d))\\d{2}((0[1-9])|(10|11|12))(([0-2][1-9])|10|20|30|31)\\d{3}[0-9Xx]$");
+        return StringUtils.isNotEmpty(str) && str.matches("^[1-9]\\d{5}(18|19|([23]\\d))\\d{2}((0[1-9])|(10|11|12))(([0-2][1-9])|10|20|30|31)\\d{3}[0-9Xx]$");
     }
 
     /**
      * 简单判断是否为手机号
      */
     public static boolean isCellNumber(String str) {
-        return str.matches("^(1)[0-9]{10}$");
+        return StringUtils.isNotEmpty(str) && str.matches("^(1)[0-9]{10}$");
     }
 
     /**
      * 简单判断是否为邮箱地址
      */
     public static boolean isEmail(String str) {
-        return str.matches("^[a-z0-9A-Z]+[- |a-z0-9A-Z._]+@([a-z0-9A-Z]+(-[a-z0-9A-Z]+)?\\.)+[a-z]{2,}$");
+        return StringUtils.isNotEmpty(str) && str.matches("^[a-z0-9A-Z]+[- |a-z0-9A-Z._]+@([a-z0-9A-Z]+(-[a-z0-9A-Z]+)?\\.)+[a-z]{2,}$");
     }
 
 }

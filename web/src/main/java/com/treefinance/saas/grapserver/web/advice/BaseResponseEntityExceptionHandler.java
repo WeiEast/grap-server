@@ -13,10 +13,10 @@
 
 package com.treefinance.saas.grapserver.web.advice;
 
-import com.treefinance.saas.grapserver.exception.TaskTimeOutException;
 import com.treefinance.saas.grapserver.exception.BadServiceException;
 import com.treefinance.saas.grapserver.exception.ForbiddenException;
 import com.treefinance.saas.grapserver.exception.IllegalRequestParameterException;
+import com.treefinance.saas.grapserver.exception.TaskTimeOutException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpHeaders;
@@ -36,7 +36,7 @@ import javax.validation.ValidationException;
 public abstract class BaseResponseEntityExceptionHandler<T> extends ResponseEntityExceptionHandler {
     protected final Logger logger = LoggerFactory.getLogger(getClass());
 
-    @ExceptionHandler({ValidationException.class, IllegalRequestParameterException.class})
+    @ExceptionHandler({ValidationException.class, javax.xml.bind.ValidationException.class, IllegalRequestParameterException.class})
     public ResponseEntity<Object> handleValidationException(Exception ex, WebRequest request) {
         return handleExceptionInternal(ex, buildBody(ex, request), null, HttpStatus.BAD_REQUEST, request);
     }

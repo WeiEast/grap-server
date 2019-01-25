@@ -5,7 +5,6 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Lists;
 import com.treefinance.saas.grapserver.biz.domain.AppLicense;
-import com.treefinance.saas.grapserver.common.enums.EBizType;
 import com.treefinance.saas.grapserver.common.enums.ETaskStatus;
 import com.treefinance.saas.grapserver.common.enums.ETaskStep;
 import com.treefinance.saas.grapserver.common.enums.ETongDunSuiShouData;
@@ -51,15 +50,11 @@ import java.util.Objects;
 public class TongdunService extends AbstractService {
 
     @Autowired
-    private TaskService taskService;
-    @Autowired
     private TaskFacade taskFacade;
     @Autowired
     private CarInfoFacade carInfoFacade;
     @Autowired
     private TaskLogFacade taskLogFacade;
-    @Autowired
-    private TaskLicenseService taskLicenseService;
     @Autowired
     private TaskLogService taskLogService;
     @Autowired
@@ -67,23 +62,6 @@ public class TongdunService extends AbstractService {
     @Autowired
     private DiamondConfig diamondConfig;
 
-    public Long startCollectTask(String appId, TongdunRequest tongdunRequest) {
-        // 使用身份证号当作uniqueId
-        taskLicenseService.verifyCreateTask(appId, tongdunRequest.getIdCard(), EBizType.TONGDUN);
-        return taskService.createTask(tongdunRequest.getIdCard(), appId, EBizType.TONGDUN.getCode(), null, null, null);
-    }
-
-    public Long startCollectDetailTask(String appId, TongdunRequest tongdunRequest) {
-        // 使用身份证号当作uniqueId
-        taskLicenseService.verifyCreateTask(appId, tongdunRequest.getIdCard(), EBizType.TONGDUN_KANIU);
-        return taskService.createTask(tongdunRequest.getIdCard(), appId, EBizType.TONGDUN_KANIU.getCode(), null, null, null);
-    }
-
-    public Long startCollectTieshuDetailTask(String appId, TongdunRequest tongdunRequest) {
-        // 使用身份证号当作uniqueId
-        taskLicenseService.verifyCreateTask(appId, tongdunRequest.getIdCard(), EBizType.TONGDUN_TIESHU);
-        return taskService.createTask(tongdunRequest.getIdCard(), appId, EBizType.TONGDUN_TIESHU.getCode(), null, null, null);
-    }
 
     public Object processCollectTask(Long taskId, String appId, TongdunRequest tongdunRequest) {
         String url = diamondConfig.getTongdunUrlCollect();
@@ -446,8 +424,6 @@ public class TongdunService extends AbstractService {
                 TongdunDetailResult tongdunDetailResult = new TongdunDetailResult();
                 Map mapString = new HashMap<>();
                 Map<String, Map> mapResult = new HashMap<>();
-                Map<String, Map> stringMapMap = new HashMap<>();
-                JSONObject item = detail.getJSONObject(ETongDunSuiShouData.getText((byte)i));
                 tongdunDetailResult.setId(ETongDunSuiShouData.getName((byte)i));
                 tongdunDetailResult.setValue(TongdunDataResolver.to(summary.getInteger(ETongDunSuiShouData.getText((byte)i))));
                 for (int j = 0; j < tongdunDetailDTOS.size(); j++) {
@@ -474,8 +450,7 @@ public class TongdunService extends AbstractService {
             }
 
             // 处理返回需要累计的字段
-            TongdunDetailResult tongdunDetailResult = new TongdunDetailResult();
-            tongdunDetailResult = tongdunDataList.get(11);
+            TongdunDetailResult tongdunDetailResult = tongdunDataList.get(11);
             tongdunDetailResult
                 .setValue(TongdunDataResolver.to(summary.getInteger(ETongDunSuiShouData.getText((byte)12)) + summary.getInteger(ETongDunSuiShouData.getText((byte)13))));
             tongdunDataList.set(11, tongdunDetailResult);

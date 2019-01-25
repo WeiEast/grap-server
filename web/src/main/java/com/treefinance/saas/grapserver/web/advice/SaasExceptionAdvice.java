@@ -24,7 +24,7 @@ public class SaasExceptionAdvice extends BaseResponseEntityExceptionHandler<Saas
     @Override
     protected SaasResult buildBody(Exception ex, WebRequest request) {
         ResponseCode responseCode;
-        if (ex instanceof ValidationException || ex instanceof IllegalRequestParameterException || ex instanceof ServletRequestBindingException) {
+        if (ex instanceof ValidationException || ex instanceof javax.xml.bind.ValidationException || ex instanceof IllegalRequestParameterException || ex instanceof ServletRequestBindingException) {
             responseCode = ResponseCode.ILLEGAL_PARAMETERS;
         } else if (ex instanceof ForbiddenException) {
             responseCode = ResponseCode.FORBIDDEN;
@@ -35,7 +35,7 @@ public class SaasExceptionAdvice extends BaseResponseEntityExceptionHandler<Saas
         }
 
         String errorMsg = null;
-        if (ex instanceof ValidationException || ex instanceof InformException) {
+        if (ex instanceof ValidationException || ex instanceof javax.xml.bind.ValidationException || ex instanceof InformException) {
             errorMsg = ex.getMessage();
         }
         errorMsg = StringUtils.defaultIfEmpty(errorMsg, responseCode.getMsg());

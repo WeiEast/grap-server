@@ -52,7 +52,7 @@ public class GlobalExceptionAdvice extends BaseResponseEntityExceptionHandler<Ob
     protected Object buildBody(Exception ex, WebRequest request) {
         SimpleResult<Map<String, Object>> result = new SimpleResult<>();
         result.setSuccess(false);
-        if (ex instanceof ValidationException || ex instanceof IllegalRequestParameterException || ex instanceof ServletRequestBindingException) {
+        if (ex instanceof ValidationException || ex instanceof javax.xml.bind.ValidationException || ex instanceof IllegalRequestParameterException || ex instanceof ServletRequestBindingException) {
             result.setErrorMsg("非法参数！");
         } else if (ex instanceof ForbiddenException) {
             result.setData(ImmutableMap.of("mark", 0));
