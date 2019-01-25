@@ -31,4 +31,15 @@ public abstract class AbstractMerchantServiceAdapter extends AbstractDubboServic
             throw new RpcServiceException("[MERCHANT] Error server! errorMsg: " + result.getRetMsg() + " - action: " + action + appendArgs(args));
         }
     }
+
+    /**
+     * 检查响应是否正常的基础上进一步检查响应的数据实体是否为空
+     */
+    protected <T> void validateResponseEntity(MerchantResult<T> result, RpcActionEnum action, Object... args) {
+        validateResponse(result, action, args);
+
+        if (result.getData() == null) {
+            throw new RpcServiceException("[MERCHANT] Invalid response entity! - action:" + " " + action + appendArgs(args));
+        }
+    }
 }

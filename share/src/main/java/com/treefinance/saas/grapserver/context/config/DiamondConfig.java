@@ -21,13 +21,17 @@ import com.github.diamond.client.extend.annotation.AfterUpdate;
 import com.github.diamond.client.extend.annotation.BeforeUpdate;
 import com.github.diamond.client.extend.annotation.DAttribute;
 import com.github.diamond.client.extend.annotation.DResource;
+import com.google.common.base.Splitter;
 import com.treefinance.saas.grapserver.common.enums.EBizType;
 import com.treefinance.toolkit.util.json.Jackson;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
+import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -109,17 +113,7 @@ public class DiamondConfig {
     @DAttribute(key="webdetect_second")
     private String webdetectSecond;
 
-    public static Logger getLogger() {
-        return logger;
-    }
-
-    public String getTongdunDetailUrlCollect() {
-        return tongdunDetailUrlCollect;
-    }
-
-    public void setTongdunDetailUrlCollect(String tongdunDetailUrlCollect) {
-        this.tongdunDetailUrlCollect = tongdunDetailUrlCollect;
-    }
+    private List<String> excludedAppIds;
 
     @BeforeUpdate
     public void before(String key, Object newValue) {
@@ -129,6 +123,14 @@ public class DiamondConfig {
     @AfterUpdate
     public void after(String key, Object newValue) {
         logger.info(key + " update to " + newValue + " end...");
+    }
+
+    public String getTongdunDetailUrlCollect() {
+        return tongdunDetailUrlCollect;
+    }
+
+    public void setTongdunDetailUrlCollect(String tongdunDetailUrlCollect) {
+        this.tongdunDetailUrlCollect = tongdunDetailUrlCollect;
     }
 
     public String getDefaultMerchantColorConfig() {
@@ -170,6 +172,20 @@ public class DiamondConfig {
 
     public void setExcludeAppId(String excludeAppId) {
         this.excludeAppId = excludeAppId;
+        this.excludedAppIds = null;
+    }
+
+    public List<String> getExcludedAppIds() {
+        if (excludedAppIds == null) {
+            String excludeAppId = getExcludeAppId();
+            if (StringUtils.isNotEmpty(excludeAppId)) {
+                excludedAppIds = Splitter.on(",").trimResults().splitToList(excludeAppId);
+            } else {
+                excludedAppIds = Collections.emptyList();
+            }
+        }
+
+        return excludedAppIds;
     }
 
     public Integer getMaxCount() {

@@ -16,20 +16,19 @@
 
 package com.treefinance.saas.grapserver.biz.service.impl;
 
-import com.google.common.base.Splitter;
 import com.treefinance.saas.assistant.model.Constants;
 import com.treefinance.saas.grapserver.biz.service.TaskService;
 import com.treefinance.saas.grapserver.biz.validation.AccessValidationHandler;
 import com.treefinance.saas.grapserver.common.enums.EBizType;
-import com.treefinance.saas.grapserver.exception.UniqueidMaxException;
 import com.treefinance.saas.grapserver.context.component.AbstractService;
 import com.treefinance.saas.grapserver.context.config.DiamondConfig;
+import com.treefinance.saas.grapserver.exception.UniqueidMaxException;
 import com.treefinance.saas.grapserver.manager.TaskManager;
 import com.treefinance.saas.grapserver.manager.domain.RecordStatusBO;
 import com.treefinance.saas.grapserver.manager.domain.TaskBO;
 import com.treefinance.saas.grapserver.manager.param.TaskParams;
 import com.treefinance.saas.grapserver.manager.param.TaskUpdateParams;
-import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
@@ -46,6 +45,7 @@ import java.util.List;
 @Service("taskService")
 public class TaskServiceImpl extends AbstractService implements TaskService {
 
+    private static final String UNIQUE_ACCOUNT_CACHE_PREFIX = "saas_gateway_task_account_uniqueid:";
     @Autowired
     private StringRedisTemplate redisTemplate;
     @Autowired
@@ -77,13 +77,8 @@ public class TaskServiceImpl extends AbstractService implements TaskService {
         validateTask(appId, uniqueId, bizType);
 
         // 校验uniqueId
-        String excludeAppId = diamondConfig.getExcludeAppId();
-        if (StringUtils.isNotEmpty(excludeAppId)) {
-            List<String> excludeAppIdList = Splitter.on(",").trimResults().splitToList(excludeAppId);
-            if (!excludeAppIdList.contains(appId)) {
-                checkUniqueId(uniqueId, appId, bizType);
-            }
-        } else {
+        List<String> excludedAppIds = diamondConfig.getExcludedAppIds();
+        if(CollectionUtils.isEmpty(excludedAppIds) || !excludedAppIds.contains(appId)){
             checkUniqueId(uniqueId, appId, bizType);
         }
 
@@ -115,8 +110,7 @@ public class TaskServiceImpl extends AbstractService implements TaskService {
 
     private String keyOfUniqueId(String uniqueId, String appId, Byte bizType) {
         // prefix
-        String prefix = "saas_gateway_task_account_uniqueid:";
-        return prefix + ":" + appId + ":" + bizType + ":" + uniqueId;
+        return UNIQUE_ACCOUNT_CACHE_PREFIX + ":" + appId + ":" + bizType + ":" + uniqueId;
     }
 
     @Override

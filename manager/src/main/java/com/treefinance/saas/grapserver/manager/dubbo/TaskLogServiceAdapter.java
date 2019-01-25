@@ -46,16 +46,16 @@ public class TaskLogServiceAdapter extends AbstractTaskServiceAdapter implements
         TaskResult<Long> result = taskLogFacade.insert(params.getTaskId(), params.getMsg(), params.getProcessTime(), params.getErrorMsg());
 
         logger.info("记录任务日志, params={}, result={}", params, result);
-        validateResult(result, RpcActionEnum.ADD_TASK_LOG, params);
+        validateResponseEntity(result, RpcActionEnum.ADD_TASK_LOG, params);
 
         return result.getData();
     }
 
     @Override
-    public TaskLogBO getLatestErrorLogByTaskId(@Nonnull Long taskId) {
+    public TaskLogBO queryLatestErrorLogByTaskId(@Nonnull Long taskId) {
         TaskResult<TaskLogRO> result = taskLogFacade.queryLastErrorLog(taskId);
 
-        validateResult(result, RpcActionEnum.QUERY_LAST_ERROR_TASK_LOG, ImmutableMap.of("taskId", taskId));
+        validateResponse(result, RpcActionEnum.QUERY_LAST_ERROR_TASK_LOG, ImmutableMap.of("taskId", taskId));
 
         return convert(result.getData(), TaskLogBO.class);
     }

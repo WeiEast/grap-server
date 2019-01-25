@@ -51,7 +51,7 @@ public class LicenseServiceAdapter extends AbstractMerchantServiceAdapter implem
             logger.debug("请求app-license远程服务，appId: {} 结果：{}", appId, JSON.toJSONString(result));
         }
 
-        validateResponse(result, RpcActionEnum.QUERY_APP_LICENSE_BY_APP_ID, request);
+        validateResponseEntity(result, RpcActionEnum.QUERY_APP_LICENSE_BY_APP_ID, request);
 
         return convert(result.getData(), AppLicenseBO.class);
     }

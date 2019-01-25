@@ -52,7 +52,7 @@ public class TaskLogServiceImpl extends AbstractService implements TaskLogServic
 
     @Override
     public TaskLog queryLatestErrorLog(@Nonnull Long taskId) {
-        TaskLogBO log = taskLogManager.getLatestErrorLogByTaskId(taskId);
+        TaskLogBO log = taskLogManager.queryLatestErrorLogByTaskId(taskId);
 
         return convert(log, TaskLog.class);
     }

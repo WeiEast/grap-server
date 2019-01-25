@@ -33,6 +33,7 @@ import org.springframework.stereotype.Service;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -60,7 +61,7 @@ public class TaskServiceAdapter extends AbstractTaskServiceAdapter implements Ta
 
         Map<String, Object> params = new HashMap<>(1);
         params.put("id", id);
-        validateResult(response, RpcActionEnum.QUERY_TASK_BY_ID, params);
+        validateResponseEntity(response, RpcActionEnum.QUERY_TASK_BY_ID, params);
 
         return convert(response.getEntity(), TaskBO.class);
     }
@@ -92,9 +93,10 @@ public class TaskServiceAdapter extends AbstractTaskServiceAdapter implements Ta
         Map<String, Object> params = new HashMap<>(1);
         params.put("taskId", taskId);
 
-        validateResult(response, RpcActionEnum.LIST_TASK_ID_WITH_SAME_TRIGGER, params);
+        validateResponse(response, RpcActionEnum.LIST_TASK_ID_WITH_SAME_TRIGGER, params);
 
-        return response.getEntity();
+        List<Long> entity = response.getEntity();
+        return entity == null? Collections.emptyList(): entity;
     }
 
     @Override
@@ -105,7 +107,7 @@ public class TaskServiceAdapter extends AbstractTaskServiceAdapter implements Ta
 
         Map<String, Object> params = new HashMap<>(1);
         params.put("id", id);
-        validateResult(response, RpcActionEnum.QUERY_COMPLETED_TASK_BY_ID, params);
+        validateResponse(response, RpcActionEnum.QUERY_COMPLETED_TASK_BY_ID, params);
 
         return convert(response.getEntity(), TaskBO.class);
     }
@@ -124,7 +126,7 @@ public class TaskServiceAdapter extends AbstractTaskServiceAdapter implements Ta
         request.setStatus((byte)0);
         TaskResponse<Long> response = taskFacade.createTask(request);
 
-        validateResult(response, RpcActionEnum.CREATE_TASK, request);
+        validateResponseEntity(response, RpcActionEnum.CREATE_TASK, request);
 
         return response.getEntity();
     }
@@ -135,7 +137,7 @@ public class TaskServiceAdapter extends AbstractTaskServiceAdapter implements Ta
 
         TaskResponse<Integer> response = taskFacade.updateProcessingTaskById(request);
 
-        validateResult(response, RpcActionEnum.UPDATE_PROCESSING_TASK_BY_ID, request);
+        validateResponseEntity(response, RpcActionEnum.UPDATE_PROCESSING_TASK_BY_ID, request);
 
         return response.getEntity();
     }
@@ -150,7 +152,7 @@ public class TaskServiceAdapter extends AbstractTaskServiceAdapter implements Ta
         params.put("accountNo", accountNo);
         params.put("website", website);
 
-        validateResult(response, RpcActionEnum.UPDATE_ACCOUNT_WEBSITE_IF_NEED_WHEN_PROCESSING, params);
+        validateResponseEntity(response, RpcActionEnum.UPDATE_ACCOUNT_WEBSITE_IF_NEED_WHEN_PROCESSING, params);
 
         return convert(response.getEntity(), RecordStatusBO.class);
     }
@@ -165,7 +167,7 @@ public class TaskServiceAdapter extends AbstractTaskServiceAdapter implements Ta
         params.put("accountNo", accountNo);
         params.put("website", website);
 
-        validateResult(response, RpcActionEnum.UPDATE_ACCOUNT_WEBSITE_WHEN_PROCESSING, params);
+        validateResponseEntity(response, RpcActionEnum.UPDATE_ACCOUNT_WEBSITE_WHEN_PROCESSING, params);
 
         return convert(response.getEntity(), RecordStatusBO.class);
     }

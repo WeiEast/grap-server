@@ -36,7 +36,7 @@ public abstract class AbstractTaskServiceAdapter extends AbstractDubboServiceAda
         }
     }
 
-    protected <T> void validateResult(TaskResult<T> result, RpcActionEnum action, Object... args) {
+    protected <T> void validateResponseEntity(TaskResult<T> result, RpcActionEnum action, Object... args) {
         validateResponse(result, action, args);
 
         if (result.getData() == null) {
@@ -59,7 +59,7 @@ public abstract class AbstractTaskServiceAdapter extends AbstractDubboServiceAda
     /**
      * 检查响应是否正常的基础上进一步检查响应的数据实体是否为空
      */
-    protected <T> void validateResult(TaskResponse<T> response, RpcActionEnum action, Object... args) {
+    protected <T> void validateResponseEntity(TaskResponse<T> response, RpcActionEnum action, Object... args) {
         validateResponse(response, action, args);
 
         if (response.getEntity() == null) {

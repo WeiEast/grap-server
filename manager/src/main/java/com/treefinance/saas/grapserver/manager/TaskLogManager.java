@@ -16,8 +16,9 @@ package com.treefinance.saas.grapserver.manager;
 import com.treefinance.saas.grapserver.manager.domain.TaskLogBO;
 import com.treefinance.saas.grapserver.manager.param.TaskLogParams;
 
-import java.util.List;
 import javax.annotation.Nonnull;
+
+import java.util.List;
 
 /**
  * @author Jerry
@@ -32,7 +33,7 @@ public interface TaskLogManager {
     /**
      * 根据任务ID查询最新任务日志
      */
-    TaskLogBO getLatestErrorLogByTaskId(@Nonnull Long taskId);
+    TaskLogBO queryLatestErrorLogByTaskId(@Nonnull Long taskId);
 
-  List<TaskLogBO> listTaskLogsByTaskIdAndMsg(@Nonnull Long taskId, @Nonnull String msg);
+    List<TaskLogBO> listTaskLogsByTaskIdAndMsg(@Nonnull Long taskId, @Nonnull String msg);
 }
