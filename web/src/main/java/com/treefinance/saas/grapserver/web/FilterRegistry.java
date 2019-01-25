@@ -16,12 +16,13 @@
 
 package com.treefinance.saas.grapserver.web;
 
-import com.treefinance.saas.grapserver.context.config.DiamondConfig;
-import com.treefinance.saas.grapserver.biz.service.LicenseService;
 import com.treefinance.saas.grapserver.biz.service.MonitorService;
 import com.treefinance.saas.grapserver.biz.service.TaskAliveService;
+import com.treefinance.saas.grapserver.context.config.DiamondConfig;
+import com.treefinance.saas.grapserver.web.filter.ExclusiveFilter;
+import com.treefinance.saas.grapserver.web.filter.MonitorFilter;
+import com.treefinance.saas.grapserver.web.filter.RequestAdaptFilter;
 import com.treefinance.saas.grapserver.web.filter.TaskAliveFilter;
-import com.treefinance.saas.grapserver.web.filter.WebContextFilter;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -41,28 +42,38 @@ public class FilterRegistry {
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         CorsConfiguration config = new CorsConfiguration();
         config.setAllowCredentials(true);
-        config.addAllowedOrigin("*");
-        config.addAllowedHeader("*");
-        config.addAllowedMethod("*");
+        config.addAllowedOrigin(CorsConfiguration.ALL);
+        config.addAllowedHeader(CorsConfiguration.ALL);
+        config.addAllowedMethod(CorsConfiguration.ALL);
         source.registerCorsConfiguration("/**", config);
         FilterRegistrationBean bean = new FilterRegistrationBean(new CorsFilter(source));
-        bean.setOrder(0);
+        bean.setOrder(FilterRegistrationBean.REQUEST_WRAPPER_FILTER_MAX_ORDER - 9);
         return bean;
     }
 
     @Bean
-    public FilterRegistrationBean webContextFilter(MonitorService monitorService,
-                                                   DiamondConfig diamondConfig,
-                                                   LicenseService licenseService) {
-        WebContextFilter contextFilter = new WebContextFilter(monitorService, diamondConfig,
-            licenseService);
-        contextFilter.addExcludeUrlPatterns("/moxie/webhook/**");
+    public FilterRegistrationBean requestAdaptFilter() {
+        ExclusiveFilter filter = new RequestAdaptFilter();
+        filter.addExcludeUrlPatterns("/moxie/webhook/**");
 
         FilterRegistrationBean registration = new FilterRegistrationBean();
-        registration.setFilter(contextFilter);
-        registration.setName("webContextFilter");
+        registration.setFilter(filter);
+        registration.setName("requestAdaptFilter");
         registration.addUrlPatterns("/*");
-        registration.setOrder(1);
+        registration.setOrder(FilterRegistrationBean.REQUEST_WRAPPER_FILTER_MAX_ORDER + 1);
+        return registration;
+    }
+
+    @Bean
+    public FilterRegistrationBean monitorFilter(MonitorService monitorService) {
+        ExclusiveFilter filter = new MonitorFilter(monitorService);
+        filter.addExcludeUrlPatterns("/moxie/webhook/**");
+
+        FilterRegistrationBean registration = new FilterRegistrationBean();
+        registration.setFilter(filter);
+        registration.setName("monitorFilter");
+        registration.addUrlPatterns("/*");
+        registration.setOrder(FilterRegistrationBean.REQUEST_WRAPPER_FILTER_MAX_ORDER + 2);
         return registration;
     }
 
@@ -75,7 +86,7 @@ public class FilterRegistry {
         registration.setFilter(taskAliveFilter);
         registration.setName("taskAliveFilter");
         registration.addUrlPatterns("/*");
-        registration.setOrder(2);
+        registration.setOrder(FilterRegistrationBean.REQUEST_WRAPPER_FILTER_MAX_ORDER + 3);
         return registration;
     }
 

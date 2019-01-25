@@ -3,12 +3,12 @@ package com.treefinance.saas.grapserver.biz.service;
 import com.alibaba.fastjson.JSON;
 import com.google.common.base.Joiner;
 import com.google.common.collect.Maps;
-import com.treefinance.saas.grapserver.common.exception.BizException;
+import com.treefinance.saas.grapserver.exception.BizException;
 import com.treefinance.saas.grapserver.common.model.vo.task.AppH5TipsVO;
 import com.treefinance.saas.grapserver.context.component.AbstractService;
 import com.treefinance.saas.grapserver.context.config.ColorConfig;
 import com.treefinance.saas.grapserver.context.config.DiamondConfig;
-import com.treefinance.saas.grapserver.exception.IllegalBizDataException;
+import com.treefinance.saas.grapserver.exception.IllegalBusinessDataException;
 import com.treefinance.saas.grapserver.manager.ColorConfigManager;
 import com.treefinance.saas.grapserver.manager.domain.ColorConfigBO;
 import com.treefinance.saas.merchant.facade.request.grapserver.GetAppH5TipsRequest;
@@ -16,8 +16,6 @@ import com.treefinance.saas.merchant.facade.result.console.AppH5TipsResult;
 import com.treefinance.saas.merchant.facade.result.console.MerchantResult;
 import com.treefinance.saas.merchant.facade.service.AppH5TipsFacade;
 import org.apache.commons.collections.CollectionUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -47,7 +45,7 @@ public class MerchantConfigService extends AbstractService {
         }
 
         if (config == null) {
-            throw new IllegalBizDataException("Can not find any app's color config!");
+            throw new IllegalBusinessDataException("Can not find any app's color config!");
         }
 
         Map<String, String> map = Maps.newHashMap();

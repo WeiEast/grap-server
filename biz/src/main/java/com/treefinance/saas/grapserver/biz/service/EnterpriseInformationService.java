@@ -6,8 +6,6 @@ package com.treefinance.saas.grapserver.biz.service;
  */
 public interface EnterpriseInformationService {
 
-    Long creatTask(String appId, String uniqueId);
-
     Object startCrawler(Long taskid, String extra);
 
     boolean isStartCrawler(String enterpriseName);

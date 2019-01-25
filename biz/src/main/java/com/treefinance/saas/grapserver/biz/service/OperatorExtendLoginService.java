@@ -13,7 +13,7 @@ import com.treefinance.saas.grapserver.manager.TaskManager;
 import com.treefinance.saas.grapserver.share.cache.redis.RedisDao;
 import com.treefinance.saas.grapserver.biz.dto.TaskAttribute;
 import com.treefinance.saas.grapserver.common.enums.EBizType;
-import com.treefinance.saas.grapserver.common.exception.CrawlerBizException;
+import com.treefinance.saas.grapserver.exception.CrawlerBizException;
 import com.treefinance.saas.grapserver.context.Constants;
 import com.treefinance.saas.grapserver.share.cache.redis.RedisKeyUtils;
 import com.treefinance.saas.grapserver.facade.enums.ETaskAttribute;

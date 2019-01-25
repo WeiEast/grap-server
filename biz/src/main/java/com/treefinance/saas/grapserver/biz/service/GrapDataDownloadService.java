@@ -8,19 +8,18 @@ import com.treefinance.saas.grapserver.biz.domain.CallbackConfig;
 import com.treefinance.saas.grapserver.biz.domain.TaskLog;
 import com.treefinance.saas.grapserver.biz.dto.TaskAttribute;
 import com.treefinance.saas.grapserver.biz.dto.TaskCallbackLog;
+import com.treefinance.saas.grapserver.biz.validation.AccessValidationHandler;
 import com.treefinance.saas.grapserver.common.enums.EBizType;
 import com.treefinance.saas.grapserver.common.enums.ETaskStatus;
-import com.treefinance.saas.grapserver.common.exception.ParamsCheckException;
+import com.treefinance.saas.grapserver.exception.ForbiddenException;
+import com.treefinance.saas.grapserver.exception.InternalServerException;
+import com.treefinance.saas.grapserver.exception.TaskStateException;
 import com.treefinance.saas.grapserver.facade.enums.EDataType;
 import com.treefinance.saas.grapserver.facade.enums.EGrapStatus;
 import com.treefinance.saas.grapserver.facade.enums.ETaskAttribute;
 import com.treefinance.saas.grapserver.manager.TaskManager;
 import com.treefinance.saas.grapserver.manager.domain.TaskBO;
 import com.treefinance.saas.grapserver.util.CallbackDataUtils;
-import java.net.URLEncoder;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -28,6 +27,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.net.URLEncoder;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 
 /**
  * @author yh-treefinance on 2018/2/7.
@@ -50,47 +54,45 @@ public class GrapDataDownloadService {
     @Autowired
     protected LicenseService licenseService;
     @Autowired
-    private TaskLicenseService taskLicenseService;
-    @Autowired
     private AppCallbackConfigService callbackConfigService;
+    @Autowired
+    private AccessValidationHandler validationHandler;
 
     /**
      * 获取加密的爬取数据
      */
-    public String getEncryptGrapData(String appId, String bizType, Long taskId) {
+    public String getEncryptGrapData(String appId, Long taskId, EBizType ebizType) {
         TaskBO task = taskManager.queryCompletedTaskById(taskId);
         if(task == null) {
-            throw new ParamsCheckException("任务进行中");
+            throw new TaskStateException("任务进行中");
         }
 
         if (!task.getAppId().equals(appId)) {
-            throw new ParamsCheckException("非授权用户taskId");
+            throw new ForbiddenException("非法访问！appId: " + appId + ", taskId: " + taskId);
         }
 
         // 校验范围权限
-        EBizType ebizType = EBizType.of(bizType);
-        if (ebizType == null) {
-            throw new ParamsCheckException("未开通相关业务");
-        }
         if (!ebizType.getCode().equals(task.getBizType())) {
-            throw new ParamsCheckException("非所属业务taskId");
+            throw new ForbiddenException("非法访问！请检查所需业务类型是否正确！");
         }
-        taskLicenseService.verifyCreateTask(appId, task.getUniqueId(), EBizType.of(bizType));
+
+        validationHandler.validateTask(appId, task.getUniqueId(), ebizType);
+
         // 1.获取回调日志中的数据
         Map<String, Object> dataMap = getGrapDataMap(task);
         // 2.默认数据的填充
         fillDataMap(task, dataMap);
         // 3.加密参数
         AppLicense appLicense = licenseService.getAppLicense(appId);
-        String params = "";
+
         try {
-            params = CallbackDataUtils.encrypt(dataMap, appLicense.getServerPublicKey());
+            String params = CallbackDataUtils.encrypt(dataMap, appLicense.getServerPublicKey());
             params = URLEncoder.encode(params, "utf-8");
+            logger.info("grap data : appId={},taskId={},params={}....", appId, taskId, params);
+            return params;
         } catch (Exception e) {
-            logger.error("encrypt data error: taskid={},dataMap={}", taskId, JSON.toJSONString(dataMap), e);
+            throw new InternalServerException("回调数据加密失败！appId: " + appId + ", taskId:" + taskId + ", bizType: " + ebizType, e);
         }
-        logger.info("grap data : appId={},taskId={},params={}....", appId, taskId, params);
-        return params;
     }
 
 

@@ -30,4 +30,6 @@ public interface MerchantInfoManager {
      * @return 商户基本信息，{@link BaseMerchantInfoBO}
      */
     BaseMerchantInfoBO getBaseInfoByAppId(@Nonnull String appId);
+
+    boolean isActive(@Nonnull String appId);
 }

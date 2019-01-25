@@ -10,14 +10,6 @@ package com.treefinance.saas.grapserver.biz.service;
 public interface CarInfoService {
 
     /**
-     * 创建车辆信息采集任务
-     *
-     * @param appId 商户id
-     * @param modelNum 车型编码
-     */
-    Long startCollectTask(String appId, String modelNum);
-
-    /**
      * 调用爬数处理车辆信息采集任务,并更新任务状态记录任务日志,并发送任务监控信息
      *
      * @param taskId 任务id

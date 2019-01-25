@@ -24,9 +24,6 @@ import com.google.common.collect.Maps;
 import com.treefinance.saas.grapserver.biz.domain.AppLicense;
 import com.treefinance.saas.grapserver.biz.service.CarInfoService;
 import com.treefinance.saas.grapserver.biz.service.LicenseService;
-import com.treefinance.saas.grapserver.biz.service.TaskLicenseService;
-import com.treefinance.saas.grapserver.biz.service.TaskService;
-import com.treefinance.saas.grapserver.common.enums.EBizType;
 import com.treefinance.saas.grapserver.common.enums.ETaskStep;
 import com.treefinance.saas.grapserver.common.model.dto.carinfo.CarInfoCollectTaskLogDTO;
 import com.treefinance.saas.grapserver.context.component.AbstractService;
@@ -50,22 +47,11 @@ import java.util.Map;
 @Service("carInfoService")
 public class CarInfoServiceImpl extends AbstractService implements CarInfoService {
     @Autowired
-    private TaskService taskService;
-    @Autowired
-    private TaskLicenseService taskLicenseService;
-    @Autowired
     private LicenseService licenseService;
     @Autowired
     private DiamondConfig diamondConfig;
     @Autowired
     private CarInfoFacade carInfoFacade;
-
-    @Override
-    public Long startCollectTask(String appId, String modelNum) {
-        // 使用车型编码当作uniqueId
-        taskLicenseService.verifyCreateTask(appId, modelNum, EBizType.CAR_INFO);
-        return taskService.createTask(modelNum, appId, EBizType.CAR_INFO.getCode(), null, null, null);
-    }
 
     @Override
     public Object processCollectTask(Long taskId, String appId, String modelNum) {

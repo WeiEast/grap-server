@@ -1,7 +1,7 @@
 package com.treefinance.saas.grapserver.biz.service;
 
 import com.treefinance.saas.grapserver.biz.dto.TaskCallbackLog;
-import com.treefinance.saas.grapserver.common.exception.UnknownException;
+import com.treefinance.saas.grapserver.exception.UnknownException;
 import com.treefinance.saas.grapserver.context.component.AbstractService;
 import com.treefinance.saas.taskcenter.facade.result.TaskCallbackLogRO;
 import com.treefinance.saas.taskcenter.facade.result.common.TaskResult;

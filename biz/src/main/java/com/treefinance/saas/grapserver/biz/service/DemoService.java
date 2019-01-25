@@ -10,7 +10,7 @@ import com.treefinance.saas.grapserver.context.component.AbstractService;
 import com.treefinance.saas.grapserver.util.CallbackDataUtils;
 import com.treefinance.saas.grapserver.context.config.DiamondConfig;
 import com.treefinance.saas.grapserver.biz.domain.AppLicense;
-import com.treefinance.saas.grapserver.common.exception.BizException;
+import com.treefinance.saas.grapserver.exception.BizException;
 import com.treefinance.saas.grapserver.common.model.dto.demo.fund.FundBillRecordDTO;
 import com.treefinance.saas.grapserver.common.model.dto.demo.fund.FundDataDTO;
 import com.treefinance.saas.grapserver.common.model.dto.demo.fund.FundLoanInfoDTO;

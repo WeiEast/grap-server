@@ -19,9 +19,9 @@ package com.treefinance.saas.grapserver.biz.service.impl;
 import com.google.common.base.Splitter;
 import com.treefinance.saas.assistant.model.Constants;
 import com.treefinance.saas.grapserver.biz.service.TaskService;
-import com.treefinance.saas.grapserver.common.exception.AppIdUncheckException;
-import com.treefinance.saas.grapserver.common.exception.ForbiddenException;
-import com.treefinance.saas.grapserver.common.exception.base.MarkBaseException;
+import com.treefinance.saas.grapserver.biz.validation.AccessValidationHandler;
+import com.treefinance.saas.grapserver.common.enums.EBizType;
+import com.treefinance.saas.grapserver.exception.UniqueidMaxException;
 import com.treefinance.saas.grapserver.context.component.AbstractService;
 import com.treefinance.saas.grapserver.context.config.DiamondConfig;
 import com.treefinance.saas.grapserver.manager.TaskManager;
@@ -31,7 +31,7 @@ import com.treefinance.saas.grapserver.manager.param.TaskParams;
 import com.treefinance.saas.grapserver.manager.param.TaskUpdateParams;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Nonnull;
@@ -47,11 +47,13 @@ import java.util.List;
 public class TaskServiceImpl extends AbstractService implements TaskService {
 
     @Autowired
-    private RedisTemplate<String, String> redisTemplate;
+    private StringRedisTemplate redisTemplate;
     @Autowired
     private DiamondConfig diamondConfig;
     @Autowired
     private TaskManager taskManager;
+    @Autowired
+    private AccessValidationHandler validationHandler;
 
     @Override
     public String getUniqueIdInTask(Long taskId) {
@@ -61,14 +63,19 @@ public class TaskServiceImpl extends AbstractService implements TaskService {
     }
 
     @Override
-    public Long createTask(String uniqueId, String appId, Byte bizType, String extra, String website, String source) {
-        if (StringUtils.isBlank(appId)) {
-            throw new AppIdUncheckException("appId非法");
-        }
-        if (bizType == null) {
-            logger.error("创建任务时传入的bizType为null");
-            throw new ForbiddenException("无操作权限");
-        }
+    public void validateTask(String appId, String uniqueId, EBizType bizType) {
+        validationHandler.validateTask(appId, uniqueId, bizType);
+    }
+
+    @Override
+    public Long createTask(String appId, String uniqueId, EBizType bizType) {
+        return createTask(appId, uniqueId, bizType, null, null, null);
+    }
+
+    @Override
+    public Long createTask(String appId, String uniqueId, EBizType bizType, String extra, String website, String source) {
+        validateTask(appId, uniqueId, bizType);
+
         // 校验uniqueId
         String excludeAppId = diamondConfig.getExcludeAppId();
         if (StringUtils.isNotEmpty(excludeAppId)) {
@@ -81,13 +88,13 @@ public class TaskServiceImpl extends AbstractService implements TaskService {
         }
 
         TaskParams params = new TaskParams();
-        params.setUniqueId(uniqueId);
         params.setAppId(appId);
-        params.setBizType(bizType);
+        params.setUniqueId(uniqueId);
+        params.setBizType(bizType.getCode());
         params.setSource(source);
         params.setWebsite(website);
-        params.setSaasEnv(Byte.valueOf(Constants.SAAS_ENV_VALUE));
         params.setExtra(extra);
+        params.setSaasEnv(Byte.valueOf(Constants.SAAS_ENV_VALUE));
 
         return taskManager.createTask(params);
     }
@@ -95,13 +102,13 @@ public class TaskServiceImpl extends AbstractService implements TaskService {
     /**
      * uniqueId校验
      */
-    private void checkUniqueId(String uniqueId, String appId, Byte bizType) {
+    private void checkUniqueId(String uniqueId, String appId, EBizType bizType) {
         Integer maxCount = diamondConfig.getMaxCount();
         if (maxCount != null) {
-            String key = keyOfUniqueId(uniqueId, appId, bizType);
+            String key = keyOfUniqueId(uniqueId, appId, bizType.getCode());
             Long count = redisTemplate.opsForSet().size(key);
             if (count != null && count >= maxCount) {
-                throw new MarkBaseException("0", "uniqueId访问超阈值");
+                throw new UniqueidMaxException("uniqueId访问超阈值");
             }
         }
     }

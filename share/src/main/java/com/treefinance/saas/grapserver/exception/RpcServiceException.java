@@ -17,6 +17,8 @@
 package com.treefinance.saas.grapserver.exception;
 
 /**
+ * RPC服务异常
+ *
  * @author Jerry
  * @date 2018/11/15 15:58
  */

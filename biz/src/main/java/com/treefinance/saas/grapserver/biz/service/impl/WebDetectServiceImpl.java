@@ -3,10 +3,7 @@ package com.treefinance.saas.grapserver.biz.service.impl;
 import com.alibaba.dubbo.rpc.RpcException;
 import com.google.gson.reflect.TypeToken;
 import com.treefinance.saas.grapserver.biz.service.AcquisitionService;
-import com.treefinance.saas.grapserver.biz.service.TaskLicenseService;
-import com.treefinance.saas.grapserver.biz.service.TaskService;
 import com.treefinance.saas.grapserver.biz.service.WebDetectService;
-import com.treefinance.saas.grapserver.common.enums.EBizType;
 import com.treefinance.saas.grapserver.common.enums.ESpiderTopic;
 import com.treefinance.saas.grapserver.common.enums.ETaskStatus;
 import com.treefinance.saas.grapserver.common.result.SaasResult;
@@ -14,7 +11,6 @@ import com.treefinance.saas.grapserver.context.component.AbstractService;
 import com.treefinance.saas.grapserver.context.config.DiamondConfig;
 import com.treefinance.saas.grapserver.manager.TaskManager;
 import com.treefinance.saas.grapserver.manager.domain.TaskBO;
-import com.treefinance.saas.processor.thirdparty.facade.enterprise.EnterpriseService;
 import com.treefinance.saas.processor.thirdparty.facade.opiniondetect.OpinionDetectService;
 import com.treefinance.saas.processor.thirdparty.facade.opiniondetect.model.OpinionDetectDataResult;
 import com.treefinance.saas.processor.thirdparty.facade.opiniondetect.model.OpinionDetectResultQuery;
@@ -37,9 +33,6 @@ public class WebDetectServiceImpl extends AbstractService implements WebDetectSe
     private static final Logger logger = LoggerFactory.getLogger(OpinionDetectService.class);
 
     @Autowired
-    private TaskLicenseService taskLicenseService;
-
-    @Autowired
     private AcquisitionService acquisitionService;
 
     @Autowired
@@ -49,16 +42,7 @@ public class WebDetectServiceImpl extends AbstractService implements WebDetectSe
     private DiamondConfig config;
 
     @Autowired
-    private TaskService taskService;
-
-    @Autowired
     private TaskManager taskManager;
-
-    @Override
-    public Long creatTask(String appId, String uniqueId) {
-        taskLicenseService.verifyCreateSaasTask(appId, uniqueId, EBizType.OPINION_DETECT);
-        return taskService.createTask(uniqueId, appId, EBizType.OPINION_DETECT.getCode(), null, null, null);
-    }
 
     @Override
     public Object startCrawler(Long taskid, String platform, String extra) {
@@ -74,7 +58,6 @@ public class WebDetectServiceImpl extends AbstractService implements WebDetectSe
 
     @Override
     public Object getData(String appId, String uniqueId, Long taskid, Integer size, Long start, String platform, String entryname, String keyword) {
-        taskLicenseService.verifyCreateSaasTask(appId, uniqueId, EBizType.OPINION_DETECT);
         TaskBO task = taskManager.getTaskById(taskid);
         if (ETaskStatus.RUNNING.getStatus().equals(task.getStatus())) {
             return SaasResult.failResult(null, "任务还在进行中...", 1);

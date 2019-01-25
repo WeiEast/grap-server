@@ -2,6 +2,7 @@ package com.treefinance.saas.grapserver;
 
 import com.treefinance.saas.grapserver.biz.service.CarInfoService;
 import com.treefinance.saas.grapserver.biz.service.TaskService;
+import com.treefinance.saas.grapserver.common.enums.EBizType;
 import com.treefinance.saas.grapserver.web.GrapServerApplication;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -25,7 +26,7 @@ public class CarInfoServiceTest {
 
     @Test
     public void test() throws InterruptedException {
-        Long taskId = taskService.createTask("223344", "QATestabcdefghQA", (byte) 8, null, null, null);
+        Long taskId = taskService.createTask("QATestabcdefghQA","223344", EBizType.CAR_INFO, null, null, null);
         carInfoService.processCollectTask(taskId, "223344", null);
         Thread.sleep(10000);
     }

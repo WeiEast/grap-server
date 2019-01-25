@@ -14,7 +14,7 @@ import com.datatrees.spider.share.domain.http.HttpResult;
 import com.google.common.base.Joiner;
 import com.google.common.collect.Maps;
 import com.treefinance.proxy.api.ProxyProvider;
-import com.treefinance.saas.grapserver.common.exception.CrawlerBizException;
+import com.treefinance.saas.grapserver.exception.CrawlerBizException;
 import com.treefinance.saas.grapserver.context.Constants;
 import com.treefinance.saas.grapserver.share.cache.redis.RedisDao;
 import com.treefinance.saas.grapserver.share.cache.redis.RedisKeyUtils;
