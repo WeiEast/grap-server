@@ -4,39 +4,52 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Lists;
-import com.treefinance.saas.grapserver.biz.config.DiamondConfig;
-import com.treefinance.saas.grapserver.common.enums.*;
+import com.treefinance.saas.grapserver.biz.domain.AppLicense;
+import com.treefinance.saas.grapserver.common.enums.EBizType;
+import com.treefinance.saas.grapserver.common.enums.ETaskStatus;
+import com.treefinance.saas.grapserver.common.enums.ETaskStep;
+import com.treefinance.saas.grapserver.common.enums.ETongDunSuiShouData;
+import com.treefinance.saas.grapserver.common.enums.ETongdunData;
+import com.treefinance.saas.grapserver.common.enums.ETongdunDetailData;
+import com.treefinance.saas.grapserver.common.enums.ETongdunExtraData;
+import com.treefinance.saas.grapserver.common.enums.ETongdunType;
 import com.treefinance.saas.grapserver.common.model.TongdunDetailDTO;
 import com.treefinance.saas.grapserver.common.model.dto.carinfo.CarInfoCollectTaskLogDTO;
 import com.treefinance.saas.grapserver.common.request.TongdunRequest;
-import com.treefinance.saas.grapserver.common.result.*;
-import com.treefinance.saas.grapserver.common.utils.DataConverterUtils;
-import com.treefinance.saas.grapserver.common.utils.HttpClientUtils;
-import com.treefinance.saas.grapserver.common.utils.TongdunDataResolver;
-import com.treefinance.saas.grapserver.dao.entity.AppLicense;
+import com.treefinance.saas.grapserver.common.result.SaasResult;
+import com.treefinance.saas.grapserver.common.result.TongdunData;
+import com.treefinance.saas.grapserver.common.result.TongdunDetailData;
+import com.treefinance.saas.grapserver.common.result.TongdunDetailResult;
+import com.treefinance.saas.grapserver.common.result.TongdunDetailTieshuResult;
+import com.treefinance.saas.grapserver.context.component.AbstractService;
+import com.treefinance.saas.grapserver.context.config.DiamondConfig;
+import com.treefinance.saas.grapserver.util.HttpClientUtils;
+import com.treefinance.saas.grapserver.util.TongdunDataResolver;
 import com.treefinance.saas.taskcenter.facade.request.CarInfoCollectTaskLogRequest;
 import com.treefinance.saas.taskcenter.facade.service.CarInfoFacade;
 import com.treefinance.saas.taskcenter.facade.service.TaskFacade;
 import com.treefinance.saas.taskcenter.facade.service.TaskLogFacade;
 import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ObjectUtils;
 
-import javax.xml.bind.ValidationException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 
 /**
- * @author:guoguoyun
- * @date:Created in 2018/10/17下午2:22
+ * @author guoguoyun
+ * @date 2018/10/17下午2:22
  */
 @Service
-public class TongdunService {
+public class TongdunService extends AbstractService {
 
-    private static final Logger logger = LoggerFactory.getLogger(TongdunService.class);
     @Autowired
     private TaskService taskService;
     @Autowired
@@ -50,7 +63,7 @@ public class TongdunService {
     @Autowired
     private TaskLogService taskLogService;
     @Autowired
-    private AppLicenseService appLicenseService;
+    private LicenseService licenseService;
     @Autowired
     private DiamondConfig diamondConfig;
 
@@ -121,7 +134,7 @@ public class TongdunService {
             return SaasResult.failResult("查询不到数据!");
         }
 
-        AppLicense license = appLicenseService.getAppLicense(appId);
+        AppLicense license = licenseService.getAppLicense(appId);
         processSuccessCollectTask(taskId, "任务成功");
         return SaasResult.successEncryptByRSAResult(tongdunDataList, license.getServerPublicKey());
     }
@@ -252,7 +265,7 @@ public class TongdunService {
             return SaasResult.failResult("查询不到数据!");
         }
 
-        AppLicense license = appLicenseService.getAppLicense(appId);
+        AppLicense license = licenseService.getAppLicense(appId);
         processSuccessCollectTask(taskId, "任务成功");
         return SaasResult.successEncryptByRSAResult(resultList, license.getServerPublicKey());
 
@@ -341,7 +354,7 @@ public class TongdunService {
             return SaasResult.failResult("查询不到数据!");
         }
 
-        AppLicense license = appLicenseService.getAppLicense(appId);
+        AppLicense license = licenseService.getAppLicense(appId);
         taskLogService.insert(taskId, "任务成功", new Date(), "");
         taskFacade.updateTaskStatusWithStep(taskId, ETaskStatus.SUCCESS.getStatus());
         return SaasResult.successEncryptByRSAResult(resultList, license.getServerPublicKey());
@@ -481,7 +494,7 @@ public class TongdunService {
             return SaasResult.failResult("查询不到数据!");
         }
 
-        AppLicense license = appLicenseService.getAppLicense(appId);
+        AppLicense license = licenseService.getAppLicense(appId);
         // processSuccessCollectTask(taskId, "任务成功");
         return SaasResult.successEncryptByRSAResult(resultList, license.getServerPublicKey());
 
@@ -592,8 +605,9 @@ public class TongdunService {
                                     }
                                 }
                             }
-                            if (!ObjectUtils.isEmpty(JSONObject.parseObject(lostDetail.get(0).toString()).get("借款人手机")))
+                            if (!ObjectUtils.isEmpty(JSONObject.parseObject(lostDetail.get(0).toString()).get("借款人手机"))) {
                                 lenderMobile = JSONObject.parseObject(lostDetail.get(0).toString()).get("借款人手机").toString();
+                            }
 
                             mapString.put("cheatType", cheatType);
                             mapString.put("lenderMobile", lenderMobile);
@@ -677,7 +691,7 @@ public class TongdunService {
     }
 
     public void updateCollectTaskStatusAndTaskLogAndSendMonitor(Long taskId, List<CarInfoCollectTaskLogDTO> logList) {
-        List<CarInfoCollectTaskLogRequest> carInfoCollectTaskLogRequestList = DataConverterUtils.convert(logList, CarInfoCollectTaskLogRequest.class);
+        List<CarInfoCollectTaskLogRequest> carInfoCollectTaskLogRequestList = convert(logList, CarInfoCollectTaskLogRequest.class);
         carInfoFacade.updateCollectTaskStatusAndTaskLogAndSendMonitor(taskId, carInfoCollectTaskLogRequestList);
     }
 
