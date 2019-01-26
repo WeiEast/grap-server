@@ -110,17 +110,17 @@
                      id="opinionDetectService"/>
     <dubbo:reference interface="com.treefinance.saas.processor.thirdparty.facade.enterprise.EnterpriseService" id="enterpriseService"/>
     <dubbo:reference interface="com.datatrees.spider.extra.api.EnterpriseApi" id="enterpriseApi"/>
-    <dubbo:reference interface="com.treefinance.saas.taskcenter.facade.service.TaskPointFacade" id="taskPointFacade" version="1.0.0"/>
+    <dubbo:reference interface="com.treefinance.saas.taskcenter.facade.service.TaskPointFacade" id="taskPointFacade"/>
 
-    <!--生产者-->
-    <dubbo:service interface="com.treefinance.saas.grapserver.facade.service.TaskFacade" ref="grapTaskFacade"/>
+    <!--&lt;!&ndash;生产者&ndash;&gt;-->
+    <!--<dubbo:service interface="com.treefinance.saas.grapserver.facade.service.TaskFacade" ref="grapTaskFacade"/>-->
 
     <!--兼容老的生产者-->
     <dubbo:service interface="com.treefinance.saas.gateway.servicefacade.TaskService" ref="gatewayTaskServiceFacade"/>
     <dubbo:service interface="com.treefinance.saas.gateway.servicefacade.AppLicenseService"
                    ref="gatewayAppLicenseServiceFacade"/>
-    <dubbo:service interface="com.treefinance.saas.grapserver.facade.service.MerchantFacade" ref="merchantFacade"/>
-    <dubbo:service interface="com.treefinance.saas.grapserver.facade.service.FundMoxieFacade" ref="fundMoxieFacade"/>
+    <!--<dubbo:service interface="com.treefinance.saas.grapserver.facade.service.MerchantFacade" ref="merchantFacade"/>-->
+    <!--<dubbo:service interface="com.treefinance.saas.grapserver.facade.service.FundMoxieFacade" ref="fundMoxieFacade"/>-->
 
 </beans>
 
