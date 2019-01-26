@@ -110,7 +110,7 @@
                      id="opinionDetectService"/>
     <dubbo:reference interface="com.treefinance.saas.processor.thirdparty.facade.enterprise.EnterpriseService" id="enterpriseService"/>
     <dubbo:reference interface="com.datatrees.spider.extra.api.EnterpriseApi" id="enterpriseApi"/>
-    <dubbo:reference interface="com.treefinance.saas.taskcenter.facade.service.TaskPointFacade" id="taskPointFacade"/>
+    <dubbo:reference interface="com.treefinance.saas.taskcenter.facade.service.TaskPointFacade" id="taskPointFacade" version="1.0.0"/>
 
     <!--&lt;!&ndash;生产者&ndash;&gt;-->
     <!--<dubbo:service interface="com.treefinance.saas.grapserver.facade.service.TaskFacade" ref="grapTaskFacade"/>-->
