@@ -482,7 +482,7 @@ public class TongdunService {
         }
 
         AppLicense license = appLicenseService.getAppLicense(appId);
-        // processSuccessCollectTask(taskId, "任务成功");
+         processSuccessCollectTask(taskId, "任务成功");
         return SaasResult.successEncryptByRSAResult(resultList, license.getServerPublicKey());
 
     }
