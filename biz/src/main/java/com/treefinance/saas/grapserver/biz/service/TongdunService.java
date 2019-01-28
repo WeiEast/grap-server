@@ -333,8 +333,7 @@ public class TongdunService extends AbstractService {
         }
 
         AppLicense license = licenseService.getAppLicense(appId);
-        taskLogService.insert(taskId, "任务成功", new Date(), "");
-        taskFacade.updateTaskStatusWithStep(taskId, ETaskStatus.SUCCESS.getStatus());
+        processSuccessCollectTask(taskId, "任务成功");
         return SaasResult.successEncryptByRSAResult(resultList, license.getServerPublicKey());
     }
 
@@ -470,7 +469,7 @@ public class TongdunService extends AbstractService {
         }
 
         AppLicense license = licenseService.getAppLicense(appId);
-        // processSuccessCollectTask(taskId, "任务成功");
+         processSuccessCollectTask(taskId, "任务成功");
         return SaasResult.successEncryptByRSAResult(resultList, license.getServerPublicKey());
 
     }
