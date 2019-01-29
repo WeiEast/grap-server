@@ -629,7 +629,7 @@ public class TongdunService extends AbstractService {
                 mapString.remove("账户身份证关联设备ID数目");
 
             }
-            mapString.put("associatedLenderIdcardList", mapString.get("关联设备ID列表"));
+            mapString.put("associatedDeviceIdList", mapString.get("关联设备ID列表"));
             mapString.remove("关联设备ID列表");
             mapString.remove("描述");
 
