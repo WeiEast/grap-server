@@ -62,7 +62,6 @@ public class TongdunService extends AbstractService {
     @Autowired
     private DiamondConfig diamondConfig;
 
-
     public Object processCollectTask(Long taskId, String appId, TongdunRequest tongdunRequest) {
         String url = diamondConfig.getTongdunUrlCollect();
         Map<String, Object> map = new HashMap<>(1);
@@ -249,7 +248,6 @@ public class TongdunService extends AbstractService {
 
     }
 
-
     public Object processCollectDetailTask(Long taskId, String appId, TongdunRequest tongdunRequest) {
         String url = diamondConfig.getTongdunDetailUrlCollect();
         JSONObject data = JSON.parseObject(JSON.toJSONString(tongdunRequest));
@@ -335,10 +333,8 @@ public class TongdunService extends AbstractService {
         return SaasResult.successEncryptByRSAResult(resultList, license.getServerPublicKey());
     }
 
-
-
     public Object processCollectDetailTaskV1(Long taskId, String appId, TongdunRequest tongdunRequest) {
-         String url = diamondConfig.getTongdunDetailUrlCollect();
+        String url = diamondConfig.getTongdunDetailUrlCollect();
         JSONObject data = JSON.parseObject(JSON.toJSONString(tongdunRequest));
 
         Map<String, Object> map = new HashMap<>(1);
@@ -467,7 +463,7 @@ public class TongdunService extends AbstractService {
         }
 
         AppLicense license = licenseService.getAppLicense(appId);
-         processSuccessCollectTask(taskId, "任务成功");
+        processSuccessCollectTask(taskId, "任务成功");
         return SaasResult.successEncryptByRSAResult(resultList, license.getServerPublicKey());
 
     }
@@ -580,18 +576,19 @@ public class TongdunService extends AbstractService {
                             if (!ObjectUtils.isEmpty(JSONObject.parseObject(lostDetail.get(0).toString()).get("借款人手机"))) {
                                 lenderMobile = JSONObject.parseObject(lostDetail.get(0).toString()).get("借款人手机").toString();
 
-                            mapString.put("cheatType", cheatType);
-                            mapString.put("lenderMobile", lenderMobile);
-                            mapString.remove("描述");
+                                mapString.put("cheatType", cheatType);
+                                mapString.put("lenderMobile", lenderMobile);
+                                mapString.remove("描述");
+                            }
                         }
                     }
+                    if (!ObjectUtils.isEmpty(mapString)) {
+                        mapResult.put("detail", mapString);
+                        tongdunData.setDetails(mapResult);
+                    }
                 }
-                if (!ObjectUtils.isEmpty(mapString)) {
-                    mapResult.put("detail", mapString);
-                    tongdunData.setDetails(mapResult);
-                }
+                tongdunDataList.add(tongdunData);
             }
-            tongdunDataList.add(tongdunData);
         }
         return tongdunDataList;
     }
