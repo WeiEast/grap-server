@@ -20,12 +20,12 @@
     <parent>
         <groupId>com.treefinance.b2b.saas</groupId>
         <artifactId>b2b-saas-data-parent</artifactId>
-        <version>1.0.0-SNAPSHOT</version>
+        <version>1.0.0</version>
         <relativePath/>
     </parent>
 
     <properties>
-        <task-center.version>2.1.0-SNAPSHOT</task-center.version>
+        <grap-server.version>${project.version}</grap-server.version>
     </properties>
 
     <dependencyManagement>
