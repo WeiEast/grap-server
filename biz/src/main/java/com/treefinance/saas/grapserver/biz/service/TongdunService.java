@@ -260,8 +260,7 @@ public class TongdunService extends AbstractService {
             httpResult = HttpClientUtils.doPost(url, map);
         } catch (Exception e) {
             logger.error("调用功夫贷同盾采集详细任务异常:taskId={},tongdunRequset={}", taskId, tongdunRequest, e);
-            taskLogFacade.insert(taskId, "调用功夫贷同盾采集任务异常", new Date(), "调用功夫贷同盾采集任务异常");
-            taskFacade.updateTaskStatusWithStep(taskId, ETaskStatus.FAIL.getStatus());
+            processFailCollectTask(taskId, "调用功夫贷同盾采集详细任务异常");
             return SaasResult.failResult("Unexpected exception!");
         }
 
@@ -273,8 +272,7 @@ public class TongdunService extends AbstractService {
         }
         if (result == null) {
             logger.error("调用功夫贷同盾采集详细任务返回值中任务日志信息存在问题:taskId={},tongdunRequest={},httpResult={}", taskId, tongdunRequest, httpResult);
-            taskLogFacade.insert(taskId, "调用功夫贷同盾采集详细任务返回值中任务日志信息存在问题", new Date(), "调用功夫贷同盾采集任务返回值中任务日志信息存在问题");
-            taskFacade.updateTaskStatusWithStep(taskId, ETaskStatus.FAIL.getStatus());
+            processFailCollectTask(taskId, "调用功夫贷同盾采集详细任务返回值中任务日志信息存在问题");
             // 错误日志中
             return SaasResult.failResult("Unexpected exception!");
         }
@@ -581,7 +579,6 @@ public class TongdunService extends AbstractService {
                             }
                             if (!ObjectUtils.isEmpty(JSONObject.parseObject(lostDetail.get(0).toString()).get("借款人手机"))) {
                                 lenderMobile = JSONObject.parseObject(lostDetail.get(0).toString()).get("借款人手机").toString();
-                            }
 
                             mapString.put("cheatType", cheatType);
                             mapString.put("lenderMobile", lenderMobile);
