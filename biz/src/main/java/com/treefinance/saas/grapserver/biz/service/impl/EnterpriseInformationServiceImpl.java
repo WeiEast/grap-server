@@ -27,10 +27,7 @@ import org.springframework.stereotype.Service;
 import javax.annotation.Resource;
 
 import java.time.Clock;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @author guimeichao
@@ -123,6 +120,9 @@ public class EnterpriseInformationServiceImpl extends AbstractService implements
         Map param = GsonUtils.fromJson(extra, new TypeToken<Map>() {}.getType());
         String keyword = (String)param.get("business");
         List<Map<String, String>> enterpriseList = enterpriseApi.queryEnterprise(keyword, website, taskid);
+        if(enterpriseList==null){
+            return SaasResult.failure(-2,"可能由于代理问题未查询企业失败");
+        }
         boolean flag = false;
         StringBuilder extraValue = new StringBuilder();
         for (Map<String, String> enterprise : enterpriseList) {
@@ -144,6 +144,7 @@ public class EnterpriseInformationServiceImpl extends AbstractService implements
         acquisitionService.acquisition(taskid, null, null, null, website, null, ESpiderTopic.SPIDER_EXTRA.name().toLowerCase(), extra);
         return SaasResult.successResult(taskid);
     }
+
 
     @Override
     public Object getEnterpriseData(String appId, String uniqueId, Long taskid, String enterpriseName) {
