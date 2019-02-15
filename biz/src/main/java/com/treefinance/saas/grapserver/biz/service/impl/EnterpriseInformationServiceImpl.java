@@ -168,17 +168,24 @@ public class EnterpriseInformationServiceImpl extends AbstractService implements
         if (enterpriseName.contains("）")) {
             enterpriseName = enterpriseName.replaceAll("(\\）)", ")");
         }
-        return getResult(enterpriseName);
+        EnterpriseDataResultDTO resultDTO = getResult(enterpriseName);
+        if (enterpriseName.contains("(")) {
+            enterpriseName = enterpriseName.replaceAll("(\\()", "（");
+        }
+        if (enterpriseName.contains(")")) {
+            enterpriseName = enterpriseName.replaceAll("(\\))", "）");
+        }
+        resultDTO.setEnterpriseName(enterpriseName);
+        return SaasResult.successResult(resultDTO);
     }
 
     @Override
-    public Object getResult(String enterpriseName) {
+    public EnterpriseDataResultDTO getResult(String enterpriseName) {
         try {
-            EnterpriseDataResultDTO result = enterpriseService.getEnterpriseDate(enterpriseName);
-            return SaasResult.successResult(result);
+            return enterpriseService.getEnterpriseDate(enterpriseName);
         } catch (RpcException e) {
             logger.error("调用dubbo服务失败", e);
-            return SaasResult.failResult("获取企业信息数据失败");
+            throw new RuntimeException("获取企业信息数据失败");
         }
     }
 

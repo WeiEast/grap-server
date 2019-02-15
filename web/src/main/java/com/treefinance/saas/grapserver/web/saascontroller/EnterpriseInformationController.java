@@ -77,7 +77,8 @@ public class EnterpriseInformationController {
         String enterpriseName = (String)map.get("business");
         boolean flag = enterpriseInformationService.isStartCrawler(enterpriseName);
         if (!flag) {
-            SaasResult<Object> saasResult = (SaasResult<Object>)enterpriseInformationService.getResult(enterpriseName);
+            SaasResult<Object> saasResult =new SaasResult<>();
+            saasResult.setData(enterpriseInformationService.getResult(enterpriseName));
             saasResult.setCode(3);
             return saasResult;
         }
