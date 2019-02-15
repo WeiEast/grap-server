@@ -120,13 +120,24 @@ public class EnterpriseInformationServiceImpl extends AbstractService implements
         Map param = GsonUtils.fromJson(extra, new TypeToken<Map>() {}.getType());
         String keyword = (String)param.get("business");
         List<Map<String, String>> enterpriseList = enterpriseApi.queryEnterprise(keyword, website, taskid);
-        if(enterpriseList==null){
-            return SaasResult.failure(-2,"可能由于代理问题未查询企业失败");
+        if (enterpriseList == null) {
+            return SaasResult.failure(-2, "可能由于代理问题未查询企业失败");
         }
         boolean flag = false;
         StringBuilder extraValue = new StringBuilder();
+        logger.info("");
         for (Map<String, String> enterprise : enterpriseList) {
-            if (keyword.equals(enterprise.get("name"))) {
+            // 修改公司中带括号的情况
+            String name = enterprise.get("name");
+            logger.info("企查查返回列表中公司name={},unique={}", name, enterprise.get("unique"));
+            if (name.contains("(")) {
+                name = name.replaceAll("(\\()", "（");
+            }
+            if (name.contains(")")) {
+                name = name.replaceAll("(\\))", "）");
+            }
+
+            if (keyword.equals(name)) {
                 extraValue.append(enterprise.get("name")).append(":").append(enterprise.get("unique")).append(":").append(enterprise.get("index")).append(";");
                 flag = true;
                 break;
@@ -144,7 +155,6 @@ public class EnterpriseInformationServiceImpl extends AbstractService implements
         acquisitionService.acquisition(taskid, null, null, null, website, null, ESpiderTopic.SPIDER_EXTRA.name().toLowerCase(), extra);
         return SaasResult.successResult(taskid);
     }
-
 
     @Override
     public Object getEnterpriseData(String appId, String uniqueId, Long taskid, String enterpriseName) {

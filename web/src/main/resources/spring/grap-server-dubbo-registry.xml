@@ -5,7 +5,7 @@
 
     <dubbo:application name="grap-server"/>
 
-    <dubbo:monitor protocol="registry"/>
+    <!--<dubbo:monitor protocol="registry"/>-->
 
     <!-- 使用multicast广播注册中心暴露发现服务地址 -->
     <dubbo:registry protocol="zookeeper" address="${dubbo.zookeeper.address}"/>
