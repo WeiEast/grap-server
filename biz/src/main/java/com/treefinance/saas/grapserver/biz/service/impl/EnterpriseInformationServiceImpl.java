@@ -162,6 +162,12 @@ public class EnterpriseInformationServiceImpl extends AbstractService implements
         if (ETaskStatus.RUNNING.getStatus().equals(task.getStatus())) {
             return SaasResult.failResult(null, "任务还在进行中...", 1);
         }
+        if (enterpriseName.contains("（")) {
+            enterpriseName = enterpriseName.replaceAll("(\\（)", "(");
+        }
+        if (enterpriseName.contains("）")) {
+            enterpriseName = enterpriseName.replaceAll("(\\）)", ")");
+        }
         return getResult(enterpriseName);
     }
 
