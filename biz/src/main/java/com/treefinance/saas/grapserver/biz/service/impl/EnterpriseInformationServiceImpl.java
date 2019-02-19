@@ -97,7 +97,14 @@ public class EnterpriseInformationServiceImpl extends AbstractService implements
     public boolean isStartCrawler(String enterpriseName) {
         EnterpriseDataResultDTO result;
         try {
-            result = enterpriseService.getEnterpriseDate(enterpriseName);
+            String name = enterpriseName;
+            if (name.contains("（")) {
+                name = name.replaceAll("(\\（)", "(");
+            }
+            if (name.contains("）")) {
+                name = name.replaceAll("(\\）)", ")");
+            }
+            result = enterpriseService.getEnterpriseDate(name);
             if (result == null) {
                 return true;
             }
