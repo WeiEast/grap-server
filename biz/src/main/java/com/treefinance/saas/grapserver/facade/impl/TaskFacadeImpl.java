@@ -1,6 +1,5 @@
 package com.treefinance.saas.grapserver.facade.impl;
 
-import com.treefinance.saas.grapserver.common.enums.EBizType;
 import com.treefinance.saas.grapserver.context.component.AbstractFacade;
 import com.treefinance.saas.grapserver.facade.model.TaskRO;
 import com.treefinance.saas.grapserver.facade.service.TaskFacade;
@@ -32,7 +31,6 @@ public class TaskFacadeImpl extends AbstractFacade implements TaskFacade {
     public SaasResult<TaskRO> getById(Long taskId) {
         TaskBO task = taskManager.getTaskById(taskId);
         TaskRO result = convertStrict(task, TaskRO.class);
-        result.setBizTypeName(EBizType.getName(task.getBizType()));
         return Results.newSuccessResult(result);
     }
 
