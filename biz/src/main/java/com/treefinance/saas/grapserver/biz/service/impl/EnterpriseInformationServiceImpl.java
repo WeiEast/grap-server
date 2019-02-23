@@ -133,22 +133,20 @@ public class EnterpriseInformationServiceImpl extends AbstractService implements
         boolean flag = false;
         StringBuilder extraValue = new StringBuilder();
         logger.info("");
-        for (Map<String, String> enterprise : enterpriseList) {
-            // 修改公司中带括号的情况
-            String name = enterprise.get("name");
-            logger.info("企查查返回列表中公司name={},unique={}", name, enterprise.get("unique"));
-            if (name.contains("(")) {
-                name = name.replaceAll("(\\()", "（");
-            }
-            if (name.contains(")")) {
-                name = name.replaceAll("(\\))", "）");
-            }
+        Map<String, String> enterprise = enterpriseList.get(0);
+        // 修改公司中带括号的情况
+        String name = enterprise.get("name");
+        logger.info("企查查返回列表中公司name={},unique={}", name, enterprise.get("unique"));
+        if (name.contains("(")) {
+            name = name.replaceAll("(\\()", "（");
+        }
+        if (name.contains(")")) {
+            name = name.replaceAll("(\\))", "）");
+        }
 
-            if (keyword.equals(name)) {
-                extraValue.append(enterprise.get("name")).append(":").append(enterprise.get("unique")).append(":").append(enterprise.get("index")).append(";");
-                flag = true;
-                break;
-            }
+        if (keyword.equals(name)) {
+            extraValue.append(enterprise.get("name")).append(":").append(enterprise.get("unique")).append(":").append(enterprise.get("index")).append(";");
+            flag = true;
         }
         if (!flag) {
             SaasResult<Object> saasResult = SaasResult.successResult("没有对应的企业");
