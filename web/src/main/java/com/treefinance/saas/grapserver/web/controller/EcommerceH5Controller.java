@@ -53,5 +53,21 @@ public class EcommerceH5Controller {
         return result;
     }
 
+    /**
+     * 登陆
+     */
+    @RequestMapping(value = {"/login/submit"}, method = {RequestMethod.POST})
+    public Object loginForTaoBaoH5(CommonPluginParam param, String userIp) {
+        logger.info("电商:登陆,传入参数,param={},userIp={}", JSON.toJSONString(param), userIp);
+        if (param == null || param.getTaskId() == null) {
+            logger.error("电商:登陆,参数缺失,taskId必传,param={}", JSON.toJSONString(param));
+            throw new IllegalArgumentException("电商:登陆,参数缺失,taskId必传");
+        }
+        param.setUserIp(userIp);
+        Object result = ecommerceLoginSimulationService.loginForTaoBaoH5(param);
+        logger.info("电商:登陆,返回结果,param={},result={}", JSON.toJSONString(param), JSON.toJSONString(result));
+        return result;
+    }
+
 
 }

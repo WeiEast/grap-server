@@ -66,6 +66,7 @@
     <dubbo:reference id="mailServiceApiForSina" interface="com.datatrees.spider.bank.api.MailServiceApiForSina"
                      timeout="20000"/>
     <dubbo:reference id="economicApiForTaoBaoQR" interface="com.datatrees.spider.ecommerce.api.EconomicApiForTaoBaoQR"/>
+    <dubbo:reference id="economicApiForTaoBaoH5" interface="com.datatrees.spider.ecommerce.api.EconomicApiForTaoBaoH5"/>
     <dubbo:reference id="educationApi" interface="com.datatrees.spider.extra.api.EducationApi" timeout="20000"/>
 
 
