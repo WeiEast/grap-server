@@ -114,15 +114,8 @@ public class EcommerceLoginSimulationService {
                 if (!result.getStatus()) {
                     return loginFailProcess(param, result);
                 }
-                if (result.getData() != null) {
-                    Map<String, Object> map = JSONObject.parseObject(JSON.toJSONString(result.getData()));
-                    if (MapUtils.isNotEmpty(map) && map.get(DIRECTIVE) != null) {
-                        if (StringUtils.equalsIgnoreCase(LOGIN_SUCCESS, map.get(DIRECTIVE).toString())) {
-                            taskService.recordAccountNoAndWebsite(param.getTaskId(), param.getUsername(), "password.taobao.com.h5");
-                            taskTimeService.updateLoginTime(param.getTaskId(), new Date());
-                        }
-                    }
-                }
+                taskService.recordAccountNoAndWebsite(param.getTaskId(), param.getUsername(), "password.taobao.com.h5");
+                taskTimeService.updateLoginTime(param.getTaskId(), new Date());
                 return SimpleResult.successResult(result);
 
             }
