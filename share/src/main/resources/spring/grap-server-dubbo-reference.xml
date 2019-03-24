@@ -13,6 +13,7 @@
 
     <dubbo:reference id="proxyProvider" interface="com.treefinance.proxy.api.ProxyProvider"/>
 
+    <dubbo:reference id="riskDataFacade" interface=" com.treefinance.saas.riskdataclean.facade.service.RiskDataFacade" version="1.0.0" />
 
     <dubbo:reference id="iMobileAttributionService"
                      interface="com.treefinance.commonservice.facade.mobileattribution.IMobileAttributionService"/>
