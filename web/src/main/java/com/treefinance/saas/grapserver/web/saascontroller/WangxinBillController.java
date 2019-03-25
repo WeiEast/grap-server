@@ -27,7 +27,7 @@ import java.util.*;
  */
 
 @RestController
-@RequestMapping("/bill")
+@RequestMapping("/bankbill")
 public class WangxinBillController extends AbstractController {
     private static final Logger logger = LoggerFactory.getLogger(WangxinBillController.class);
 
@@ -39,7 +39,7 @@ public class WangxinBillController extends AbstractController {
     /**
      * 网信账单洗数评分
      */
-    @RequestMapping(value = "/wangxin/clean", method = {RequestMethod.POST})
+    @RequestMapping(value = "/risk/dataclean", method = {RequestMethod.POST})
     public Object clean(@RequestBody RiskDataRequest riskDataRequest) {
 
         Long taskId = initial(riskDataRequest.getAppid(), riskDataRequest.getAppid(), EBizType.BILL_WANGXIN_CLEAN);
