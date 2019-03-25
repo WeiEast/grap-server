@@ -42,9 +42,9 @@ public class WangxinBillController extends AbstractController {
     @RequestMapping(value = "/wangxin/clean", method = {RequestMethod.POST})
     public Object clean(@RequestBody RiskDataRequest riskDataRequest) {
 
-//        Long taskId = initial(riskDataRequest.getAppid(), riskDataRequest.getAppid(), EBizType.BILL_WANGXIN_CLEAN);
-        Object result = wangxinBillService.clean(null, riskDataRequest.getAppid(), buildRequest(riskDataRequest));
-        logger.info("网信账单洗数评分,返回结果:result={},taskId={},appid={}", JSON.toJSONString(result), null, riskDataRequest.getAppid());
+        Long taskId = initial(riskDataRequest.getAppid(), riskDataRequest.getAppid(), EBizType.BILL_WANGXIN_CLEAN);
+        Object result = wangxinBillService.clean(taskId, riskDataRequest.getAppid(), buildRequest(riskDataRequest));
+        logger.info("网信账单洗数评分,返回结果:result={},taskId={},appid={}", JSON.toJSONString(result), taskId, riskDataRequest.getAppid());
         return result;
     }
 
