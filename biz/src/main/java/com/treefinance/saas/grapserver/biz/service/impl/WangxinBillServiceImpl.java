@@ -1,36 +1,29 @@
 package com.treefinance.saas.grapserver.biz.service.impl;
 
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Lists;
 import com.treefinance.saas.grapserver.biz.domain.AppLicense;
 import com.treefinance.saas.grapserver.biz.service.LicenseService;
 import com.treefinance.saas.grapserver.biz.service.TaskLogService;
 import com.treefinance.saas.grapserver.biz.service.WangxinBillService;
 import com.treefinance.saas.grapserver.common.enums.ETaskStep;
-import com.treefinance.saas.grapserver.common.enums.ETongdunData;
 import com.treefinance.saas.grapserver.common.model.dto.carinfo.CarInfoCollectTaskLogDTO;
-import com.treefinance.saas.grapserver.common.request.TongdunRequest;
 import com.treefinance.saas.grapserver.common.result.SaasResult;
-import com.treefinance.saas.grapserver.common.result.TongdunData;
-import com.treefinance.saas.grapserver.context.config.DiamondConfig;
-import com.treefinance.saas.grapserver.util.TongdunDataResolver;
 import com.treefinance.saas.riskdataclean.facade.request.BankBillRequest;
-import com.treefinance.saas.riskdataclean.facade.result.CustomerHistoryOutputResult;
+import com.treefinance.saas.riskdataclean.facade.result.RiskDataResult;
 import com.treefinance.saas.riskdataclean.facade.service.RiskDataFacade;
 import com.treefinance.saas.taskcenter.facade.request.CarInfoCollectTaskLogRequest;
 import com.treefinance.saas.taskcenter.facade.service.CarInfoFacade;
 import com.treefinance.saas.taskcenter.facade.service.TaskFacade;
 import com.treefinance.saas.taskcenter.facade.service.TaskLogFacade;
 import org.apache.commons.lang3.StringUtils;
-import org.checkerframework.checker.units.qual.A;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 
 import static com.treefinance.b2b.saas.util.BeanUtils.convert;
 
@@ -59,9 +52,9 @@ public class WangxinBillServiceImpl implements WangxinBillService {
     @Override
     public Object clean(Long taskId, String appId, BankBillRequest bankBillRequest) {
 
-        CustomerHistoryOutputResult customerHistoryOutputResult = new CustomerHistoryOutputResult();
+        List<RiskDataResult>  riskDataResults = new ArrayList<>();
         try {
-            customerHistoryOutputResult = riskDataFacade.cleanData(bankBillRequest);
+             riskDataResults = riskDataFacade.cleanData(bankBillRequest);
 
         } catch (Exception e) {
             logger.error("调用网信账单洗数任务异常:taskId={},tongdunRequset={}", taskId, bankBillRequest, e);
@@ -70,8 +63,8 @@ public class WangxinBillServiceImpl implements WangxinBillService {
         }
 
         AppLicense license = licenseService.getAppLicense(appId);
-//        processSuccessCollectTask(taskId, "任务成功");
-        return SaasResult.successEncryptByRSAResult(customerHistoryOutputResult, license.getServerPublicKey());
+        processSuccessCollectTask(taskId, "任务成功");
+        return SaasResult.successEncryptByRSAResult(riskDataResults, license.getServerPublicKey());
 
     }
 
