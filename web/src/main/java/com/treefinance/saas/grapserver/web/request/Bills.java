@@ -27,7 +27,7 @@ public class Bills implements Serializable {
     /**
      * 网信给的数据没有
      */
-    private Integer userId;
+    private String userId;
 
     /**
      * 邮箱地址
@@ -113,11 +113,11 @@ public class Bills implements Serializable {
         this.bankId = bankId;
     }
 
-    public Integer getUserId() {
+    public String getUserId() {
         return userId;
     }
 
-    public void setUserId(Integer userId) {
+    public void setUserId(String userId) {
         this.userId = userId;
     }
 
