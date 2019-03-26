@@ -43,7 +43,7 @@ public class WangxinBillController extends AbstractController {
     public Object clean(@RequestBody RiskDataRequest riskDataRequest) {
 
         Long taskId = initial(riskDataRequest.getAppid(), riskDataRequest.getAppid(), EBizType.BILL_WANGXIN_CLEAN);
-        Object result = wangxinBillService.clean(taskId, riskDataRequest.getAppid(), buildRequest(riskDataRequest));
+        Object result = wangxinBillService.clean(taskId, riskDataRequest.getAppid(), buildRequest(riskDataRequest, taskId));
         logger.info("网信账单洗数评分,返回结果:result={},taskId={},appid={}", JSON.toJSONString(result), taskId, riskDataRequest.getAppid());
         return result;
     }
@@ -54,18 +54,18 @@ public class WangxinBillController extends AbstractController {
         return taskService.createTask(appId, uniqueId, bizType);
     }
 
-    private BankBillRequest buildRequest(RiskDataRequest riskDataRequest) {
+    private BankBillRequest buildRequest(RiskDataRequest riskDataRequest, Long taskId) {
         BankBillRequest bankBillRequest = new BankBillRequest();
         List<BankBill> bankBillList = new ArrayList<>();
         for (Bills bill : riskDataRequest.getData().getBills()) {
             BankBill bankBill = BeanUtils.convert(bill, BankBill.class);
             bankBill.setBankBillDetailList(BeanUtils.convert(bill.getBillDetails(), BankBillDetail.class));
+            bankBill.setAppId(riskDataRequest.getAppid());
+            bankBill.setTaskId(taskId);
             bankBillList.add(bankBill);
         }
         bankBillRequest.setBankBillList(bankBillList);
-
         return bankBillRequest;
-
     }
 
 }
