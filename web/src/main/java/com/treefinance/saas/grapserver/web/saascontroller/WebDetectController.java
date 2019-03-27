@@ -37,12 +37,12 @@ public class WebDetectController {
 
     @Autowired
     private WebDetectService webDetectService;
+
     @Autowired
-    private TaskService taskService;
+    private TaskService      taskService;
 
     /**
      * 发起任务
-     * 
      * @param appid
      * @param uniqueId
      * @param platform 平台、网站
@@ -51,7 +51,7 @@ public class WebDetectController {
      */
     @RequestMapping(value = "/start", method = RequestMethod.POST)
     public Object createTask(@RequestParam String appid, @RequestParam("uniqueId") String uniqueId, @RequestParam("platform") String platform,
-        @RequestParam("extra") String extra) {
+            @RequestParam("extra") String extra) {
         RequestChecker.notEmpty("appid", appid);
         RequestChecker.notEmpty("uniqueId", uniqueId);
         RequestChecker.notEmpty("platform", platform);
@@ -64,7 +64,6 @@ public class WebDetectController {
 
     /**
      * 获取数据
-     * 
      * @param appid
      * @param uniqueId
      * @param saasid
@@ -77,13 +76,12 @@ public class WebDetectController {
      */
     @RequestMapping(value = "/getData", method = RequestMethod.POST)
     public Object getData(@RequestParam String appid, @RequestParam("uniqueId") String uniqueId, @RequestParam("saasid") Long saasid,
-        @RequestParam(value = "size", required = false) Integer size, @RequestParam(value = "start", required = false) Long start,
-        @RequestParam(value = "platform") String platform, @RequestParam(value = "entryname") String entryname, @RequestParam(value = "keyword") String keyword) {
+            @RequestParam(value = "size", required = false) Integer size, @RequestParam(value = "start", required = false) Long start,
+            @RequestParam(value = "platform") String platform, @RequestParam(value = "entryname", required = false) String entryname,
+            @RequestParam(value = "keyword", required = false) String keyword) {
         RequestChecker.notEmpty("appid", appid);
         RequestChecker.notEmpty("uniqueId", uniqueId);
         RequestChecker.notEmpty("platform", platform);
-        RequestChecker.notEmpty("entryname", entryname);
-        RequestChecker.notEmpty("keyword", keyword);
 
         taskService.validateTask(appid, uniqueId, EBizType.OPINION_DETECT);
 
