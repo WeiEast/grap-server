@@ -1,8 +1,6 @@
 package com.treefinance.saas.grapserver.biz.service;
 
-import com.alibaba.fastjson.JSON;
 import com.treefinance.saas.taskcenter.facade.request.TaskPointRequest;
-import com.treefinance.saas.taskcenter.facade.result.common.TaskResult;
 import com.treefinance.saas.taskcenter.facade.service.TaskPointFacade;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,9 +26,6 @@ public class TaskPointService {
         taskPointRequest.setAppId(appId);
         taskPointRequest.setCode(code);
         taskPointRequest.setType((byte)0);
-        TaskResult<Void> result=taskPointFacade.addTaskPoint(taskPointRequest);
-        if (!result.isSuccess()){
-            logger.error("埋点记录失败,taskPointRequest={}", JSON.toJSONString(taskPointRequest));
-        }
+        taskPointFacade.addTaskPoint(taskPointRequest);
     }
 }
