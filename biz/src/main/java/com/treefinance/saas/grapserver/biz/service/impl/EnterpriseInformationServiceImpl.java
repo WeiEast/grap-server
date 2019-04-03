@@ -2,6 +2,7 @@ package com.treefinance.saas.grapserver.biz.service.impl;
 
 import com.alibaba.dubbo.rpc.RpcException;
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import com.datatrees.spider.extra.api.EnterpriseApi;
 import com.google.gson.reflect.TypeToken;
 import com.treefinance.saas.grapserver.biz.mq.DirectiveResult;
@@ -132,7 +133,12 @@ public class EnterpriseInformationServiceImpl extends AbstractService implements
         }
         boolean flag = false;
         StringBuilder extraValue = new StringBuilder();
-        logger.info("");
+        logger.info("企查查返回列表 enterpriseList={},size={}", JSONObject.toJSONString(enterpriseList),enterpriseList.size());
+        if (enterpriseList.size() == 0) {
+            SaasResult<Object> saasResult = SaasResult.successResult("没有对应的企业");
+            saasResult.setCode(4);
+            return saasResult;
+        }
         Map<String, String> enterprise = enterpriseList.get(0);
         // 修改公司中带括号的情况
         String name = enterprise.get("name");

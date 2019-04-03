@@ -37,4 +37,6 @@ public class TaskBO implements Serializable {
     private String stepCode;
     private Byte status;
     private Byte saasEnv;
+
+    private String bizTypeName;
 }
