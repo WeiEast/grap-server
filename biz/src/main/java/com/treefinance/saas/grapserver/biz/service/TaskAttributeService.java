@@ -14,8 +14,8 @@ import java.util.Map;
 
 /**
  * @author chenjh on 2017/7/5.
- * <p>
- * 任务拓展属性业务层
+ *         <p>
+ *         任务拓展属性业务层
  */
 @Service
 public class TaskAttributeService extends AbstractService {
@@ -33,10 +33,10 @@ public class TaskAttributeService extends AbstractService {
     /**
      * 通过属性名查询属性值
      *
-     * @param taskId  taskId
-     * @param name    属性名
+     * @param taskId taskId
+     * @param name 属性名
      * @param decrypt 是否要解密，true:是，false:否
-     * @return        拓展属性对象
+     * @return 拓展属性对象
      */
     public TaskAttribute findByName(Long taskId, String name, boolean decrypt) {
         TaskResult<TaskAttributeRO> rpcResult = taskAttributeFacade.findByName(taskId, name, decrypt);
@@ -62,7 +62,7 @@ public class TaskAttributeService extends AbstractService {
         Map<String, TaskAttribute> attributeMap = Maps.newHashMap();
 
         for (Map.Entry<String, TaskAttributeRO> taskAttributeROEntry : rpcResult.getData().entrySet()) {
-            TaskAttribute taskAttribute = convert(taskAttributeROEntry, TaskAttribute.class);
+            TaskAttribute taskAttribute = convert(taskAttributeROEntry.getValue(), TaskAttribute.class);
             attributeMap.put(taskAttributeROEntry.getKey(), taskAttribute);
         }
         return attributeMap;
