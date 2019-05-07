@@ -2,7 +2,9 @@ package com.treefinance.saas.grapserver.web.controller;
 
 import com.alibaba.fastjson.JSON;
 import com.datatrees.spider.share.domain.CommonPluginParam;
+import com.treefinance.saas.grapserver.biz.domain.ChsiUserInfo;
 import com.treefinance.saas.grapserver.biz.service.DiplomaLoginSimulationService;
+import com.treefinance.saas.knife.result.SimpleResult;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -126,5 +128,32 @@ public class DiplomaController {
         logger.info("学信网:获取合作方属性值引用,返回结果,taskId={},result={}", taskId, JSON.toJSONString(result));
         return result;
     }
+
+    @RequestMapping(value = "/register/check",method = RequestMethod.POST)
+    public Object registerCheck(Long taskId,String id){
+        if (taskId == null) {
+            logger.error("学信网:获取合作方属性值引用,参数缺失,taskid必传");
+            throw new IllegalArgumentException("学信网:获取合作方属性值引用,参数缺失,taskid必传");
+        }
+        ChsiUserInfo userInfo = diplomaLoginSimulationService.checkRegister(taskId, id);
+        return SimpleResult.successResult(userInfo);
+    }
+
+    @RequestMapping(value = "/chsiUserInfo",method = RequestMethod.POST)
+    public Object chsiUserInfo(ChsiUserInfo userInfo){
+        String id = diplomaLoginSimulationService.saveUserInfo(userInfo);
+        if (id == null) {
+            return SimpleResult.failResult("用户信息缓存失败");
+        }
+        return SimpleResult.successResult(id);
+    }
+
+
+
+
+
+
+
+
 
 }

@@ -5,6 +5,7 @@ import com.datatrees.spider.extra.api.EducationApi;
 import com.datatrees.spider.share.domain.CommonPluginParam;
 import com.datatrees.spider.share.domain.http.HttpResult;
 import com.google.common.collect.Maps;
+import com.treefinance.saas.grapserver.biz.domain.ChsiUserInfo;
 import com.treefinance.saas.grapserver.biz.dto.TaskAttribute;
 import com.treefinance.saas.grapserver.common.enums.EBizType;
 import com.treefinance.saas.grapserver.exception.CrawlerBizException;
@@ -14,6 +15,7 @@ import com.treefinance.saas.grapserver.manager.TaskManager;
 import com.treefinance.saas.grapserver.share.cache.redis.RedisDao;
 import com.treefinance.saas.grapserver.share.cache.redis.RedisKeyUtils;
 import com.treefinance.saas.knife.result.SimpleResult;
+import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -22,7 +24,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 /**
  * 学信网
@@ -149,7 +153,7 @@ public class DiplomaLoginSimulationService {
     public Object registerRefreshPicCode(CommonPluginParam param) {
         HttpResult<Object> result;
         try {
-            result = educationApi.registerRefeshPicCode(param);
+            result = educationApi.registerRefreshPicCode(param);
         } catch (Exception e) {
             logger.error("学信网:调用爬数注册时刷新图片验证码异常,param={}", JSON.toJSONString(param), e);
             throw e;
@@ -207,6 +211,21 @@ public class DiplomaLoginSimulationService {
         }
     }
 
+    public ChsiUserInfo checkRegister(Long taskId,String id){
+        String key = RedisKeyUtils.genChsiUserInfoKey(id);
+        Map<String, String> userInfoMap = redisDao.getHash(key);
+        if (userInfoMap.isEmpty()) {
+            return null;
+        }
+        ChsiUserInfo userInfo = new ChsiUserInfo();
+        userInfo.setMobile(userInfoMap.get("mobile"));
+        userInfo.setIdNo(userInfoMap.get("idNo"));
+        userInfo.setName(userInfoMap.get("name"));
+        String action = educationApi.checkRegister(taskId, Long.parseLong(userInfo.getMobile()));
+        userInfo.setAction(action);
+        return userInfo;
+    }
+
     /**
      * 获取配置
      */
@@ -232,4 +251,19 @@ public class DiplomaLoginSimulationService {
         return SimpleResult.successResult(map);
     }
 
+    public String saveUserInfo(ChsiUserInfo userInfo) {
+        String uuid = UUID.randomUUID().toString();
+        String key = RedisKeyUtils.genChsiUserInfoKey(uuid);
+        Map<String,String> userInfoMap = new HashMap<>();
+        userInfoMap.put("name",userInfo.getName());
+        userInfoMap.put("idNo",userInfo.getIdNo());
+        userInfoMap.put("mobile",userInfo.getMobile());
+        try {
+            redisDao.putHash(key,userInfoMap);
+            return key;
+        } catch (Exception e) {
+            logger.error("put chsi userInfo to redis fail",e);
+            return null;
+        }
+    }
 }
