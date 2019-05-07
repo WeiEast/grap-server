@@ -214,6 +214,7 @@ public class DiplomaLoginSimulationService {
     public ChsiUserInfo checkRegister(Long taskId,String id){
         String key = RedisKeyUtils.genChsiUserInfoKey(id);
         Map<String, String> userInfoMap = redisDao.getHash(key);
+        redisDao.delete(key);
         if (userInfoMap.isEmpty()) {
             return null;
         }
@@ -252,7 +253,7 @@ public class DiplomaLoginSimulationService {
     }
 
     public String saveUserInfo(ChsiUserInfo userInfo) {
-        String uuid = UUID.randomUUID().toString();
+        String uuid = UUID.randomUUID().toString().replaceAll("-","");
         String key = RedisKeyUtils.genChsiUserInfoKey(uuid);
         Map<String,String> userInfoMap = new HashMap<>();
         userInfoMap.put("name",userInfo.getName());
@@ -260,7 +261,7 @@ public class DiplomaLoginSimulationService {
         userInfoMap.put("mobile",userInfo.getMobile());
         try {
             redisDao.putHash(key,userInfoMap);
-            return key;
+            return uuid;
         } catch (Exception e) {
             logger.error("put chsi userInfo to redis fail",e);
             return null;
