@@ -130,12 +130,12 @@ public class DiplomaController {
     }
 
     @RequestMapping(value = "/register/check",method = RequestMethod.POST)
-    public Object registerCheck(Long taskId,String id){
+    public Object registerCheck(Long taskId,String code){
         if (taskId == null) {
             logger.error("学信网:获取合作方属性值引用,参数缺失,taskid必传");
             throw new IllegalArgumentException("学信网:获取合作方属性值引用,参数缺失,taskid必传");
         }
-        ChsiUserInfo userInfo = diplomaLoginSimulationService.checkRegister(taskId, id);
+        ChsiUserInfo userInfo = diplomaLoginSimulationService.checkRegister(taskId, code);
         return SimpleResult.successResult(userInfo);
     }
 
