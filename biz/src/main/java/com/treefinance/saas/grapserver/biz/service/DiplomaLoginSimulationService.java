@@ -27,6 +27,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 /**
  * 学信网
@@ -214,7 +215,7 @@ public class DiplomaLoginSimulationService {
     public ChsiUserInfo checkRegister(Long taskId,String id){
         String key = RedisKeyUtils.genChsiUserInfoKey(id);
         Map<String, String> userInfoMap = redisDao.getHash(key);
-        redisDao.delete(key);
+        //redisDao.delete(key);
         if (userInfoMap.isEmpty()) {
             return null;
         }
@@ -261,10 +262,79 @@ public class DiplomaLoginSimulationService {
         userInfoMap.put("mobile",userInfo.getMobile());
         try {
             redisDao.putHash(key,userInfoMap);
+            redisDao.expire(key,30, TimeUnit.MINUTES);
             return uuid;
         } catch (Exception e) {
             logger.error("put chsi userInfo to redis fail",e);
             return null;
+        }
+    }
+
+    public Object initUpdatePwd(CommonPluginParam param){
+
+        try {
+            HttpResult<Object> result = educationApi.initUpdatePwd(param);
+            if (result.getStatus()) {
+                return SimpleResult.successResult(result.getData());
+            }
+            return SimpleResult.failResult(result.getMessage());
+        } catch (Exception e) {
+            logger.error("chsi pwd update init error,param:{}",param,e);
+            return SimpleResult.failResult("init error");
+        }
+    }
+
+    public Object updatePwdSubmitAccount(CommonPluginParam param){
+
+        try {
+            HttpResult<Object> result = educationApi.updatePwdSubmitAccount(param);
+            if (result.getStatus()) {
+                return SimpleResult.successResult(result.getData());
+            }
+            return SimpleResult.failResult(result.getMessage());
+        } catch (Exception e) {
+            logger.error("chsi update pwd submit account error,param:{}",param,e);
+            return SimpleResult.failResult("submit account error");
+        }
+    }
+
+    public Object updatePwdSubmitInfo(CommonPluginParam param){
+        try {
+            HttpResult<Object> result = educationApi.updatePwdSubmitInfo(param);
+            if (result.getStatus()) {
+                return SimpleResult.successResult(result.getData());
+            }
+            return SimpleResult.failResult(result.getMessage());
+        } catch (Exception e) {
+            logger.error("chsi update pwd submit info error,param:{}",param,e);
+            return SimpleResult.failResult("submit info error");
+        }
+    }
+
+    public Object updatePwdSubmit(CommonPluginParam param){
+
+        try {
+            HttpResult<Object> result = educationApi.updatePwdSubmit(param);
+            if (result.getStatus()) {
+                return SimpleResult.successResult(result.getData());
+            }
+            return SimpleResult.failResult(result.getMessage());
+        } catch (Exception e) {
+            logger.error("chsi update pwd submit error,param:{}",param,e);
+            return SimpleResult.failResult("update pwd error");
+        }
+    }
+
+    public Object passportCaptcha(CommonPluginParam param){
+        try {
+            HttpResult<Object> result = educationApi.getPassportCaptcha(param);
+            if (result.getStatus()) {
+                return SimpleResult.successResult(result.getData());
+            }
+            return SimpleResult.failResult(result.getMessage());
+        } catch (Exception e) {
+            logger.error("chsi get passport captcha error,param:{}",param,e);
+            return SimpleResult.failResult("get passport catptcha error");
         }
     }
 }
