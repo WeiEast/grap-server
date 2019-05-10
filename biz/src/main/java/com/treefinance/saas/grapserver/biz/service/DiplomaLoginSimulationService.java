@@ -337,4 +337,17 @@ public class DiplomaLoginSimulationService {
             return SimpleResult.failResult("get passport catptcha error");
         }
     }
+
+    public Object getCaptcha(CommonPluginParam param) {
+        try {
+            HttpResult<Object> result = educationApi.getCaptcha(param);
+            if (result.getStatus()) {
+                return SimpleResult.successResult(result.getData());
+            }
+            return SimpleResult.failResult(result.getMessage());
+        } catch (Exception e) {
+            logger.error("refresh captcha error,param:{}",param,e);
+            return SimpleResult.failResult("error");
+        }
+    }
 }
