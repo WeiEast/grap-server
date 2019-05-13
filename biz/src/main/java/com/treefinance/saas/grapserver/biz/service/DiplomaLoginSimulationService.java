@@ -339,7 +339,7 @@ public class DiplomaLoginSimulationService {
             return uuid;
         } catch (Exception e) {
             logger.error("put chsi userInfo to redis fail", e);
-            throw new CrawlerBizException("put chsi userInfo to redis fail");
+            throw new CrawlerBizException("学信网用户信息保存失败");
         }
     }
 
@@ -375,7 +375,7 @@ public class DiplomaLoginSimulationService {
         try {
             HttpResult<Object> result = educationApi.updatePwdSubmitInfo(param);
             if (result.getStatus()) {
-                return SimpleResult.successResult(result.getData());
+                return SimpleResult.successResult("验证通过");
             }
             return SimpleResult.failResult(result.getMessage());
         } catch (Exception e) {
@@ -389,7 +389,7 @@ public class DiplomaLoginSimulationService {
         try {
             HttpResult<Object> result = educationApi.updatePwdSubmit(param);
             if (result.getStatus()) {
-                return SimpleResult.successResult(result.getData());
+                return SimpleResult.successResult("密码重置成功");
             }
             return SimpleResult.failResult(result.getMessage());
         } catch (Exception e) {
@@ -411,9 +411,9 @@ public class DiplomaLoginSimulationService {
         }
     }
 
-    public Object getCaptcha(CommonPluginParam param) {
+    public Object userInfoCaptcha(CommonPluginParam param) {
         try {
-            HttpResult<Object> result = educationApi.getCaptcha(param);
+            HttpResult<Object> result = educationApi.userInfoCaptcha(param);
             if (result.getStatus()) {
                 return SimpleResult.successResult(result.getData());
             }

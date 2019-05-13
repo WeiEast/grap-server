@@ -174,12 +174,10 @@ public class DiplomaController {
         return diplomaLoginSimulationService.passportCaptcha(param);
     }
 
-    @RequestMapping(value = "/captcha")
+    @RequestMapping(value = "/password/update/info/captcha")
     public Object getCaptcha(CommonPluginParam param){
-        return diplomaLoginSimulationService.getCaptcha(param);
+        return diplomaLoginSimulationService.userInfoCaptcha(param);
     }
-
-
 
 
 
