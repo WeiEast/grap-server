@@ -131,11 +131,11 @@ public class DiplomaController {
 
     @RequestMapping(value = "/register/check",method = RequestMethod.POST)
     public Object registerCheck(Long taskId,String code){
-        if (taskId == null) {
-            logger.error("学信网:获取合作方属性值引用,参数缺失,taskid必传");
-            throw new IllegalArgumentException("学信网:获取合作方属性值引用,参数缺失,taskid必传");
+        if (taskId == null || code == null) {
+            logger.error("学信网:检查用户状态,参数缺失,taskid必传");
+            throw new IllegalArgumentException("学信网:检查用户状态,参数缺失,taskid及code必传");
         }
-        ChsiUserInfo userInfo = diplomaLoginSimulationService.checkRegister(taskId, code);
+        ChsiUserInfo userInfo = diplomaLoginSimulationService.checkRegister(taskId,code);
         return SimpleResult.successResult(userInfo);
     }
 
@@ -151,37 +151,31 @@ public class DiplomaController {
 
     @RequestMapping(value = "/password/update/init",method = RequestMethod.POST)
     public Object updatePwdInit(CommonPluginParam param){
-        logger.info("接口 /password/update/init,param{} ",param);
         return diplomaLoginSimulationService.initUpdatePwd(param);
     }
 
     @RequestMapping(value = "/password/update/account",method = RequestMethod.POST)
     public Object updatePwdSubmitAccount(CommonPluginParam param){
-        logger.info("接口 /password/update/account,param{} ",param);
         return diplomaLoginSimulationService.updatePwdSubmitAccount(param);
     }
 
     @RequestMapping(value = "/password/update/info",method = RequestMethod.POST)
     public Object updatePwdSubmitInfo(CommonPluginParam param){
-        logger.info("接口 /password/update/info,param{}",param);
         return diplomaLoginSimulationService.updatePwdSubmitInfo(param);
     }
 
     @RequestMapping(value = "/password/update")
     public Object updatePwdSubmit(CommonPluginParam param){
-        logger.info("接口 /password/update,param{}",param);
         return diplomaLoginSimulationService.updatePwdSubmit(param);
     }
 
     @RequestMapping(value = "/passport/captcha")
     public Object getPassportCaptcha(CommonPluginParam param){
-        logger.info("接口 /passport/captcha,param{}",param);
         return diplomaLoginSimulationService.passportCaptcha(param);
     }
 
     @RequestMapping(value = "/captcha")
     public Object getCaptcha(CommonPluginParam param){
-        logger.info("接口/captcha,param{}",param);
         return diplomaLoginSimulationService.getCaptcha(param);
     }
 

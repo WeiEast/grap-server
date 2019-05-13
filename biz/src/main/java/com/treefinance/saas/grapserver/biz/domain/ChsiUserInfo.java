@@ -10,7 +10,7 @@ public class ChsiUserInfo {
 
     private String name;
 
-    private String idNo;
+    private String idCard;
 
     private String mobile;
 
@@ -30,12 +30,12 @@ public class ChsiUserInfo {
         this.name = name;
     }
 
-    public String getIdNo() {
-        return idNo;
+    public String getIdCard() {
+        return idCard;
     }
 
-    public void setIdNo(String idNo) {
-        this.idNo = idNo;
+    public void setIdCard(String idCard) {
+        this.idCard = idCard;
     }
 
     public String getMobile() {
