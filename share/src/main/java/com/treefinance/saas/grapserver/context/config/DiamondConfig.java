@@ -113,6 +113,9 @@ public class DiamondConfig {
     @DAttribute(key="webdetect_second")
     private String webdetectSecond;
 
+    @DAttribute(key = "saas.enterprise.website.weight")
+    private String enterpriseWebsiteWeight;
+
     private List<String> excludedAppIds;
 
     @BeforeUpdate
@@ -330,6 +333,14 @@ public class DiamondConfig {
 
     public void setWebdetectSecond(String webdetectSecond) {
         this.webdetectSecond = webdetectSecond;
+    }
+
+    public String getEnterpriseWebsiteWeight() {
+        return enterpriseWebsiteWeight;
+    }
+
+    public void setEnterpriseWebsiteWeight(String enterpriseWebsiteWeight) {
+        this.enterpriseWebsiteWeight = enterpriseWebsiteWeight;
     }
 
     public ColorConfig getDefaultColorConfig() {
