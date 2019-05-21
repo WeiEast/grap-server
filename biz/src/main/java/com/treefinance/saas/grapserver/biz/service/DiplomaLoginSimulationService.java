@@ -214,7 +214,7 @@ public class DiplomaLoginSimulationService {
         }
     }
 
-    public ChsiUserInfo checkRegister(Long taskId,String code) {
+    public ChsiUserInfo checkRegister(Long taskId, String code) {
 
         try {
             ChsiUserInfo userInfo = getUserInfoByCode(code);
@@ -225,10 +225,10 @@ public class DiplomaLoginSimulationService {
                     throw new CrawlerBizException("用户信息为空");
                 }
 
-            }else {
-                setUserInfo(taskId,userInfo);
+            } else {
+                setUserInfo(taskId, userInfo);
             }
-            if (userInfo.getMobile()==null) {
+            if (userInfo.getMobile() == null) {
                 logger.error("学信网检查用户注册异常,手机号码为空手机号码为空");
                 throw new CrawlerBizException("手机号码为空");
             }
@@ -243,12 +243,9 @@ public class DiplomaLoginSimulationService {
 
     private void setUserInfo(Long taskId, ChsiUserInfo userInfo) {
 
-        taskAttributeService.insertOrUpdateSelective(taskId, ETaskAttribute.NAME.getAttribute(),
-            userInfo.getName());
-        taskAttributeService.insertOrUpdateSelective(taskId, ETaskAttribute.MOBILE.getAttribute(),
-            userInfo.getMobile());
-        taskAttributeService.insertOrUpdateSelective(taskId, ETaskAttribute.ID_CARD.getAttribute(),
-            userInfo.getIdCard());
+        taskAttributeService.insert(taskId, ETaskAttribute.NAME.getAttribute(), userInfo.getName(), true);
+        taskAttributeService.insert(taskId, ETaskAttribute.MOBILE.getAttribute(), userInfo.getMobile(), true);
+        taskAttributeService.insert(taskId, ETaskAttribute.ID_CARD.getAttribute(), userInfo.getIdCard(), true);
     }
 
     private ChsiUserInfo getUserInfoByCode(String code) {
@@ -272,7 +269,7 @@ public class DiplomaLoginSimulationService {
 
     private ChsiUserInfo getUserInfoByTaskId(Long taskId) {
         Map<String, TaskAttribute> taskAttributeMap =
-            taskAttributeService.findByNames(taskId, false, ETaskAttribute.MOBILE.getAttribute(),
+            taskAttributeService.findByNames(taskId, true, ETaskAttribute.MOBILE.getAttribute(),
                 ETaskAttribute.NAME.getAttribute(), ETaskAttribute.ID_CARD.getAttribute());
         logger.info(taskAttributeMap.toString());
 
@@ -282,7 +279,7 @@ public class DiplomaLoginSimulationService {
             TaskAttribute mobile = taskAttributeMap.get(ETaskAttribute.MOBILE.getAttribute());
             TaskAttribute idCard = taskAttributeMap.get(ETaskAttribute.ID_CARD.getAttribute());
             ChsiUserInfo userInfo = new ChsiUserInfo();
-            if (idCard == null && name == null && mobile ==null) {
+            if (idCard == null && name == null && mobile == null) {
                 return null;
             }
             if (name != null) {
@@ -321,7 +318,7 @@ public class DiplomaLoginSimulationService {
         if (userInfo != null) {
             return SimpleResult.successResult(userInfo);
         }
-        //过程修改 但返回参数沿用之前
+        // 过程修改 但返回参数沿用之前
 
         return SimpleResult.failResult("获取用户信息失败");
     }
