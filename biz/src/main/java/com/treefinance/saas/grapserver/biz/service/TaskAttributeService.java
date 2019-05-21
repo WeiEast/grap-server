@@ -31,6 +31,13 @@ public class TaskAttributeService extends AbstractService {
     }
 
     /**
+     * 保存属性
+     */
+    public void insert(Long taskId, String name, String value,boolean sensitive) {
+        taskAttributeFacade.insert(taskId, name, value,sensitive);
+    }
+
+    /**
      * 通过属性名查询属性值
      *
      * @param taskId taskId
