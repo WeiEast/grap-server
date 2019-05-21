@@ -272,7 +272,7 @@ public class DiplomaLoginSimulationService {
 
     private ChsiUserInfo getUserInfoByTaskId(Long taskId) {
         Map<String, TaskAttribute> taskAttributeMap =
-            taskAttributeService.findByNames(taskId, true, ETaskAttribute.MOBILE.getAttribute(),
+            taskAttributeService.findByNames(taskId, false, ETaskAttribute.MOBILE.getAttribute(),
                 ETaskAttribute.NAME.getAttribute(), ETaskAttribute.ID_CARD.getAttribute());
         logger.info(taskAttributeMap.toString());
 
