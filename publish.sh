@@ -1,6 +1,6 @@
 #!/bin/sh
 
-server_ip="192.168.5.15"
+server_ip="192.168.5.131"
 server_application="/dashu/application/grap-server"
 server_log_path="/dashu/log/"
 

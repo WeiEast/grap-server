@@ -32,6 +32,7 @@ public class RedisKeyUtils {
 
     private final static String PREFIX_TASK_LOGIN_TIME_KEY = "saas_gateway_task_time:";
     private final static String PREFIX_LOGIN_TASK_SET_KEY = "saas_gateway_task_time:login-taskids";
+    private static final String CHSI_USER_INFO_KEY= "saas_gateway_task_time:chsi_user:%s";
 
     public static String genRedisKey(String key) {
         return String.format(PREFIX_KEY, key);
@@ -85,4 +86,8 @@ public class RedisKeyUtils {
         return PREFIX_TASK_LOGIN_TIME_KEY + taskId;
     }
 
+
+    public static String genChsiUserInfoKey(String key){
+        return String.format(CHSI_USER_INFO_KEY,key);
+    }
 }

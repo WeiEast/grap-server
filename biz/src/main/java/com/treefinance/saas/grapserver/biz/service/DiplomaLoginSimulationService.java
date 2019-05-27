@@ -5,6 +5,7 @@ import com.datatrees.spider.extra.api.EducationApi;
 import com.datatrees.spider.share.domain.CommonPluginParam;
 import com.datatrees.spider.share.domain.http.HttpResult;
 import com.google.common.collect.Maps;
+import com.treefinance.saas.grapserver.biz.domain.ChsiUserInfo;
 import com.treefinance.saas.grapserver.biz.dto.TaskAttribute;
 import com.treefinance.saas.grapserver.common.enums.EBizType;
 import com.treefinance.saas.grapserver.exception.CrawlerBizException;
@@ -22,10 +23,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 /**
  * 学信网
+ * 
  * @author haojiahong on 2017/12/11.
  */
 @Service
@@ -65,8 +70,8 @@ public class DiplomaLoginSimulationService {
                     throw e;
                 }
                 if (!result.getStatus()) {
-                    logger.info("学信网:调用爬数登陆初始化失败,param={},result={}",
-                            JSON.toJSONString(educationParam), JSON.toJSONString(result));
+                    logger.info("学信网:调用爬数登陆初始化失败,param={},result={}", JSON.toJSONString(educationParam),
+                        JSON.toJSONString(result));
                     throw new CrawlerBizException(result.getMessage());
                 }
                 return SimpleResult.successResult(result.getData());
@@ -131,8 +136,8 @@ public class DiplomaLoginSimulationService {
                     throw e;
                 }
                 if (!result.getStatus()) {
-                    logger.info("学信网:调用爬数注册初始化失败,param={},result={}",
-                            JSON.toJSONString(educationParam), JSON.toJSONString(result));
+                    logger.info("学信网:调用爬数注册初始化失败,param={},result={}", JSON.toJSONString(educationParam),
+                        JSON.toJSONString(result));
                     throw new CrawlerBizException(result.getMessage());
                 }
                 return SimpleResult.successResult(result.getData());
@@ -149,7 +154,7 @@ public class DiplomaLoginSimulationService {
     public Object registerRefreshPicCode(CommonPluginParam param) {
         HttpResult<Object> result;
         try {
-            result = educationApi.registerRefeshPicCode(param);
+            result = educationApi.registerRefreshPicCode(param);
         } catch (Exception e) {
             logger.error("学信网:调用爬数注册时刷新图片验证码异常,param={}", JSON.toJSONString(param), e);
             throw e;
@@ -173,7 +178,8 @@ public class DiplomaLoginSimulationService {
             throw e;
         }
         if (!result.getStatus()) {
-            logger.info("学信网:调用爬数注册时验证图片验证码并发送短信失败,param={},result={}", JSON.toJSONString(param), JSON.toJSONString(result));
+            logger.info("学信网:调用爬数注册时验证图片验证码并发送短信失败,param={},result={}", JSON.toJSONString(param),
+                JSON.toJSONString(result));
             throw new CrawlerBizException(result.getMessage());
         }
         return SimpleResult.successResult(result.getData());
@@ -196,7 +202,8 @@ public class DiplomaLoginSimulationService {
                     throw e;
                 }
                 if (!result.getStatus()) {
-                    logger.info("学信网:调用爬数注册提交失败,param={},result={}", JSON.toJSONString(param), JSON.toJSONString(result));
+                    logger.info("学信网:调用爬数注册提交失败,param={},result={}", JSON.toJSONString(param),
+                        JSON.toJSONString(result));
                     throw new CrawlerBizException(result.getMessage());
                 }
                 return SimpleResult.successResult(result.getData());
@@ -205,6 +212,90 @@ public class DiplomaLoginSimulationService {
         } finally {
             redisDao.releaseLock(key, lockMap, 60 * 1000L);
         }
+    }
+
+    public ChsiUserInfo checkRegister(Long taskId, String code) {
+
+        try {
+            ChsiUserInfo userInfo = getUserInfoByCode(code);
+            if (userInfo == null) {
+                userInfo = getUserInfoByTaskId(taskId);
+                if (userInfo == null) {
+                    logger.error("学信网检查用户注册异常,用户信息为空");
+                    throw new CrawlerBizException("用户信息为空");
+                }
+
+            } else {
+                setUserInfo(taskId, userInfo);
+            }
+            if (userInfo.getMobile() == null) {
+                logger.error("学信网检查用户注册异常,手机号码为空手机号码为空");
+                throw new CrawlerBizException("手机号码为空");
+            }
+            String action = educationApi.checkRegister(taskId, Long.parseLong(userInfo.getMobile()));
+            userInfo.setAction(action);
+            return userInfo;
+        } catch (Exception e) {
+            logger.error("学信息网检查用户状态异常", e);
+            throw new CrawlerBizException("chsi check user register error");
+        }
+    }
+
+    private void setUserInfo(Long taskId, ChsiUserInfo userInfo) {
+
+        taskAttributeService.insert(taskId, ETaskAttribute.NAME.getAttribute(), userInfo.getName(), true);
+        taskAttributeService.insert(taskId, ETaskAttribute.MOBILE.getAttribute(), userInfo.getMobile(), true);
+        taskAttributeService.insert(taskId, ETaskAttribute.ID_CARD.getAttribute(), userInfo.getIdCard(), true);
+    }
+
+    private ChsiUserInfo getUserInfoByCode(String code) {
+        try {
+            String key = RedisKeyUtils.genChsiUserInfoKey(code);
+            Map<String, String> userInfoMap = redisDao.getHash(key);
+            if (userInfoMap.isEmpty()) {
+                return null;
+            }
+            ChsiUserInfo userInfo = new ChsiUserInfo();
+            userInfo.setMobile(userInfoMap.get("mobile"));
+            userInfo.setIdCard(userInfoMap.get("idCard"));
+            userInfo.setName(userInfoMap.get("name"));
+            logger.info(userInfo.toString());
+            return userInfo;
+        } catch (Exception e) {
+            logger.error("get userInfo from redis error", e);
+            return null;
+        }
+    }
+
+    private ChsiUserInfo getUserInfoByTaskId(Long taskId) {
+        Map<String, TaskAttribute> taskAttributeMap =
+            taskAttributeService.findByNames(taskId, true, ETaskAttribute.MOBILE.getAttribute(),
+                ETaskAttribute.NAME.getAttribute(), ETaskAttribute.ID_CARD.getAttribute());
+        logger.info(taskAttributeMap.toString());
+
+        if (MapUtils.isNotEmpty(taskAttributeMap)) {
+            // code获取用户信息并保存
+            TaskAttribute name = taskAttributeMap.get(ETaskAttribute.NAME.getAttribute());
+            TaskAttribute mobile = taskAttributeMap.get(ETaskAttribute.MOBILE.getAttribute());
+            TaskAttribute idCard = taskAttributeMap.get(ETaskAttribute.ID_CARD.getAttribute());
+            ChsiUserInfo userInfo = new ChsiUserInfo();
+            if (idCard == null && name == null && mobile == null) {
+                return null;
+            }
+            if (name != null) {
+                userInfo.setName(name.getValue());
+
+            }
+            if (mobile != null) {
+                userInfo.setMobile(mobile.getValue());
+            }
+            if (idCard != null) {
+                userInfo.setIdCard(idCard.getValue());
+            }
+            logger.info(userInfo.toString());
+            return userInfo;
+        }
+        return null;
     }
 
     /**
@@ -222,14 +313,111 @@ public class DiplomaLoginSimulationService {
      * 获取合作方属性值引用
      */
     public Object getThirdPartyReference(Long taskId) {
-        Map<String, TaskAttribute> taskAttributeMap
-                = taskAttributeService.findByNames(taskId, true, ETaskAttribute.MOBILE.getAttribute(),
-                ETaskAttribute.NAME.getAttribute(), ETaskAttribute.ID_CARD.getAttribute());
-        Map<String, Object> map = Maps.newHashMap();
-        if (MapUtils.isNotEmpty(taskAttributeMap)) {
-            map.putAll(taskAttributeMap);
+        // 通过code获取用户信息
+        ChsiUserInfo userInfo = getUserInfoByTaskId(taskId);
+        if (userInfo != null) {
+            return SimpleResult.successResult(userInfo);
         }
-        return SimpleResult.successResult(map);
+        // 过程修改 但返回参数沿用之前
+
+        return SimpleResult.failResult("获取用户信息失败");
     }
 
+    public String saveUserInfo(ChsiUserInfo userInfo) {
+        String uuid = UUID.randomUUID().toString().replaceAll("-", "");
+        String key = RedisKeyUtils.genChsiUserInfoKey(uuid);
+        Map<String, String> userInfoMap = new HashMap<>();
+        userInfoMap.put("name", userInfo.getName());
+        userInfoMap.put("idCard", userInfo.getIdCard());
+        userInfoMap.put("mobile", userInfo.getMobile());
+        try {
+            redisDao.putHash(key, userInfoMap);
+            redisDao.expire(key, 30, TimeUnit.MINUTES);
+            return uuid;
+        } catch (Exception e) {
+            logger.error("put chsi userInfo to redis fail", e);
+            throw new CrawlerBizException("学信网用户信息保存失败");
+        }
+    }
+
+    public Object initUpdatePwd(CommonPluginParam param) {
+
+        try {
+            HttpResult<Object> result = educationApi.initUpdatePwd(param);
+            if (result.getStatus()) {
+                return SimpleResult.successResult(result.getData());
+            }
+            return SimpleResult.failResult(result.getMessage());
+        } catch (Exception e) {
+            logger.error("chsi pwd update init error,param:{}", param, e);
+            throw new CrawlerBizException("chsi pwd update init error");
+        }
+    }
+
+    public Object updatePwdSubmitAccount(CommonPluginParam param) {
+
+        try {
+            HttpResult<Object> result = educationApi.updatePwdSubmitAccount(param);
+            if (result.getStatus()) {
+                return SimpleResult.successResult(result.getData());
+            }
+            return SimpleResult.failResult(result.getMessage());
+        } catch (Exception e) {
+            logger.error("chsi update pwd submit account error,param:{}", param, e);
+            throw new CrawlerBizException("chsi update pwd submit account error");
+        }
+    }
+
+    public Object updatePwdSubmitInfo(CommonPluginParam param) {
+        try {
+            HttpResult<Object> result = educationApi.updatePwdSubmitInfo(param);
+            if (result.getStatus()) {
+                return SimpleResult.successResult("验证通过");
+            }
+            return SimpleResult.failResult(result.getMessage());
+        } catch (Exception e) {
+            logger.error("chsi update pwd submit info error,param:{}", param, e);
+            throw new CrawlerBizException("chsi update pwd submit info error");
+        }
+    }
+
+    public Object updatePwdSubmit(CommonPluginParam param) {
+
+        try {
+            HttpResult<Object> result = educationApi.updatePwdSubmit(param);
+            if (result.getStatus()) {
+                return SimpleResult.successResult("密码重置成功");
+            }
+            return SimpleResult.failResult(result.getMessage());
+        } catch (Exception e) {
+            logger.error("chsi update pwd submit error,param:{}", param, e);
+            throw new CrawlerBizException("update pwd error");
+        }
+    }
+
+    public Object passportCaptcha(CommonPluginParam param) {
+        try {
+            HttpResult<Object> result = educationApi.getPassportCaptcha(param);
+            if (result.getStatus()) {
+                return SimpleResult.successResult(result.getData());
+            }
+            return SimpleResult.failResult(result.getMessage());
+        } catch (Exception e) {
+            logger.error("chsi get passport captcha error,param:{}", param, e);
+            throw new CrawlerBizException("get passport catptcha error");
+        }
+    }
+
+    public Object userInfoCaptcha(CommonPluginParam param) {
+        try {
+            HttpResult<Object> result = educationApi.userInfoCaptcha(param);
+            if (result.getStatus()) {
+                return SimpleResult.successResult(result.getData());
+            }
+            return SimpleResult.failResult(result.getMessage());
+        } catch (Exception e) {
+            logger.error("refresh captcha error,param:{}", param, e);
+            throw new CrawlerBizException("error");
+        }
+    }
 }

@@ -26,7 +26,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
-
 import java.time.Clock;
 import java.util.*;
 
@@ -38,51 +37,72 @@ import java.util.*;
 public class EnterpriseInformationServiceImpl extends AbstractService implements EnterpriseInformationService {
 
     @Autowired
-    private DiamondConfig config;
+    private DiamondConfig      config;
 
     @Autowired
     private AcquisitionService acquisitionService;
 
     @Resource
-    private EnterpriseApi enterpriseApi;
+    private EnterpriseApi      enterpriseApi;
 
     @Autowired
-    private EnterpriseService enterpriseService;
+    private EnterpriseService  enterpriseService;
 
     @Autowired
-    private TaskManager taskManager;
+    private TaskManager        taskManager;
 
     @Autowired
-    private MessageProducer messageProducer;
+    private MessageProducer    messageProducer;
 
     @Autowired
-    private MQConfig mqConfig;
+    private MQConfig           mqConfig;
+
+    private static final String QICHACHA       = "qichacha.com";
+
+    private static final String TIANYANCHA_XCX = "xcx.tianyancha.com";
 
     @Override
     public Object startCrawler(Long taskid, String extra) {
-        Map platToWebsite = GsonUtils.fromJson(config.getOpinionDetectPlatformToWebsite(), new TypeToken<Map>() {}.getType());
-        String website = (String)platToWebsite.get("enterprise");
-        if (StringUtils.isBlank(website)) {
-            return SaasResult.failResult("当前平台不支持!");
-        }
+        //Map platToWebsite = GsonUtils.fromJson(config.getOpinionDetectPlatformToWebsite(), new TypeToken<Map>() {}.getType());
+        //String website = (String)platToWebsite.get("enterprise");
+        //if (StringUtils.isBlank(website)) {
+        //    return SaasResult.failResult("当前平台不支持!");
+        //}
         Map param = GsonUtils.fromJson(extra, new TypeToken<Map>() {}.getType());
-        String keyword = (String)param.get("business");
+        String keyword = (String) param.get("business");
+        /**
+         * 获取taskId尾数
+         */
+        int index = (int) (taskid % 10);
+        int weight = 5;
+        if (StringUtils.isNotBlank(config.getEnterpriseWebsiteWeight())) {
+            weight = Integer.valueOf(config.getEnterpriseWebsiteWeight());
+        }
+        String website;
+        /**
+         * 根据尾数和权重分配站点
+         */
+        if (index < weight) {
+            website = QICHACHA;
+        } else {
+            website = TIANYANCHA_XCX;
+        }
         List<Map<String, String>> enterpriseList = enterpriseApi.queryEnterprise(keyword, website, taskid);
         if (enterpriseList == null) {
             // 回调操作
-            messageProducer.send(
-                JSON.toJSONString(new DirectiveResult(taskid, DirectiveResult.Directive.task_success,
-                    JSON.toJSONString(new SuccessRemark(taskid, "enterprise", 0, null, 0, Clock.systemUTC().millis(), (byte)1)))),
-                mqConfig.getProduceDirectiveTopic(), mqConfig.getProduceDirectiveTag(), null);
+            messageProducer.send(JSON.toJSONString(new DirectiveResult(taskid, DirectiveResult.Directive.task_success,
+                            JSON.toJSONString(new SuccessRemark(taskid, "enterprise", 0, null, 0, Clock.systemUTC().millis(), (byte) 1)))),
+                    mqConfig.getProduceDirectiveTopic(), mqConfig.getProduceDirectiveTag(), null);
             logger.info("mq发送成功，taskId={},topic={},tag={}", taskid, mqConfig.getProduceDirectiveTopic(), mqConfig.getProduceDirectiveTag());
             return SaasResult.successResult(taskid);
         }
         StringBuilder extraValue = new StringBuilder();
-        enterpriseList.stream()
-            .forEach(enterprise -> extraValue.append(enterprise.get("name")).append(":").append(enterprise.get("unique")).append(":").append(enterprise.get("index")).append(";"));
+        enterpriseList.stream().forEach(
+                enterprise -> extraValue.append(enterprise.get("name")).append(":").append(enterprise.get("unique")).append(":")
+                        .append(enterprise.get("index")).append(";"));
         if (StringUtils.isBlank(extraValue)) {
-            messageProducer.send(JSON.toJSONString(new DirectiveResult(taskid, DirectiveResult.Directive.task_fail, null)), mqConfig.getProduceDirectiveTopic(),
-                mqConfig.getProduceDirectiveTag(), null);
+            messageProducer.send(JSON.toJSONString(new DirectiveResult(taskid, DirectiveResult.Directive.task_fail, null)),
+                    mqConfig.getProduceDirectiveTopic(), mqConfig.getProduceDirectiveTag(), null);
             logger.warn("调用EnterpriseApi返回空列表，taskId={}", taskid);
             return SaasResult.successResult(taskid);
         }
@@ -121,19 +141,19 @@ public class EnterpriseInformationServiceImpl extends AbstractService implements
     @Override
     public Object startPynerCrawler(Long taskid, String platform, String extra) {
         Map platToWebsite = GsonUtils.fromJson(config.getOpinionDetectPlatformToWebsite(), new TypeToken<Map>() {}.getType());
-        String website = (String)platToWebsite.get(platform);
+        String website = (String) platToWebsite.get(platform);
         if (StringUtils.isBlank(website)) {
             return SaasResult.failResult("当前平台不支持!");
         }
         Map param = GsonUtils.fromJson(extra, new TypeToken<Map>() {}.getType());
-        String keyword = (String)param.get("business");
+        String keyword = (String) param.get("business");
         List<Map<String, String>> enterpriseList = enterpriseApi.queryEnterprise(keyword, website, taskid);
         if (enterpriseList == null) {
             return SaasResult.failure(-2, "可能由于代理问题未查询企业失败");
         }
         boolean flag = false;
         StringBuilder extraValue = new StringBuilder();
-        logger.info("企查查返回列表 enterpriseList={},size={}", JSONObject.toJSONString(enterpriseList),enterpriseList.size());
+        logger.info("企查查返回列表 enterpriseList={},size={}", JSONObject.toJSONString(enterpriseList), enterpriseList.size());
         if (enterpriseList.size() == 0) {
             SaasResult<Object> saasResult = SaasResult.successResult("没有对应的企业");
             saasResult.setCode(4);
@@ -151,7 +171,8 @@ public class EnterpriseInformationServiceImpl extends AbstractService implements
         }
 
         if (keyword.equals(name)) {
-            extraValue.append(enterprise.get("name")).append(":").append(enterprise.get("unique")).append(":").append(enterprise.get("index")).append(";");
+            extraValue.append(enterprise.get("name")).append(":").append(enterprise.get("unique")).append(":").append(enterprise.get("index"))
+                    .append(";");
             flag = true;
         }
         if (!flag) {
