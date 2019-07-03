@@ -76,7 +76,7 @@ public class TaskController {
     @RequestMapping(value = "/config", method = {RequestMethod.GET, RequestMethod.POST})
     public Object getConfig(@RequestParam String appid, @RequestParam String type, @RequestParam(value = "id", required = false) Integer id,
         @RequestParam(value = "style", required = false) String style, @RequestParam(value = "name", required = false) String name,
-        @RequestParam(value = "taskId", required = false) String taskId, @RequestParam(value = "uniqueld", required = false) String uniqueld) {
+        @RequestParam(value = "taskId", required = false) String taskId, @RequestParam(value = "uniqueId", required = false) String uniqueId) {
         if (StringUtils.isBlank(type)) {
             throw new IllegalArgumentException("Parameter 'type' is incorrect.");
         }
@@ -92,7 +92,7 @@ public class TaskController {
         if (taskAttribute != null && taskAttribute.getValue() != null) {
             map.put("isEcoPageAuth", taskAttribute.getValue());
             if (Integer.valueOf(taskAttribute.getValue()) == 1) {
-                SimpleResult simpleResult= gfdMessageService.getProtocolUrl(uniqueld);
+                SimpleResult simpleResult= gfdMessageService.getProtocolUrl(uniqueId);
                 if(Objects.isEmpty(simpleResult.getData())){
                     return simpleResult;
                 }
@@ -227,8 +227,8 @@ public class TaskController {
      * 功夫贷签署协议接口
      */
     @RequestMapping(value = "/signProtocol", method = {RequestMethod.POST})
-    public Object buryPointLog(@RequestParam("uniqueld") String uniqueld) {
-        logger.info("传入参数:uniqueld={}", uniqueld);
-        return gfdMessageService.signProtocol(uniqueld);
+    public Object buryPointLog(@RequestParam("uniqueld") String uniqueId) {
+        logger.info("传入参数:uniqueld={}", uniqueId);
+        return gfdMessageService.signProtocol(uniqueId);
     }
 }

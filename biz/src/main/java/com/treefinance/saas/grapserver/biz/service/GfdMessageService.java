@@ -29,10 +29,10 @@ public class GfdMessageService {
     @Autowired
     private DiamondConfig diamondConfig;
 
-    public SimpleResult getProtocolUrl(String uniqueld) {
-        logger.info("获取协议接口 传入参数uniqueld为{}", uniqueld);
-        if(StringUtils.isEmpty(uniqueld)){
-            return SimpleResult.failResult("uniqueld不能为空");
+    public SimpleResult getProtocolUrl(String uniqueId) {
+        logger.info("获取协议接口 传入参数uniqueId为{}", uniqueId);
+        if(StringUtils.isEmpty(uniqueId)){
+            return SimpleResult.failResult("uniqueId不能为空");
         }
         String url = diamondConfig.getGfdH5taobaoUrlgetProtocol();
 
@@ -41,7 +41,7 @@ public class GfdMessageService {
         JSONObject data = new JSONObject();
         String result ;
         JSONArray protocolList = new JSONArray();
-        params.put("userId", uniqueld);
+        params.put("userId", uniqueId);
         params.put("source", "H5");
         try {
             result = HttpClientUtils.doPost(url, params);
@@ -69,15 +69,15 @@ public class GfdMessageService {
         return SimpleResult.successResult(resultList);
     }
 
-    public Object signProtocol(String uniqueld) {
-        logger.info("签署协议接口 传入参数uniqueld为{}", uniqueld);
-        if(StringUtils.isEmpty(uniqueld)){
-            return SimpleResult.failResult("uniqueld不能为空");
+    public Object signProtocol(String uniqueId) {
+        logger.info("签署协议接口 传入参数uniqueId为{}", uniqueId);
+        if(StringUtils.isEmpty(uniqueId)){
+            return SimpleResult.failResult("uniqueId不能为空");
         }
         String url = diamondConfig.getGfdH5taobaoUrlsignProtocol();
 
         Map<String, Object> params = new HashMap<>();
-        params.put("userId", uniqueld);
+        params.put("userId", uniqueId);
         String result;
         params.put("source", "H5");
         try {
