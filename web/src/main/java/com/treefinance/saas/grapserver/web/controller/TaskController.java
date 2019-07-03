@@ -227,7 +227,7 @@ public class TaskController {
      * 功夫贷签署协议接口
      */
     @RequestMapping(value = "/signProtocol", method = {RequestMethod.POST})
-    public Object buryPointLog(@RequestParam("uniqueld") String uniqueId) {
+    public Object buryPointLog(@RequestParam("uniqueId") String uniqueId) {
         logger.info("传入参数:uniqueld={}", uniqueId);
         return gfdMessageService.signProtocol(uniqueId);
     }
