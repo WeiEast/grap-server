@@ -5,15 +5,8 @@ import com.datatrees.spider.share.api.SpiderTaskApi;
 import com.google.common.collect.Maps;
 import com.treefinance.saas.grapserver.biz.domain.Directive;
 import com.treefinance.saas.grapserver.biz.domain.MerchantBaseInfo;
-import com.treefinance.saas.grapserver.biz.service.AppBizLicenseService;
-import com.treefinance.saas.grapserver.biz.service.MerchantBaseInfoService;
-import com.treefinance.saas.grapserver.biz.service.MerchantConfigService;
-import com.treefinance.saas.grapserver.biz.service.TaskBuryPointLogService;
-import com.treefinance.saas.grapserver.biz.service.TaskBuryPointSpecialCodeService;
-import com.treefinance.saas.grapserver.biz.service.TaskConfigService;
-import com.treefinance.saas.grapserver.biz.service.TaskDirectiveService;
-import com.treefinance.saas.grapserver.biz.service.TaskService;
-import com.treefinance.saas.grapserver.biz.service.TaskTimeService;
+import com.treefinance.saas.grapserver.biz.dto.TaskAttribute;
+import com.treefinance.saas.grapserver.biz.service.*;
 import com.treefinance.saas.grapserver.common.enums.EBizType;
 import com.treefinance.saas.grapserver.common.enums.EDirective;
 import com.treefinance.saas.grapserver.common.enums.EOperatorCodeType;
@@ -49,7 +42,11 @@ public class TaskController {
     @Autowired
     private TaskService taskService;
     @Autowired
+    private TaskAttributeService taskAttributeService;
+    @Autowired
     private TaskTimeService taskTimeService;
+    @Autowired
+    GfdMessageService gfdMessageService;
     @Autowired
     private TaskDirectiveService taskDirectiveService;
     @Autowired
@@ -83,19 +80,21 @@ public class TaskController {
             throw new IllegalArgumentException("Parameter 'type' is incorrect.");
         }
         logger.info("获取配置 传入参数taskId为{},uniqueld{}", taskId, uniqueld);
+
+        TaskAttribute taskAttribute = taskAttributeService.findByName(Long.parseLong(taskId), "isEcoPageAuth", false);
         Map<String, String> colorMap = merchantConfigService.getColorConfig(appid, style);
         Object defaultConfig = taskConfigService.getTaskConfig(type, id, name);
         Map<String, Object> map = Maps.newHashMap();
-        List<String> stringList = new ArrayList<>();
-        stringList.add("https://www.baidu.com/");
-        stringList.add("https://www.zhihu.com/");
         map.put("config", defaultConfig);
         map.put("color", colorMap);
         map.put("license", appBizLicenseService.isShowLicense(appid, type));
         map.put("licenseTemplate", appBizLicenseService.getLicenseTemplate(appid, type));
-        if (taskId != null) {
-            map.put("isEcoPageAuth", 1);
-            map.put("protocolUrl", stringList);
+
+        if (taskAttribute != null && taskAttribute.getValue() != null) {
+            map.put("isEcoPageAuth", taskAttribute.getValue());
+            if (Integer.valueOf(taskAttribute.getValue()) == 1) {
+                map.put("protocolUrl", gfdMessageService.getProtocolUrl(uniqueld));
+            }
         }
         map.putAll(appBizLicenseService.isShowQuestionnaireOrFeedback(appid, type));
         return new SimpleResult<>(map);
@@ -227,6 +226,6 @@ public class TaskController {
     @RequestMapping(value = "/signProtocol", method = {RequestMethod.POST})
     public Object buryPointLog(@RequestParam("uniqueld") String uniqueld) {
         logger.info("传入参数:uniqueld={}", uniqueld);
-        return SimpleResult.successResult(null);
+        return gfdMessageService.signProtocol(uniqueld);
     }
 }
