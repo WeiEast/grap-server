@@ -17,6 +17,12 @@
 
     <name>grap-server</name>
 
+    <scm>
+        <connection>scm:git:http://192.168.5.252/saas/grap-server.git</connection>
+        <developerConnection>scm:git:http://192.168.5.252/saas/grap-server.git</developerConnection>
+        <url>http://192.168.5.252/saas/grap-server</url>
+    </scm>
+
     <parent>
         <groupId>com.treefinance.b2b.saas</groupId>
         <artifactId>b2b-saas-data-parent</artifactId>
@@ -88,4 +94,12 @@
         </dependency>
     </dependencies>
 
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-release-plugin</artifactId>
+            </plugin>
+        </plugins>
+    </build>
 </project>
