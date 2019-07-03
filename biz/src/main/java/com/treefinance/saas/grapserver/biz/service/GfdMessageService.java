@@ -2,10 +2,12 @@ package com.treefinance.saas.grapserver.biz.service;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.treefinance.saas.grapserver.context.config.DiamondConfig;
 import com.treefinance.saas.grapserver.util.HttpClientUtils;
 import com.treefinance.saas.knife.result.SimpleResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -21,8 +23,13 @@ import java.util.Map;
 public class GfdMessageService {
     private final static Logger logger = LoggerFactory.getLogger(GfdMessageService.class);
 
+
+    @Autowired
+    private DiamondConfig diamondConfig;
+
+
     public List<Map<String, String>> getProtocolUrl(String uniqueld) {
-        String url = "http://test.91gfd.com.cn/gongfudaiv2/basics/idcard/peopleBankCredit/getProtocol";
+        String url = diamondConfig.getGfdH5taobaoUrlgetProtocol();
 
         Map<String, Object> params = new HashMap<>();
         List<Map<String, String>> resultList = new ArrayList<>();
@@ -52,7 +59,7 @@ public class GfdMessageService {
     }
 
     public Object signProtocol(String uniqueld) {
-        String url = "http://test.91gfd.com.cn/gongfudaiv2/basics/idcard/peopleBankCredit/signProtocol";
+        String url = diamondConfig.getGfdH5taobaoUrlsignProtocol();
 
         Map<String, Object> params = new HashMap<>();
         params.put("userId", uniqueld);

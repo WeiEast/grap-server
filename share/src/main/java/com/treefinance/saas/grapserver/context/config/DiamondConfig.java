@@ -116,6 +116,15 @@ public class DiamondConfig {
     @DAttribute(key = "saas.enterprise.website.weight")
     private String enterpriseWebsiteWeight;
 
+
+    @DAttribute(key = "gfd.h5.taobao.url.getprotocol")
+    private String gfdH5taobaoUrlgetProtocol;
+
+    @DAttribute(key = "gfd.h5.taobao.url.signprotocol")
+    private String gfdH5taobaoUrlsignProtocol;
+
+
+
     private List<String> excludedAppIds;
 
     @BeforeUpdate
@@ -349,5 +358,20 @@ public class DiamondConfig {
 
         return defaultConfig;
     }
-    
+
+    public String getGfdH5taobaoUrlgetProtocol() {
+        return gfdH5taobaoUrlgetProtocol;
+    }
+
+    public void setGfdH5taobaoUrlgetProtocol(String gfdH5taobaoUrlgetProtocol) {
+        this.gfdH5taobaoUrlgetProtocol = gfdH5taobaoUrlgetProtocol;
+    }
+
+    public String getGfdH5taobaoUrlsignProtocol() {
+        return gfdH5taobaoUrlsignProtocol;
+    }
+
+    public void setGfdH5taobaoUrlsignProtocol(String gfdH5taobaoUrlsignProtocol) {
+        this.gfdH5taobaoUrlsignProtocol = gfdH5taobaoUrlsignProtocol;
+    }
 }
