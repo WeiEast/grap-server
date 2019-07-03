@@ -31,6 +31,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.validation.ValidationException;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -67,28 +69,34 @@ public class TaskController {
      * 获取配置,电商在用
      *
      * @param appid
-     * @param type  分类
-     * @param id    过滤task_support表中的id字段
+     * @param type 分类
+     * @param id 过滤task_support表中的id字段
      * @param style
-     * @param name  过滤task_support表中的type字段
+     * @param name 过滤task_support表中的type字段
      * @return
      */
     @RequestMapping(value = "/config", method = {RequestMethod.GET, RequestMethod.POST})
-    public Object getConfig(@RequestParam String appid,
-                            @RequestParam String type,
-                            @RequestParam(value = "id", required = false) Integer id,
-                            @RequestParam(value = "style", required = false) String style,
-                            @RequestParam(value = "name", required = false) String name) {
+    public Object getConfig(@RequestParam String appid, @RequestParam String type, @RequestParam(value = "id", required = false) Integer id,
+        @RequestParam(value = "style", required = false) String style, @RequestParam(value = "name", required = false) String name,
+        @RequestParam(value = "taskId", required = false) String taskId, @RequestParam(value = "uniqueld", required = false) String uniqueld) {
         if (StringUtils.isBlank(type)) {
             throw new IllegalArgumentException("Parameter 'type' is incorrect.");
         }
+        logger.info("获取配置 传入参数taskId为{},uniqueld{}", taskId, uniqueld);
         Map<String, String> colorMap = merchantConfigService.getColorConfig(appid, style);
         Object defaultConfig = taskConfigService.getTaskConfig(type, id, name);
         Map<String, Object> map = Maps.newHashMap();
+        List<String> stringList = new ArrayList<>();
+        stringList.add("https://www.baidu.com/");
+        stringList.add("https://www.zhihu.com/");
         map.put("config", defaultConfig);
         map.put("color", colorMap);
         map.put("license", appBizLicenseService.isShowLicense(appid, type));
         map.put("licenseTemplate", appBizLicenseService.getLicenseTemplate(appid, type));
+        if (taskId != null) {
+            map.put("isEcoPageAuth", 1);
+            map.put("protocolUrl", stringList);
+        }
         map.putAll(appBizLicenseService.isShowQuestionnaireOrFeedback(appid, type));
         return new SimpleResult<>(map);
     }
@@ -97,7 +105,7 @@ public class TaskController {
      * 获取滚动消息提示或其他类型消息提示
      *
      * @param appId 商户appId
-     * @param type  业务类型
+     * @param type 业务类型
      */
     @RequestMapping(value = "/tips", method = {RequestMethod.POST})
     public Object getAgreement(@RequestParam("appid") String appId, @RequestParam String type) {
@@ -148,7 +156,7 @@ public class TaskController {
             map.put("directive", "waiting");
             map.put("information", "请等待");
         } else {
-            //登陆成功后,已收到指令并指令操作已处理完毕,如输入短信验证码
+            // 登陆成功后,已收到指令并指令操作已处理完毕,如输入短信验证码
             if (StringUtils.equalsIgnoreCase(directiveInfo.getDirective(), "waiting")) {
                 // 轮询过程中，判断任务是否超时
                 if (taskTimeService.isTaskTimeout(taskId)) {
@@ -171,21 +179,15 @@ public class TaskController {
         return new SimpleResult<>(map);
     }
 
-
     /**
      * 发送验证码
      */
     @RequestMapping(value = "/verification/code", method = {RequestMethod.POST})
-    public Object verifyCode(@RequestParam() String directiveId,
-                             @RequestParam() Long taskid,
-                             @RequestParam() String type,
-                             @RequestParam() String code,
+    public Object verifyCode(@RequestParam() String directiveId, @RequestParam() Long taskid, @RequestParam() String type, @RequestParam() String code,
         @RequestParam(value = "extra", required = false) String extra) {
-        logger.info("taskId={}输入验证信息,directiveId={},type={},code={},extra={}",
-                taskid, directiveId, type, code, extra);
+        logger.info("taskId={}输入验证信息,directiveId={},type={},code={},extra={}", taskid, directiveId, type, code, extra);
         taskDirectiveService.deleteNextDirective(taskid);
-        spiderTaskApi.importCrawlCode(directiveId, taskid, EOperatorCodeType.getCode(type), code,
-            Jackson.parseMap(extra, String.class, String.class));
+        spiderTaskApi.importCrawlCode(directiveId, taskid, EOperatorCodeType.getCode(type), code, Jackson.parseMap(extra, String.class, String.class));
         return new SimpleResult<>();
     }
 
@@ -202,10 +204,8 @@ public class TaskController {
      * 埋点记录
      */
     @RequestMapping(value = "/bury/point/log", method = {RequestMethod.POST})
-    public Object buryPointLog(@RequestParam("taskid") Long taskId,
-                               @RequestParam("appid") String appId,
-                               @RequestParam("code") String code,
-                               @RequestParam(value = "extra", required = false) String extra) {
+    public Object buryPointLog(@RequestParam("taskid") Long taskId, @RequestParam("appid") String appId, @RequestParam("code") String code,
+        @RequestParam(value = "extra", required = false) String extra) {
         logger.info("记录埋点:taskid={},appid={},code={},extra={}", taskId, appId, code, extra);
         if (taskId == null) {
             throw new ValidationException("参数taskid为空");
@@ -221,4 +221,12 @@ public class TaskController {
         return SimpleResult.successResult(null);
     }
 
+    /**
+     * 功夫贷签署协议接口
+     */
+    @RequestMapping(value = "/signProtocol", method = {RequestMethod.POST})
+    public Object buryPointLog(@RequestParam("uniqueld") String uniqueld) {
+        logger.info("传入参数:uniqueld={}", uniqueld);
+        return SimpleResult.successResult(null);
+    }
 }
