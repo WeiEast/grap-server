@@ -77,17 +77,17 @@ public class FilterRegistry {
         return registration;
     }
 
-    @Bean
-    public FilterRegistrationBean taskAliveFilter(DiamondConfig diamondConfig,
-                                                  TaskAliveService taskAliveService) {
-        TaskAliveFilter taskAliveFilter = new TaskAliveFilter(diamondConfig, taskAliveService);
-        taskAliveFilter.addExcludeUrlPatterns("/moxie/webhook/**", "/**/start/**/", "/grap/*/data");
-        FilterRegistrationBean registration = new FilterRegistrationBean();
-        registration.setFilter(taskAliveFilter);
-        registration.setName("taskAliveFilter");
-        registration.addUrlPatterns("/*");
-        registration.setOrder(FilterRegistrationBean.REQUEST_WRAPPER_FILTER_MAX_ORDER + 3);
-        return registration;
-    }
+//    @Bean
+//    public FilterRegistrationBean taskAliveFilter(DiamondConfig diamondConfig,
+//                                                  TaskAliveService taskAliveService) {
+//        TaskAliveFilter taskAliveFilter = new TaskAliveFilter(diamondConfig, taskAliveService);
+//        taskAliveFilter.addExcludeUrlPatterns("/moxie/webhook/**", "/**/start/**/", "/grap/*/data");
+//        FilterRegistrationBean registration = new FilterRegistrationBean();
+//        registration.setFilter(taskAliveFilter);
+//        registration.setName("taskAliveFilter");
+//        registration.addUrlPatterns("/*");
+//        registration.setOrder(FilterRegistrationBean.REQUEST_WRAPPER_FILTER_MAX_ORDER + 3);
+//        return registration;
+//    }
 
 }

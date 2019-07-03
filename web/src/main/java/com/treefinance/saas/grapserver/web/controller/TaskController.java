@@ -12,6 +12,7 @@ import com.treefinance.saas.grapserver.common.enums.EDirective;
 import com.treefinance.saas.grapserver.common.enums.EOperatorCodeType;
 import com.treefinance.saas.grapserver.exception.RpcServiceException;
 import com.treefinance.saas.knife.result.SimpleResult;
+import com.treefinance.toolkit.util.Objects;
 import com.treefinance.toolkit.util.json.Jackson;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -79,8 +80,6 @@ public class TaskController {
         if (StringUtils.isBlank(type)) {
             throw new IllegalArgumentException("Parameter 'type' is incorrect.");
         }
-        logger.info("获取配置 传入参数taskId为{},uniqueld{}", taskId, uniqueld);
-
         TaskAttribute taskAttribute = taskAttributeService.findByName(Long.parseLong(taskId), "isEcoPageAuth", false);
         Map<String, String> colorMap = merchantConfigService.getColorConfig(appid, style);
         Object defaultConfig = taskConfigService.getTaskConfig(type, id, name);
@@ -93,7 +92,11 @@ public class TaskController {
         if (taskAttribute != null && taskAttribute.getValue() != null) {
             map.put("isEcoPageAuth", taskAttribute.getValue());
             if (Integer.valueOf(taskAttribute.getValue()) == 1) {
-                map.put("protocolUrl", gfdMessageService.getProtocolUrl(uniqueld));
+                SimpleResult simpleResult= gfdMessageService.getProtocolUrl(uniqueld);
+                if(Objects.isEmpty(simpleResult.getData())){
+                    return simpleResult;
+                }
+                map.put("protocolUrl",simpleResult.getData());
             }
         }
         map.putAll(appBizLicenseService.isShowQuestionnaireOrFeedback(appid, type));
