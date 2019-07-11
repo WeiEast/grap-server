@@ -113,6 +113,7 @@
     <dubbo:reference interface="com.treefinance.saas.processor.thirdparty.facade.enterprise.EnterpriseService" id="enterpriseService"/>
     <dubbo:reference interface="com.datatrees.spider.extra.api.EnterpriseApi" id="enterpriseApi"/>
     <dubbo:reference interface="com.treefinance.saas.taskcenter.facade.service.TaskPointFacade" id="taskPointFacade" version="1.0.0"/>
+    <dubbo:reference interface="com.datatrees.spider.share.api.WebsiteApi" id="websiteApi"/>
     
 </beans>
 

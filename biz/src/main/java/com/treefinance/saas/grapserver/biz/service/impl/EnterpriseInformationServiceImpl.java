@@ -4,6 +4,12 @@ import com.alibaba.dubbo.rpc.RpcException;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.datatrees.spider.extra.api.EnterpriseApi;
+import com.datatrees.spider.operator.domain.OperatorLoginConfig;
+import com.datatrees.spider.share.api.WebsiteApi;
+import com.datatrees.spider.share.domain.CommonPluginParam;
+import com.datatrees.spider.share.domain.FormType;
+import com.datatrees.spider.share.domain.WebLoginConfig;
+import com.datatrees.spider.share.domain.http.HttpResult;
 import com.google.gson.reflect.TypeToken;
 import com.treefinance.saas.grapserver.biz.mq.DirectiveResult;
 import com.treefinance.saas.grapserver.biz.mq.MQConfig;
@@ -11,13 +17,17 @@ import com.treefinance.saas.grapserver.biz.mq.MessageProducer;
 import com.treefinance.saas.grapserver.biz.mq.SuccessRemark;
 import com.treefinance.saas.grapserver.biz.service.AcquisitionService;
 import com.treefinance.saas.grapserver.biz.service.EnterpriseInformationService;
+import com.treefinance.saas.grapserver.biz.service.TaskAttributeService;
 import com.treefinance.saas.grapserver.common.enums.ESpiderTopic;
 import com.treefinance.saas.grapserver.common.enums.ETaskStatus;
 import com.treefinance.saas.grapserver.common.result.SaasResult;
 import com.treefinance.saas.grapserver.context.component.AbstractService;
 import com.treefinance.saas.grapserver.context.config.DiamondConfig;
+import com.treefinance.saas.grapserver.exception.CrawlerBizException;
+import com.treefinance.saas.grapserver.facade.enums.ETaskAttribute;
 import com.treefinance.saas.grapserver.manager.TaskManager;
 import com.treefinance.saas.grapserver.manager.domain.TaskBO;
+import com.treefinance.saas.knife.result.SimpleResult;
 import com.treefinance.saas.processor.thirdparty.facade.enterprise.EnterpriseService;
 import com.treefinance.saas.processor.thirdparty.facade.enterprise.model.EnterpriseDataResultDTO;
 import com.treefinance.toolkit.util.json.GsonUtils;
@@ -37,81 +47,96 @@ import java.util.*;
 public class EnterpriseInformationServiceImpl extends AbstractService implements EnterpriseInformationService {
 
     @Autowired
-    private DiamondConfig      config;
+    private DiamondConfig        config;
 
     @Autowired
-    private AcquisitionService acquisitionService;
+    private AcquisitionService   acquisitionService;
 
     @Resource
-    private EnterpriseApi      enterpriseApi;
+    private EnterpriseApi        enterpriseApi;
+
+    @Resource
+    private WebsiteApi           websiteApi;
 
     @Autowired
-    private EnterpriseService  enterpriseService;
+    private EnterpriseService    enterpriseService;
 
     @Autowired
-    private TaskManager        taskManager;
+    private TaskAttributeService taskAttributeService;
 
     @Autowired
-    private MessageProducer    messageProducer;
+    private TaskManager          taskManager;
 
     @Autowired
-    private MQConfig           mqConfig;
+    private MessageProducer      messageProducer;
 
-    private static final String QICHACHA       = "qichacha.com";
-
-    private static final String TIANYANCHA_XCX = "xcx.tianyancha.com";
+    @Autowired
+    private MQConfig             mqConfig;
 
     @Override
-    public Object startCrawler(Long taskid, String extra) {
-        //Map platToWebsite = GsonUtils.fromJson(config.getOpinionDetectPlatformToWebsite(), new TypeToken<Map>() {}.getType());
-        //String website = (String)platToWebsite.get("enterprise");
-        //if (StringUtils.isBlank(website)) {
-        //    return SaasResult.failResult("当前平台不支持!");
-        //}
+    public Object prepare(Long taskId, String extra) {
         Map param = GsonUtils.fromJson(extra, new TypeToken<Map>() {}.getType());
         String keyword = (String) param.get("business");
-        /**
-         * 获取taskId尾数
-         */
-        int index = (int) (taskid % 10);
-        int weight = 5;
-        if (StringUtils.isNotBlank(config.getEnterpriseWebsiteWeight())) {
-            weight = Integer.valueOf(config.getEnterpriseWebsiteWeight());
+        CommonPluginParam commonPluginParam = new CommonPluginParam();
+        commonPluginParam.setTaskId(taskId);
+        commonPluginParam.setGroupCode("ENTERPRISE_INFORMATION");
+        commonPluginParam.setGroupName("企业工商信息");
+        commonPluginParam.setUsername(keyword);
+        HttpResult<WebLoginConfig> result;
+        try {
+            result = websiteApi.preLogin(commonPluginParam);
+        } catch (Exception e) {
+            logger.error("工商信息:调用爬数获取工商信息配置信息异常,commonPluginParam={}", JSON.toJSONString(commonPluginParam), e);
+            throw e;
         }
-        String website;
-        /**
-         * 根据尾数和权重分配站点
-         */
-        if (index < weight) {
-            website = QICHACHA;
+        if (!result.getStatus()) {
+            logger.info("工商信息:调用爬数获取工商信息配置信息失败,commonPluginParam={},result={}", JSON.toJSONString(commonPluginParam), JSON.toJSONString(result));
+            throw new CrawlerBizException(result.getResponseCode(), result.getMessage());
+        }
+        if (result.getData() != null && StringUtils.isNotBlank(result.getData().getUsername()) &&
+                StringUtils.isNotBlank(result.getData().getWebsiteName())) {
+            String accountNo = result.getData().getUsername();
+            String websiteName = result.getData().getWebsiteName();
+            taskManager.setAccountNoAndWebsite(taskId, accountNo, websiteName);
         } else {
-            website = TIANYANCHA_XCX;
+            logger.info("工商信息:调用爬数获取工商信息accountNo,websiteName为空,taskId={},commonPluginParam={},result={}", taskId,
+                    JSON.toJSONString(commonPluginParam), JSON.toJSONString(result));
         }
-        List<Map<String, String>> enterpriseList = enterpriseApi.queryEnterprise(keyword, website, taskid);
-        if (enterpriseList == null) {
+        String groupCode = commonPluginParam.getGroupCode();
+        String groupName = commonPluginParam.getGroupName();
+        taskAttributeService.insertOrUpdateSelective(taskId, ETaskAttribute.OPERATOR_GROUP_CODE.getAttribute(), groupCode);
+        taskAttributeService.insertOrUpdateSelective(taskId, ETaskAttribute.OPERATOR_GROUP_NAME.getAttribute(), groupName);
+        commonPluginParam.setWebsiteName(result.getData().getWebsiteName());
+        commonPluginParam.setFormType(FormType.LOGIN);
+        return startCrawler(commonPluginParam);
+    }
+
+    @Override
+    public Object startCrawler(CommonPluginParam commonPluginParam) {
+        HttpResult<Object> result;
+        Long taskId = commonPluginParam.getTaskId();
+        try {
+            result = websiteApi.submit(commonPluginParam);
+        } catch (Exception e) {
+            logger.error("工商信息:调用爬数获取工商信息爬取异常,commonPluginParam={}", JSON.toJSONString(commonPluginParam), e);
+            throw e;
+        }
+        if (!result.getStatus()) {
+            messageProducer.send(JSON.toJSONString(new DirectiveResult(taskId, DirectiveResult.Directive.task_fail, null)),
+                    mqConfig.getProduceDirectiveTopic(), mqConfig.getProduceDirectiveTag(), null);
+            logger.warn("工商信息:调用爬数获取工商信息爬取失败,taskId={},result={}", taskId, JSON.toJSONString(result));
+            return SaasResult.successResult(taskId);
+        }
+        if (result.getData() == null) {
             // 回调操作
-            messageProducer.send(JSON.toJSONString(new DirectiveResult(taskid, DirectiveResult.Directive.task_success,
-                            JSON.toJSONString(new SuccessRemark(taskid, "enterprise", 0, null, 0, Clock.systemUTC().millis(), (byte) 1)))),
+            messageProducer.send(JSON.toJSONString(new DirectiveResult(taskId, DirectiveResult.Directive.task_success,
+                            JSON.toJSONString(new SuccessRemark(taskId, "enterprise", 0, null, 0, Clock.systemUTC().millis(), (byte) 1)))),
                     mqConfig.getProduceDirectiveTopic(), mqConfig.getProduceDirectiveTag(), null);
-            logger.info("mq发送成功，taskId={},topic={},tag={}", taskid, mqConfig.getProduceDirectiveTopic(), mqConfig.getProduceDirectiveTag());
-            return SaasResult.successResult(taskid);
+            logger.info("mq发送成功，taskId={},topic={},tag={}", taskId, mqConfig.getProduceDirectiveTopic(), mqConfig.getProduceDirectiveTag());
+            return SaasResult.successResult(taskId);
         }
-        StringBuilder extraValue = new StringBuilder();
-        enterpriseList.stream().forEach(
-                enterprise -> extraValue.append(enterprise.get("name")).append(":").append(enterprise.get("unique")).append(":")
-                        .append(enterprise.get("index")).append(";"));
-        if (StringUtils.isBlank(extraValue)) {
-            messageProducer.send(JSON.toJSONString(new DirectiveResult(taskid, DirectiveResult.Directive.task_fail, null)),
-                    mqConfig.getProduceDirectiveTopic(), mqConfig.getProduceDirectiveTag(), null);
-            logger.warn("调用EnterpriseApi返回空列表，taskId={}", taskid);
-            return SaasResult.successResult(taskid);
-        }
-        Map<String, String> extraMap = new HashMap<>();
-        extraMap.put("business", extraValue.toString());
-        extra = GsonUtils.toJson(extraMap);
-        logger.info("工商信息-发消息：acquisition，taskid={},extra={}", taskid, extra);
-        acquisitionService.acquisition(taskid, null, null, null, website, null, ESpiderTopic.SPIDER_EXTRA.name().toLowerCase(), extra);
-        return SaasResult.successResult(taskid);
+        logger.info("工商信息:调用爬数获取工商信息爬取成功,commonPluginParam={},result={}", JSON.toJSONString(commonPluginParam), JSON.toJSONString(result));
+        return SimpleResult.successResult(taskId);
     }
 
     @Override

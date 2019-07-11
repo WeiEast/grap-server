@@ -62,7 +62,7 @@ public class EnterpriseInformationController {
         RequestChecker.notEmpty("extra", extra);
 
         Long taskId = taskService.createTask(appid, uniqueId, EBizType.ENTERPRISE);
-        return enterpriseInformationService.startCrawler(taskId, extra);
+        return enterpriseInformationService.prepare(taskId, extra);
     }
 
     @RequestMapping(value = "/pynerStart", method = RequestMethod.POST)
