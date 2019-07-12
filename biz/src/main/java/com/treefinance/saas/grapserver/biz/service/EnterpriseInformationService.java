@@ -1,6 +1,7 @@
 package com.treefinance.saas.grapserver.biz.service;
 
 import com.datatrees.spider.share.domain.CommonPluginParam;
+import com.datatrees.spider.share.domain.http.HttpResult;
 
 /**
  * @author guimeichao
@@ -8,7 +9,7 @@ import com.datatrees.spider.share.domain.CommonPluginParam;
  */
 public interface EnterpriseInformationService {
 
-    Object prepare(Long taskId, String extra);
+    CommonPluginParam prepare(Long taskId, String extra);
 
     Object startCrawler(CommonPluginParam commonPluginParam);
 

@@ -14,6 +14,7 @@
 package com.treefinance.saas.grapserver.web.saascontroller;
 
 import com.alibaba.fastjson.JSON;
+import com.datatrees.spider.share.domain.CommonPluginParam;
 import com.treefinance.saas.assistant.exception.FailureInSendingToMQException;
 import com.treefinance.saas.grapserver.biz.service.EnterpriseInformationService;
 import com.treefinance.saas.grapserver.biz.service.TaskService;
@@ -62,7 +63,8 @@ public class EnterpriseInformationController {
         RequestChecker.notEmpty("extra", extra);
 
         Long taskId = taskService.createTask(appid, uniqueId, EBizType.ENTERPRISE);
-        return enterpriseInformationService.prepare(taskId, extra);
+        CommonPluginParam param = enterpriseInformationService.prepare(taskId, extra);
+        return enterpriseInformationService.startCrawler(param);
     }
 
     @RequestMapping(value = "/pynerStart", method = RequestMethod.POST)
