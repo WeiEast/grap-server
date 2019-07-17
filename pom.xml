@@ -51,7 +51,7 @@
             <dependency>
                 <groupId>com.datatrees.spider</groupId>
                 <artifactId>spider-share-api</artifactId>
-                <version>4.2.9-SNAPSHOT</version>
+                <version>4.2.9</version>
             </dependency>
 
             <dependency>
